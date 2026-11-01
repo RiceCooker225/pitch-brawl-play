@@ -1809,7 +1809,7 @@ function PBCORE(){
         sp.aim = tg ? Math.atan2(tg.y - by, tg.x - bx) : (inward > 0 ? Math.PI : 0); sp.turn = 0; sp.hold = FK_HOLD_AIM; fkPlace(G, sp, tp);
       }
     }
-    if (kind === 'fk') refSet(G, ST, sp, g);
+    if (kind === 'fk'){ refSet(G, ST, sp, g); fkGoalSide(G, ST, sp, g); }
     for (const q of G.players) q.lrTap = 0;   // (left and right pressed before it: not a pick of its curl)
     keepOut(G, sp);
   }
@@ -1821,6 +1821,35 @@ function PBCORE(){
   // angle to the posts, FK_REF_D off his line, and the FK_REF_WALL nearest the ball of the others in the wall (where
   // the computer would make it: fkWallSpot); a side of one, with no keeper, in goal. (Not with three teams)
   const FK_REF_R = 330, FK_REF_D = 24, FK_REF_WALL = 2;
+  // v28.14 ("when u foul them, teleport them like next to the goalie or smth cuz sometimes u might be behind the zone and
+  // hard to move there"): at the whistle, anyone of the side defending who is the wrong side of the ball (further from
+  // his goal than it) or inside the zone goes goal-side of it, just off the zone, beside the others; a keeper caught out
+  // goes back to his goal. (Not with three teams)
+  function fkGoalSide(G, ST, sp, g){
+    if (ST.tri || !g) return;
+    const D = G.discs, gx = (g.x0 + g.x1) / 2, gy = (g.y0 + g.y1) / 2, bd = Math.hypot(gx - sp.x, gy - sp.y), u = fkWallLine(sp, g);
+    const free = (x, y, r, self) => G.players.every(o => { const od = D[o.di]; return o === self || o.ctrl === 'gone' || Math.hypot(od.x - x, od.y - y) >= od.radius + r + 2; }) && Math.hypot(D[0].x - x, D[0].y - y) >= D[0].radius + r + 2;
+    for (const q of G.players){
+      if (q.team !== g.team || q.ctrl === 'gone' || q.ctrl === 'hold') continue;
+      const d = D[q.di], md = Math.hypot(gx - d.x, gy - d.y), inZone = Math.hypot(d.x - sp.x, d.y - sp.y) < FK_R + d.radius;
+      if (md <= bd + 10 && !inZone) continue;   // goal-side already
+      let x, y;
+      if (q.role === 'keeper'){ const nx = sp.x - gx, ny = sp.y - gy, nl = Math.hypot(nx, ny) || 1; x = gx + nx / nl * (d.radius + 10); y = gy + ny / nl * (d.radius + 10); }
+      else {
+        const w = fkWallSpot(sp, u, 1, 0, d.radius); x = w.x; y = w.y;
+        for (let k = 1; k < 12 && !free(x, y, d.radius, q); k++){ const off = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (2 * d.radius + 4); x = w.x - u.uy * off; y = w.y + u.ux * off; }
+      }
+      d.x = x; d.y = y; d.vx = d.vy = 0;
+    }
+    // (and no two on one spot: the zone at 120 put the referee's wall where he puts the keeper, close in: slid sideways)
+    for (const q of G.players){
+      if (q.team !== g.team || q.role === 'keeper' || q.ctrl === 'gone' || q.ctrl === 'hold') continue;
+      const d = D[q.di]; if (free(d.x, d.y, d.radius, q)) continue;
+      const x0 = d.x, y0 = d.y;
+      for (let k = 1; k < 16; k++){ const off = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * (d.radius + 4), x = x0 - u.uy * off, y = y0 + u.ux * off;
+        if (Math.hypot(x - sp.x, y - sp.y) >= FK_R + d.radius && free(x, y, d.radius, q)){ d.x = x; d.y = y; break; } }
+    }
+  }
   function refSet(G, ST, sp, g){
     if (ST.tri || !g || Math.hypot(sp.x - sp.gx, sp.y - sp.gy) > FK_REF_R) return;
     const D = G.discs, side = G.players.filter(q => q.team === g.team && q.ctrl !== 'gone' && q.ctrl !== 'hold');
@@ -2516,7 +2545,7 @@ function PBAI(C){
   // blocked by the wall and the bodies; the Insane keeper, who reacts at once, saved nearly every one that wasn't
   // curled round the wall)
   // v25.4 ("get ai gk to save freekicks"; free kicks no longer curl by themselves): FK_SEE 6 -> 2
-  let FK_WALL = 2, FK_GOAL_R = 330, FK_DEPTH = 24, FK_KEEP_LEAN = 0.25, FK_SEE = 2, FK_SEE_T = 40;
+  let FK_WALL = 2, FK_GOAL_R = 330, FK_DEPTH = 24, FK_KEEP_LEAN = 0.25, FK_SEE = 2, FK_SEE_T = 40, FK_READ_PW = 0.8, FK_CURL_READ = 0.3;
   const FK_SUP = 110, FK_SUP_W = 100;
   const fkLate = (G, team) => G.fkShot && G.fkShot.team !== team && G.frame - G.fkShot.frame < FK_SEE_T ? FK_SEE : 0;
   // v27.3 ("get ai to take freekick asw"): the computer's own free kick, taken as a person takes one (the engine holds
@@ -2599,6 +2628,18 @@ function PBAI(C){
   // v27.3: a keeper facing a person's free kick reads his aim, as a keeper reads a taker's body: where its straight line
   // (not the curl he has picked, which the body doesn't show) crosses x; he goes L.read of the way over to it (Easy 0.3 ..
   // Insane 0.8). Hit straight into a corner it's read; aimed one way and curled the other it beats him. null: no aim
+  // v28.14 ("make gk save better freekicks, like rn its facing like idk, but dont make it too op"): where his free kick
+  // will be at my line as he's set it up now, his curl and all (the path his own guide shows: fkPreview at the power
+  // he has, or a likely one), not the straight line of his aim: with a curl he picked, I leaned the wrong way
+  function fkReadY(G, ST, sp, x){
+    if (!sp || sp.kind !== 'fk' || sp.aim == null) return null;
+    const tk = G.players.find(p => p.id === sp.tk); if (!tk) return fkAimY(sp, x);
+    const P = C.fkPreview(G, ST, tk, tk.charge > 0 ? tk.charge : FK_READ_PW, 140);
+    const st = fkAimY(sp, x);
+    for (let i = 1; i < P.length; i++){ const a = P[i - 1], b = P[i]; if ((a.x - x) * (b.x - x) <= 0 && a.x !== b.x){ const f = (x - a.x) / (b.x - a.x), cy = a.y + (b.y - a.y) * f;
+      return st == null ? cy : st + (cy - st) * FK_CURL_READ; } }   // (only part of the bend: read in full, he saved every one)
+    return st;
+  }
   function fkAimY(sp, x){ if (!sp || sp.kind !== 'fk' || sp.aim == null) return null; const c = Math.cos(sp.aim); if (Math.abs(c) < 0.05 || (x - sp.x) / c <= 0) return null; return sp.y + Math.sin(sp.aim) * (x - sp.x) / c; }
   // how far toward the goal's middle (px) disc d is from the ball: > 0 between the ball and the goal
   const goalSideBy = (d, b, own) => { const gx = own.x - b.x, gy = own.y - b.y, gl = Math.hypot(gx, gy) || 1; return ((d.x - b.x) * gx + (d.y - b.y) * gy) / gl; };
@@ -2766,7 +2807,7 @@ function PBAI(C){
           const n0 = Math.hypot(ownG.x0 - sp.x, ownG.y0 - sp.y) || 1, n1 = Math.hypot(ownG.x1 - sp.x, ownG.y1 - sp.y) || 1;
           let ax = (ownG.x0 - sp.x) / n0 + (ownG.x1 - sp.x) / n1, ay = (ownG.y0 - sp.y) / n0 + (ownG.y1 - sp.y) / n1; const al = Math.hypot(ax, ay) || 1; ax /= al; ay /= al;
           const s = Math.max(0, (Math.hypot(own.x - sp.x, own.y - sp.y) - FK_DEPTH)), kx = sp.x + ax * s; let ky = sp.y + ay * s;
-          const ry = fkAimY(sp, kx), glo = Math.min(ownG.y0, ownG.y1) + 8, ghi = Math.max(ownG.y0, ownG.y1) - 8;
+          const ry = fkReadY(G, ST, sp, kx), glo = Math.min(ownG.y0, ownG.y1) + 8, ghi = Math.max(ownG.y0, ownG.y1) - 8;   // (v28.14: his curl in part too)
           if (ry != null) ky += (cl(ry, glo, ghi) - ky) * (L.read || 0);
           const k = fkOut(sp, me, kx, ky); return finish(G, ST, t, L, mem, me, p, arrive(t, me, k[0], k[1]), false);
         }
@@ -3448,7 +3489,7 @@ function PBAI(C){
     let tx, ty;
     if (s > 0 && -ax * dir > 0.2){ tx = Q.x + ax * s; ty = cl(Q.y + ay * s + bias, lo - 3, hi + 3); }
     else { tx = own.x + dir * depth; ty = cl(Q.y * 0.6 + bias, lo, hi); }
-    if (fsp && fsp.team !== team){ const ry = fkAimY(fsp, tx); if (ry != null) ty += (cl(ry, lo + 8, hi - 8) - ty) * (L.read || 0); }   // (v27.3: his aim read)
+    if (fsp && fsp.team !== team){ const ry = fkReadY(G, ST, fsp, tx); if (ry != null) ty += (cl(ry, lo + 8, hi - 8) - ty) * (L.read || 0); }   // (v27.3: his aim read)
     // they have the ball and their other player is free near my goal: lean toward the pass to him, never leaving the goal
     if (!ours && foes.length > 1 && foeBest){
       const other = foes.find(o => o !== foeBest), od = D[other.di];
@@ -3623,7 +3664,7 @@ function PBAI(C){
     if ('show' in o) SHOW = o.show; if ('showD' in o) SHOW_D = o.showD;
     if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
     if ('fkAiRead' in o) FK_AI_READ = o.fkAiRead; if ('fkAiMin' in o) FK_AI_MIN = o.fkAiMin; if ('fkAiStep' in o) FK_AI_STEP = o.fkAiStep;
-    if ('fkSee' in o) FK_SEE = o.fkSee; if ('fkSeeT' in o) FK_SEE_T = o.fkSeeT; if ('fkLean' in o) FK_KEEP_LEAN = o.fkLean; if ('fkWall' in o) FK_WALL = o.fkWall; }};
+    if ('fkSee' in o) FK_SEE = o.fkSee; if ('fkSeeT' in o) FK_SEE_T = o.fkSeeT; if ('fkLean' in o) FK_KEEP_LEAN = o.fkLean; if ('fkCurlRead' in o) FK_CURL_READ = o.fkCurlRead; if ('fkWall' in o) FK_WALL = o.fkWall; }};
 }
 // Runs inside a Web Worker: self-play training for the computer's brain, a smaller version of the offline trainer.
 // Each generation tries one changed brain (a "challenger"). The challenger and the current brain play the same games,
@@ -7972,7 +8013,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.13';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.14';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
