@@ -71,6 +71,8 @@
   .gmsub > button.ghost:hover{background:var(--panel2);border-color:#7a8498}
   /* v28.9 ("add a r u sure option when leave/restart"): in place of the buttons, the question */
   .gmsure{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35)}
+  #xferBox{width:100%;resize:vertical;font:12px ui-monospace,Menlo,Consolas,monospace;background:var(--ground);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;-webkit-user-select:text;user-select:text}
+  .dnote{color:var(--muted);font-size:12px;margin:0}
   .errchip{position:fixed;left:12px;bottom:12px;z-index:200;max-width:min(560px,calc(100vw - 24px));padding:8px 12px;border-radius:10px;background:#3a1d22;color:#ffd7d7;border:1px solid #ff6b6b;font:500 12px var(--body);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
   .gmsure p{margin:0;color:var(--text);font-size:14px;font-weight:500;max-width:none} .gmsure .gsp{flex:1}
   .gmsure button{padding:8px 14px;font-size:14px} .gmsure .gmyes{background:#e5484d;color:#fff} .gmsure .gmyes:hover{background:#f2555a}
@@ -816,6 +818,12 @@
     </section>
     <section class="dsec"><h3>Stadium</h3>
       <div class="drow"><button class="ghost sm" id="loadBtn" type="button">Load stadium (.hbs)</button><button class="ghost sm" id="defStBtn" type="button" hidden>Default stadium</button><input type="file" id="file" accept=".hbs,.json,application/json" hidden></div>
+    </section>
+    <section class="dsec"><h3>Move to another copy</h3>
+      <p class="dnote">Your controls, settings and progress (achievements, scores, saved goals, cup and league, your trained copy) to another copy of the game, such as the website: Copy here, then Load there.</p>
+      <div class="drow"><button class="ghost sm" id="xferCopy" type="button">Copy my settings &amp; progress</button><span class="dnote" id="xferMsg"></span></div>
+      <textarea id="xferBox" rows="3" spellcheck="false" placeholder="Paste a copied code here, then Load"></textarea>
+      <div class="drow"><button class="ghost sm" id="xferLoad" type="button">Load</button></div>
     </section>
   </div>
   <div class="overlay" id="gameMenu" hidden>
@@ -6823,6 +6831,41 @@ function openSettings(){
   openPanel('setPanel');   // (v25.6: over ☰ Menu when opened from it, which stays open under it: Done goes back to the menu)
 }
 function closeSettings(){ closePanel('setPanel'); }
+// v28.13 ("take my controls and stuff"; the Claude copy and the website keep their own saves, which neither can read):
+// everything this copy keeps (every pb.* in this browser's storage) as one code to paste into another copy. Copy: the
+// code on the clipboard and in the box; Load: the pasted code replaces this copy's, asked once, then the page reloads
+const XFER = 'PB1:';
+async function xferCode(){
+  const o = {}; try { for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (k && k.startsWith('pb.')) o[k] = localStorage.getItem(k); } } catch (e) {}
+  const bytes = new TextEncoder().encode(JSON.stringify({v: NET_VER, t: Date.now(), d: o}));
+  let out = bytes, z = 0;
+  if (typeof CompressionStream === 'function'){ try { out = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer()); z = 1; } catch (e) { out = bytes; } }
+  let bin = ''; for (let i = 0; i < out.length; i += 0x8000) bin += String.fromCharCode.apply(null, out.subarray(i, i + 0x8000));
+  return {code: XFER + z + btoa(bin), keys: Object.keys(o).length};
+}
+async function xferRead(code){
+  code = String(code || '').trim(); if (!code.startsWith(XFER)) throw new Error('not a Pitch Brawl code');
+  const z = code[XFER.length] === '1', bin = atob(code.slice(XFER.length + 1)), raw = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) raw[i] = bin.charCodeAt(i);
+  const bytes = z ? new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer()) : raw;
+  const o = JSON.parse(new TextDecoder().decode(bytes)); if (!o || typeof o.d !== 'object') throw new Error('nothing in it');
+  return o;
+}
+$('xferCopy').addEventListener('click', async () => {
+  const msg = $('xferMsg'), box = $('xferBox');
+  try { const {code, keys} = await xferCode(); box.value = code; box.select();
+    let ok = false; try { await navigator.clipboard.writeText(code); ok = true; } catch (e) { try { ok = document.execCommand('copy'); } catch (e2) {} }
+    msg.textContent = ok ? `Copied (${keys} things). In the other copy: Settings, paste, Load` : 'Copy the code in the box (Ctrl+C), then in the other copy: Settings, paste, Load';
+  } catch (e) { msg.textContent = 'Could not make the code: ' + (e && e.message ? e.message : e); }
+});
+let xferArmed = 0;
+$('xferLoad').addEventListener('click', async () => {
+  const msg = $('xferMsg'), btn = $('xferLoad');
+  let o; try { o = await xferRead($('xferBox').value); } catch (e) { msg.textContent = 'That code doesn\u2019t work: ' + (e && e.message ? e.message : e) + '. Copy it again in the other copy.'; return; }
+  const n = Object.keys(o.d).filter(k => k.startsWith('pb.')).length;
+  if (performance.now() - xferArmed > 6000){ xferArmed = performance.now(); btn.textContent = `Yes, replace this copy's with these ${n}`; msg.textContent = `From v${o.v || '?'}: it replaces this copy's settings and progress.`; setTimeout(() => { if (performance.now() - xferArmed >= 6000) btn.textContent = 'Load'; }, 6100); return; }
+  try { for (const [k, v] of Object.entries(o.d)) if (k.startsWith('pb.') && typeof v === 'string') localStorage.setItem(k, v); } catch (e) { msg.textContent = 'This browser won\u2019t keep it: ' + (e && e.message ? e.message : e); return; }
+  msg.textContent = `Loaded ${n}. Starting again with them…`; setTimeout(() => location.reload(), 600);
+});
 document.querySelectorAll('.setb').forEach(b => b.addEventListener('click', openSettings));
 $('setDone').addEventListener('click', closeSettings);
 // How to play (v25.5: it was four boxes of text under the game): the whole screen, from the menu or ⚙ Settings
@@ -7929,7 +7972,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.12';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.13';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
