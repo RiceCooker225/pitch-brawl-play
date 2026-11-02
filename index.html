@@ -19,7 +19,6 @@
          background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 16px}
   .team{display:flex;align-items:center;gap:10px;min-width:0;font-family:var(--display);font-size:clamp(26px,6vw,44px);line-height:1}
   .team.right{justify-content:flex-end}
-  .team small.wp{color:var(--text);letter-spacing:.04em;text-transform:none;font-weight:700;flex:none}   /* v28.16: the chance to win */
   .team small{font-family:var(--body);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .dot{width:.55em;height:.55em;border-radius:50%;border:3px solid #111;flex:none}
   .clock{font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(18px,3.5vw,26px);
@@ -27,7 +26,6 @@
   .clock.ot{border-color:var(--bad);color:#ffd2d2}
   .clock small{display:block;font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
   .clock small.leg{color:var(--accent);letter-spacing:.06em;margin-top:1px}
-  .clock small.wpd{color:var(--text);letter-spacing:.04em;text-transform:none;font-weight:700;margin-top:1px}   /* v28.17: the chance of a draw */
   .stats{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr);gap:6px 14px;width:min(100%,940px);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px 14px;font-size:13px;align-items:center}
   /* each team's shots and shots on target together, on that team's side; possession in the middle */
   .tst{display:flex;flex-direction:column;gap:1px;min-width:0} .tst.r{align-items:flex-end;text-align:right;grid-column:3;grid-row:1}
@@ -43,6 +41,15 @@
   .st span em{font-style:normal;color:var(--text);letter-spacing:0;text-transform:none;font-size:11px}
   .st b{font-variant-numeric:tabular-nums;font-weight:700;font-size:16px}
   .st b:nth-of-type(1){text-align:right} .st b:nth-of-type(2){text-align:left}
+  /* v28.20 ("the win probability, rn its hard to read"): its own row across the scoreboard: big numbers, a bar in the kits' colours */
+  .wprow{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:baseline;gap:3px 12px;padding-top:6px;border-top:1px solid var(--line)}
+  .wprow b{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--text)}
+  .wprow small{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .wprow > span{display:flex;align-items:baseline;gap:6px;min-width:0} .wprow .wpr{justify-content:flex-end} .wprow .wpm{justify-content:center}
+  #game.flip .wprow .wpl,#game.flip .wprow .wpr{flex-direction:row-reverse}   /* (your side on the right: each number at its own edge) */
+  .wpb{grid-column:1/-1;display:flex;height:7px;border-radius:4px;overflow:hidden;background:var(--line)}
+  .wpb u{display:block;height:100%;transition:width .5s}
+  #wbD{background:repeating-linear-gradient(135deg,#8a93a8 0 3px,#5f6779 3px 6px)}
   .pbar{grid-column:1/-1;height:5px;border-radius:3px;overflow:hidden;background:var(--line);display:flex}
   .pbar u{display:block;height:100%;transition:width .4s}
   .pbar u.c{background:repeating-linear-gradient(135deg,#8a93a8 0 3px,#5f6779 3px 6px)}
@@ -495,7 +502,7 @@
   body.tri .board .team.third{display:flex}
   body.tri .board .team{order:1} body.tri .board .team.right{order:2;flex-direction:row-reverse;justify-content:flex-end} body.tri .board .team.third{order:3} body.tri .board .clock{order:4}
   body.tri .board .team.right small{text-align:left}
-  #game.flip .board .team > *,#game.flip .board .clock{direction:ltr}
+  #game.flip .board .team > *,#game.flip .board .clock,#game.flip .board .wprow > span{direction:ltr}
   #game.flip .team.right small{text-align:left} #game.flip .team:not(.right) small{text-align:right}
   #game.flip .stats{direction:rtl} #game.flip .stats > *{direction:ltr}
   #game.flip .stats .tst:not(.r){align-items:flex-end;text-align:right} #game.flip .stats .tst:not(.r) .tsl{justify-content:flex-end}
@@ -624,10 +631,11 @@
 
 <div id="game">
 <div class="board" aria-live="polite">
-  <div class="team"><span class="dot a"></span><span id="s0">0</span><small id="bn0">Orange</small><small class="wp" id="wp0" hidden></small></div>
-  <div class="clock" id="clockBox"><span id="clock">3:00</span><small id="clockLabel">Time left</small><small id="legLbl" class="leg" hidden></small><small id="wpD" class="wpd" hidden></small></div>
-  <div class="team right"><small class="wp" id="wp1" hidden></small><small id="bn1">White</small><span id="s1">0</span><span class="dot b"></span></div>
+  <div class="team"><span class="dot a"></span><span id="s0">0</span><small id="bn0">Orange</small></div>
+  <div class="clock" id="clockBox"><span id="clock">3:00</span><small id="clockLabel">Time left</small><small id="legLbl" class="leg" hidden></small></div>
+  <div class="team right"><small id="bn1">White</small><span id="s1">0</span><span class="dot b"></span></div>
   <div class="team third"><span class="dot c"></span><span id="s2">0</span><small id="bn2">Green</small></div>
+  <div class="wprow" id="wpRow" hidden title="The chance of each result from here, worked out from the match so far"><span class="wpl"><b id="wpN0">0%</b><small>win</small></span><span class="wpm" id="wpMid"><small>draw</small><b id="wpND">0%</b></span><span class="wpr"><small>win</small><b id="wpN1">0%</b></span><div class="wpb"><u id="wbA"></u><u id="wbD"></u><u id="wbB"></u></div></div>
 </div>
 
 <div class="stats" id="stats" hidden>
@@ -2433,7 +2441,7 @@ function PBAI(C){
   // leaves a ball to a person of his who gets there no more than KP_YIELD ticks after him (and before them), and passes
   // to a person only from KP_PASS_MIN px off (closer, a full kick bounced off him)
   let SHOW = 1, SHOW_D = [150, 210, 270];   // (v27.7: see showPlan)
-  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 60, CALL_RUSH_R = 300, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
+  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 150, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
   let THRU_PASS = 1, THRU_AHEAD = 100, RECV_REACT = 10, PASS_ADV = 10, PASS_SAFE = -30, KEEP_LINEUP = 12, KEEP_CAREFUL = 1, KEEP_PTOL = 0.07, THRU_KZONE = 240, THRU_MARGIN = 0;
   // v24:
   //  - SHOT_HR: a shot is judged against a person in goal (or in the way) reacting at least this many ticks late, as
@@ -3398,6 +3406,10 @@ function PBAI(C){
     // whenever one of theirs gets there first (KP_RUSH_THRU 0: not only when he's through; a man of ours nearer it than
     // theirs no longer stops him either), and a loose ball he's first to (and you aren't) within CALL_RUSH_R he comes
     // and plays (callClaim, below), past his zone too
+    // v28.20 ("the rush zone i kinda meant like when we manual rush tell it to rush earlier"): your call is answered
+    // anywhere in our half (CALL_RUSH_R 300 -> 420: the half is 368 px deep), and it stands 2.5 s (CALL_RUSH_T 60 -> 150),
+    // so calling as he breaks still sends me when he gets there. e2e t_callrush.js, 80 breakaways called at the start:
+    // Normal goals 12 -> 7-10, Insane 6 -> 3-6
     const bdG = Math.hypot(ball.x - own.x, ball.y - own.y);
     const called = G.players.some(q => q.team === team && (q.ctrl === 'human' || q.ctrl === 'remote') && G.frame - (q.callAt == null ? -1e9 : q.callAt) < CALL_RUSH_T);
     const callClaim = KP_RUSH_CALL && called && !back && !yieldTo && shot < 0 && rx(ball.x) > 0 && bdG < CALL_RUSH_R && nMe <= nFoe && nMe <= nMate;
@@ -3670,7 +3682,7 @@ function PBAI(C){
     if ('kpress' in o) KEEP_PRESS = o.kpress; if ('kpressLate' in o) KEEP_PRESS_LATE = o.kpressLate; if ('kpMargin' in o) KP_MARGIN = o.kpMargin; if ('kpRcap' in o) KP_RCAP = o.kpRcap; if ('kpRecheck' in o) KP_RECHECK = o.kpRecheck;
     if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside;
     if ('show' in o) SHOW = o.show; if ('showD' in o) SHOW_D = o.showD;
-    if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
+    if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
     if ('fkAiRead' in o) FK_AI_READ = o.fkAiRead; if ('fkAiMin' in o) FK_AI_MIN = o.fkAiMin; if ('fkAiStep' in o) FK_AI_STEP = o.fkAiStep;
     if ('fkSee' in o) FK_SEE = o.fkSee; if ('fkSeeT' in o) FK_SEE_T = o.fkSeeT; if ('fkLean' in o) FK_KEEP_LEAN = o.fkLean; if ('fkCurlRead' in o) FK_CURL_READ = o.fkCurlRead; if ('fkWall' in o) FK_WALL = o.fkWall; }};
 }
@@ -6681,8 +6693,10 @@ function updateUI(){
       const n = +po[t] || 0; setHidden('stPw' + t, !n); if (n) setText('stPt' + t, n);
       const f = +((st.fouls || [0, 0])[t]) || 0; setHidden('stFw' + t, !f); if (f) setText('stFo' + t, f);
     }
-    { const w = realMatch(s) && G.nt !== 3 && G.state < 3 ? winChance(G, st) : null; for (const t of [0, 1]){ setHidden('wp' + t, !w); if (w) setText('wp' + t, `${w[t]}% win`); }
-      setHidden('wpD', !w || w[2] == null); if (w && w[2] != null) setText('wpD', `Draw ${w[2]}%`); }
+    { const w = realMatch(s) && G.nt !== 3 && G.state < 3 ? winChance(G, st) : null; setHidden('wpRow', !w);   // (v28.20: a row of its own, with a bar)
+      if (w){ setText('wpN0', w[0] + '%'); setText('wpN1', w[1] + '%'); setHidden('wpMid', w[2] == null); if (w[2] != null) setText('wpND', w[2] + '%');
+        const key = [w[0], w[1], w[2], KIT[0].color, KIT[1].color].join();
+        if (shown.wbar !== key){ shown.wbar = key; $('wbA').style.width = w[0] + '%'; $('wbD').style.width = (w[2] || 0) + '%'; $('wbB').style.width = w[1] + '%'; $('wbA').style.background = KIT[0].color; $('wbB').style.background = KIT[1].color; } } }
     const [pa, pc, pb] = possession(st);
     setText('stPo0', pa + '%'); setText('stPo1', pb + '%'); setText('stCo', `· contested ${pc}%`);
     const key = [pa, pc, pb, KIT[0].color, KIT[1].color].join();
@@ -8096,7 +8110,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.19';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.20';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
