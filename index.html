@@ -1685,7 +1685,7 @@ function PBCORE(){
     [x, y] = slideAim(G, d, x, y);
     const along = d.vx * x + d.vy * y, s = SLIDE_V + 0.35 * Math.max(0, along);
     d.vx = x * s; d.vy = y * s;
-    p.slide = SLIDE_T; p.slideCd = SLIDE_CD; p.slideDx = x; p.slideDy = y; p.slideBall = false; p.kicking = false;
+    p.slide = SLIDE_T; p.slideCd = SLIDE_CD; p.slideDx = x; p.slideDy = y; p.slideBall = false; p.kicking = false; p.slideBump = false;
     if (ev) ev.push({type:'slide', id: ++G.eventId, frame: G.frame, pid: p.id});
   }
   function slideTick(G, ST, ev, predict){
@@ -1725,6 +1725,7 @@ function PBCORE(){
             // kicks on; otherwise he is just bumped and play goes on
             const q = D[foe.di], qb = Math.sqrt((b.x - q.x) ** 2 + (b.y - q.y) ** 2) - b.radius - q.radius;
             if (qb < SLIDE_HAS && (G.cfg.fk || inArea(ST, p.team, q.x, q.y))) foul(G, ST, p, foe, ev);
+            else if (!p.slideBump){ p.slideBump = true; if (ev) ev.push({type:'playon', id: ++G.eventId, frame: G.frame, pid: p.id, vid: foe.id, team: foe.team}); }   // (v28.22: a bump, no foul: the referee waves play on)
           }
         }
         if (p.slide > 0 && --p.slide === 0) p.down = SLIDE_DOWN;
@@ -4230,6 +4231,7 @@ function onEvent(s, e){
     e.late = late;
     { const sc = e.pid != null && !e.og ? playerById(G, e.pid) : null; if (sc && sc.ctrl === 'ai' && !s.mode && s.kind !== 'guest') aiEmote(s, sc.id); }   // (v27.9)
     e.tag = s.mode ? '' : goalTag(s, G, e);   // (v28.21: what it means: equaliser, two-goal lead, hat-trick...)
+    if (!s.mode) refGoal({og: !!e.og, kmh: e.kmh, post: !!e.post, slide: !!e.slide && !e.og, m: e.m | 0, late});
     if (s.mode && s.mode.quietGoals) sfx.whistle(0.35);   // keeper practice: a goal against you is not a celebration
     else { goalFx(e.team, e.kmh, e.record, e.og ? who + ' (own goal)' : who, !!e.post, late, timeLeft(G), undefined, !!e.slide && !e.og, e.m); if (fx.goal) fx.goal.tag = e.tag; }
     if (!s.mode){
@@ -4253,13 +4255,14 @@ function onEvent(s, e){
     else if ((s.mode.kind === 'practice' || s.mode.kind === 'pens' || s.mode.kind === 'fkdrill') && !e.late) popFx('post', null, e.x, e.y, e.kmh, false);
   } else if (e.type === 'slide'){ const p = playerById(G, e.pid); sfx.slide(); if (p) dustFx(G.discs[p.di], p.slideDx, p.slideDy); }
   else if (e.type === 'foul') foulFx(s, e, nameOf(s, playerById(G, e.pid)), nameOf(s, playerById(G, e.vid)));
+  else if (e.type === 'playon'){ if (realMatch(s)) refPlayOn(e.team); }
   else if (e.type === 'call') callFx(e.pid);
   else if (e.type === 'emote') emoteFx(e.pid, e.e);
-  else if (e.type === 'kickoff'){ if (!s.mode && s.ticks < 30){ sfx.whistle(0.25); refWhistle(); } s.koAt = {frame: G.frame, team: G.koTeam}; fxEnd(); }
+  else if (e.type === 'kickoff'){ if (!s.mode && s.ticks < 30){ sfx.whistle(0.25); refWhistle(); refAct(null, ['Let\'s play!', 'Good luck!', 'Play!'][Math.floor(Math.random() * 3)], {sayMs: 1300}); } s.koAt = {frame: G.frame, team: G.koTeam}; fxEnd(); }
   else if (e.type === 'reset') fxEnd();   // (lined up for the kick-off: the celebration is over)
-  else if (e.type === 'timeup'){ sfx.whistle(1); refWhistle(); say('Time is up!'); }
+  else if (e.type === 'timeup'){ sfx.whistle(1); refWhistle(); say('Time is up!'); refAct('arms', 'Time!', {ms: 1800}); }
   else if (e.type === 'end'){
-    sfx.whistle(1.2); s.endAt = s.ticks;
+    sfx.whistle(1.2); s.endAt = s.ticks; if (!s.mode) refAct('arms', 'Full time!', {ms: 2600});
     if (s.mode && s.mode.end) s.mode.end(s, e);
     else if (e.winner >= 0){ fireworks(e.winner, 7); say(`${KIT[e.winner].name} win ${Math.max(...G.score)}–${Math.min(...G.score)}!`); } else say('It ends level.');
   }
@@ -6060,6 +6063,7 @@ function foulFx(s, e, who, vic){
   popFx('foul', e.vid, 0, 0, 0, !!e.pen);
   if (e.pen){ s.msg = {text: 'PENALTY!', sub: `${who || KIT[e.team].name} fouled ${vic || 'him'} in the area`, until: s.ticks + 100, untilMs: performance.now() + 1700, team: -1}; if (!reduceMotion) fx.shake = 6; }
   if (e.card){ refS.card = performance.now(); fx.cards.set(e.pid, performance.now()); setTimeout(() => sfx.whistle(0.5), 380); }   // (v28.21: booked)
+  refAct(e.card ? null : e.pen ? null : 'wag', e.card ? 'Booked!' : e.pen ? 'Penalty!' : ['Careful!', 'No!', 'That\'s a foul!'][Math.floor(Math.random() * 3)], {ms: 1300});   // (v28.22)
   const vt = (playerById(s.G, e.vid) || {team: 1 - e.team}).team;
   if (e.card) say(`Yellow card · ${who || KIT[e.team].name}`, 1);
   say(e.pen ? `Penalty! ${who || KIT[e.team].name} slid into ${vic || KIT[vt].name} in the area` : `Foul by ${who || KIT[e.team].name} · free kick to ${KIT[vt].name}`);
@@ -6106,6 +6110,24 @@ const refS = {x: 0, y: -110, vx: 0, vy: 0, wh: 0, foul: 0, pt: null, ptAt: 0, hi
 // vanishing spray: a foam arc just outside the zone, toward the goal, and a ring round the ball's spot), back to the ball
 // to point; the foam goes a couple of seconds after the kick. A yellow card: he holds it up, and it shows over the man
 const spray = {key: '', x: 0, y: 0, ax: 1, ay: 0, t0: 0, end: 0};
+// v28.22 ("bit more with ref, like interesting actions"): he talks (a bubble over him) and acts it out: play on (both arms
+// forward, the way they attack) after a bump that's no foul; a finger wagged at a foul; the card held up; ten yards
+// once the wall's sprayed, take it when a free kick waits; the TV drawn in the air (VAR) at a tackle goal, then goal;
+// clapping a rocket, a banger off the post or one from far out; a shrug at an own goal; tapping his watch with a minute
+// to go; both arms up at the end; and out of the way, with a hop, of a ball hit at him
+function refAct(kind, text, o){
+  if (!SET.ref) return; const now = performance.now(); o = o || {};
+  if (kind) refS.gest = {kind, t0: now, until: now + (o.ms || 1500), dir: o.dir || 1};
+  if (text) refS.say = {text, t0: now, until: now + (o.sayMs || o.ms || 1600)};
+}
+function refPlayOn(team){ const g = ST.goals.find(q => q.team !== team); refAct('playon', ['Play on!', 'Play on, play on!', 'No foul!'][Math.floor(Math.random() * 3)], {ms: 1300, dir: g && (g.x0 + g.x1) / 2 < 0 ? -1 : 1}); }
+function refGoal(g){
+  if (g.og) refAct('shrug', ['Unlucky!', 'Oh dear…', 'Own goal!'][Math.floor(Math.random() * 3)], {ms: 1700});
+  else if (g.slide){ refAct('var', 'VAR check…', {ms: 1500}); setTimeout(() => refAct('point', 'Goal stands!', {ms: 1300}), 1500); }
+  else if (g.post || g.kmh >= 95) refAct('clap', g.post ? 'What a hit!' : 'Rocket!', {ms: 1700});
+  else if (g.m >= 22) refAct('clap', 'From there?!', {ms: 1700});
+  else if (g.late) refAct('arms', 'Drama!', {ms: 1500});
+}
 const SPRAY_RUN = 1100, SPRAY_FADE = 2500, CARD_MS = 2200;
 function sprayTick(V, now){
   const sp = V && V.state === 1 && V.sp && V.sp.kind === 'fk' ? V.sp : null;
@@ -6154,13 +6176,29 @@ function refTick(V, dt){
   refS.vx += (wx - refS.vx) * Math.min(1, 0.12 * k); refS.vy += (wy - refS.vy) * Math.min(1, 0.12 * k);
   refS.x += refS.vx * k; refS.y += refS.vy * k;
   const now = performance.now();
+  { // (v28.22) a ball hit at him: a hop out of its way
+    const bv = Math.hypot(b.vx, b.vy), rx = refS.x - b.x, ry = refS.y - b.y, rd = Math.hypot(rx, ry);
+    if (V.state === 1 && bv > 4.5 && rd < 30 + bv * 7 && (b.vx * rx + b.vy * ry) / (rd || 1) > bv * 0.9 && now - (refS.dodgeAt || 0) > 2500){
+      const cr = b.vx * ry - b.vy * rx, sd = cr >= 0 ? 1 : -1, px = -b.vy / bv * sd, py = b.vx / bv * sd;
+      refS.vx += px * 5.5; refS.vy += py * 5.5; refS.dodgeAt = now; refAct('dodge', ['Whoa!', 'Oi!', 'Watch it!'][Math.floor(Math.random() * 3)], {ms: 700, sayMs: 1000});
+    }
+  }
+  if (V.state === 1 && V.cfg && V.cfg.timeLimit > 0){ const left = V.cfg.timeLimit * 60 - V.time;
+    if (refS.left > 60 && left <= 60 && left > 55) refAct('watch', '1 minute!', {ms: 1800});
+    else if (refS.left > 10 && left <= 10 && left > 7) refAct('watch', '10 seconds!', {ms: 1500});
+    refS.left = left; }
+  if (sp && sp.kind === 'fk' && V.state === 1){ const key = spray.key;
+    if (key && refS.yards !== key && now - spray.t0 > SPRAY_RUN + 150){ refS.yards = key; refAct(null, ['Ten yards!', 'Back, back!', 'Wall back!'][Math.floor(Math.random() * 3)], {sayMs: 1400}); }
+    if (sp.aim != null && sp.t > C.FK_AUTO - 240 && refS.hurry !== key){ refS.hurry = key; refAct('wag', 'Take it!', {ms: 1200}); } }
   if (pt){ const l = Math.hypot(pt[0], pt[1]) || 1; if (!refS.pt) refS.ptAt = now; refS.pt = [pt[0] / l, pt[1] / l]; } else refS.pt = null;
 }
 function drawRef(fl){
   const r = (ST.pp && ST.pp.radius || 15) * 0.85, x = refS.x, y = refS.y, now = performance.now();
   const w = (now - refS.wh) / 700;   // the whistle: rings out from him
   if (w >= 0 && w < 1){ ctx.lineWidth = 2; for (let i = 0; i < 2; i++){ const f = Math.min(1, w * 1.4 - i * 0.3); if (f <= 0) continue; ctx.strokeStyle = `rgba(255,255,255,${0.7 * (1 - f)})`; ctx.beginPath(); ctx.arc(x, y, r + 4 + f * 20, 0, C.TAU); ctx.stroke(); } }
-  if (refS.pt){   // the arm, out over 0.2 s
+  const G2 = refS.gest && now < refS.gest.until ? refS.gest : null;
+  if (G2) refGesture(G2, x, y, r, now, fl);
+  if (refS.pt && !G2){   // the arm, out over 0.2 s
     const e = Math.min(1, (now - refS.ptAt) / 200), L = r + 4 + 13 * e, hx = x + refS.pt[0] * L, hy = y + refS.pt[1] * L;
     ctx.lineCap = 'round'; ctx.strokeStyle = '#11141b'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(hx, hy); ctx.stroke();
     ctx.strokeStyle = '#e6ff3c'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(hx, hy); ctx.stroke();
@@ -6175,10 +6213,49 @@ function drawRef(fl){
     ctx.strokeStyle = '#11141b'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x + r * 0.4, y - r * 0.4); ctx.lineTo(hx, hy + 8); ctx.stroke();
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(0.12); ctx.fillStyle = '#ffd400'; ctx.strokeStyle = '#1a1e28'; ctx.lineWidth = 2; ctx.beginPath(); ctx.rect(-7, -11, 14, 20); ctx.fill(); ctx.stroke(); ctx.restore();
   }
+  if (refS.say && now < refS.say.until) refBubble(refS.say, x, y - r - (G2 && (G2.kind === 'var' || G2.kind === 'arms' || G2.kind === 'clap' || G2.kind === 'dodge') ? 34 : refS.card && now - refS.card < CARD_MS ? 36 : 12), now, fl);
   const fresh = now - refS.foul < 1600;   // just blown for a foul: the whistle shows in his hand
   ctx.save(); ctx.translate(x, y); ctx.scale(fl, 1); ctx.font = `900 ${Math.round(r * 0.62)}px 'Arial Black', Rubik, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#11141b'; ctx.fillText(fresh ? '!' : 'R', 0, 1); ctx.restore();
 }
 
+function refArm(x, y, r, a, len){
+  const sx = x + Math.cos(a) * r * 0.75, sy = y + Math.sin(a) * r * 0.75, hx = x + Math.cos(a) * (r + len), hy = y + Math.sin(a) * (r + len);
+  ctx.lineCap = 'round'; ctx.strokeStyle = '#11141b'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(hx, hy); ctx.stroke();
+  ctx.strokeStyle = '#e6ff3c'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(hx, hy); ctx.stroke();
+  ctx.fillStyle = '#f2c9a0'; ctx.beginPath(); ctx.arc(hx, hy, 3, 0, C.TAU); ctx.fill();
+  return [hx, hy];
+}
+function refGesture(g, x, y, r, now, fl){
+  const t = (now - g.t0) / 1000, e = Math.min(1, t / 0.18), up = -Math.PI / 2, d = g.dir || 1, fwd = d > 0 ? 0 : Math.PI;
+  if (g.kind === 'playon'){ const sw = Math.sin(t * 9) * 0.18; refArm(x, y, r, fwd - 0.38 * d + sw, 14 * e); refArm(x, y, r, fwd + 0.38 * d + sw, 14 * e); }
+  else if (g.kind === 'arms'){ refArm(x, y, r, up - 0.38, 15 * e); refArm(x, y, r, up + 0.38, 15 * e); }
+  else if (g.kind === 'wag'){ const a = up + 0.35 + Math.sin(t * 16) * 0.28; const [hx, hy] = refArm(x, y, r, a, 13 * e); ctx.strokeStyle = '#f2c9a0'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + Math.cos(a) * 5, hy + Math.sin(a) * 5); ctx.stroke(); }
+  else if (g.kind === 'clap'){ const o = 0.12 + Math.abs(Math.sin(t * 10)) * 0.32; refArm(x, y, r, up - o, 12 * e); refArm(x, y, r, up + o, 12 * e);
+    if (Math.sin(t * 10) > 0.85){ ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1.5; for (const k of [-1, 0, 1]){ const a = up + k * 0.5; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * (r + 18), y + Math.sin(a) * (r + 18)); ctx.lineTo(x + Math.cos(a) * (r + 23), y + Math.sin(a) * (r + 23)); ctx.stroke(); } } }
+  else if (g.kind === 'shrug'){ refArm(x, y, r, Math.PI + 0.45, 11 * e); refArm(x, y, r, -0.45, 11 * e); }
+  else if (g.kind === 'dodge'){ refArm(x, y, r, up - 0.8, 12 * e); refArm(x, y, r, up + 0.8, 12 * e); }
+  else if (g.kind === 'point'){ refArm(x, y, r, up, 14 * e); }
+  else if (g.kind === 'watch'){ const [hx, hy] = refArm(x, y, r, Math.PI * 0.8, 9 * e); refArm(x, y, r, Math.PI * 0.95 + Math.sin(t * 12) * 0.12, 7 * e);
+    ctx.fillStyle = '#11141b'; ctx.beginPath(); ctx.arc(hx, hy, 4, 0, C.TAU); ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(hx, hy, 3, 0, C.TAU); ctx.stroke(); }
+  else if (g.kind === 'var'){   // the TV: both hands draw its outline in the air
+    refArm(x, y, r, up - 0.5, 12); refArm(x, y, r, up + 0.5, 12);
+    const w = 30, h = 20, cx = x, cy = y - r - 26, f = Math.min(1, t / 0.9), per = 2 * (w + h), L = per * f;
+    const pts = [[cx, cy - h / 2], [cx + w / 2, cy - h / 2], [cx + w / 2, cy + h / 2], [cx - w / 2, cy + h / 2], [cx - w / 2, cy - h / 2], [cx, cy - h / 2]];
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); let left = L;
+    for (let i = 1; i < pts.length && left > 0; i++){ const [ax, ay] = pts[i - 1], [bx, by] = pts[i], sl = Math.hypot(bx - ax, by - ay), u = Math.min(1, left / sl); ctx.lineTo(ax + (bx - ax) * u, ay + (by - ay) * u); left -= sl; }
+    ctx.stroke();
+  }
+}
+function refBubble(sy, x, y, now, fl){
+  const age = now - sy.t0, a = Math.min(1, age / 120, (sy.until - now) / 250); if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y - 14); ctx.scale(fl * (0.85 + 0.15 * Math.min(1, age / 150)), 0.85 + 0.15 * Math.min(1, age / 150));
+  ctx.font = "700 12px Rubik, system-ui, sans-serif"; const tw = ctx.measureText(sy.text).width, w = tw + 14, h = 20;
+  ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#11141b'; ctx.lineWidth = 2;
+  ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-w / 2, -h, w, h, 8); else ctx.rect(-w / 2, -h, w, h); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-5, -1); ctx.lineTo(0, 7); ctx.lineTo(5, -1); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(-5, 0); ctx.lineTo(0, 7); ctx.lineTo(5, 0); ctx.stroke();
+  ctx.fillStyle = '#11141b'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(sy.text, 0, -h / 2 + 0.5);
+  ctx.restore();
+}
 // an empty place (online: the player left or moved with no computer to fill in; offline: taken off): off the pitch,
 // touching nothing, not drawn; back on at its own half
 function parkSeat(G, p){ const d = G.discs[p.di]; d.cMask = 0; d.cGroup = 0; d.vx = d.vy = 0; d.x = 0; d.y = -9999; }
@@ -8250,7 +8327,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.21';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.22';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -9120,6 +9197,7 @@ function hostNet(s){
       else if (e.type === 'reset') N.ring.push([e.id, 'r']);
       else if (e.type === 'foul') N.ring.push([e.id, 'f', e.team, e.pid, e.vid, r4(e.x), r4(e.y), e.pen ? 1 : 0, e.card ? 1 : 0]);
       else if (e.type === 'slide') N.ring.push([e.id, 'l', e.pid]);
+      else if (e.type === 'playon') N.ring.push([e.id, 'o', e.team]);
       else if (e.type === 'call') N.ring.push([e.id, 'q', e.pid]);
       else if (e.type === 'emote') N.ring.push([e.id, 'm', e.pid, e.e]);
     }
@@ -9443,6 +9521,7 @@ function guestApply(s, o){
       s.last = kmh; if (!s.best || kmh > s.best.v) s.best = {v: kmh, team};
       const who = p ? nameOf(s, p) + (ev[5] ? ' (own goal)' : '') : '';
       const late = typeof ev[10] === 'string' && LATE_WORDS[ev[10]] ? ev[10] : '';
+      refGoal({og: !!ev[5], kmh, post: !!ev[9], slide: !!ev[12], m: ev[13] | 0, late});
       goalFx(team, kmh, !!ev[8], who, !!ev[9], late, +ev[11] || 0, undefined, !!ev[12], ev[13] | 0); if (fx.goal) fx.goal.tag = typeof ev[16] === 'string' ? ev[16].slice(0, 48) : '';   // (v28.21: equaliser, brace...) say(`${late ? LATE_WORDS[late][0] + ' ' : ev[12] ? 'TACKLE GOAL! ' : ev[9] ? 'BANGER, in off the post! ' : 'GOAL! '}${who || KIT[team].name} · ${ev[13] ? (ev[13] | 0) + ' m, ' : ''}${Math.round(kmh)} km/h`);
       if (p && !ev[5] && p.team === team && s.locals.some(L => L.pid === p.id) && isFinite(+ev[14]) && isFinite(+ev[15])) shotmapAdd(G, {team, og: false, kmh}, {bx: +ev[14], by: +ev[15]});   // (v27.3: the shot map)
       if (p && !ev[5] && p.team === team && s.locals.some(L => L.pid === p.id)){ if (kmh >= 90) achUnlock('rocket'); s.myGoals = (s.myGoals || 0) + 1; if (s.myGoals >= 3) achUnlock('hattrick'); }
@@ -9452,8 +9531,9 @@ function guestApply(s, o){
     else if (t === 'c'){ const p = G.players.find(q => q.id === ev[3]), v = G.players.find(q => q.id === ev[4]); if (p) tackleFx(s, 'tackle', p, v, 0); }
     else if (t === 'p'){ const p = G.players.find(q => q.id === ev[3]), kmh = +ev[4] || 0, x = +ev[5], y = +ev[6];
       if (isFinite(x) && isFinite(y)){ if (!ev[7]){ sfx.post(Math.max(1.3, kmh / C.KMH)); popFx('post', null, x, y, kmh, false); } say(`Off the post! ${p ? nameOf(s, p) : KIT[ev[2] ? 1 : 0].name}${kmh > 0 ? ' · ' + Math.round(kmh) + ' km/h' : ''}`); } }
-    else if (t === 't'){ sfx.whistle(1); say('Time is up!'); }
-    else if (t === 'e'){ sfx.whistle(1.2); const w = ev[2]; if (w === 0 || w === 1) fireworks(w, 7); }
+    else if (t === 't'){ sfx.whistle(1); say('Time is up!'); refAct('arms', 'Time!', {ms: 1800}); }
+    else if (t === 'e'){ sfx.whistle(1.2); const w = ev[2]; if (w === 0 || w === 1) fireworks(w, 7); refAct('arms', 'Full time!', {ms: 2600}); }
+    else if (t === 'o') refPlayOn(ev[2] ? 1 : 0);   // (v28.22: a bump, no foul)
     else if (t === 'r'){ for (const L of s.locals) L.hold = L.sent; if (s.full) s.full.cut = G.frame; fxEnd(); }
     else if (t === 'f'){ const fo = G.players.find(q => q.id === ev[3]), vi = G.players.find(q => q.id === ev[4]); foulFx(s, {team: ev[2] ? 1 : 0, pid: ev[3], vid: ev[4], pen: !!ev[7], card: !!ev[8]}, fo ? nameOf(s, fo) : '', vi ? nameOf(s, vi) : ''); }
     else if (t === 'q'){ if (G.players.some(q => q.id === ev[2])) callFx(ev[2]); }
