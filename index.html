@@ -73,6 +73,7 @@
   .gmsub > button.ghost:hover{background:var(--panel2);border-color:#7a8498}
   /* v28.9 ("add a r u sure option when leave/restart"): in place of the buttons, the question */
   .gmsure{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.35)}
+  label.fbtn{display:inline-flex;align-items:center;cursor:pointer;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-weight:500;font-size:clamp(11px,1.9vw,13px);line-height:normal}   /* v28.18: a file picker that looks like the buttons by it */
   #xferBox{width:100%;resize:vertical;font:12px ui-monospace,Menlo,Consolas,monospace;background:var(--ground);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:6px 8px;-webkit-user-select:text;user-select:text}
   .dnote{color:var(--muted);font-size:12px;margin:0}
   .errchip{position:fixed;left:12px;bottom:12px;z-index:200;max-width:min(560px,calc(100vw - 24px));padding:8px 12px;border-radius:10px;background:#3a1d22;color:#ffd7d7;border:1px solid #ff6b6b;font:500 12px var(--body);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
@@ -825,7 +826,7 @@
       <p class="dnote">Your controls, settings and progress (achievements, scores, saved goals, cup and league, your trained copy) to another copy of the game, such as the website: Copy here, then Load there.</p>
       <div class="drow"><button class="ghost sm" id="xferCopy" type="button">Copy my settings &amp; progress</button><span class="dnote" id="xferMsg"></span></div>
       <textarea id="xferBox" rows="3" spellcheck="false" placeholder="Paste a copied code here, then Load"></textarea>
-      <div class="drow"><button class="ghost sm" id="xferLoad" type="button">Load</button></div>
+      <div class="drow"><button class="ghost sm" id="xferLoad" type="button">Load</button><label class="ghost sm fbtn" for="xferFile" title="A code saved in a file (.txt)">Open a code file…</label><input type="file" id="xferFile" accept=".txt,text/plain" hidden></div>
     </section>
   </div>
   <div class="overlay" id="gameMenu" hidden>
@@ -6913,8 +6914,26 @@ function closeSettings(){ closePanel('setPanel'); }
 // everything this copy keeps (every pb.* in this browser's storage) as one code to paste into another copy. Copy: the
 // code on the clipboard and in the box; Load: the pasted code replaces this copy's, asked once, then the page reloads
 const XFER = 'PB1:';
+const xferJSON = v => { try { return v == null ? null : JSON.parse(v); } catch (e){ return null; } };
+// two lists of records with ids (goals in My goals, drills in My scores): both kept, newest first, one of each id
+function xferMergeList(a, b, max){
+  const m = new Map(); for (const r of [...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])]) if (r && typeof r.id === 'string' && !m.has(r.id)) m.set(r.id, r);
+  return [...m.values()].sort((p, q) => (+q.at || 0) - (+p.at || 0)).slice(0, max);
+}
 async function xferCode(){
   const o = {}; try { for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (k && k.startsWith('pb.')) o[k] = localStorage.getItem(k); } } catch (e) {}
+  // (v28.18, "my old saved goals scores etc are not brought over to the web": in Claude, My goals, My scores and the
+  // achievements are kept with your Claude account, not in this browser: they go in the code too)
+  try {
+    const c = await drillCloud(false);
+    if (c){
+      const idx = []; try { const q = await c.meta.orderBy('at', 'desc').limit(GOALS_MAX).get(); for (const d of q.docs){ const m = d.data(); if (!m || typeof m.id !== 'string' || !/^[\w.-]{1,60}$/.test(m.id)) continue; const g = await c.data.doc(m.id).get(); if (g.exists){ o[lgKey(m.id)] = JSON.stringify(g.data()); idx.push(m); } } } catch (e) {}
+      if (idx.length) o[LG_IDX] = JSON.stringify(xferMergeList(xferJSON(o[LG_IDX]), idx, GOALS_MAX));
+      const dl = []; try { const q = await c.drills.orderBy('at', 'desc').limit(500).get(); for (const d of q.docs){ const r = drillRec(d.data()); if (r) dl.push(r); } } catch (e) {}
+      if (dl.length) o['pb.drills'] = JSON.stringify(xferMergeList(xferJSON(o['pb.drills']), dl, 500));
+      try { const d = await c.ach.get(); if (d && d.exists){ const a = achLoad(xferJSON(o['pb.ach'])), r = achLoad(d.data()); for (const k in r.u) if (!a.u[k] || r.u[k] < a.u[k]) a.u[k] = r.u[k]; for (const k in r.c) if (r.c[k] > (a.c[k] || 0)) a.c[k] = r.c[k]; o['pb.ach'] = JSON.stringify(a); } } catch (e) {}
+    }
+  } catch (e) {}
   const bytes = new TextEncoder().encode(JSON.stringify({v: NET_VER, t: Date.now(), d: o}));
   let out = bytes, z = 0;
   if (typeof CompressionStream === 'function'){ try { out = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer()); z = 1; } catch (e) { out = bytes; } }
@@ -6935,14 +6954,31 @@ $('xferCopy').addEventListener('click', async () => {
     msg.textContent = ok ? `Copied (${keys} things). In the other copy: Settings, paste, Load` : 'Copy the code in the box (Ctrl+C), then in the other copy: Settings, paste, Load';
   } catch (e) { msg.textContent = 'Could not make the code: ' + (e && e.message ? e.message : e); }
 });
-let xferArmed = 0;
+let xferArmed = -1e9;
 $('xferLoad').addEventListener('click', async () => {
   const msg = $('xferMsg'), btn = $('xferLoad');
   let o; try { o = await xferRead($('xferBox').value); } catch (e) { msg.textContent = 'That code doesn\u2019t work: ' + (e && e.message ? e.message : e) + '. Copy it again in the other copy.'; return; }
-  const n = Object.keys(o.d).filter(k => k.startsWith('pb.')).length;
-  if (performance.now() - xferArmed > 6000){ xferArmed = performance.now(); btn.textContent = `Yes, replace this copy's with these ${n}`; msg.textContent = `From v${o.v || '?'}: it replaces this copy's settings and progress.`; setTimeout(() => { if (performance.now() - xferArmed >= 6000) btn.textContent = 'Load'; }, 6100); return; }
-  try { for (const [k, v] of Object.entries(o.d)) if (k.startsWith('pb.') && typeof v === 'string') localStorage.setItem(k, v); } catch (e) { msg.textContent = 'This browser won\u2019t keep it: ' + (e && e.message ? e.message : e); return; }
+  const keys = Object.keys(o.d).filter(k => k.startsWith('pb.')), n = keys.length;
+  // (v28.18: My goals, My scores and the achievements are added to this copy's, not put in their place; the rest replaces)
+  const ng = keys.filter(k => k.startsWith('pb.goal.')).length, nd = (xferJSON(o.d['pb.drills']) || []).length, na = Object.keys(achLoad(xferJSON(o.d['pb.ach'])).u).length;
+  const other = keys.filter(k => !k.startsWith('pb.goal.') && k !== LG_IDX && k !== 'pb.drills' && k !== 'pb.ach').length;
+  const what = [ng && `${ng} goal${ng > 1 ? 's' : ''}`, nd && `${nd} score${nd > 1 ? 's' : ''}`, na && `${na} achievement${na > 1 ? 's' : ''}`, other && 'settings'].filter(Boolean).join(', ') || `${n} things`;
+  if (performance.now() - xferArmed > 6000){ xferArmed = performance.now(); btn.textContent = `Yes, load ${what}`; msg.textContent = `From v${o.v || '?'}: goals, scores and achievements are added to this copy's${other ? '; its settings replace this copy\u2019s' : ''}.`; setTimeout(() => { if (performance.now() - xferArmed >= 6000) btn.textContent = 'Load'; }, 6100); return; }
+  try {
+    for (const [k, v] of Object.entries(o.d)){
+      if (!k.startsWith('pb.') || typeof v !== 'string') continue;
+      if (k === LG_IDX) localStorage.setItem(k, JSON.stringify(xferMergeList(localGoals.list(), xferJSON(v), GOALS_MAX)));
+      else if (k === 'pb.drills') localStorage.setItem(k, JSON.stringify(xferMergeList(localDrills.list(), (xferJSON(v) || []).map(drillRec).filter(Boolean), 500)));
+      else if (k === 'pb.ach'){ achMerge(xferJSON(v)); localStorage.setItem(k, JSON.stringify(ach)); }
+      else localStorage.setItem(k, v);
+    }
+  } catch (e) { msg.textContent = 'This browser won\u2019t keep it: ' + (e && e.message ? e.message : e); return; }
   msg.textContent = `Loaded ${n}. Starting again with them…`; setTimeout(() => location.reload(), 600);
+});
+$('xferFile').addEventListener('change', async e => {   // (v28.18: a code saved in a file)
+  const inp = e.target, f = inp.files && inp.files[0]; if (!f) return;
+  try { $('xferBox').value = (await f.text()).trim(); xferArmed = -1e9; $('xferLoad').click(); } catch (er) { $('xferMsg').textContent = 'Could not read that file'; }
+  inp.value = '';   // (after reading: the same file can be picked again)
 });
 document.querySelectorAll('.setb').forEach(b => b.addEventListener('click', openSettings));
 $('setDone').addEventListener('click', closeSettings);
@@ -8050,7 +8086,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.17';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.18';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
