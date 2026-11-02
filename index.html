@@ -823,9 +823,9 @@
       <div class="drow"><button class="ghost sm" id="loadBtn" type="button">Load stadium (.hbs)</button><button class="ghost sm" id="defStBtn" type="button" hidden>Default stadium</button><input type="file" id="file" accept=".hbs,.json,application/json" hidden></div>
     </section>
     <section class="dsec"><h3>Move to another copy</h3>
-      <p class="dnote">Your controls, settings and progress (achievements, scores, saved goals, cup and league, your trained copy) to another copy of the game, such as the website: Copy here, then Load there.</p>
-      <div class="drow"><button class="ghost sm" id="xferCopy" type="button">Copy my settings &amp; progress</button><span class="dnote" id="xferMsg"></span></div>
-      <textarea id="xferBox" rows="3" spellcheck="false" placeholder="Paste a copied code here, then Load"></textarea>
+      <p class="dnote">Everything (controls, settings, saved goals, scores, achievements, cup and league, your trained copy) to another copy of the game, such as the website: Save it as a file here and open the file there, or Copy here and Load there.</p>
+      <div class="drow"><button class="ghost sm" id="xferSave" type="button">Save everything as a file</button><button class="ghost sm" id="xferCopy" type="button">Copy everything</button><span class="dnote" id="xferMsg"></span></div>
+      <textarea id="xferBox" rows="3" spellcheck="false" placeholder="Load takes a copied code (or paste it here first)"></textarea>
       <div class="drow"><button class="ghost sm" id="xferLoad" type="button">Load</button><label class="ghost sm fbtn" for="xferFile" title="A code saved in a file (.txt)">Open a code file…</label><input type="file" id="xferFile" accept=".txt,text/plain" hidden></div>
     </section>
   </div>
@@ -6947,16 +6947,26 @@ async function xferRead(code){
   const o = JSON.parse(new TextDecoder().decode(bytes)); if (!o || typeof o.d !== 'object') throw new Error('nothing in it');
   return o;
 }
+// (v28.19, "just add a thing where it just brings everything over": everything in one file, the way that worked: Save
+// here, Open a code file there; and Load takes a copied code straight from the clipboard)
+$('xferSave').addEventListener('click', async () => {
+  const msg = $('xferMsg'); msg.textContent = 'Getting everything together…';
+  try { const {code, keys} = await xferCode(); const out = await offerFile('pitch-brawl-everything.txt', new Blob([code + '\n'], {type: 'text/plain'}));
+    msg.textContent = out === 'saved' ? `Saved (${keys} things) as pitch-brawl-everything.txt. In the other copy: Settings, Open a code file…` : out === 'declined' ? 'Not saved' : 'Could not save a file here: use Copy everything instead';
+  } catch (e) { msg.textContent = 'Could not make the file: ' + (e && e.message ? e.message : e); }
+});
 $('xferCopy').addEventListener('click', async () => {
   const msg = $('xferMsg'), box = $('xferBox');
   try { const {code, keys} = await xferCode(); box.value = code; box.select();
     let ok = false; try { await navigator.clipboard.writeText(code); ok = true; } catch (e) { try { ok = document.execCommand('copy'); } catch (e2) {} }
-    msg.textContent = ok ? `Copied (${keys} things). In the other copy: Settings, paste, Load` : 'Copy the code in the box (Ctrl+C), then in the other copy: Settings, paste, Load';
+    msg.textContent = ok ? `Copied (${keys} things). In the other copy: Settings, Load` : 'Copy the code in the box (Ctrl+C), then in the other copy: Settings, paste, Load';
   } catch (e) { msg.textContent = 'Could not make the code: ' + (e && e.message ? e.message : e); }
 });
 let xferArmed = -1e9;
 $('xferLoad').addEventListener('click', async () => {
   const msg = $('xferMsg'), btn = $('xferLoad');
+  if (!$('xferBox').value.trim()){ try { const t = await navigator.clipboard.readText(); if (t && t.trim().startsWith(XFER)) $('xferBox').value = t.trim(); } catch (e) {} }
+  if (!$('xferBox').value.trim()){ msg.textContent = 'Nothing to load: Copy everything in the other copy first (or paste its code in the box, or Open a code file)'; return; }
   let o; try { o = await xferRead($('xferBox').value); } catch (e) { msg.textContent = 'That code doesn\u2019t work: ' + (e && e.message ? e.message : e) + '. Copy it again in the other copy.'; return; }
   const keys = Object.keys(o.d).filter(k => k.startsWith('pb.')), n = keys.length;
   // (v28.18: My goals, My scores and the achievements are added to this copy's, not put in their place; the rest replaces)
@@ -8086,7 +8096,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.18';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.19';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
