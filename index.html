@@ -2001,13 +2001,25 @@ function PBCORE(){
   }
   function setInput(p, bits){ if (!(p.input & 16) && (bits & 16)){ p.kicking = true; p.kPress = (p.kPress || 0) + 1; } if (!(p.input & 32) && (bits & 32)) p.slideReq = true; const lr = bits & ~p.input & 12; if (lr) p.lrTap = (p.lrTap || 0) | lr; p.input = bits; }   // (lrTap: left/right pressed since the last tick, for a free kick's curl)
 
+  const SAVE_KEEP = 0.75, SAVE_T = 30;
   function kickDisc(G, ST, p, d, o, pw, fkc){
     const pp = ST.pp, m = PU[p.pu] || PU.none;
     let x = o.x - d.x, y = o.y - d.y; const dist = Math.sqrt(x * x + y * y);
     if (!(dist - o.radius - d.radius < 4 + (m.reach || 0)) || dist === 0) return false;
     x /= dist; y /= dist;
     const ks = pp.kickStrength * (m.kick || 1) * (pw || 1);
+    const vIn = o === G.discs[0] ? Math.sqrt(o.vx * o.vx + o.vy * o.vy) : 0;
     o.vx += ks * x * o.invMass; o.vy += ks * y * o.invMass;
+    // v28.24 ("sometimes the ball doesnt seem fast and when gk touches it it says save and a really fast save and hits the
+    // back very fast"): a kick adds its push to the speed the ball has, so a shot going past the keeper that he kicked
+    // flew off faster than it came, 115-120 km/h off a 90 km/h shot (e2e t_gkball.js). Kicking a shot of theirs away,
+    // the one just saved (his touch saved it: lastTouch.save) or one still on its way: no faster than a kick of his own
+    // or SAVE_KEEP of the shot, whichever is more
+    if (o === G.discs[0]){
+      const lt = G.lastTouch, saving = (lt && ((lt.id === p.id && lt.save && G.frame - lt.save < SAVE_T) || (lt.team !== p.team && lt.shot && lt.kick)))
+        || (p.role === 'keeper' && !ST.tri);   // (and any keeper's kick: on a moving ball, out of his area too, it went off at 120-140)
+      if (saving){ const v = Math.sqrt(o.vx * o.vx + o.vy * o.vy), cap = Math.max(ks * o.invMass, vIn * SAVE_KEEP); if (v > cap){ o.vx *= cap / v; o.vy *= cap / v; } }
+    }
     d.vx += -pp.kickback * x * d.invMass; d.vy += -pp.kickback * y * d.invMass;
     if (o === G.discs[0]){
       // a person's shot curls by itself with curve on (v25.3: autoCurl; v25.4: straight or the whole curl, free kicks below);
@@ -2043,7 +2055,7 @@ function PBCORE(){
     if (dt == null) dt = 1;
     if (G.pause > 0){ if (G.pause < 120) G.pause--; return; }
     const D = G.discs, predict = opts && opts.predict, ev = predict ? null : G.events;
-    G.frame++;
+    G.frame++; G.bv0 = Math.sqrt(D[0].vx * D[0].vx + D[0].vy * D[0].vy);   // (v28.24: the ball's speed coming into this tick: a save's speed)
     { const b0 = D[0]; if (b0.spT > 0 && --b0.spT === 0) b0.spSkip = -1; }
     const noKick = !!G.sp && G.sp.t < G.sp.hold;   // a free kick or penalty being set up: nobody kicks yet
     for (const p of G.players){
@@ -2150,9 +2162,9 @@ function PBCORE(){
     tt[p.team] = {id: p.id, on: kicked ? false : !!(prev && prev.id === p.id && prev.on)};
     if (kicked) G.stats.kicks[p.team]++;
   }
-  // a save: the shot's speed as it was struck (km/h) goes with it; the fastest of the match (not the first) is a record
+  // a save: the ball's speed as it reached him (km/h; v28.24, was as it was struck) goes with it; the fastest of the match (not the first) is a record
   function saveMade(G, p, lt){
-    const st = G.stats, kmh = (lt.sp || Math.hypot(G.discs[0].vx, G.discs[0].vy)) * KMH;
+    const st = G.stats, kmh = (G.bv0 != null ? G.bv0 : lt.sp || Math.hypot(G.discs[0].vx, G.discs[0].vy)) * KMH;   // (v28.24: as it reached him, not as it was struck: a slow ball was a "104 km/h save")
     const list = st.saveList || (st.saveList = []), hs = st.hardSave || (st.hardSave = [0, 0]);
     const record = list.length > 0 && (!st.bestSave || kmh > st.bestSave.v);
     list.push({team: p.team, pid: p.id, kmh, frame: G.frame}); if (list.length > 500) list.shift();
@@ -8350,7 +8362,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.23';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.24';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
