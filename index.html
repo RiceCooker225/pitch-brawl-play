@@ -1965,7 +1965,7 @@ function PBCORE(){
   // roster: [{id, team 0|1, ctrl 'human'|'ai'|'remote', name, avatar, pu, role}]
   function newGame(ST, cfg, roster){
     const nt = ST.nt || 2;
-    const G = {cfg: Object.assign({timeLimit:3, scoreLimit:3}, cfg), frame:0, state:0, timer:0, time:0, score: nt === 3 ? [0, 0, 0] : [0, 0], koTeam: cfg && cfg.leg === 2 ? 1 : 0,   // (v28.16: the second leg, the other side kicks off) pause:0, nt,
+    const G = {cfg: Object.assign({timeLimit:3, scoreLimit:3}, cfg), frame:0, state:0, timer:0, time:0, score: nt === 3 ? [0, 0, 0] : [0, 0], koTeam: cfg && cfg.leg === 2 ? 1 : 0, pause:0, nt,   // (koTeam, v28.16: the second leg, the other side kicks off. v28.25: this comment had swallowed pause and nt: no pause count (a penalty taker never went), no three teams)
                discs: ST.discs.map(d => Object.assign({}, d)), players: [], events: [], kickRate: {min:2, rate:0, burst:1},
                stats: newStats(nt), ballHist: [], lastTouch: null, prevTouch: null, eventId: 0, sp: null};
     for (const r of roster){
@@ -2122,7 +2122,7 @@ function PBCORE(){
         G.timer--;
         if (G.timer <= 0){
           const sl = G.cfg.scoreLimit, tl = G.cfg.timeLimit;
-          if ((sl > 0 && G.score.some(v => v >= sl)) || (tl > 0 && timeUp(G))) endGame(G);
+          if (limitHit(G) || (tl > 0 && timeUp(G))) endGame(G);
           else { resetPositions(G, ST); if (ev) ev.push({type:'reset', id: ++G.eventId, frame: G.frame}); }
         }
         break;
@@ -2131,9 +2131,21 @@ function PBCORE(){
     }
     if (!predict) afterStep(G, ST);
   }
+  // v28.25 ("when there is goal limits, and 2 legs, doesnt make sense"): the goal limit counted the leg alone, so in a
+  // second leg the side chasing the tie was stopped by its own goals (3-0 down from the first leg, 3-1 up in this one:
+  // over, out 4-3), or it ended level on the total. Now a second leg ends at the limit only for a side that has it in
+  // this leg and is ahead on the total; the other side goes on (to the clock, or till the leader has the limit too, or
+  // till it goes ahead itself). A first leg, and one match, as before: the first to the limit
+  function limitHit(G){
+    const sl = G.cfg.scoreLimit; if (!(sl > 0)) return false;
+    const a = G.cfg.agg; if (!a || G.score.length !== 2) return G.score.some(v => v >= sl);
+    const tot = [G.score[0] + (+a[0] || 0), G.score[1] + (+a[1] || 0)];
+    return [0, 1].some(t => G.score[t] >= sl && tot[t] > tot[1 - t]);
+  }
   function endGame(G){
     G.state = 3; G.timer = 300; G.sp = null;
-    const top = Math.max(...G.score), w = G.score.filter(v => v === top).length === 1 ? G.score.indexOf(top) : -1;   // (two teams: as before)
+    const sc = G.cfg.agg && G.score.length === 2 ? G.score.map((v, i) => v + (+G.cfg.agg[i] || 0)) : G.score;   // (v28.25: a second leg: on the total)
+    const top = Math.max(...sc), w = sc.filter(v => v === top).length === 1 ? sc.indexOf(top) : -1;   // (two teams: as before)
     G.events.push({type:'end', id: ++G.eventId, frame: G.frame, winner: w});
   }
   const overtime = G => G.cfg.timeLimit > 0 && G.time >= 60 * G.cfg.timeLimit && G.state < 3 && !G.cfg.draws && G.cfg.tie !== 2;
@@ -2370,7 +2382,7 @@ function PBCORE(){
     return C;
   }
 
-  return {TAU, TICK, FL, IN, TEAMS, PU, KMH, buildStadium, colliders, physics, crossesGoal, newGame, resetPositions, setInput, step, endGame, overtime, topTied,
+  return {TAU, TICK, FL, IN, TEAMS, PU, KMH, limitHit, buildStadium, colliders, physics, crossesGoal, newGame, resetPositions, setInput, step, endGame, overtime, topTied,
           copyGame, extrapolate, ballPath, playerDisc, newStats, pstat, timeUp, inArea, areaOf, ballArea, setPiece,
           CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, slideAim, FK_R, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
           fkPreview, FK_SHOW_PW, FK_AUTO, FK_HOLD, FK_HOLD_AIM, CURL, fkWallLine, fkWallSpot, autoCurl, manualCurl, curlTo, AC_BIT, flightCross, curveMul, CURVE_LV,
@@ -4086,7 +4098,7 @@ function legIntro(s){
   const G = s.G, c = G.cfg; if (!c.leg || s.mode) return;
   const ko = KIT[G.koTeam] ? KIT[G.koTeam].name : '';
   let text, sub;
-  if (c.agg){ const [a, b] = c.agg.map(v => +v || 0); text = 'SECOND LEG'; sub = `First leg ${a}–${b} · ${a === b ? 'all level' : KIT[a > b ? 0 : 1].name + ' lead by ' + Math.abs(a - b)} · ${ko} kick off`; }
+  if (c.agg){ const [a, b] = c.agg.map(v => +v || 0); text = 'SECOND LEG'; sub = `First leg ${a}–${b} · ${a === b ? 'all level' : KIT[a > b ? 0 : 1].name + ' lead by ' + Math.abs(a - b)} · ${ko} kick off${c.scoreLimit > 0 ? ` · ${c.scoreLimit} here ends it only for the side ahead overall` : ''}`; }
   else { text = 'FIRST LEG'; sub = `Both legs together decide it · ${ko} kick off`; }
   s.msg = {text, sub, until: (s.ticks || 0) + 220, untilMs: performance.now() + 3600, team: -1};
 }
@@ -6347,9 +6359,12 @@ function winChance(G, st){
   // rates): the chance to win the tie; level after both: the middle (it goes to the tie's decider)
   const leg1 = cfg.leg === 1 && !cfg.agg, L2 = tl ? cfg.timeLimit * 60 : 600;
   const N = 600, w = [0, 0], canDraw = leg1 ? tl : tl && left > 0 && !C.overtime(G); let draw = 0;
-  const run = (s, left) => { let t = 0; while (true){ t += -Math.log(1 - rnd()) / rr; if (t >= left) break; s[rnd() < r[0] / rr ? 0 : 1]++; if (sl && (s[0] >= sl || s[1] >= sl)) break; } return s; };
+  // (v28.25: the limit as the engine has it: in a second leg, only for a side ahead on the total)
+  const hit = (s, ag) => ag ? [0, 1].some(t => s[t] >= sl && s[t] + ag[t] > s[1 - t] + ag[1 - t]) : s[0] >= sl || s[1] >= sl;
+  const run = (s, left, ag) => { let t = 0; while (true){ t += -Math.log(1 - rnd()) / rr; if (t >= left) break; s[rnd() < r[0] / rr ? 0 : 1]++; if (sl && hit(s, ag)) break; } return s; };
+  const agg2 = cfg.agg ? [agg[0] | 0, agg[1] | 0] : null;
   for (let n = 0; n < N; n++){
-    const s = run(G.score.slice(0, 2), left), s2 = leg1 ? run([0, 0], L2) : [0, 0];
+    const s = run(G.score.slice(0, 2), left, agg2), s2 = leg1 ? run([0, 0], L2, s.slice()) : [0, 0];
     const a = s[0] + s2[0] + (agg[0] | 0), b = s[1] + s2[1] + (agg[1] | 0);
     if (a > b) w[0]++; else if (b > a) w[1]++;
     else if ((cfg.draws && !leg1) || canDraw) draw++;
@@ -8362,7 +8377,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.24';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.25';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -9557,7 +9572,7 @@ function guestApply(s, o){
       const who = p ? nameOf(s, p) + (ev[5] ? ' (own goal)' : '') : '';
       const late = typeof ev[10] === 'string' && LATE_WORDS[ev[10]] ? ev[10] : '';
       refGoal({og: !!ev[5], kmh, post: !!ev[9], slide: !!ev[12], m: ev[13] | 0, late, tag: typeof ev[16] === 'string' ? ev[16] : ''});
-      goalFx(team, kmh, !!ev[8], who, !!ev[9], late, +ev[11] || 0, undefined, !!ev[12], ev[13] | 0); if (fx.goal) fx.goal.tag = typeof ev[16] === 'string' ? ev[16].slice(0, 48) : '';   // (v28.21: equaliser, brace...) say(`${late ? LATE_WORDS[late][0] + ' ' : ev[12] ? 'TACKLE GOAL! ' : ev[9] ? 'BANGER, in off the post! ' : 'GOAL! '}${who || KIT[team].name} · ${ev[13] ? (ev[13] | 0) + ' m, ' : ''}${Math.round(kmh)} km/h`);
+      goalFx(team, kmh, !!ev[8], who, !!ev[9], late, +ev[11] || 0, undefined, !!ev[12], ev[13] | 0); if (fx.goal) fx.goal.tag = typeof ev[16] === 'string' ? ev[16].slice(0, 48) : '';   /* (v28.21: equaliser, brace...; v28.25: this note had commented out the line's say) */ say(`${late ? LATE_WORDS[late][0] + ' ' : ev[12] ? 'TACKLE GOAL! ' : ev[9] ? 'BANGER, in off the post! ' : 'GOAL! '}${who || KIT[team].name} · ${ev[13] ? (ev[13] | 0) + ' m, ' : ''}${Math.round(kmh)} km/h`);
       if (p && !ev[5] && p.team === team && s.locals.some(L => L.pid === p.id) && isFinite(+ev[14]) && isFinite(+ev[15])) shotmapAdd(G, {team, og: false, kmh}, {bx: +ev[14], by: +ev[15]});   // (v27.3: the shot map)
       if (p && !ev[5] && p.team === team && s.locals.some(L => L.pid === p.id)){ if (kmh >= 90) achUnlock('rocket'); s.myGoals = (s.myGoals || 0) + 1; if (s.myGoals >= 3) achUnlock('hattrick'); }
       fullGoal(s, team, p ? nameOf(s, p) : '', !!ev[5], kmh);
