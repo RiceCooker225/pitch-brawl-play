@@ -631,10 +631,10 @@
      big and plain, the sections a list down the left (big condensed italic words, the one you're on on an orange slab),
      what's in it on the right as flat rows with rules between, the Kick off button a hard-edged orange block; no glow, no
      rounded boxes, no icon squares. On a narrow screen it all goes in one column */
-  #menu{--cond:'Barlow Condensed','Arial Narrow',Rubik,sans-serif;--rule:#2b313e;--dim:#8a92a5;
+  #menu{--cond:'Barlow Condensed','Arial Narrow',Rubik,sans-serif;--rule:#454d61;--dim:#a8b0c2;
         display:grid;grid-template-columns:minmax(200px,30%) minmax(0,1fr);grid-template-rows:auto auto auto auto;column-gap:36px;row-gap:16px;
         align-items:start;align-content:start;justify-items:stretch;justify-content:stretch;padding:28px 34px 22px 40px;text-align:left;
-        background:linear-gradient(90deg,var(--accent) 0 5px,transparent 5px),repeating-linear-gradient(115deg,rgba(255,255,255,.016) 0 26px,transparent 26px 52px),linear-gradient(180deg,#12151c,#0e1116)}
+        background:linear-gradient(90deg,var(--accent) 0 6px,transparent 6px),repeating-linear-gradient(115deg,rgba(255,255,255,.028) 0 26px,transparent 26px 52px),linear-gradient(180deg,#2a3040,#222735)}   /* (v28.29: lighter, "menus a bit dark") */
   #menu[hidden]{display:none}
   #menu > .mhead{grid-column:1;grid-row:1;align-items:flex-start;text-align:left;gap:8px}
   #menu > .mtabs{grid-column:1;grid-row:2}
@@ -648,28 +648,28 @@
   /* the sections */
   #menu .mtabs{display:flex;flex-direction:column;align-items:flex-start;gap:0;background:none;border:0;border-radius:0;padding:0;box-shadow:none;counter-reset:mt}
   #menu .mtabs button{position:relative;isolation:isolate;display:flex;align-items:baseline;gap:12px;text-align:left;background:none;border:0;border-radius:0;box-shadow:none;
-        padding:4px 18px 4px 0;color:#6f788c;font-family:var(--cond);font-style:italic;font-weight:800;font-size:clamp(22px,2.6vw,31px);text-transform:uppercase;letter-spacing:.01em;line-height:1.08;transition:color .12s,transform .12s}
-  #menu .mtabs button::before{counter-increment:mt;content:counter(mt,decimal-leading-zero);font:700 11px/1 Rubik,sans-serif;font-style:normal;letter-spacing:.1em;color:#4c5466;min-width:18px}
+        padding:4px 18px 4px 0;color:#9099ac;font-family:var(--cond);font-style:italic;font-weight:800;font-size:clamp(22px,2.6vw,31px);text-transform:uppercase;letter-spacing:.01em;line-height:1.08;transition:color .12s,transform .12s}
+  #menu .mtabs button::before{counter-increment:mt;content:counter(mt,decimal-leading-zero);font:700 11px/1 Rubik,sans-serif;font-style:normal;letter-spacing:.1em;color:#79829a;min-width:18px}
   #menu .mtabs button::after{content:'';position:absolute;z-index:-1;inset:3px -4px 3px -10px;background:var(--accent);transform:skewX(-14deg) scaleX(0);transform-origin:left;transition:transform .16s ease-out}
   #menu .mtabs button.on{color:#15100a;background:none;box-shadow:none} #menu .mtabs button.on::before{color:rgba(21,16,10,.6)} #menu .mtabs button.on::after{transform:skewX(-14deg) scaleX(1)}
   #menu .mtabs button:not(.on):hover{color:#fff;background:none;transform:translateX(5px)}
   #menu .mtabs button:focus-visible{outline:2px solid #fff;outline-offset:2px}
-  #menu .mlearn{justify-self:start;display:flex;flex-direction:column;gap:1px;max-width:250px;background:none;border:0;border-left:3px solid #ffd166;border-radius:0;padding:4px 0 4px 12px;color:var(--dim);font-size:12px;font-weight:500;text-align:left}
+  #menu .mlearn{justify-self:start;display:flex;flex-direction:column;gap:1px;max-width:250px;background:none;border:0;border-left:4px solid #ffd166;border-radius:0;padding:4px 0 4px 12px;color:var(--dim);font-size:12px;font-weight:500;text-align:left}
   #menu .mlearn b{font-family:var(--cond);font-style:italic;font-weight:800;font-size:22px;text-transform:uppercase;color:#ffd166;line-height:1.05}
-  #menu .mlearn small{font-size:11px;color:#6f788c}
+  #menu .mlearn small{font-size:11px;color:#9099ac}
   #menu .mlearn:hover b{color:#fff}
   /* what's in a section */
   #menu .mpane{gap:14px}
   #menu .mcard{background:none;border:0;border-radius:0;box-shadow:none;padding:0;gap:14px}
   #menu .lbl{font:700 11px/1.2 Rubik,sans-serif;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
-  #menu .seg.big{gap:0;border:1px solid #3a4152;border-radius:0;overflow:hidden}
-  #menu .seg.big button,#menu .seg.big button + button{border:0;border-right:1px solid #3a4152;border-radius:0;background:transparent;box-shadow:none;padding:11px 4px 9px;
+  #menu .seg.big{gap:0;border:2px solid #5a6378;border-radius:0;overflow:hidden}   /* (v28.29: "border bit thin": 2 px) */
+  #menu .seg.big button,#menu .seg.big button + button{border:0;border-right:2px solid #5a6378;border-radius:0;background:transparent;box-shadow:none;padding:11px 4px 9px;
         font-family:var(--cond);font-weight:700;font-size:21px;letter-spacing:.02em;text-transform:uppercase;color:#c8cdd8}
   #menu .seg.big button:last-child{border-right:0}
   #menu .seg.big button.on{background:#f1efe9;color:#12151c;box-shadow:none}
-  #menu .seg.big button:not(.on):not(:disabled):hover{background:rgba(255,255,255,.05);color:#fff}
+  #menu .seg.big button:not(.on):not(:disabled):hover{background:rgba(255,255,255,.08);color:#fff}
   #menu .seg.big .si{display:none} #menu .seg.big .lw,#menu .seg.big .sw2{font:inherit}
-  #menu .seg.pill{border-radius:0;border:1px solid #3a4152;background:none}
+  #menu .seg.pill{border-radius:0;border:2px solid #5a6378;background:none}
   #menu .seg.pill button{font-family:var(--cond);font-weight:700;font-size:17px;text-transform:uppercase;letter-spacing:.02em;border-radius:0}
   #menu .seg.pill button.on{background:#f1efe9;color:#12151c}
   #menu button.mgo{border-radius:0;padding:15px 30px 15px 22px;gap:16px;background:var(--accent);color:#15100a;box-shadow:none;clip-path:polygon(0 0,100% 0,calc(100% - 20px) 100%,0 100%);transition:background-color .12s,padding .12s}
@@ -678,33 +678,33 @@
   #menu .mgo b{font-family:var(--cond);font-style:italic;font-weight:800;font-size:clamp(28px,3.4vw,38px);text-transform:uppercase;letter-spacing:.005em;line-height:.95}
   #menu .mgo small{font-size:13px;font-weight:600;opacity:.72}
   #menu .mgo .go{width:auto;height:auto;border-radius:0;background:none;color:#15100a} #menu .mgo .go svg{width:28px;height:28px;margin:0}
-  #menu .tiles{gap:0;border-top:1px solid var(--rule)}
+  #menu .tiles{gap:0;border-top:2px solid var(--rule)}
   #menu .tiles.c2,#menu .tiles.c3{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:26px}
-  #menu .tile{position:relative;background:none;border:0;border-bottom:1px solid var(--rule);border-radius:0;box-shadow:none;padding:10px 6px 10px 12px;gap:0;transition:padding .12s,background-color .12s}
-  #menu .tile::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;background:var(--accent);transform:scaleY(0);transition:transform .12s}
-  #menu .tile:hover{background:rgba(255,255,255,.03);transform:none;padding-left:18px;border-color:var(--rule)} #menu .tile:hover::before{transform:scaleY(1)}
+  #menu .tile{position:relative;background:none;border:0;border-bottom:2px solid var(--rule);border-radius:0;box-shadow:none;padding:10px 6px 10px 12px;gap:0;transition:padding .12s,background-color .12s}
+  #menu .tile::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:4px;background:var(--accent);transform:scaleY(0);transition:transform .12s}
+  #menu .tile:hover{background:rgba(255,255,255,.06);transform:none;padding-left:18px;border-color:var(--rule)} #menu .tile:hover::before{transform:scaleY(1)}
   #menu .tile .ic{display:none}
   #menu .tile b{font-family:var(--cond);font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
   #menu .tile small{font-size:12.5px;color:var(--dim)}
   #menu .tile.full{grid-column:1 / -1;width:100%}
-  #menu .tile.full:not(.big){border-top:1px solid var(--rule)}
-  #menu .tile.big{border:1px solid var(--accent);background:rgba(240,138,43,.07);padding:14px 18px}
+  #menu .tile.full:not(.big){border-top:2px solid var(--rule)}
+  #menu .tile.big{border:2px solid var(--accent);background:rgba(240,138,43,.1);padding:14px 18px}
   #menu .tile.big b{font-family:var(--cond);font-style:italic;font-weight:800;font-size:30px;color:#fff}
   #menu .tile.tutb b{color:#ffd166}
   #menu .mnote{text-align:left;font-size:12px;color:var(--dim)}
   /* the match settings: plain words under small labels, an underline each */
-  #menu .mbar{gap:14px;border-top:1px solid var(--rule);padding-top:12px}
-  #menu .mbar .mo{background:none;border:0;border-bottom:2px solid #3a4152;border-radius:0;padding:0 0 2px}
+  #menu .mbar{gap:14px;border-top:2px solid var(--rule);padding-top:12px}
+  #menu .mbar .mo{background:none;border:0;border-bottom:3px solid #5a6378;border-radius:0;padding:0 0 2px}
   #menu .mbar .mo:hover{border-bottom-color:var(--accent)}
   #menu .mbar .mo > span{font:700 10px/1.3 Rubik,sans-serif;letter-spacing:.16em}
   #menu .mbar select{font-family:var(--cond);font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:.01em;padding:1px 16px 2px 0}
   #menu[data-tab="train"] .mbar{grid-template-columns:minmax(0,200px);justify-content:start}
   /* the foot: plain links */
   #menu .mfoot{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:1px;width:auto}
-  #menu .mfoot button{background:none;border:0;border-radius:0;padding:2px 0;color:#9aa2b4;font-size:13px;font-weight:600;box-shadow:none}
+  #menu .mfoot button{background:none;border:0;border-radius:0;padding:2px 0;color:#c2c8d6;font-size:13px;font-weight:600;box-shadow:none}
   #menu .mfoot button:hover{color:#fff;background:none}
   #menu .mfoot button > span{display:none}
-  #menu .mst{text-align:left;font-size:11px;color:#5a6274;margin-top:6px;flex-basis:auto}
+  #menu .mst{text-align:left;font-size:11px;color:#8c95a8;margin-top:6px;flex-basis:auto}
   @media (max-width:760px){
     #menu{grid-template-columns:minmax(0,1fr);padding:18px 16px 16px 20px;row-gap:12px}
     #menu > *{grid-column:1 !important;grid-row:auto !important;max-width:none !important}
@@ -715,14 +715,14 @@
   /* the first-time question, over the menu */
   .tutwel{position:absolute;inset:0;z-index:3;display:grid;place-items:center;background:rgba(8,10,14,.78)}
   .tutwel[hidden]{display:none}
-  .tutwel > div{width:min(470px,92%);background:#141820;border-left:6px solid var(--accent);padding:22px 24px;display:flex;flex-direction:column;gap:10px;text-align:left;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .tutwel > div{width:min(470px,92%);background:#262c3a;border-left:6px solid var(--accent);padding:22px 24px;display:flex;flex-direction:column;gap:10px;text-align:left;box-shadow:0 18px 40px rgba(0,0,0,.45)}
   .tutwel small{font:700 11px/1 Rubik,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
   .tutwel h3{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:italic;font-weight:800;font-size:40px;line-height:.95;text-transform:uppercase;color:#fff}
   .tutwel p{max-width:none;color:#c9cfdc;font-size:14px;line-height:1.5}
   .tutwel .row{justify-content:flex-start;margin-top:4px} .tutwel button{border-radius:0}
   /* the tutorial's panel, over the foot of the pitch */
   .tutbox{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:4;width:min(580px,94%);display:flex;flex-direction:column;gap:6px;text-align:left;
-          background:rgba(13,16,22,.94);border-left:5px solid var(--accent);padding:10px 12px 10px 14px;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+          background:rgba(34,39,52,.96);border-left:5px solid var(--accent);padding:10px 12px 10px 14px;box-shadow:0 12px 30px rgba(0,0,0,.45)}
   .tutbox[hidden]{display:none}
   .tuthead{display:flex;align-items:center;gap:12px}
   .tuthead span{font:700 11px/1 Rubik,sans-serif;letter-spacing:.14em;color:var(--muted)}
@@ -8666,7 +8666,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.28';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.29';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -9927,7 +9927,10 @@ function keysAt(L, k, s, R, have){
 // the moment a snapshot disagreed: a jump, the further ahead the bigger. Now each such correction is eased out over
 // SMOOTH_MS: they go on from where they were drawn and the gap closes. Not your own player (your keys: v27.8), and not
 // one over SMOOTH_MAX px (a kick-off, a reset: straight there). NET.smooth false: as before
-const SMOOTH_MS = 80, SMOOTH_MAX = 40;
+// v28.29 ("please make online as smooth as possible"): a correction of the others up to 70 px glides (was 40: on Wi-Fi a
+// lag spike left them going the wrong way for a moment and the catch-up, 41-49 px, was a jump; e2e t_other.js, 4 runs:
+// biggest 41-49 px in 3 of 4 -> 7-10 px in 3 of 4)
+const SMOOTH_MS = +(window.__smOther != null ? window.__smOther : 80), SMOOTH_MAX = +(window.__smOtherMax != null ? window.__smOtherMax : 70);   // (window.__smOther*: e2e tuning)
 // v28.17 ("the freekicks are kinda glitchy online, same is player, not as smooth as haxball, like i wanna the 93
 // extrapolation be the same as offline"): the correction was taken as the last picture run on to now against the new
 // one, so it held your key presses too (your player was left out for that) and the ball was left out (a kick shows at
@@ -9935,13 +9938,17 @@ const SMOOTH_MS = 80, SMOOTH_MAX = 40;
 // keys: only what the host's news changed, and that glides out for everyone, you and the ball too. Your keys and a
 // kick you make still show at once (they're in both). What changed by more than the caps (a kick someone else made, a
 // reset) goes straight there. e2e t_sm93.js: your player's jumps 30-50 px -> under 7, as offline
-const SM_ME = 80, SM_ME_MAX = 40, SM_BALL = 60, SM_BALL_MAX = 24, SM_BALL_DV = 1.2;
+const SM_ME = 80, SM_ME_MAX = +(window.__smMeMax != null ? window.__smMeMax : 40), SM_BALL = 60, SM_BALL_MAX = 24, SM_BALL_DV = 1.2, SM_KICK = +(window.__smKick != null ? window.__smKick : 40), SM_KICK_MAX = 110;
+// v28.29 ("did u fix the online thing where its a bit glitchy"): a kick (or a bounce) nobody here saw coming went straight
+// to where it now is, the look-ahead of it at once: 40-60 px in a frame, every time the other side touched it (e2e
+// t_smball.js: the joiner's ball jumped 4x as often as the host's). Now it glides there over SM_KICK ms (gone in about
+// two frames' worth of a fast kick), up to SM_KICK_MAX px; a reset or a jump bigger than that, straight there
 function smoothView(s, V){
   if (NET.smooth === false || !SET.smooth || !V || V === s.G) return V;
   const now = viewNow(), sm = s.sm || (s.sm = {at: now, h: -1, base: null, R: s.ackR, off: new Map()});
   const dt = Math.max(0, now - sm.at);
   for (const [i, o] of sm.off){ const f = Math.exp(-dt / o[2]); o[0] *= f; o[1] *= f; if (Math.hypot(o[0], o[1]) < 0.05) sm.off.delete(i); }
-  if (!sm.base || V.state !== sm.base.state || dt > 150 || s.snapH - sm.h > 30) sm.off.clear();
+  if (!sm.base || V.state !== sm.base.state || !!V.sp !== !!sm.base.sp || dt > 150 || s.snapH - sm.h > 30) sm.off.clear();   // (v28.29: a free kick given or taken: everyone put in place at once, not glided there)
   else if (s.snapH !== sm.h || s.ackR !== sm.R){   // news from the host: the same moment from the last snapshot (and the last measure of your keys' trip), against this one
     const rNow = s.ackR; s.ackR = sm.R; const was = guestView(s, false, sm.base, sm.h); s.ackR = rNow;
     if (was && was !== sm.base){
@@ -9949,7 +9956,9 @@ function smoothView(s, V){
       for (const i of s.dyn){
         const a = was.discs[i], b = V.discs[i]; if (!a || !b) continue;
         const ball = i === 0, me = mine.has(i), cap = ball ? SM_BALL_MAX : me ? SM_ME_MAX : SMOOTH_MAX;
-        if (ball && Math.hypot(a.vx - b.vx, a.vy - b.vy) > SM_BALL_DV){ sm.off.delete(i); continue; }   // (a kick nobody here saw coming: there at once)
+        if (ball && Math.hypot(a.vx - b.vx, a.vy - b.vy) > SM_BALL_DV){   // (a kick nobody here saw coming: quickly there, not in one frame)
+          const o = sm.off.get(i) || [0, 0, 0], ox = o[0] + a.x - b.x, oy = o[1] + a.y - b.y;
+          if (SM_KICK > 0 && Math.hypot(ox, oy) <= SM_KICK_MAX) sm.off.set(i, [ox, oy, SM_KICK]); else sm.off.delete(i); continue; }
         const o = sm.off.get(i) || [0, 0, 0], ox = o[0] + a.x - b.x, oy = o[1] + a.y - b.y;
         if (Math.hypot(ox, oy) > cap) sm.off.delete(i); else sm.off.set(i, [ox, oy, ball ? SM_BALL : me ? SM_ME : SMOOTH_MS]);
       }
