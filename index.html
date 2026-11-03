@@ -733,6 +733,50 @@
   .tutx{display:flex;flex-wrap:wrap;gap:6px} .tutx:empty{display:none} .tutx button{border-radius:0} .tutx button.on{border-color:var(--accent);color:#fff;box-shadow:inset 0 0 0 1px var(--accent)}
   .tutfoot{display:flex;align-items:center;gap:12px} .tutfoot button{border-radius:0}
   #tutState{flex:1;font-size:13px;color:var(--muted)} #tutState.ok{color:#7ee2a0;font-weight:600}
+
+  /* v28.30 ("bro now the menu doesnt suit the stuff we press"): every screen in the menu's look. The same slate with
+     the orange edge behind each panel, headings in the menu's condensed italic capitals with the orange slash, square
+     buttons and boxes with 2 px lines, flat cards. Round stays round where it means something: team dots, colour
+     swatches, avatars, the on/off switches */
+  :root{--cond:'Barlow Condensed','Arial Narrow',Rubik,sans-serif;--rule2:#454d61;--edge:#5a6378;
+        --slate:linear-gradient(90deg,var(--accent) 0 6px,transparent 6px),repeating-linear-gradient(115deg,rgba(255,255,255,.028) 0 26px,transparent 26px 52px),linear-gradient(180deg,#2a3040,#222735);
+        --card:#30374a}
+  .overlay:not(#menu):not(#gameMenu):not(#cbPanel){background:var(--slate)}
+  #setPanel{background:var(--slate)} #setPanel .dhead{background:#2a3040}
+  .overlay h2:not(#menuTitle){font-family:var(--cond);font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.005em;font-size:clamp(30px,4.6vw,46px);line-height:.95;color:#fff;text-shadow:none}
+  .overlay h2:not(#menuTitle)::after{content:'';display:block;width:56px;height:5px;margin:8px auto 2px;background:var(--accent);transform:skewX(-24deg)}
+  #setPanel h2{font-size:30px} #setPanel h2::after,#gameMenu h2::after{margin-left:0;margin-right:0}
+  .overlay h3{font-family:var(--cond);font-style:italic;font-weight:800;text-transform:uppercase;letter-spacing:.01em;font-size:clamp(18px,2.6vw,24px)}
+  .dsec h3{font-family:var(--body);font-style:normal;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  /* buttons: square; the orange ones in the menu's capitals */
+  button{border-radius:0}
+  .overlay button:not(.ghost):not(.tog):not(.tile):not(.mgo):not(.room):not(.pl):not(.add):not(.mlearn):not(.pmenu button){font-family:var(--cond);font-weight:700;text-transform:uppercase;letter-spacing:.03em;font-size:17px;padding:7px 16px}
+  .overlay button.sm:not(.ghost){font-size:15px;padding:5px 12px}
+  button.ghost{border-width:2px;border-color:var(--edge);background:rgba(255,255,255,.04)}
+  button.ghost:hover:not(:disabled){border-color:#8a93a8;background:rgba(255,255,255,.08)}
+  button.ghost.on{border-color:var(--accent);box-shadow:none;background:rgba(240,138,43,.14)}
+  input[type=text],select,textarea,#setPanel input[type=number],#xferBox,.clipin{border-radius:0;border-width:2px;border-color:var(--edge)}
+  input[type=text]:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+  /* cards and boxes: flat, square, 2 px */
+  .gmcard,.gmsure,.owcard,.ocard,.room,.room .rj,.rbar,.chat.lobbychat,.hsec,.dsec,.chk,.ach,.dst div,.sbest,.srow,.stabs,.ssum div,.res .ailine,.gtr,.rtr,.rv,.cbchart,
+  .lobby section,.lobby .pl,.lobby .add,.pmenu,.pmenu button,.bracket .m,.lrn,label.fbtn,#gmResume,.seg,.seg.pill,.mbar .mo,.stats,.board,.errchip{border-radius:0}
+  .gmcard,.owcard,.ocard,.rbar,.hsec,.dsec,.ach,.srow,.lobby section,.bracket .m,.lrn,.res .ailine,.cbchart{border-width:2px;border-color:var(--rule2);box-shadow:none}
+  .gmcard,.owcard,.ocard,.rbar,.hsec,.dsec,.ach,.srow,.bracket .m,.lrn{background:var(--card)}
+  .lobby section{background:var(--card);border-top-width:5px}
+  .room{border-width:2px;border-color:var(--rule2);background:rgba(255,255,255,.03)} .room:hover{border-color:var(--accent)}
+  .chk{border-width:2px;border-color:var(--edge)}
+  .gmcard{border-left:5px solid var(--accent)}
+  #gameMenu{background:rgba(22,26,36,.82)}
+  .seg{border-width:2px;border-color:var(--edge)}
+  .seg button + button{border-left-width:2px;border-left-color:var(--edge)}
+  .stabs{border-width:2px;border-color:var(--edge)}
+  /* the scoreboard and the strip under it: square too, sturdier lines */
+  .board,.stats{border-width:2px;border-color:var(--rule2)}
+  /* the results: the score and the big numbers in the menu's figures */
+  .res .big .sc,.res .dsc b,.res .tr3 .sc{font-family:var(--cond);font-weight:800;font-style:italic;letter-spacing:.01em}
+  .res .big .sc{font-size:clamp(40px,8vw,64px)}
+  .res .pensline{font-family:var(--cond);font-weight:800;font-style:italic;font-size:22px;text-transform:uppercase}
+  .res .cbtag{border-radius:0;font-family:var(--cond);font-weight:800;font-style:italic;font-size:15px;text-transform:uppercase;transform:skewX(-8deg)}
 </style>
 
 <header>
@@ -8666,7 +8710,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.29';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.30';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
