@@ -2163,7 +2163,7 @@ function PBCORE(){
   }
   // v27.2 ("the opponent players for freekicks move slower than usual, so they get less time to prepare and more time for
   // freekick taker"): until a free kick is taken the side defending it runs at FK_SLOW of its speed (slow)
-  const FK_SLOW = 0.6, CALL_TAP = 18;
+  const FK_SLOW = 0.6, CALL_TAP = 18, CALL_BALL = 45, CALL_QUIET = 24, CALL_CONFIRM = 10;
   function movePlayer(ST, p, d, slow){
     const pp = ST.pp, m = PU[p.pu] || PU.none, b = p.input;
     if (p.slide > 0){ d.damping = SLIDE_DAMP; return; }   // sliding: no steering
@@ -2191,7 +2191,23 @@ function PBCORE(){
       if (bar) fkCharge(G, ST, p, d, noKick, ev, predict); else if (p.charge) p.charge = 0;
       // v27.3 ("double tap shoot could get the gk to pass to u rn"): a person tapping kick twice within CALL_TAP ticks calls
       // for the ball (p.callAt; the computers of his side pass it to him: see the AI)
-      if ((p.ctrl === 'human' || p.ctrl === 'remote') && p.kPress !== p.kSeen){ p.kSeen = p.kPress; if (G.frame - (p.kTapF == null ? -1e9 : p.kTapF) <= CALL_TAP){ p.callAt = G.frame; p.kTapF = -1e9; if (ev) ev.push({type:'call', id: ++G.eventId, frame: G.frame, pid: p.id}); } else p.kTapF = G.frame; }
+      // v28.28 ("gk rush randomly, gk takes kickoff randomly"): taps that weren't a call made one: keys pressed to skip a
+      // goal's replay or at the kick-off (then, with v28.20's longer reach, the keeper took the kick-off himself), and
+      // kick mashed by the ball trying to hit it. Now a tap counts only in play (not a goal, a kick-off or a set piece),
+      // one at a time (not a burst saved up while the game wasn't running), and not with the ball by your feet
+      // A call is a clean double tap: quiet before it (CALL_QUIET), two taps within CALL_TAP, and no third (mashing) within
+      // CALL_CONFIRM after, when it goes
+      if (p.ctrl === 'human' || p.ctrl === 'remote'){
+        if (p.kPress !== p.kSeen){
+          const burst = (p.kPress | 0) - (p.kSeen | 0) > 1; p.kSeen = p.kPress;
+          const b0 = D[0], near = Math.hypot(b0.x - d.x, b0.y - d.y) < d.radius + b0.radius + CALL_BALL, live = G.state === 1 && !G.sp && !burst && !near;
+          const tp = p.taps || (p.taps = []);
+          if (!live){ tp.length = 0; p.callPend = null; }
+          else { tp.push(G.frame); if (tp.length > 3) tp.shift(); const n = tp.length;
+            p.callPend = n >= 2 && tp[n - 1] - tp[n - 2] <= CALL_TAP && (n < 3 || tp[n - 2] - tp[n - 3] > CALL_QUIET) ? G.frame : null; }
+        }
+        if (p.callPend != null && G.frame - p.callPend >= CALL_CONFIRM){ p.callPend = null; p.taps = []; p.callAt = G.frame; if (ev) ev.push({type:'call', id: ++G.eventId, frame: G.frame, pid: p.id}); }
+      }
       if (!(p.input & 16)) p.kicking = false;
       if (p.kickMin > 0) p.kickMin--;
       if (p.kickBurst < G.kickRate.burst) p.kickBurst++;
@@ -2598,7 +2614,7 @@ function PBAI(C){
   // leaves a ball to a person of his who gets there no more than KP_YIELD ticks after him (and before them), and passes
   // to a person only from KP_PASS_MIN px off (closer, a full kick bounced off him)
   let SHOW = 1, SHOW_D = [150, 210, 270];   // (v27.7: see showPlan)
-  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 150, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
+  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 90, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
   let THRU_PASS = 1, THRU_AHEAD = 100, RECV_REACT = 10, PASS_ADV = 10, PASS_SAFE = -30, KEEP_LINEUP = 12, KEEP_CAREFUL = 1, KEEP_PTOL = 0.07, THRU_KZONE = 240, THRU_MARGIN = 0;
   // v24:
   //  - SHOT_HR: a shot is judged against a person in goal (or in the way) reacting at least this many ticks late, as
@@ -3568,7 +3584,7 @@ function PBAI(C){
     // so calling as he breaks still sends me when he gets there. e2e t_callrush.js, 80 breakaways called at the start:
     // Normal goals 12 -> 7-10, Insane 6 -> 3-6
     const bdG = Math.hypot(ball.x - own.x, ball.y - own.y);
-    const called = G.players.some(q => q.team === team && (q.ctrl === 'human' || q.ctrl === 'remote') && G.frame - (q.callAt == null ? -1e9 : q.callAt) < CALL_RUSH_T);
+    const called = G.state === 1 && !G.sp && G.players.some(q => q.team === team && (q.ctrl === 'human' || q.ctrl === 'remote') && G.frame - (q.callAt == null ? -1e9 : q.callAt) < CALL_RUSH_T);   // (v28.28: never at a kick-off; a call stands 1.5 s, was 2.5)
     const callClaim = KP_RUSH_CALL && called && !back && !yieldTo && shot < 0 && rx(ball.x) > 0 && bdG < CALL_RUSH_R && nMe <= nFoe && nMe <= nMate;
     const rushCall = KP_RUSH_CALL && called && !back && shot < 0 && foeBest && nFoe < nMe && !yieldTo && rx(ball.x) > 0 && bdG < CALL_RUSH_R
       && !(KP_RUSH_THRU && mates.some(m => { const md = D[m.di]; return m.ctrl !== 'gone' && Math.hypot(md.x - own.x, md.y - own.y) < bdG - 6 && Math.abs((md.y - own.y) * (ball.x - own.x) - (md.x - own.x) * (ball.y - own.y)) / (bdG || 1) < KP_RUSH_THRU; }));
@@ -8650,7 +8666,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.27';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.28';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
