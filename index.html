@@ -6348,32 +6348,72 @@ function safeDraw(where, f){ ctx.save(); try { f(); } catch (e) { reportErr(wher
 // for the goal limit), to the goal limit; a second leg counts the first's score; level at the end: overtime goes to
 // whoever scores more often, extra time and penalties near a coin
 let wpMemo = null;
-function winChance(G, st){
-  const cf = G.cfg, sot = (st && st.sot) || [0, 0], key = G.score.join() + '|' + Math.floor(G.time / 2) + '|' + sot.join() + '|' + G.state + '|' + (cf.leg || 0) + (cf.agg || []).join() + '|' + cf.timeLimit + '|' + cf.scoreLimit;
-  if (wpMemo && wpMemo.key === key) return wpMemo.v;
-  const cfg = G.cfg, tl = cfg.timeLimit > 0, left = tl ? timeLeft(G) : 600, el = Math.max(0, G.time), sl = cfg.scoreLimit > 0 ? cfg.scoreLimit : 0;
-  const sh = (sot[0] + 1) / (sot[0] + sot[1] + 2), r = [0, 1].map(t => (G.score[t] + 2 * (t ? 1 - sh : sh)) / (el + 240)), rr = r[0] + r[1] || 1e-6;
-  const agg = Array.isArray(cfg.agg) ? cfg.agg : [0, 0];
-  let seed = 0; for (const c of key) seed = (seed * 31 + c.charCodeAt(0)) >>> 0; const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
-  // v28.21 ("for the legs, like put wins as smth that overall win"): a first leg plays the second on (as long, the same
-  // rates): the chance to win the tie; level after both: the middle (it goes to the tie's decider)
-  const leg1 = cfg.leg === 1 && !cfg.agg, L2 = tl ? cfg.timeLimit * 60 : 600;
-  const N = 600, w = [0, 0], canDraw = leg1 ? tl : tl && left > 0 && !C.overtime(G); let draw = 0;
-  // (v28.25: the limit as the engine has it: in a second leg, only for a side ahead on the total)
-  const hit = (s, ag) => ag ? [0, 1].some(t => s[t] >= sl && s[t] + ag[t] > s[1 - t] + ag[1 - t]) : s[0] >= sl || s[1] >= sl;
-  const run = (s, left, ag) => { let t = 0; while (true){ t += -Math.log(1 - rnd()) / rr; if (t >= left) break; s[rnd() < r[0] / rr ? 0 : 1]++; if (sl && hit(s, ag)) break; } return s; };
-  const agg2 = cfg.agg ? [agg[0] | 0, agg[1] | 0] : null;
-  for (let n = 0; n < N; n++){
-    const s = run(G.score.slice(0, 2), left, agg2), s2 = leg1 ? run([0, 0], L2, s.slice()) : [0, 0];
-    const a = s[0] + s2[0] + (agg[0] | 0), b = s[1] + s2[1] + (agg[1] | 0);
-    if (a > b) w[0]++; else if (b > a) w[1]++;
-    else if ((cfg.draws && !leg1) || canDraw) draw++;
-    else { const p0 = cfg.tie === 0 || cfg.tie == null ? r[0] / rr : 0.5 + (r[0] / rr - 0.5) * 0.3; if (rnd() < p0) w[0]++; else w[1]++; }
+// v28.26 ("the percentage thing, make it better, someone had 0 percent winning"): it was 600 random runs of the rest of
+// the match, so anything under about half a percent came out 0%; and a side behind, with few shots, got a tenth of the
+// leader's scoring rate (a 0-2 with a minute left: 0.15%). Now worked out exactly: the rest of the match as goals that
+// come at each side's rate (uniformization: the chance of every score at the end of the time left, the goal limit as it
+// stops a match), and the rates closer to how matches go: a prior of a goal every 90 s each (WP_T0), no side under
+// WP_FLOOR of the average, and the side behind pushing (WP_PUSH a goal behind, up to 3) which opens the game for the
+// leader too (WP_OPEN). Shown never 0% or 100% while it can still change: "<1%", ">99%" (wpPct), the three making 100
+const WP_T0 = 180, WP_PRIOR = 2, WP_FLOOR = 0.45, WP_PUSH = 0.25, WP_OPEN = 0.1, WP_K = 12;
+// the chance of each score (start + [i, j]) after T seconds; stop(a, b): the match is over at that score
+function wpDist(a0, b0, T, rate, stop){
+  const K = WP_K, n = K + 1, idx = (i, j) => i * n + j, R0 = new Float64Array(n * n), R1 = new Float64Array(n * n), ab = new Uint8Array(n * n);
+  let L = 1e-9;
+  for (let i = 0; i <= K; i++) for (let j = 0; j <= K; j++){ const k = idx(i, j); if (i === K || j === K || stop(a0 + i, b0 + j)){ ab[k] = 1; continue; } const r = rate(a0 + i, b0 + j); R0[k] = r[0]; R1[k] = r[1]; if (r[0] + r[1] > L) L = r[0] + r[1]; }
+  let x = L * T; if (x > 500){ x = 500; }
+  let v = new Float64Array(n * n), nv = new Float64Array(n * n); const acc = new Float64Array(n * n); v[0] = 1;
+  if (!(x > 0)){ acc.set(v); }
+  else {
+    let w = Math.exp(-x), cum = 0; const kmax = Math.ceil(x + 12 * Math.sqrt(x) + 30);
+    for (let k = 0; k <= kmax; k++){
+      for (let q = 0; q < v.length; q++) if (v[q]) acc[q] += w * v[q];
+      cum += w; if (cum > 1 - 1e-12) break;
+      nv.fill(0);
+      for (let i = 0; i <= K; i++) for (let j = 0; j <= K; j++){ const q = idx(i, j), m = v[q]; if (!m) continue;
+        if (ab[q]){ nv[q] += m; continue; }
+        const p0 = R0[q] / L, p1 = R1[q] / L; nv[q] += m * (1 - p0 - p1); nv[idx(i + 1, j)] += m * p0; nv[idx(i, j + 1)] += m * p1; }
+      const t = v; v = nv; nv = t; w *= x / (k + 1);
+    }
+    const left = 1 - cum; if (left > 0) for (let q = 0; q < v.length; q++) acc[q] += left * v[q];   // (the rest of the Poisson tail: where it was going)
   }
-  // v28.17 ("add a draw probability"): as the odds for a match are given, win / draw / win, the three make 100: a draw is
-  // level when the time is up (on aggregate in a second leg), whatever comes after it. No time limit, or in overtime: no
-  // draw, the two make 100
-  const dr = (cfg.draws && !leg1) || canDraw ? Math.round(draw / N * 100) : null, v0 = Math.round(w[0] / N * 100), v = [v0, 100 - v0 - (dr || 0), dr];
+  const out = []; for (let i = 0; i <= K; i++) for (let j = 0; j <= K; j++){ const p = acc[idx(i, j)]; if (p > 1e-12) out.push([a0 + i, b0 + j, p]); }
+  return out;
+}
+// whole percents that make 100 (largest remainders), and how to show one
+function wpRound(v){ const f = v.map(x => Math.floor(x)), r = 100 - f.reduce((a, b) => a + b, 0), o = v.map((x, i) => [x - Math.floor(x), i]).sort((p, q) => q[0] - p[0]); for (let k = 0; k < r && k < o.length; k++) f[o[k][1]]++; return f; }
+const wpPct = (raw, shown) => raw < 0.5 ? '<1%' : raw > 99.5 ? '>99%' : shown + '%';
+function winChance(G, st){
+  const cf = G.cfg, sot = (st && st.sot) || [0, 0], key = G.score.join() + '|' + Math.floor(G.time / 2) + '|' + sot.join() + '|' + G.state + '|' + (cf.leg || 0) + (cf.agg || []).join() + '|' + cf.timeLimit + '|' + cf.scoreLimit + '|' + cf.tie;
+  if (wpMemo && wpMemo.key === key) return wpMemo.v;
+  const cfg = G.cfg, tl = cfg.timeLimit > 0, sl = cfg.scoreLimit > 0 ? cfg.scoreLimit : 0, left = tl ? timeLeft(G) : sl ? 1800 : 600, el = Math.max(0, G.time);
+  const sh = (sot[0] + 1) / (sot[0] + sot[1] + 2);
+  let base = [0, 1].map(t => (G.score[t] + WP_PRIOR * 2 * (t ? 1 - sh : sh)) / (el + WP_T0));   // (each side's goals, and the prior split by the shots on target)
+  { const m = (base[0] + base[1]) / 2; base = base.map(r => Math.max(r, WP_FLOOR * m)); }
+  const agg = Array.isArray(cfg.agg) ? [+cfg.agg[0] || 0, +cfg.agg[1] || 0] : [0, 0];
+  const rate = off => (a, b) => { const d = (a + off[0]) - (b + off[1]), k = Math.min(3, Math.abs(d)); if (!d) return base; const r = base.slice(), tr = d < 0 ? 0 : 1; r[tr] *= 1 + WP_PUSH * k; r[1 - tr] *= 1 + WP_OPEN * k; return r; };
+  // the goal limit as the engine has it (v28.25): a second leg only for a side ahead on the total
+  const stopAt = off => (a, b) => sl > 0 && (off ? [0, 1].some(t => [a, b][t] >= sl && [a, b][t] + off[t] > [a, b][1 - t] + off[1 - t]) : a >= sl || b >= sl);
+  // (v28.21) a first leg plays the second on (as long, the same rates): the chance to win the tie
+  const leg1 = cfg.leg === 1 && !cfg.agg, L2 = tl ? cfg.timeLimit * 60 : sl ? 1800 : 600;
+  const canDraw = leg1 ? tl : (cfg.draws || (tl && left > 0 && !C.overtime(G)));
+  const w = [0, 0]; let draw = 0;
+  const settle = (A, B, p, off) => {
+    if (A > B) w[0] += p; else if (B > A) w[1] += p;
+    else if (canDraw) draw += p;
+    else { const r = rate(off)(A - off[0], B - off[1]), p0 = r[0] / (r[0] + r[1] || 1e-9), q = cfg.tie === 0 || cfg.tie == null ? p0 : 0.5 + (p0 - 0.5) * 0.3; w[0] += p * q; w[1] += p * (1 - q); }   // (overtime: the next goal; extra time and penalties: near a coin)
+  };
+  const D1 = wpDist(G.score[0], G.score[1], left, rate(agg), stopAt(cfg.agg ? agg : null));
+  if (!leg1) for (const [a, b, p] of D1) settle(a + agg[0], b + agg[1], p, agg);
+  else {   // (the second leg hangs only on the first's goal difference: once for each)
+    const byD = new Map(); for (const [a, b, p] of D1){ const d = a - b; byD.set(d, (byD.get(d) || 0) + p); }
+    for (const [d, p] of byD){ if (p < 1e-9) continue; const off = [Math.max(0, d), Math.max(0, -d)];
+      for (const [c, e, q] of wpDist(0, 0, L2, rate(off), stopAt(off))) settle(off[0] + c, off[1] + e, p * q, off); }
+  }
+  const tot = w[0] + w[1] + draw || 1, raw = [w[0] / tot * 100, w[1] / tot * 100, canDraw ? draw / tot * 100 : null];
+  const ints = wpRound(raw[2] == null ? [raw[0], raw[1]] : [raw[0], raw[1], raw[2]]);
+  // [win 0, win 1, draw or null] as whole numbers for the bar, then the raw ones (for "<1%", and the record)
+  const v = [ints[0], ints[1], raw[2] == null ? null : ints[2]]; v.raw = raw;
   wpMemo = {key, v}; return v;
 }
 function myPlayers(s, V){ if (!s || !V || !s.locals) return []; return s.locals.map(L => V.players.find(p => p.id === L.pid)).filter(Boolean); }
@@ -6913,8 +6953,8 @@ function updateUI(){
       const f = +((st.fouls || [0, 0])[t]) || 0; setHidden('stFw' + t, !f); if (f) setText('stFo' + t, f);
     }
     { const w = realMatch(s) && G.nt !== 3 && G.state < 3 ? winChance(G, st) : null; setHidden('wpRow', !w);   // (v28.20: a row of its own, with a bar)
-      if (w && s.wpLast !== w){ s.wpLast = w; const h = s.wpH || (s.wpH = []); if (h.length < 1200) h.push([Math.round(G.time * 10) / 10, w[0], w[1]]); }   // (v28.21: the chances over the match, for the comeback screen)
-      if (w){ setText('wpN0', w[0] + '%'); setText('wpN1', w[1] + '%'); setHidden('wpMid', w[2] == null); if (w[2] != null) setText('wpND', w[2] + '%');
+      if (w && s.wpLast !== w){ s.wpLast = w; const h = s.wpH || (s.wpH = []), rw = w.raw || w; if (h.length < 1200) h.push([Math.round(G.time * 10) / 10, Math.round(rw[0] * 10) / 10, Math.round(rw[1] * 10) / 10]); }   // (v28.21: the chances over the match, for the comeback screen)
+      if (w){ const rw = w.raw || w; setText('wpN0', wpPct(rw[0], w[0])); setText('wpN1', wpPct(rw[1], w[1])); setHidden('wpMid', w[2] == null); if (w[2] != null) setText('wpND', wpPct(rw[2], w[2]));
         { const lg = !!G.cfg.leg, k = lg ? 'win overall' : 'win'; if (shown.wpk !== k){ shown.wpk = k; document.querySelectorAll('#wpRow .wpl small, #wpRow .wpr small').forEach(e => { e.textContent = k; }); $('wpMid').querySelector('small').textContent = lg ? 'level' : 'draw';
           $('wpRow').title = lg ? 'Two legs: the chance of each side winning the tie (both legs together) from here; level: level on the total at the end' : 'The chance of each result from here, worked out from the match so far'; } }   // (v28.21: two legs: the tie overall)
         const key = [w[0], w[1], w[2], KIT[0].color, KIT[1].color].join();
@@ -7537,7 +7577,7 @@ function showResults(R, s, after){
   if (cb) box.append(el('div', 'cbtag', `${cbWord(cb.down)} · from ${cb.at.sc[cb.w]}–${cb.at.sc[1 - cb.w]} down`));
   if (Array.isArray(R.mo) && (+R.mo[0] || +R.mo[1])){ const eq = +R.mo[0] || 0, lc = +R.mo[1] || 0;   // (v28.21: the story of it)
     box.append(el('div', 'motm', [eq ? `${eq} equaliser${eq > 1 ? 's' : ''}` : '', lc ? `the lead changed hands ${lc === 1 ? 'once' : lc === 2 ? 'twice' : lc + ' times'}` : ''].filter(Boolean).join(' · '))); }
-  { const lo = w >= 0 ? wpLow(R, w) : null; if (lo && lo.v <= 25) box.append(el('div', 'motm', `${R.names[w]}'s chance to ${l2 ? 'go through' : 'win'} was down to ${lo.v}% at ${fmt(lo.t)}`)); }
+  { const lo = w >= 0 ? wpLow(R, w) : null; if (lo && lo.v <= 25) box.append(el('div', 'motm', `${R.names[w]}'s chance to ${l2 ? 'go through' : 'win'} was down to ${wpPct(lo.v, Math.round(lo.v))} at ${fmt(lo.t)}`)); }
   { const lg = R.goals && R.goals.length ? R.goals[R.goals.length - 1] : null;   // won with a late winner or a golden goal
     if (lg && !pens && R.tl > 0){ const sc0 = R.goals.reduce((m, g) => { m[g[0] ? 1 : 0]++; return m; }, [0, 0]), t = lg[0] ? 1 : 0;
       const k = lateKind(R.tl, +lg[1] || 0, sc0, t, R.gg != null ? !!R.gg : !R.dr, +R.et || 0), d = sc0[t] - sc0[1 - t];
@@ -7631,7 +7671,7 @@ function showComeback(R, s, cb){
   // v28.21 ("add like comeback screen showing like low percentage of comeback"): how low their chance went, big, and
   // the chance over the match as the chart (the goal difference one when there's no record of it)
   const lo = wpLow(R, w);
-  if (lo){ const o = el('div', 'cbodds'); o.append(el('b', null, lo.v + '%'), el('span', null, `${you ? 'your' : 'their'} chance to ${L2 ? 'go through' : 'win'} at ${fmt(lo.t)}${lo.v <= 5 ? ' · almost nobody comes back from there' : lo.v <= 15 ? ' · about one in ' + Math.max(2, Math.round(100 / Math.max(1, lo.v))) : ''}`)); box.append(o); }
+  if (lo){ const o = el('div', 'cbodds'); o.append(el('b', null, wpPct(lo.v, Math.round(lo.v))), el('span', null, `${you ? 'your' : 'their'} chance to ${L2 ? 'go through' : 'win'} at ${fmt(lo.t)}${lo.v < 2 ? ' · almost nobody comes back from there' : lo.v <= 15 ? ' · about one in ' + Math.max(2, Math.round(100 / lo.v)) : ''}`)); box.append(o); }
   box.append(lo ? wpChart(R, w, lo) : cbChart(R, w));
   $('cbPanel').hidden = false; $('cbPanel').classList.remove('in'); void $('cbPanel').offsetWidth; $('cbPanel').classList.add('in');
   fireworks(w, 12); sfx.banger();
@@ -7673,7 +7713,7 @@ function wpChart(R, w, lo){
   h.push([end, 100]);
   const X = t => padL + (W - padL - padR) * t / end, Y = v => padT + (H - padT - padB) * (100 - v) / 100;
   const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('class', 'cbchart'); svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-label', `${R.names[w]}'s chance to ${Array.isArray(R.lg) && R.lg[0] === 2 ? 'go through' : 'win'} over the match, lowest ${lo.v}%`);
+  svg.setAttribute('aria-label', `${R.names[w]}'s chance to ${Array.isArray(R.lg) && R.lg[0] === 2 ? 'go through' : 'win'} over the match, lowest ${wpPct(lo.v, Math.round(lo.v))}`);
   const add = (tag, attrs, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; svg.append(e); return e; };
   for (const v of [0, 25, 50, 75, 100]){ add('line', {x1: padL, x2: W - padR, y1: Y(v), y2: Y(v), class: v === 50 ? 'z' : 'g'}); add('text', {x: padL - 8, y: Y(v) + 4, class: 'ax', 'text-anchor': 'end'}, v + '%'); }
   const cw = KIT[w].color === '#ffffff' ? '#ffd166' : KIT[w].color;
@@ -7683,7 +7723,7 @@ function wpChart(R, w, lo){
   const at = t => { let v = h[0][1]; for (const p of h){ if (p[0] > t + 0.05) break; v = p[1]; } return v; };
   for (const g of goals){ const t = +g[1] || 0, mine = g[0] === w; add('circle', {cx: X(t), cy: Y(at(t)), r: 4.5, class: mine ? 'up' : 'dn', fill: mine ? cw : KIT[1 - w].color === cw ? '#a3acc2' : KIT[1 - w].color}); }
   add('circle', {cx: X(lo.t), cy: Y(lo.v), r: 7, fill: 'none', stroke: '#ff6b6b', 'stroke-width': 2.5});
-  add('text', {x: Math.min(W - 70, Math.max(padL + 40, X(lo.t))), y: Math.min(H - padB - 4, Y(lo.v) + 22), class: 'lowl', 'text-anchor': 'middle'}, `${lo.v}% at ${fmt(lo.t)}`);
+  add('text', {x: Math.min(W - 70, Math.max(padL + 40, X(lo.t))), y: Math.min(H - padB - 4, Y(lo.v) + 22), class: 'lowl', 'text-anchor': 'middle'}, `${wpPct(lo.v, Math.round(lo.v))} at ${fmt(lo.t)}`);
   add('text', {x: X(end) - 4, y: Y(100) + 14, class: 'endl', 'text-anchor': 'end'}, `${R.score[w]}–${R.score[1 - w]}${R.pa ? ' · won on penalties' : ''}`);
   add('text', {x: padL, y: H - 6, class: 'ax'}, '0:00'); add('text', {x: W - padR, y: H - 6, class: 'ax', 'text-anchor': 'end'}, fmt(end));
   return svg;
@@ -8377,7 +8417,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.25';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.26';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10395,7 +10435,7 @@ function boot(){
   joinFromLink();
 }
 window.pitchBrawl = {get session(){ return sess; }, get stadium(){ return ST; }, get net(){ return NET; }, core: C, ai: A, get brain(){ return brain; },
-  get adapt(){ return adapt; }, get trick(){ return trick; }, get you(){ return you; }, get fx(){ return fx; }, get cam(){ return cam; }, youBot, test: {lesson, trickPlay, guestView: (...a) => guestView(...a), get lines(){ return lines; }, showResults, start, comebackOf}};
+  get adapt(){ return adapt; }, get trick(){ return trick; }, get you(){ return you; }, get fx(){ return fx; }, get cam(){ return cam; }, youBot, test: {lesson, trickPlay, guestView: (...a) => guestView(...a), winChance: (...a) => winChance(...a), get lines(){ return lines; }, showResults, start, comebackOf}};
 boot();
 })();
 
