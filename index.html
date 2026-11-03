@@ -2248,9 +2248,13 @@ function PBCORE(){
           const tp = p.taps || (p.taps = []);
           if (!live){ tp.length = 0; p.callPend = null; }
           else { tp.push(G.frame); if (tp.length > 3) tp.shift(); const n = tp.length;
-            p.callPend = n >= 2 && tp[n - 1] - tp[n - 2] <= CALL_TAP && (n < 3 || tp[n - 2] - tp[n - 3] > CALL_QUIET) ? G.frame : null; }
+            // (v28.31, "the rush for gk, its so late": the call went CALL_CONFIRM ticks after the second tap, to be sure no
+            // third came; now at once, and a third close behind (mashing) takes it back)
+            if (p.callPend != null && G.frame - p.callPend < CALL_CONFIRM){ p.callAt = null; p.callPend = null; }
+            else if (n >= 2 && tp[n - 1] - tp[n - 2] <= CALL_TAP && (n < 3 || tp[n - 2] - tp[n - 3] > CALL_QUIET)){ p.callPend = G.frame; p.callAt = G.frame; if (ev) ev.push({type:'call', id: ++G.eventId, frame: G.frame, pid: p.id}); }
+          }
         }
-        if (p.callPend != null && G.frame - p.callPend >= CALL_CONFIRM){ p.callPend = null; p.taps = []; p.callAt = G.frame; if (ev) ev.push({type:'call', id: ++G.eventId, frame: G.frame, pid: p.id}); }
+        if (p.callPend != null && G.frame - p.callPend >= CALL_CONFIRM){ p.callPend = null; p.taps = []; }
       }
       if (!(p.input & 16)) p.kicking = false;
       if (p.kickMin > 0) p.kickMin--;
@@ -2658,7 +2662,7 @@ function PBAI(C){
   // leaves a ball to a person of his who gets there no more than KP_YIELD ticks after him (and before them), and passes
   // to a person only from KP_PASS_MIN px off (closer, a full kick bounced off him)
   let SHOW = 1, SHOW_D = [150, 210, 270];   // (v27.7: see showPlan)
-  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 90, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
+  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 90, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3, KP_RUSH_CHARGE = 1, KP_RUSH_SLIDE = 0.8, KP_RECV = 1, RECV_V = 1.5, RECV_EARLY = 6, RECV_FOE = 60, RECV_AWAY = 0.5, KP_DANCE = 20, KP_HURRY = 30, KP_NOW_FOE = 30, KP_NOW_FWD = 0.35, KP_NOW_GAIN = 40, KP_PATH = 1, KP_PATH_V = 3.5, KP_PATH_R = 0.3, KP_PATH_EARLY = 4, STUCK_T = 90;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
   let THRU_PASS = 1, THRU_AHEAD = 100, RECV_REACT = 10, PASS_ADV = 10, PASS_SAFE = -30, KEEP_LINEUP = 12, KEEP_CAREFUL = 1, KEEP_PTOL = 0.07, THRU_KZONE = 240, THRU_MARGIN = 0;
   // v24:
   //  - SHOT_HR: a shot is judged against a person in goal (or in the way) reacting at least this many ticks late, as
@@ -3065,7 +3069,9 @@ function PBAI(C){
       // stand in the ball's path; knock it away from goal if it is in range and the kick would go outward
       const n = Math.max(1, Math.min(pl.n - (G.frame - mem.planAt), P.length - 1)), Pn = P[n];
       const bw = p.role === 'keeper' && KP_AVOID && !pl.press ? ballDetour(me, ball, Pn.x, Pn.y, rr) : null;   // (its path ahead: not through the ball)
-      v = bw ? arrive(t, me, bw[0], bw[1], t.vmax) : arrive(t, me, Pn.x, Pn.y, null);
+      // v28.31 ("the rush for gk, its so late and doesnt do much"): a rush is a charge, full speed through where he meets
+      // it (it braked to a stop there, as a keeper walking to his spot does, and arrived timidly)
+      v = bw ? arrive(t, me, bw[0], bw[1], t.vmax) : arrive(t, me, Pn.x, Pn.y, pl.rush && KP_RUSH_CHARGE ? t.vmax : null);
       const bx = ball.x - me.x, by = ball.y - me.y, dist = Math.hypot(bx, by);
       if (dist > 0 && dist - rr < 4 + th.pre && bx * pl.out[0] + by * pl.out[1] > (pl.press ? PRESS_SIDE : 0.1) * dist) wantKick = true;   // (pressing: a kick sideways too, not a push)
       if (wantKick && pl.press && KP_INTOFOE && intoFoe(G, D, team, ball, bx / dist, by / dist)) wantKick = false;   // (v26.9: not straight back into the man)
@@ -3082,8 +3088,12 @@ function PBAI(C){
         tx = Pn.x - Dx * c * 0.9 - Dy * side * c; ty = Pn.y - Dy * c * 0.9 + Dx * side * c; through = null;
         if (p.role === 'keeper' && KP_AVOID){ const bw = ballDetour(me, ball, tx, ty, rr); if (bw){ tx = bw[0]; ty = bw[1]; } }
       }
+      // (v28.31) a back pass still running at me or across me: into its way first (pl.recv, recvPoint) and stopped there;
+      // the pass from where it ends up, as usual
+      const recvNow = !!pl.recv && G.frame - mem.planAt <= pl.recv.n + 3 && Math.hypot(ball.vx, ball.vy) >= RECV_V * 0.6 && Math.hypot(ball.x - me.x, ball.y - me.y) - rr > 2;
+      if (recvNow){ tx = pl.recv.x; ty = pl.recv.y; through = null; }
       v = arrive(t, me, tx, ty, through);
-      if (through == null && !(careful && along <= -rr * 0.35) && Math.hypot(tx - me.x, ty - me.y) > 4){ const L2 = Math.hypot(v[0], v[1]) || 1, s = Math.max(L2, t.vmax * 0.85); v = [v[0] / L2 * s, v[1] / L2 * s]; }
+      if (through == null && !recvNow && !(careful && along <= -rr * 0.35) && Math.hypot(tx - me.x, ty - me.y) > 4){ const L2 = Math.hypot(v[0], v[1]) || 1, s = Math.max(L2, t.vmax * 0.85); v = [v[0] / L2 * s, v[1] / L2 * s]; }
       // kick when the ball is in range and lined up with the wanted direction
       const bx = ball.x - me.x, by = ball.y - me.y, dist = Math.hypot(bx, by), gap = dist - rr;
       if (gap >= 4) mem.lineUp = 0;
@@ -3132,6 +3142,16 @@ function PBAI(C){
       // a keeper with room: a ball still running at him against the way he wants to pass is stopped first (a pass struck
       // into its run keeps only half its pace)
       if (wantKick && KEEP_CONTROL && careful && pl.kind === 'pass' && ball.vx * Dx + ball.vy * Dy < -KEEP_CONTROL) wantKick = false;
+      // v28.31 ("i try to pass back to gk using wall ... it goes weirdly"): the ball at my feet and not lined up for the
+      // pass or clearance I want, with one of theirs closing in (KP_HURRY ticks from it) or me at it KP_DANCE ticks
+      // already: it goes now, the way I'm facing, if that way is good enough (kickNowOk). Going round it for the better
+      // way, the way kept changing as their man came and he walked round it till he took it off him
+      if (KP_DANCE && p.role === 'keeper' && pl.kind !== 'dribble' && dist > 0){
+        if (gap < 4 + th.pre){ mem.atBall = (mem.atBall || 0) + 1;
+          if (!wantKick){ let nf = 999; for (const o of G.players) if (o.team !== team && o.ctrl !== 'gone'){ const n2 = intercept(t, D[o.di], P, rr, 2); if (n2 < nf) nf = n2; }
+            if ((nf < KP_HURRY || mem.atBall > KP_DANCE) && kickNowOk(G, ST, t, p, ball, [bx / dist, by / dist], team, dir, rr)) wantKick = true; } }
+        else if (gap > 10) mem.atBall = 0;
+      }
       // shoving through someone on the ball: run on at full speed so the bodies push
       if (pl.barge && gap > 2){ const fo = G.players.find(o => o.id === pl.barge); if (fo){ const fd = D[fo.di]; v = arrive(t, me, (fd.x + Pn.x) / 2, (fd.y + Pn.y) / 2, t.vmax); } }
     } else {
@@ -3161,6 +3181,24 @@ function PBAI(C){
     if (SLIDE_AI && G.cfg.slide && G.state === 1 && !G.sp && p.role !== 'keeper' && !p.slide && !p.slideCd && !(p.down > 0) && (L.sl || 0) > 0 && pl.mode !== 'block'){   // (v25.9: "tackles at wrong time": keepers never slide)
       const k = slideTry(G, ST, t, p, me, L, mem, P, rr);
       if (k) return k | 32;
+    }
+    // (v28.31) ...except out on a rush: then a slide that gets the ball first (out of his area, as anyone's) is his too
+    if (SLIDE_AI && KP_RUSH_SLIDE && G.cfg.slide && G.state === 1 && !G.sp && p.role === 'keeper' && pl.rush && !p.slide && !p.slideCd && !(p.down > 0)){
+      const k = slideTry(G, ST, t, p, me, Object.assign({}, L, {sl: Math.max(L.sl || 0, KP_RUSH_SLIDE)}), mem, P, rr);
+      if (k) return k | 32;
+    }
+    // v28.31: the ball wedged still in a corner between two of us pushing at it, neither kicking (a striker dribbling it
+    // in, who won't kick it into the end wall, and their keeper pressing it from the other side, who kicks only out from
+    // his goal): computer v computer, 283 s with nothing happening (t_stalldump.js, with and without this version's
+    // keeper). STUCK_T ticks with it still at my feet: a kick, unless that puts it in my own goal
+    if (STUCK_T && G.state === 1 && !G.sp && !wantKick){
+      const bx = ball.x - me.x, by = ball.y - me.y, dist = Math.hypot(bx, by);
+      if (dist > 0 && dist - rr < 3 && Math.hypot(ball.vx, ball.vy) < 0.4){
+        if ((mem.stuck = (mem.stuck || 0) + 1) > STUCK_T){
+          const S = C.ballPath(ST, {x: ball.x, y: ball.y, vx: ball.vx + bx / dist * t.kickV, vy: ball.vy + by / dist * t.kickV, gx: 0, gy: 0, radius: ball.radius, bCoef: ball.bCoef, invMass: ball.invMass, damping: ball.damping, cMask: ball.cMask, cGroup: ball.cGroup}, 90, D);
+          if (shotOnGoal(ST, S, goalOf(ST, team)) < 0) wantKick = true;
+        }
+      } else mem.stuck = 0;
     }
     p.aiShot = wantKick && pl.mode === 'ball' && (pl.kind === 'shot' || !!mem.spPen);
     return finish(G, ST, t, L, mem, me, p, v, wantKick);
@@ -3463,6 +3501,25 @@ function PBAI(C){
     }
     return false;
   }
+  // (v28.31) the keeper's kick now, along u from the ball b: forward (KP_NOW_FWD), never nearer my goal than it is now on
+  // its way (off a wall, say), KP_NOW_GAIN px up the pitch in half a second, and a man of mine on it first or none of
+  // theirs within KP_NOW_FOE ticks. (A kick nearly into the side wall out of the corner came straight back off it into
+  // him: the ball stayed in the corner by him for minutes, t_aastall.js)
+  function kickNowOk(G, ST, t, p, b, u, team, dir, rr){
+    if (u[0] * dir < KP_NOW_FWD) return false;
+    const ownG = goalOf(ST, team), om = mid(ownG), d0 = Math.hypot(b.x - om.x, b.y - om.y);
+    const S = C.ballPath(ST, {x: b.x, y: b.y, vx: b.vx + u[0] * t.kickV, vy: b.vy + u[1] * t.kickV, gx: 0, gy: 0, radius: b.radius, bCoef: b.bCoef, invMass: b.invMass, damping: b.damping, cMask: b.cMask, cGroup: b.cGroup}, 90, G.discs);
+    if (shotOnGoal(ST, S, ownG) >= 0 || S.some(q => Math.hypot(q.x - om.x, q.y - om.y) < d0 - 4) || (S[Math.min(30, S.length - 1)].x - b.x) * dir < KP_NOW_GAIN) return false;
+    let mate = 999, foe = 999;
+    for (const o of G.players){
+      if (o === p || o.ctrl === 'gone') continue;
+      const d = G.discs[o.di]; let i = 1;
+      for (; i < S.length; i++) if (slack(t, d, S[i], i, rr) >= 0) break;
+      if (i >= S.length) i = 999;
+      if (o.team === team){ if (i < mate) mate = i; } else if (i < foe) foe = i;
+    }
+    return mate < foe || foe >= KP_NOW_FOE;
+  }
   // a clearance struck now along D (the ball b): would one of theirs have it within KP_CLEAR_T ticks?
   function clearBlocked(G, ST, t, team, b, D, rr){
     const S = C.ballPath(ST, {x: b.x, y: b.y, vx: b.vx + D[0] * t.kickV, vy: b.vy + D[1] * t.kickV, gx: 0, gy: 0, radius: b.radius, bCoef: b.bCoef, invMass: b.invMass, damping: b.damping, cMask: b.cMask, cGroup: b.cGroup}, KP_CLEAR_T, G.discs);
@@ -3552,6 +3609,25 @@ function PBAI(C){
     }
     return best || {kind:'clear', D: aimDir(t, B, B, {x: B.x + dir * 260, y: side * ST.height * 0.85})};
   }
+  // v28.31 ("i try to pass back to gk using wall, it doesnt calculate the bounces accurately and it goes weirdly"): where
+  // I take a back pass that's still running at me or across me: in its way (my middle on its path, just ahead of it) at
+  // the earliest tick of its path, walls and all, that I can be there RECV_EARLY ticks before it, no further out than
+  // KEEP_BACK_R and on the pitch; none if it's going away from my goal there (that I run onto from behind), slow by
+  // then, or one of theirs could be on it within RECV_FOE ticks of it reaching me (then it's played first time)
+  function recvPoint(G, ST, t, me, P, rr, rx, dir, foes){
+    const D = G.discs, yW = C.ballArea(ST).y + 22;
+    for (let i = 2; i < P.length && i <= t.N; i++){
+      const q = P[i], v = Math.hypot(q.vx, q.vy);
+      if (v < RECV_V) return null;
+      if (q.vx * dir > RECV_AWAY * v) continue;
+      const x = q.x + q.vx / v * (rr - 1), y = q.y + q.vy / v * (rr - 1);
+      if (rx(x) < 3 || rx(x) > KEEP_BACK_R || Math.abs(y) > yW + 4) continue;
+      if (slack(t, me, {x, y}, Math.max(1, i - RECV_EARLY), 0) < 0) continue;
+      for (const f of foes) if (f.ctrl !== 'gone' && slack(t, D[f.di], q, i + RECV_FOE, rr) >= 0) return null;
+      return {x, y, n: i};
+    }
+    return null;
+  }
   function keeperPlan(G, ST, t, p, th, L, mem, P, team, own, opp, oppGoal, dir, rr, nMe, nFoe, mates, foes, nMate, foeBest){
     const D = G.discs, me = D[p.di], g = goalOf(ST, team), lo = Math.min(g.y0, g.y1), hi = Math.max(g.y0, g.y1);
     const rx = x => (x - own.x) * dir;
@@ -3568,6 +3644,19 @@ function PBAI(C){
       // (v28.15, "make the gk able to save curls a lot more": a curling shot, or one its kicker can still bend, gets the
       // reach the quick keepers have at every level)
       const curling = Math.abs(D[0].sp || 0) > 0.02 || (D[0].atT > 0 && D[0].atAdd);
+      // v28.31 ("i try to pass back to gk using wall ... it goes weirdly"): one of ours going in (a back pass off the
+      // wall, say) or a slow one (under KP_PATH_V px a tick there): into its path, the earliest point I can be standing
+      // on it KP_PATH_EARLY ticks before it gets there, rather than the first point I can just touch it. Waiting beside
+      // its path, a back pass coming off the side wall at an angle brushed his goal side and rolled on in with him
+      // walking after it (e2e t_wbstat.js)
+      if (KP_PATH){
+        const ours = lt && lt.team === team && lt.id !== p.id;
+        for (let i = 1; i <= shot && i < P.length; i++){
+          const q = P[i];
+          if (!ours && Math.hypot(q.vx, q.vy) >= KP_PATH_V) continue;
+          if (rx(q.x) < th.kZone && rx(q.x) > 2 && slack(t, me, q, Math.max(1, i - KP_PATH_EARLY), rr * KP_PATH_R) >= 0) return {mode:'block', n: i, out: [dir, 0], path: true};
+        }
+      }
       for (let i = 1; i <= shot && i < P.length; i++){
         if (rx(P[i].x) < th.kZone && slack(t, me, P[i], i, rr * KEEP_REACH * (L.see <= 3 || curling ? KEEP_REACH_HI : 1)) >= 0){
           // ...from in front of it or the side: reaching it from behind only pushes it on into the goal
@@ -3690,7 +3779,8 @@ function PBAI(C){
       // nothing on: a long clearance up the touchline on the ball's side (for a keeper this beats a clever flatter one)
       if (!best){ const y = B.y >= 0 ? 1 : -1, tgt = {x: B.x + dir * 300, y: y * ST.height * 0.8}, cd = CLEAR_SMART ? clearDir(G, ST, t, p, B, team, dir) : null; best = {D: cd || aimDir(t, B, B, tgt), kind:'clear'}; }
       if (L.err > 0) best.D = wobble(G, mem, L, best.D, best.kind === 'pass' ? 0.5 : 1);
-      return {mode:'ball', n, D: best.D, kind: best.kind, to: best.to, limit: best.limit, wall: !!best.wall, thru: !!best.thru, tgt: best.tgt || null, call: !!best.call};
+      const recv = back && KP_RECV && Math.hypot(ball.vx, ball.vy) >= RECV_V ? recvPoint(G, ST, t, me, P, rr, rx, dir, foes) : null;
+      return {mode:'ball', n, D: best.D, kind: best.kind, to: best.to, limit: best.limit, wall: !!best.wall, thru: !!best.thru, tgt: best.tgt || null, call: !!best.call, recv};
     }
     // v27.8 ("ai gk still came half court and got the ball but ran back"): nothing above has him play it, but he went for
     // it (claiming or pressing, within KP_WON_T ticks) and he's right at it (KP_AT_GAP px), one of theirs about as close:
@@ -3899,7 +3989,7 @@ function PBAI(C){
     if ('kpress' in o) KEEP_PRESS = o.kpress; if ('kpressLate' in o) KEEP_PRESS_LATE = o.kpressLate; if ('kpMargin' in o) KP_MARGIN = o.kpMargin; if ('kpRcap' in o) KP_RCAP = o.kpRcap; if ('kpRecheck' in o) KP_RECHECK = o.kpRecheck;
     if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside;
     if ('show' in o) SHOW = o.show; if ('showD' in o) SHOW_D = o.showD;
-    if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
+    if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('rushCharge' in o) KP_RUSH_CHARGE = o.rushCharge; if ('rushSlide' in o) KP_RUSH_SLIDE = o.rushSlide; if ('kpRecv' in o) KP_RECV = o.kpRecv; if ('recvV' in o) RECV_V = o.recvV; if ('recvEarly' in o) RECV_EARLY = o.recvEarly; if ('recvFoe' in o) RECV_FOE = o.recvFoe; if ('recvAway' in o) RECV_AWAY = o.recvAway; if ('kpDance' in o) KP_DANCE = o.kpDance; if ('kpHurry' in o) KP_HURRY = o.kpHurry; if ('kpNowFoe' in o) KP_NOW_FOE = o.kpNowFoe; if ('kpNowFwd' in o) KP_NOW_FWD = o.kpNowFwd; if ('kpNowGain' in o) KP_NOW_GAIN = o.kpNowGain; if ('kpPath' in o) KP_PATH = o.kpPath; if ('kpPathV' in o) KP_PATH_V = o.kpPathV; if ('kpPathR' in o) KP_PATH_R = o.kpPathR; if ('kpPathEarly' in o) KP_PATH_EARLY = o.kpPathEarly; if ('stuckT' in o) STUCK_T = o.stuckT; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
     if ('fkAiRead' in o) FK_AI_READ = o.fkAiRead; if ('fkAiMin' in o) FK_AI_MIN = o.fkAiMin; if ('fkAiStep' in o) FK_AI_STEP = o.fkAiStep;
     if ('fkSee' in o) FK_SEE = o.fkSee; if ('fkSeeT' in o) FK_SEE_T = o.fkSeeT; if ('fkLean' in o) FK_KEEP_LEAN = o.fkLean; if ('fkCurlRead' in o) FK_CURL_READ = o.fkCurlRead; if ('fkWall' in o) FK_WALL = o.fkWall; }};
 }
@@ -6268,8 +6358,10 @@ const fxK = () => Math.max(1, Math.min(2.2, cssW / (cam.zoom || 1) / 520));
 // v27.2 ("the celebration full screen is a bit too much, like after each match i still see the stuff when kickoff already
 // started ... could u make it faster"): the rockets go up within 1.6 s (were 230 ms apart: 3-6 s), climb faster, the sparks
 // and confetti go sooner, and whatever is left fades out at once when the players line up for the kick-off (fxEnd)
+// (v28.31) the celebrations' own colours, whoever scored
+const CEL_COLS = ['#ffd166', '#ffffff', '#f08a2b', '#ffe6a6', '#ffb347'], CEL_BAND = '#f08a2b';
 function fireworks(team, bursts){
-  const cols = KIT[team] ? flagColours(KIT[team]).concat(['#ffd166', '#ffffff']) : ['#ffffff', '#ffd166'], n = reduceMotion ? 1 : Math.round((bursts || 6) * fxK()), gap = Math.min(120, 1600 / n);
+  const cols = CEL_COLS, n = reduceMotion ? 1 : Math.round((bursts || 6) * fxK()), gap = Math.min(120, 1600 / n);
   for (let i = 0; i < n; i++) fx.timers.push(setTimeout(() => {
     const vw = cssW / (cam.zoom || 1), vh = cssH / (cam.zoom || 1);
     if (reduceMotion){ burst(cam.x, cam.y - vh * 0.1, cols, 40, 'peony'); return; }
@@ -6316,7 +6408,7 @@ function dustFx(d, dx, dy){ if (!d || reduceMotion) return; for (let i = 0; i < 
 // confetti falls in screen space over everything
 function confetti(team, n){
   if (reduceMotion) return;
-  const cols = KIT[team] ? flagColours(KIT[team]).concat(['#ffd166', '#ffffff']) : ['#ffffff', '#ffd166'], q = Math.max(1, Math.min(2.5, cssW / 400)), z = Math.sqrt(q);   // (a wider screen: more of it, a bit bigger)
+  const cols = CEL_COLS, q = Math.max(1, Math.min(2.5, cssW / 400)), z = Math.sqrt(q);   // (a wider screen: more of it, a bit bigger)
   n = Math.round(n * q);
   for (let i = 0; i < n; i++) fx.conf.push({x: Math.random() * cssW, y: -10 - Math.random() * cssH * 0.3, vx: (Math.random() - 0.5) * 1.2, vy: 2.4 + Math.random() * 2.4, rot: Math.random() * C.TAU, vr: (Math.random() - 0.5) * 0.3, w: (5 + Math.random() * 5) * z, h: (3 + Math.random() * 3) * z, c: cols[i % cols.length], life: 1, age: 0});
   if (fx.conf.length > 900) fx.conf.splice(0, fx.conf.length - 900);
@@ -6361,7 +6453,7 @@ function goalFx(team, kmh, record, who, post, late, left, into, slide, m){   // 
   fx.pops = fx.pops.filter(f => f.kind !== 'save');   // a save just before a goal didn't keep it out
   if (!reduceMotion){ fx.shake = post ? 14 : 9; fx.flash = post ? 1 : 0.7; }
   // a shockwave out of the goal it went into (the one the other team defends)
-  const g = goalOf(into != null ? into : 1 - team); if (g && !reduceMotion){ const gx = (g.x0 + g.x1) / 2, gy = (g.y0 + g.y1) / 2; for (let i = 0; i < 2; i++) fx.rings.push({x: gx, y: gy, r: 10 + i * 26, life: 1 - i * 0.2, c: post ? '#ffd166' : KIT[team].color}); }
+  const g = goalOf(into != null ? into : 1 - team); if (g && !reduceMotion){ const gx = (g.x0 + g.x1) / 2, gy = (g.y0 + g.y1) / 2; for (let i = 0; i < 2; i++) fx.rings.push({x: gx, y: gy, r: 10 + i * 26, life: 1 - i * 0.2, c: post ? '#ffd166' : '#ffffff'}); }
   fireworks(team, post ? 10 : 6); confetti(team, post ? 160 : 110); sfx.goal(); if (post) sfx.banger();
 }
 // the big one: gold words, a longer show, more of everything, the horn
@@ -6369,7 +6461,7 @@ function lateFx(team, kmh, record, who, post, late, left, into){
   fx.goal = {team, kmh, record, who, post, late, left: Math.max(0, left || 0), t0: performance.now(), until: performance.now() + 3200};
   fx.pops = fx.pops.filter(f => f.kind !== 'save');
   if (!reduceMotion){ fx.shake = 16; fx.flash = 1; }
-  const g = goalOf(into != null ? into : 1 - team); if (g && !reduceMotion){ const gx = (g.x0 + g.x1) / 2, gy = (g.y0 + g.y1) / 2; for (let i = 0; i < 3; i++) fx.rings.push({x: gx, y: gy, r: 8 + i * 24, life: 1 - i * 0.15, c: i === 1 ? KIT[team].color : '#ffd166'}); }
+  const g = goalOf(into != null ? into : 1 - team); if (g && !reduceMotion){ const gx = (g.x0 + g.x1) / 2, gy = (g.y0 + g.y1) / 2; for (let i = 0; i < 3; i++) fx.rings.push({x: gx, y: gy, r: 8 + i * 24, life: 1 - i * 0.15, c: i === 1 ? '#ffffff' : '#ffd166'}); }
   fireworks(team, 12); confetti(team, 220); sfx.goal(); sfx.banger(); setTimeout(() => sfx.banger(), 450);
 }
 // a foul: the whistle, FOUL! over the player fouled, and the free kick or penalty on the pitch
@@ -7009,10 +7101,12 @@ function overlayText(s, V){
   if (fx.emo.size) drawEmotes(V, now);
   if (fx.goal && now < fx.goal.until){
     const g = fx.goal, k = KIT[g.team], age = (now - (g.t0 || now)) / 1000, left = (g.until - now) / 1000;
-    const fade = Math.min(1, left / 0.35), col = g.post ? '#ffd166' : k.color === '#ffffff' || k.color === '#f4f4f4' ? '#ffffff' : k.color, size = g.post ? Math.min(Math.max(66, cssH * 0.27), cssW / 7) : Math.min(Math.max(60, cssH * 0.26), cssW / 7.5), y = cssH * 0.3;   // (v26.7: was 0.18 / 0.17 of the height, small on a laptop)
+    // (v28.31, "celebration colour with teams doesnt look good": no kit colours in it, one look for every goal: white
+    // letters, gold for a banger and the late ones, the band's stripes orange; who scored is in the words under it)
+    const fade = Math.min(1, left / 0.35), col = g.post ? '#ffd166' : '#ffffff', size = g.post ? Math.min(Math.max(66, cssH * 0.27), cssW / 7) : Math.min(Math.max(60, cssH * 0.26), cssW / 7.5), y = cssH * 0.3;   // (v26.7: was 0.18 / 0.17 of the height, small on a laptop)
     const lw = g.late && LATE_WORDS[g.late], word = lw ? lw[0] : g.slide ? 'TACKLE GOAL!' : g.post ? 'BANGER!' : 'GOAL!', wc = lw ? '#ffd166' : col, wsz = Math.min(size, cssW / (Array.from(word).length * 0.62));
     if (reduceMotion){ ctx.save(); ctx.globalAlpha = fade; bigText(word, null, wc, y, wsz); ctx.restore(); }
-    else goalTitle(word, wc, k.color, y, wsz, age, fade);
+    else goalTitle(word, wc, CEL_BAND, y, wsz, age, fade);
     if (g.tag){   // (v28.21: what it means, a gold line over the word)
       const ts = Math.round(Math.max(16, Math.min(30, size * 0.3, cssW / (Array.from(g.tag).length * 0.75)))), pop = reduceMotion ? 1 : Math.min(1, Math.max(0, (age - 0.35) / 0.2)), sc = 0.7 + 0.3 * pop + (pop < 1 ? 0 : 0);
       ctx.save(); ctx.globalAlpha = fade * pop; ctx.translate(cssW / 2, y - size * 0.62); ctx.scale(sc, sc);
@@ -7051,7 +7145,7 @@ function overlayText(s, V){
       ctx.strokeText(t2, cssW / 2, y0 + 22); ctx.fillStyle = left <= 3 ? '#ffd166' : '#e8e3e3'; ctx.fillText(t2, cssW / 2, y0 + 22);
     }
   }
-  else if (G.state === 3 && !s.done){ const top = Math.max(...G.score), w = G.score.filter(v => v === top).length === 1 ? G.score.indexOf(top) : -1; bigText(w < 0 ? 'DRAW' : KIT[w].name.toUpperCase() + ' WIN', null, w < 0 ? '#e8e3e3' : KIT[w].color, cssH * 0.32, Math.min(48, cssW / 11)); }
+  else if (G.state === 3 && !s.done){ const top = Math.max(...G.score), w = G.score.filter(v => v === top).length === 1 ? G.score.indexOf(top) : -1; bigText(w < 0 ? 'DRAW' : KIT[w].name.toUpperCase() + ' WIN', null, w < 0 ? '#e8e3e3' : '#ffd166', cssH * 0.32, Math.min(48, cssW / 11)); }   // (v28.31: gold, not the kit's colour, as the goal celebrations)
   if (!s.mode && C.overtime(G) && G.state < 2 && (G.cfg.tie === 1 || G.score[0] === G.score[1])){
     ctx.font = '500 12px Rubik, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = 'rgba(255,190,190,.9)';
     ctx.fillText(G.cfg.tie === 1 ? `EXTRA TIME · ${fmt(Math.ceil(timeLeft(G)))} left${G.score[0] === G.score[1] ? ' · penalties if it stays level' : ''}` : `OVERTIME +${fmt(G.time - 60 * G.cfg.timeLimit)} · next goal wins`, cssW / 2, 8);
@@ -7957,7 +8051,7 @@ function showComeback(R, s, cb){
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   const w = cb.w, final = R.score, you = s && s.kind === 'local' && !twoP(s.cfg);
   $('cbTitle').textContent = cbWord(cb.down) + '!';
-  $('cbTitle').style.setProperty('--c', KIT[w].color === '#ffffff' ? '#ffd166' : KIT[w].color);
+  $('cbTitle').style.setProperty('--c', '#ffd166');   // (v28.31: a celebration's colour, whoever it is)
   const L2 = Array.isArray(R.lg) && R.lg[0] === 2, tot = L2 ? [final[0] + (+R.lg[1] || 0), final[1] + (+R.lg[2] || 0)] : final;
   const pensTxt = R.pa ? ` and won on penalties` : L2 ? ` and went through ${tot[w]}–${tot[1 - w]} on aggregate` : ` and won ${final[w]}–${final[1 - w]}`;
   box.append(el('p', 'cbsub', `${you ? 'You were' : R.names[w] + ' were'} ${cb.at.sc[w]}–${cb.at.sc[1 - w]} down${L2 ? ' on aggregate' : ''}${cb.at.t > 0 ? ' at ' + fmt(cb.at.t) : ' at the start'}${pensTxt}`));
@@ -8710,7 +8804,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.30';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.31';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
