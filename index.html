@@ -1040,16 +1040,16 @@
         <p>Change them in Controls.</p>
       </section>
       <section class="hsec"><h3>Play</h3><ul>
-        <li>Kick fires as soon as the ball's in reach.</li>
+        <li>Kick fires as soon as the ball's in reach: hold it as you run in (you run a little slower while you hold it).</li>
         <li>After a goal, press your keys again to move.</li>
-        <li>Tap kick twice quickly: call for the ball. Your computer teammates pass it to you as soon as it's safe (your keeper holds it a moment for you). When one of theirs has it near your goal, it sends your computer keeper out at him.</li>
+        <li>Tap kick twice quickly: call for the ball. Your computer teammates pass it to you as soon as it's safe (your keeper holds it a moment for you). When one of theirs has it near your goal, it sends your computer keeper out at him. A third quick tap takes the call back.</li>
         <li>Keys 1–8 (or 😎 on the pitch): emotes over your player, EZ, Skill issue 💀 and more. Online everyone sees them. Two on one keyboard: P1 has 1–5, P2 has 6–0 (or all eight on the number pad).</li>
-        <li><kbd>Esc</kbd> or <kbd>M</kbd> menu · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen</li>
+        <li><kbd>Esc</kbd> or <kbd>M</kbd> menu · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>+</kbd> <kbd>−</kbd> zoom · online <kbd>Enter</kbd> or <kbd>T</kbd> chat</li>
         <li>In fullscreen inside Claude the browser always takes Esc to leave fullscreen: <kbd>M</kbd> opens the menu and stays fullscreen. Left by Esc, it goes back to fullscreen on your next key or click.</li>
       </ul></section>
       <section class="hsec"><h3>Curl</h3><ul>
         <li>Hold up or down as you shoot: it curls that way and still goes where you aim.</li>
-        <li>How much: Curve in ⚙ Settings.</li>
+        <li>How much: Curve in ⚙ Settings. Auto curl (in Controls, for each player): your shots curl into the corner by themselves.</li>
       </ul></section>
       <section class="hsec"><h3>Free kicks</h3><ul>
         <li><kbd>↑</kbd><kbd>↓</kbd> aim · <kbd>←</kbd><kbd>→</kbd> curl · hold kick for power.</li>
@@ -1070,7 +1070,7 @@
     <div class="mtabs" role="tablist" aria-label="Modes">
       <button type="button" role="tab" data-tab="play" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" aria-selected="false">With friends</button><button type="button" role="tab" data-tab="me" aria-selected="false">My stuff</button>
     </div>
-    <button class="mlearn tutb" type="button">New to the game? <b>Learn to play</b><small>3 minutes: move, shoot, curl, slide, free kicks, extrapolation</small></button>
+    <button class="mlearn tutb" type="button">New to the game? <b>Learn to play</b><small>4 minutes: every control, step by step</small></button>
     <div class="mright">
     <div class="mpane" data-pane="play" role="tabpanel">
       <div class="mcard" id="setPlay" data-people="1">
@@ -1084,7 +1084,7 @@
     </div>
     <div class="mpane" data-pane="train" role="tabpanel" hidden>
       <div class="tiles c3">
-        <button class="tile tutb" type="button"><i class="ic" data-ic="target"></i><span><b>Tutorial</b><small>the controls, step by step</small></span></button>
+        <button class="tile tutb" type="button"><i class="ic" data-ic="target"></i><span><b>Tutorial</b><small>every control, step by step</small></span></button>
         <button class="tile" data-mode="practice" data-size="1" type="button"><i class="ic" data-ic="target"></i><span><b>Shooting</b><small>beat the keeper</small></span></button>
         <button class="tile" data-mode="fkdrill" data-size="1" type="button" title="Free kicks from all over, a wall and a computer keeper: up and down aim, left and right curl it round the wall, hold kick to power it up"><i class="ic" data-ic="fk"></i><span><b>Free kicks</b><small>past the wall and keeper</small></span></button>
         <button class="tile" data-mode="dribble" data-size="1" type="button" title="You have the ball and a computer defender is in your way: get past him and score"><i class="ic" data-ic="cone"></i><span><b>Dribbling</b><small>past the defender</small></span></button>
@@ -1129,7 +1129,7 @@
     <div class="tutwel" id="tutWelcome" hidden><div>
       <small>Welcome to Pitch Brawl</small>
       <h3>First time?</h3>
-      <p>A short tutorial shows you how to play: moving, kicking, curling the ball, slide tackles and free kicks, and what extrapolation means online. About three minutes, and you can skip any part.</p>
+      <p>A short tutorial shows you every control: moving, kicking, curling, calling for the ball, slide tackles, free kicks, emotes and the other keys, and what extrapolation means online. About four minutes, and you can skip any part.</p>
       <div class="row"><button id="tutGo" type="button">Start the tutorial</button><button class="ghost" id="tutNo" type="button">Skip, I know how to play</button></div>
     </div></div>
   </div>
@@ -5802,10 +5802,15 @@ function dribbleMode(){
 // computer player who is put where each step needs him): move, kick, score, curl it round a man, a slide tackle, a free
 // kick, what extrapolation is (online), then off to a match. A panel says what to do and when it's done; Next goes on
 // at any time, Skip tutorial leaves it. Offered once to anyone new (no matches played yet), and in the menu always
-const TUT_STEPS = ['move', 'kick', 'score', 'curl', 'slide', 'fk', 'extrap', 'done'];
+// v28.32 ("remember to include all controls in tutorial"): every control has a step or a line: moving, kicking (and
+// holding kick), shooting, curling (and auto curl), calling for the ball (and the keeper's rush), slide tackles, free
+// kicks, emotes, the other keys (menu, pause, restart, fullscreen, zoom, chat, two on one keyboard), extrapolation
+const TUT_STEPS = ['move', 'kick', 'score', 'curl', 'call', 'slide', 'fk', 'emote', 'keys', 'extrap', 'done'];
 const tutKeys = () => { const k = (p, a) => bind[p] && bind[p][a] ? kname(bind[p][a]) : '';
+  if (coarseScreen() && !kbUsed) return {touch: true, move: 'the stick', up: 'stick up', down: 'stick down', left: 'stick left', right: 'stick right', kick: 'KICK', slide: 'SLIDE'};   // (a phone)
   return {move: `${['up', 'left', 'down', 'right'].map(a => k('p1', a)).join(' ')} or the arrow keys`, up: `${k('p1', 'up')}/↑`, down: `${k('p1', 'down')}/↓`, left: `${k('p1', 'left')}/←`, right: `${k('p1', 'right')}/→`,
-          kick: k('p1', 'kick') || 'Space', slide: k('p1', 'slide') || 'C'}; };
+          kick: k('p1', 'kick') || 'Space', slide: k('p1', 'slide') || 'C',
+          p1: `${['up', 'left', 'down', 'right'].map(a => k('p1', a)).join(' ')}`, k1: k('p1', 'kick'), s1: k('p1', 'slide'), p2: `${['up', 'left', 'down', 'right'].map(a => k('p2', a)).join(' ')}`, k2: k('p2', 'kick'), s2: k('p2', 'slide')}; };
 function tutorialMode(){
   const tu = {i: 0, ok: false, okAt: 0, n: 0, tries: 0, targets: [], curled: false, kicked: false, note: ''};
   const M = {kind: 'tutorial', tu};
@@ -5816,8 +5821,9 @@ function tutorialMode(){
   M.setup = s => {
     const G = s.G, P = me(s), Q = cp(s), d = G.discs[P.di], b = G.discs[0], gm = goalMid(1), dir = Math.sign(gm.x) || 1;
     G.state = 1; G.sp = null; G.lastTouch = null; G.ballHist.length = 0; s.msg = null;
-    Object.assign(tu, {ok: false, okAt: 0, n: 0, curled: false, kicked: false, note: '', targets: []});
+    Object.assign(tu, {ok: false, okAt: 0, n: 0, curled: false, kicked: false, note: '', targets: [], called: null, passed: false, pz: 0, kn: 0, zi0: zi});
     const q = Q && G.discs[Q.di];
+    if (Q){ if (tu.qTeam == null) tu.qTeam = Q.team; if (Q.team !== tu.qTeam){ Q.team = tu.qTeam; Object.assign(q, C.playerDisc(ST, Q)); } }   // (the call step had him on your side)
     const park = () => { if (Q){ Q.ctrl = 'hold'; C.setInput(Q, 0); q.x = 0; q.y = -(ST.height - 16); still(q); } };
     const st = step();
     if (st === 'move'){ d.x = -dir * 150; d.y = 0; b.x = 0; b.y = ST.height * 0.75; park(); tu.targets = [[-dir * 40, -90], [dir * 100, -20], [-dir * 170, 10]]; /* (clear of the panel at the foot) */ }
@@ -5825,6 +5831,10 @@ function tutorialMode(){
     else if (st === 'score'){ b.x = gm.x - dir * 170; b.y = -20; d.x = b.x - dir * 50; d.y = -20; park(); }
     else if (st === 'curl'){ b.x = gm.x - dir * 210; b.y = 0; d.x = b.x - dir * 45; d.y = 0; park(); if (Q){ q.x = gm.x - dir * 110; q.y = 0; still(q); Q.role = 'wall'; } }
     else if (st === 'slide'){ if (Q){ Q.ctrl = 'hold'; C.setInput(Q, 0); q.x = 60; q.y = -10; still(q); } b.x = 60 - dir * 30; b.y = -10; d.x = -dir * 110; d.y = -10; }   // (the ball out in front of him, toward you)
+    else if (st === 'call'){   // (the computer on your side for this step, the ball at his feet in our half, you up the pitch)
+      if (Q){ Q.team = P.team; Q.role = 'striker'; Q.ctrl = 'hold'; C.setInput(Q, 0); Object.assign(q, C.playerDisc(ST, Q)); q.x = -dir * 175; q.y = 70; still(q); aiMem(s, Q).plan = null; }
+      b.x = -dir * 152; b.y = 70; d.x = dir * 40; d.y = -60; }
+    else if (st === 'emote' || st === 'keys'){ park(); d.x = -dir * 60; d.y = 0; b.x = dir * 40; b.y = 0; }
     else if (st === 'fk'){ park(); if (Q){ Q.ctrl = 'ai'; Q.role = 'keeper'; q.x = gm.x - dir * 20; q.y = gm.y; still(q); } const x = gm.x - dir * 175; d.x = x - dir * 30; d.y = -40; C.setPiece(G, ST, 'fk', P.team, x, -40, P.id); }
     else { park(); d.x = -dir * 60; d.y = 0; b.x = 0; b.y = 0; }
     still(d, b); b.sp = 0; b.atT = 0;
@@ -5844,13 +5854,26 @@ function tutorialMode(){
         if (st === 'curl') tu.curled = Math.abs(b.sp || 0) > 0.01;
         if (st === 'slide' && e.slide) pass(s, 'Clean tackle: you got the ball first.'); }
       if (e.type === 'foul' && e.pid === P.id && st === 'slide'){ tu.tries++; tu.note = 'Foul! You took the man first. Slide at the ball, from the side it sticks out.'; setTimeout(() => { if (sess === s && step() === 'slide' && !tu.ok) M.setup(s); }, 1400); tutPanel(s); }
+      if (e.type === 'call' && e.pid === P.id && st === 'call' && !tu.ok && tu.called == null){ tu.called = G.frame; tu.note = 'Called! Here it comes…'; const Q = cp(s); if (Q){ Q.ctrl = 'ai'; aiMem(s, Q).plan = null; } tutPanel(s); }
+      if (e.type === 'emote' && e.pid === P.id && st === 'emote') pass(s, 'Online everyone sees it. Two on one keyboard: P1 has 1–5, P2 6–0.');
       if (e.type === 'goal'){
-        if (st === 'score' && e.team === P.team) pass(s, 'Goal! That\'s the whole idea.');
+        if (st === 'score' && e.team === P.team) pass(s, 'Goal! After a goal everyone\'s keys are let go: press them again to move.');
         else if (st === 'curl' && e.team === P.team){ tu.tries++; if (tu.curled) pass(s, 'Curled it in! Holding up or down as you kick bends the ball.'); else { tu.note = tu.tries >= 3 ? 'Scored. It went in straight, which is fine too; you can go on.' : 'Scored, but straight: hold up or down as you kick to bend it.'; if (tu.tries >= 3) pass(s, tu.note); else tutPanel(s); } }
         else if (st === 'fk' && e.team === P.team) pass(s, 'Free kick goal!');
       }
     }
+    if (st === 'keys' && !tu.ok){
+      if (G.pause >= 120) tu.pz = 1; else if (tu.pz === 1) tu.pz = 2;   // (paused, then on again)
+      const kn = (tu.pz === 2 ? 1 : 0) + (zi !== tu.zi0 ? 2 : 0); if (kn !== tu.kn){ tu.kn = kn; tutPanel(s); }
+      if (kn === 3) pass(s, 'That\'s them. Change any key in Controls (menu).');
+    }
     if (G.state !== 1) return;
+    if (st === 'call' && !tu.ok && tu.called != null){
+      const lt = G.lastTouch, Q = cp(s);
+      if (lt && Q && lt.id === Q.id && lt.kick) tu.passed = true;
+      if (tu.passed && lt && lt.id === P.id) pass(s, 'He passed it to you. When one of theirs is through on your goal, the same two taps send your keeper out at him.');
+      else if (G.frame - tu.called > 360){ tu.tries++; M.setup(s); tu.note = 'Again: two quick taps of kick, away from the ball.'; tutPanel(s); }
+    }
     if (st === 'move' && !tu.ok){ const t = tu.targets[tu.n]; if (t && Math.hypot(d.x - t[0], d.y - t[1]) < 24){ tu.n++; sfx.kick && sfx.kick(0.3); if (tu.n >= tu.targets.length) pass(s, 'You can move. Diagonals work too: hold two keys.'); else tutPanel(s); } }
     if (st === 'fk' && !tu.ok && !G.sp && tu.kicked){ tu.fkT = (tu.fkT || 0) + 1; if (tu.fkT > 150) pass(s, 'That\'s a free kick. The keeper reads your aim: aim one way, curl it the other.'); }
     if (st === 'kick' || st === 'score' || st === 'curl'){   // (the ball gone off somewhere, or stopped short: put it back)
@@ -5877,13 +5900,18 @@ function tutPanel(s){
   const tu = m.tu, st = TUT_STEPS[tu.i], K = tutKeys(), kb = t => `<kbd>${t}</kbd>`;
   const T = {
     move: ['Move', `Move with ${kb(K.move)}. Run through the yellow circles, in order.`, `${tu.n} of ${tu.targets.length || 3}`],
-    kick: ['Kick', `Walk up to the ball and press ${kb(K.kick)} when you're right next to it. Running into it only nudges it.`, ''],
+    kick: ['Kick', `Walk up to the ball and ${K.touch ? 'tap' : 'press'} ${kb(K.kick)} when you're right next to it. Running into it only nudges it. ${K.touch ? 'Hold it' : 'Holding it'} as you run in kicks the moment it's in reach (you run a little slower while you hold it).`, ''],
     score: ['Score', `Shoot it into the goal on the right: get behind the ball, face the goal, ${kb(K.kick)}.`, ''],
-    curl: ['Curl it', `A man is in the way. Hold ${kb(K.up)} or ${kb(K.down)} as you kick: the ball bends that way and still goes where you aimed. Bend it round him.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    slide: ['Slide tackle', `Press ${kb(K.slide)} to slide. The computer has the ball: slide into the ball, not the man (taking the man first is a foul).`, ''],
+    curl: ['Curl it', `A man is in the way. Hold ${kb(K.up)} or ${kb(K.down)} as you kick: the ball bends that way and still goes where you aimed. Bend it round him. (Auto curl in Controls curls your shots into the corner by themselves.)`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    call: ['Call for the ball', `Your teammate has it. Tap ${kb(K.kick)} twice quickly (away from the ball) to call for it: your computer teammates pass to you, and your keeper holds it a moment for you. A third quick tap takes the call back.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    slide: ['Slide tackle', `${K.touch ? 'Tap' : 'Press'} ${kb(K.slide)} to slide. The computer has the ball: slide into the ball, not the man (taking the man first is a foul, and in your own area a penalty).`, ''],
     fk: ['Free kick', `You were fouled: your free kick. ${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)} to power it up and let go to shoot. The dots show where it will go.`, ''],
+    emote: ['Emotes', K.touch ? `Tap 😎 on the pitch and pick one: it shows over your player (EZ, Skill issue 💀 and more).` : `Press a number, ${kb('1')} to ${kb('8')}: an emote over your player (EZ, Skill issue 💀 and more).`, ''],
+    keys: ['Other keys', K.touch ? `The buttons in the corner: Pause, ⚙ Settings (zoom, extrapolation, sound, controls), 😎 emotes, ☰ Menu (restart, leave), ⛶ fullscreen, and Chat online. Try Pause (then again to play on) and a different zoom in ⚙.`
+      : `${kb('Esc')} or ${kb('M')} menu · ${kb('P')} pause · ${kb('R')} restart (here: this step) · ${kb('F')} fullscreen · ${kb('+')} ${kb('−')} zoom · online ${kb('Enter')} or ${kb('T')} to chat. Two on one keyboard: P1 ${kb(K.p1)} ${kb(K.k1)} kick ${kb(K.s1)} slide, P2 ${kb(K.p2)} ${kb(K.k2)} kick ${kb(K.s2)} slide. Try ${kb('P')} twice and ${kb('+')} or ${kb('−')}.`,
+      `${tu.pz === 2 ? '✓' : '·'} pause  ${zi !== tu.zi0 ? '✓' : '·'} zoom`],
     extrap: ['Extrapolation (online)', `Online, what you see of the others comes from the host a moment late (your ping). <b>Extrapolation</b> draws everyone a little ahead, where they'll be, so it feels like there's no delay. 0 shows exactly what arrived (smooth but late); higher feels quicker, but other players can jump a little when they change direction. Most players like about 90. You can change it any time in ⚙ Settings.`, ''],
-    done: ['You\'re ready', `That's the game. Two more things: tap ${kb(K.kick)} twice quickly to call for the ball (your computer teammates pass to you, your keeper comes out when they're through), and Esc or M opens the menu. Have a match against the computer on Easy?`, ''],
+    done: ['You\'re ready', `That's every control. They're all in How to play (menu), and Controls changes any key. Have a match against the computer on Easy?`, ''],
   }[st];
   $('tutStep').textContent = `${tu.i + 1} / ${TUT_STEPS.length}`; $('tutTitle').textContent = T[0];
   $('tutText').innerHTML = T[1];
@@ -7470,7 +7498,8 @@ $('optFk').addEventListener('change', e => { if (roomRule('optFk', e.target.chec
 // v25.5 ("i changed it and restarted its still the original curl, i need to leave the match and then comeback"): a restart
 // or a rematch kept the rules the match began with. Now they take the settings as they are, and in a match on this device
 // a change to curve, slide tackles or free kicks counts at once (cfgFor: a drill keeps the rules it has to have)
-function freshRules(cfg){ const c = Object.assign({}, cfg), r = cfgFor(cfg.mode, cfg.size); for (const k of ['curve', 'curveLv', 'slide', 'fk', 'tie']) c[k] = r[k]; return c; }
+function freshRules(cfg){ const c = Object.assign({}, cfg); if (cfg.mode === 'tutorial') return c;   // (v28.32: the tutorial keeps its own rules: slide tackles, free kicks and curve on)
+  const r = cfgFor(cfg.mode, cfg.size); for (const k of ['curve', 'curveLv', 'slide', 'fk', 'tie']) c[k] = r[k]; return c; }
 function liveRules(){
   const s = sess; if (!s || s.kind !== 'local' || s.done || !s.G) return;
   Object.assign(s.cfg, freshRules(s.cfg)); const r = rulesOf(s.cfg); for (const k of ['curve', 'curveLv', 'slide', 'fk']) s.G.cfg[k] = r[k];
@@ -7741,7 +7770,8 @@ $('gmRestart').addEventListener('click', () => askSure('restart'));
 // v28.9 ("add a r u sure option when leave/restart"): Leave, Restart and Back to lobby ask first, in the menu itself
 // (Enter or the red button: yes; Esc or Cancel: no). In practice, Restart (and R) don't: trying again is the point
 const SURE = {
-  restart: () => [NET.on && sess && sess.kind !== 'local' ? 'Restart the match for everyone from 0–0?' : 'Restart the match from 0–0?', 'Restart', () => { const s = sess; closePanel('gameMenu');
+  restart: () => sess && sess.mode && sess.mode.kind === 'tutorial' ? ['Start this step of the tutorial again?', 'Again', () => { const s = sess; closePanel('gameMenu'); if (s && s.mode && s.mode.kind === 'tutorial') s.mode.setup(s); }]
+    : [NET.on && sess && sess.kind !== 'local' ? 'Restart the match for everyone from 0–0?' : 'Restart the match from 0–0?', 'Restart', () => { const s = sess; closePanel('gameMenu');
     if (s && s.kind === 'local') start(freshRules(s.cfg)); else if (NET.on && NET.host) restartOnline(myNick()); else if (isMgr()) sendCmd('rs'); }],
   leave: () => [NET.on ? 'Leave the room? The match goes on without you.' : 'Leave the match for the main menu?', 'Leave', () => exitToMenu()],
   lobby: () => ['Stop the match for everyone and go back to the room?', 'Stop the match', () => {   // the host or a manager stops the match: everyone back to the lobby
@@ -8804,7 +8834,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.31';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.32';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10437,7 +10467,7 @@ addEventListener('keydown', e => {
       if (who && i >= 0){ sendEmote(i, who); return; }
     } }
   if (e.code === 'KeyP' && sess && !sess.rp){ togglePause(); return; }
-  if (e.code === 'KeyR' && sess && sess.kind === 'local'){ if (sess.mode && !realMatch(sess)) start(freshRules(sess.cfg)); else { fsBack = false; openGameMenu(); askSure('restart'); } }
+  if (e.code === 'KeyR' && sess && sess.kind === 'local'){ if (sess.mode && sess.mode.kind === 'tutorial') sess.mode.setup(sess); else if (sess.mode && !realMatch(sess)) start(freshRules(sess.cfg)); else { fsBack = false; openGameMenu(); askSure('restart'); } }   // (v28.32: in the tutorial, R starts this step again)
   else if (e.code === 'KeyR' && sess && NET.on && (NET.host || isMgr()) && !sess.done && !sess.rp){ fsBack = false; openGameMenu(); askSure('restart'); }   // (v28.10: online, the host or a manager)
   else if (e.code === 'KeyF') toggleFs();
   else if (e.code === 'KeyM' && sess && $('menu').hidden && !(sess.rp || sess.replay || sess.done)){ fsBack = false; openGameMenu(); }
