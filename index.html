@@ -626,6 +626,113 @@
           width:max-content;max-width:calc(100% - 20px);background:rgba(26,30,40,.96);border:1px solid var(--accent);border-radius:10px;padding:7px 12px;font-size:13px;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.45)}
   .fsnote span{max-width:52ch}
   @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+
+  /* v28.27 ("can u redo the menu again, make it less ai looking"): a sports game's menu, not cards with icons. The name
+     big and plain, the sections a list down the left (big condensed italic words, the one you're on on an orange slab),
+     what's in it on the right as flat rows with rules between, the Kick off button a hard-edged orange block; no glow, no
+     rounded boxes, no icon squares. On a narrow screen it all goes in one column */
+  #menu{--cond:'Barlow Condensed','Arial Narrow',Rubik,sans-serif;--rule:#2b313e;--dim:#8a92a5;
+        display:grid;grid-template-columns:minmax(200px,30%) minmax(0,1fr);grid-template-rows:auto auto auto auto;column-gap:36px;row-gap:16px;
+        align-items:start;align-content:start;justify-items:stretch;justify-content:stretch;padding:28px 34px 22px 40px;text-align:left;
+        background:linear-gradient(90deg,var(--accent) 0 5px,transparent 5px),repeating-linear-gradient(115deg,rgba(255,255,255,.016) 0 26px,transparent 26px 52px),linear-gradient(180deg,#12151c,#0e1116)}
+  #menu[hidden]{display:none}
+  #menu > .mhead{grid-column:1;grid-row:1;align-items:flex-start;text-align:left;gap:8px}
+  #menu > .mtabs{grid-column:1;grid-row:2}
+  #menu > .mlearn{grid-column:1;grid-row:3}
+  #menu > .mfoot{grid-column:1;grid-row:4;align-self:start}
+  #menu > .mright{grid-column:2;grid-row:1 / 5;display:flex;flex-direction:column;gap:20px;width:100%;max-width:660px;min-width:0}
+  #menu .mright > .mpane,#menu .mright > .mbar{width:100%}
+  #menu h2{font-family:var(--cond);font-style:italic;font-weight:800;font-size:clamp(36px,5vw,58px);line-height:.88;letter-spacing:.005em;text-transform:uppercase;color:#fff;text-shadow:none}
+  #menu h2::after{content:'';display:block;width:70px;height:6px;margin-top:10px;background:var(--accent);transform:skewX(-24deg);transform-origin:left}
+  #menu .mhead p{font-size:12px;letter-spacing:.06em;color:var(--dim);max-width:30ch;text-transform:none}
+  /* the sections */
+  #menu .mtabs{display:flex;flex-direction:column;align-items:flex-start;gap:0;background:none;border:0;border-radius:0;padding:0;box-shadow:none;counter-reset:mt}
+  #menu .mtabs button{position:relative;isolation:isolate;display:flex;align-items:baseline;gap:12px;text-align:left;background:none;border:0;border-radius:0;box-shadow:none;
+        padding:4px 18px 4px 0;color:#6f788c;font-family:var(--cond);font-style:italic;font-weight:800;font-size:clamp(22px,2.6vw,31px);text-transform:uppercase;letter-spacing:.01em;line-height:1.08;transition:color .12s,transform .12s}
+  #menu .mtabs button::before{counter-increment:mt;content:counter(mt,decimal-leading-zero);font:700 11px/1 Rubik,sans-serif;font-style:normal;letter-spacing:.1em;color:#4c5466;min-width:18px}
+  #menu .mtabs button::after{content:'';position:absolute;z-index:-1;inset:3px -4px 3px -10px;background:var(--accent);transform:skewX(-14deg) scaleX(0);transform-origin:left;transition:transform .16s ease-out}
+  #menu .mtabs button.on{color:#15100a;background:none;box-shadow:none} #menu .mtabs button.on::before{color:rgba(21,16,10,.6)} #menu .mtabs button.on::after{transform:skewX(-14deg) scaleX(1)}
+  #menu .mtabs button:not(.on):hover{color:#fff;background:none;transform:translateX(5px)}
+  #menu .mtabs button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  #menu .mlearn{justify-self:start;display:flex;flex-direction:column;gap:1px;max-width:250px;background:none;border:0;border-left:3px solid #ffd166;border-radius:0;padding:4px 0 4px 12px;color:var(--dim);font-size:12px;font-weight:500;text-align:left}
+  #menu .mlearn b{font-family:var(--cond);font-style:italic;font-weight:800;font-size:22px;text-transform:uppercase;color:#ffd166;line-height:1.05}
+  #menu .mlearn small{font-size:11px;color:#6f788c}
+  #menu .mlearn:hover b{color:#fff}
+  /* what's in a section */
+  #menu .mpane{gap:14px}
+  #menu .mcard{background:none;border:0;border-radius:0;box-shadow:none;padding:0;gap:14px}
+  #menu .lbl{font:700 11px/1.2 Rubik,sans-serif;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+  #menu .seg.big{gap:0;border:1px solid #3a4152;border-radius:0;overflow:hidden}
+  #menu .seg.big button,#menu .seg.big button + button{border:0;border-right:1px solid #3a4152;border-radius:0;background:transparent;box-shadow:none;padding:11px 4px 9px;
+        font-family:var(--cond);font-weight:700;font-size:21px;letter-spacing:.02em;text-transform:uppercase;color:#c8cdd8}
+  #menu .seg.big button:last-child{border-right:0}
+  #menu .seg.big button.on{background:#f1efe9;color:#12151c;box-shadow:none}
+  #menu .seg.big button:not(.on):not(:disabled):hover{background:rgba(255,255,255,.05);color:#fff}
+  #menu .seg.big .si{display:none} #menu .seg.big .lw,#menu .seg.big .sw2{font:inherit}
+  #menu .seg.pill{border-radius:0;border:1px solid #3a4152;background:none}
+  #menu .seg.pill button{font-family:var(--cond);font-weight:700;font-size:17px;text-transform:uppercase;letter-spacing:.02em;border-radius:0}
+  #menu .seg.pill button.on{background:#f1efe9;color:#12151c}
+  #menu button.mgo{border-radius:0;padding:15px 30px 15px 22px;gap:16px;background:var(--accent);color:#15100a;box-shadow:none;clip-path:polygon(0 0,100% 0,calc(100% - 20px) 100%,0 100%);transition:background-color .12s,padding .12s}
+  #menu button.mgo:hover{filter:none;transform:none;box-shadow:none;background:#ff9b40;padding-left:28px}
+  #menu .mgo .ic{display:none}
+  #menu .mgo b{font-family:var(--cond);font-style:italic;font-weight:800;font-size:clamp(28px,3.4vw,38px);text-transform:uppercase;letter-spacing:.005em;line-height:.95}
+  #menu .mgo small{font-size:13px;font-weight:600;opacity:.72}
+  #menu .mgo .go{width:auto;height:auto;border-radius:0;background:none;color:#15100a} #menu .mgo .go svg{width:28px;height:28px;margin:0}
+  #menu .tiles{gap:0;border-top:1px solid var(--rule)}
+  #menu .tiles.c2,#menu .tiles.c3{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:26px}
+  #menu .tile{position:relative;background:none;border:0;border-bottom:1px solid var(--rule);border-radius:0;box-shadow:none;padding:10px 6px 10px 12px;gap:0;transition:padding .12s,background-color .12s}
+  #menu .tile::before{content:'';position:absolute;left:0;top:9px;bottom:9px;width:3px;background:var(--accent);transform:scaleY(0);transition:transform .12s}
+  #menu .tile:hover{background:rgba(255,255,255,.03);transform:none;padding-left:18px;border-color:var(--rule)} #menu .tile:hover::before{transform:scaleY(1)}
+  #menu .tile .ic{display:none}
+  #menu .tile b{font-family:var(--cond);font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
+  #menu .tile small{font-size:12.5px;color:var(--dim)}
+  #menu .tile.full{grid-column:1 / -1;width:100%}
+  #menu .tile.full:not(.big){border-top:1px solid var(--rule)}
+  #menu .tile.big{border:1px solid var(--accent);background:rgba(240,138,43,.07);padding:14px 18px}
+  #menu .tile.big b{font-family:var(--cond);font-style:italic;font-weight:800;font-size:30px;color:#fff}
+  #menu .tile.tutb b{color:#ffd166}
+  #menu .mnote{text-align:left;font-size:12px;color:var(--dim)}
+  /* the match settings: plain words under small labels, an underline each */
+  #menu .mbar{gap:14px;border-top:1px solid var(--rule);padding-top:12px}
+  #menu .mbar .mo{background:none;border:0;border-bottom:2px solid #3a4152;border-radius:0;padding:0 0 2px}
+  #menu .mbar .mo:hover{border-bottom-color:var(--accent)}
+  #menu .mbar .mo > span{font:700 10px/1.3 Rubik,sans-serif;letter-spacing:.16em}
+  #menu .mbar select{font-family:var(--cond);font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:.01em;padding:1px 16px 2px 0}
+  #menu[data-tab="train"] .mbar{grid-template-columns:minmax(0,200px);justify-content:start}
+  /* the foot: plain links */
+  #menu .mfoot{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:1px;width:auto}
+  #menu .mfoot button{background:none;border:0;border-radius:0;padding:2px 0;color:#9aa2b4;font-size:13px;font-weight:600;box-shadow:none}
+  #menu .mfoot button:hover{color:#fff;background:none}
+  #menu .mfoot button > span{display:none}
+  #menu .mst{text-align:left;font-size:11px;color:#5a6274;margin-top:6px;flex-basis:auto}
+  @media (max-width:760px){
+    #menu{grid-template-columns:minmax(0,1fr);padding:18px 16px 16px 20px;row-gap:12px}
+    #menu > *{grid-column:1 !important;grid-row:auto !important;max-width:none !important}
+    #menu .mtabs{flex-direction:row;flex-wrap:wrap;gap:2px 14px} #menu .mtabs button{font-size:21px} #menu .mtabs button::before{display:none}
+    #menu .mfoot{flex-direction:row;flex-wrap:wrap;gap:4px 14px}
+    #menu .tiles.c2,#menu .tiles.c3{grid-template-columns:minmax(0,1fr)}
+  }
+  /* the first-time question, over the menu */
+  .tutwel{position:absolute;inset:0;z-index:3;display:grid;place-items:center;background:rgba(8,10,14,.78)}
+  .tutwel[hidden]{display:none}
+  .tutwel > div{width:min(470px,92%);background:#141820;border-left:6px solid var(--accent);padding:22px 24px;display:flex;flex-direction:column;gap:10px;text-align:left;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .tutwel small{font:700 11px/1 Rubik,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  .tutwel h3{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:italic;font-weight:800;font-size:40px;line-height:.95;text-transform:uppercase;color:#fff}
+  .tutwel p{max-width:none;color:#c9cfdc;font-size:14px;line-height:1.5}
+  .tutwel .row{justify-content:flex-start;margin-top:4px} .tutwel button{border-radius:0}
+  /* the tutorial's panel, over the foot of the pitch */
+  .tutbox{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:4;width:min(580px,94%);display:flex;flex-direction:column;gap:6px;text-align:left;
+          background:rgba(13,16,22,.94);border-left:5px solid var(--accent);padding:10px 12px 10px 14px;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+  .tutbox[hidden]{display:none}
+  .tuthead{display:flex;align-items:center;gap:12px}
+  .tuthead span{font:700 11px/1 Rubik,sans-serif;letter-spacing:.14em;color:var(--muted)}
+  .tuthead b{flex:1;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:italic;font-weight:800;font-size:25px;line-height:1;text-transform:uppercase;color:#fff}
+  .tuthead button{border-radius:0}
+  .tutbox p{margin:0;font-size:13.5px;line-height:1.45;color:#e3e6ec;max-width:none}
+  .tutbox kbd{display:inline-block;padding:0 6px;border:1px solid #5a6274;border-bottom-width:2px;border-radius:3px;background:#20252f;font:600 12px/1.45 Rubik,sans-serif;color:#fff;white-space:nowrap}
+  .tutx{display:flex;flex-wrap:wrap;gap:6px} .tutx:empty{display:none} .tutx button{border-radius:0} .tutx button.on{border-color:var(--accent);color:#fff;box-shadow:inset 0 0 0 1px var(--accent)}
+  .tutfoot{display:flex;align-items:center;gap:12px} .tutfoot button{border-radius:0}
+  #tutState{flex:1;font-size:13px;color:var(--muted)} #tutState.ok{color:#7ee2a0;font-weight:600}
 </style>
 
 <header>
@@ -649,6 +756,12 @@
 </div>
 
 <div class="stage" id="stage">
+  <div class="tutbox" id="tutBox" hidden>
+    <div class="tuthead"><span id="tutStep">1 / 8</span><b id="tutTitle"></b><button class="ghost sm" id="tutSkip" type="button">Skip tutorial</button></div>
+    <p id="tutText"></p>
+    <div class="tutx" id="tutExtra"></div>
+    <div class="tutfoot"><span id="tutState"></span><button id="tutNext" type="button">Next ›</button></div>
+  </div>
   <canvas id="c"></canvas>
   <div class="hud" id="hud" hidden></div>
   <div class="corner"><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (Esc)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
@@ -911,8 +1024,10 @@
   <div class="overlay" id="menu" data-tab="play">
     <div class="mhead"><h2 id="menuTitle">Pitch Brawl</h2><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p></div>
     <div class="mtabs" role="tablist" aria-label="Modes">
-      <button type="button" role="tab" data-tab="play" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" aria-selected="false">Friends</button><button type="button" role="tab" data-tab="me" aria-selected="false">Me</button>
+      <button type="button" role="tab" data-tab="play" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" aria-selected="false">With friends</button><button type="button" role="tab" data-tab="me" aria-selected="false">My stuff</button>
     </div>
+    <button class="mlearn tutb" type="button">New to the game? <b>Learn to play</b><small>3 minutes: move, shoot, curl, slide, free kicks, extrapolation</small></button>
+    <div class="mright">
     <div class="mpane" data-pane="play" role="tabpanel">
       <div class="mcard" id="setPlay" data-people="1">
         <div class="mrow"><span class="lbl">Match against the computer</span><span class="seg big" data-k="size"><button type="button" data-v="1"><i class="si" data-ic="one"></i>1v1</button><button type="button" data-v="2"><i class="si" data-ic="two"></i>2v2</button><button type="button" data-v="3"><i class="si" data-ic="three"></i>3v3</button><button type="button" data-v="tri" title="Three players, three goals on a six-sided pitch: score in either of the others, keep your own"><i class="si" data-ic="tri"></i>1v1v1</button></span></div>
@@ -925,6 +1040,7 @@
     </div>
     <div class="mpane" data-pane="train" role="tabpanel" hidden>
       <div class="tiles c3">
+        <button class="tile tutb" type="button"><i class="ic" data-ic="target"></i><span><b>Tutorial</b><small>the controls, step by step</small></span></button>
         <button class="tile" data-mode="practice" data-size="1" type="button"><i class="ic" data-ic="target"></i><span><b>Shooting</b><small>beat the keeper</small></span></button>
         <button class="tile" data-mode="fkdrill" data-size="1" type="button" title="Free kicks from all over, a wall and a computer keeper: up and down aim, left and right curl it round the wall, hold kick to power it up"><i class="ic" data-ic="fk"></i><span><b>Free kicks</b><small>past the wall and keeper</small></span></button>
         <button class="tile" data-mode="dribble" data-size="1" type="button" title="You have the ball and a computer defender is in your way: get past him and score"><i class="ic" data-ic="cone"></i><span><b>Dribbling</b><small>past the defender</small></span></button>
@@ -961,10 +1077,17 @@
       <label class="mo" for="setTie" title="A tie at full time: overtime (next goal wins), extra time played in full and then a penalty shootout if it's still level, or straight to penalties"><span>If level</span><select id="setTie"><option value="0">Overtime</option><option value="1">Extra time, pens</option><option value="2">Penalties</option></select></label>
       <label class="mo" for="optLegs" title="Two legs, like the Champions League: a first leg (a draw is fine), then a second leg; the total of both decides"><span>Legs</span><select id="optLegs"><option value="1">One match</option><option value="2">Two legs</option></select></label>
     </div>
+    </div>
     <div class="mfoot">
       <button class="ghost sm setb" type="button" title="Settings: rules, curve, sound, view"><span aria-hidden="true">⚙</span> Settings</button><button class="ghost sm ctl" type="button" title="Change your keys"><span aria-hidden="true">⌨</span> Controls</button><button class="ghost sm tmb" type="button" title="Each side's kit"><span aria-hidden="true">◐</span> Kits</button><button class="ghost sm pub" type="button" title="A power-up for each side"><span aria-hidden="true">✦</span> Power-ups</button><button class="ghost sm hlpb" type="button" title="How to play, the controls and the modes"><span aria-hidden="true">?</span> How to play</button>
       <span class="mst" id="mStadium"></span>
     </div>
+    <div class="tutwel" id="tutWelcome" hidden><div>
+      <small>Welcome to Pitch Brawl</small>
+      <h3>First time?</h3>
+      <p>A short tutorial shows you how to play: moving, kicking, curling the ball, slide tackles and free kicks, and what extrapolation means online. About three minutes, and you can skip any part.</p>
+      <div class="row"><button id="tutGo" type="button">Start the tutorial</button><button class="ghost" id="tutNo" type="button">Skip, I know how to play</button></div>
+    </div></div>
   </div>
 </div>
 </div>
@@ -4056,6 +4179,7 @@ const playerById = (G, id) => G.players.find(p => p.id === id);
 // no achievements. Three: P3 plays on cfg.p3t's side (P1's by default), in its second place
 function twoP(c){ return !!c && (c.mode === '2p' || !!c.two); }
 function localRoster(cfg){
+  if (cfg.mode === 'tutorial') return [{id: 1, team: 0, ctrl: 'human', slot: 'both', role: 'striker', pu: 'none', name: 'You', avatar: 'P1'}, {id: 2, team: 1, ctrl: 'hold', slot: null, role: 'striker', pu: 'none', name: 'Computer', avatar: 'CP'}];   // (v28.27: the tutorial)
   if (cfg.mode === 'fkdrill'){   // free kick practice: you; their keeper (the computer) and a man in the wall, standing still
     return [{id: 1, team: 0, ctrl: 'human', slot: 'both', role: 'striker', pu: puSel[0], name: 'You', avatar: 'P1'},
             {id: 2, team: 1, ctrl: 'ai', slot: null, role: 'keeper', pu: puSel[1], name: 'Keeper', avatar: 'GK'},
@@ -5523,6 +5647,113 @@ function dribbleMode(){
 }
 
 // ---------- keeper practice: you keep goal, the computer shoots from a new spot each time ----------
+// v28.27 ("make it friendly to begineers, they dont know how to play, so maybe make a tutorial on curls, shoot etc and
+// extrapolation, and option to skip it"): a short course, step by step on a pitch of its own (you, the ball and one
+// computer player who is put where each step needs him): move, kick, score, curl it round a man, a slide tackle, a free
+// kick, what extrapolation is (online), then off to a match. A panel says what to do and when it's done; Next goes on
+// at any time, Skip tutorial leaves it. Offered once to anyone new (no matches played yet), and in the menu always
+const TUT_STEPS = ['move', 'kick', 'score', 'curl', 'slide', 'fk', 'extrap', 'done'];
+const tutKeys = () => { const k = (p, a) => bind[p] && bind[p][a] ? kname(bind[p][a]) : '';
+  return {move: `${['up', 'left', 'down', 'right'].map(a => k('p1', a)).join(' ')} or the arrow keys`, up: `${k('p1', 'up')}/↑`, down: `${k('p1', 'down')}/↓`, left: `${k('p1', 'left')}/←`, right: `${k('p1', 'right')}/→`,
+          kick: k('p1', 'kick') || 'Space', slide: k('p1', 'slide') || 'C'}; };
+function tutorialMode(){
+  const tu = {i: 0, ok: false, okAt: 0, n: 0, tries: 0, targets: [], curled: false, kicked: false, note: ''};
+  const M = {kind: 'tutorial', tu};
+  const me = s => s.G.players.find(p => p.ctrl === 'human') || s.G.players[0], cp = s => s.G.players.find(p => p !== me(s));
+  const step = () => TUT_STEPS[tu.i];
+  const still = (...ds) => { for (const d of ds) d.vx = d.vy = 0; };
+  // where each step starts
+  M.setup = s => {
+    const G = s.G, P = me(s), Q = cp(s), d = G.discs[P.di], b = G.discs[0], gm = goalMid(1), dir = Math.sign(gm.x) || 1;
+    G.state = 1; G.sp = null; G.lastTouch = null; G.ballHist.length = 0; s.msg = null;
+    Object.assign(tu, {ok: false, okAt: 0, n: 0, curled: false, kicked: false, note: '', targets: []});
+    const q = Q && G.discs[Q.di];
+    const park = () => { if (Q){ Q.ctrl = 'hold'; C.setInput(Q, 0); q.x = 0; q.y = -(ST.height - 16); still(q); } };
+    const st = step();
+    if (st === 'move'){ d.x = -dir * 150; d.y = 0; b.x = 0; b.y = ST.height * 0.75; park(); tu.targets = [[-dir * 40, -90], [dir * 100, -20], [-dir * 170, 10]]; /* (clear of the panel at the foot) */ }
+    else if (st === 'kick'){ d.x = -dir * 120; d.y = 0; b.x = -dir * 70; b.y = 0; park(); }
+    else if (st === 'score'){ b.x = gm.x - dir * 170; b.y = -20; d.x = b.x - dir * 50; d.y = -20; park(); }
+    else if (st === 'curl'){ b.x = gm.x - dir * 210; b.y = 0; d.x = b.x - dir * 45; d.y = 0; park(); if (Q){ q.x = gm.x - dir * 110; q.y = 0; still(q); Q.role = 'wall'; } }
+    else if (st === 'slide'){ if (Q){ Q.ctrl = 'hold'; C.setInput(Q, 0); q.x = 60; q.y = -10; still(q); } b.x = 60 - dir * 30; b.y = -10; d.x = -dir * 110; d.y = -10; }   // (the ball out in front of him, toward you)
+    else if (st === 'fk'){ park(); if (Q){ Q.ctrl = 'ai'; Q.role = 'keeper'; q.x = gm.x - dir * 20; q.y = gm.y; still(q); } const x = gm.x - dir * 175; d.x = x - dir * 30; d.y = -40; C.setPiece(G, ST, 'fk', P.team, x, -40, P.id); }
+    else { park(); d.x = -dir * 60; d.y = 0; b.x = 0; b.y = 0; }
+    still(d, b); b.sp = 0; b.atT = 0;
+    tutPanel(s);
+  };
+  M.init = s => { M.setup(s); };
+  const pass = (s, note) => { if (tu.ok) return; tu.ok = true; tu.okAt = performance.now(); tu.note = note || 'Done!'; sfx.chime && sfx.chime(); tutPanel(s); };
+  M.next = s => { if (tu.i < TUT_STEPS.length - 1){ tu.i++; tu.tries = 0; M.setup(s); } };
+  M.before = s => {
+    const G = s.G;
+    if (G.state === 2 && G.timer <= 1){ G.state = 1; if (tu.ok) M.next(s); else M.setup(s); return; }   // (after a goal: on, or this step again)
+  };
+  M.after = s => {
+    const G = s.G, P = me(s), d = G.discs[P.di], b = G.discs[0], st = step();
+    for (const e of G.events){
+      if (e.type === 'kick' && e.pid === P.id){ tu.kicked = true; if (st === 'kick') pass(s, 'Nice kick! Running into the ball only pushes it: the kick key is what gives it power.');
+        if (st === 'curl') tu.curled = Math.abs(b.sp || 0) > 0.01;
+        if (st === 'slide' && e.slide) pass(s, 'Clean tackle: you got the ball first.'); }
+      if (e.type === 'foul' && e.pid === P.id && st === 'slide'){ tu.tries++; tu.note = 'Foul! You took the man first. Slide at the ball, from the side it sticks out.'; setTimeout(() => { if (sess === s && step() === 'slide' && !tu.ok) M.setup(s); }, 1400); tutPanel(s); }
+      if (e.type === 'goal'){
+        if (st === 'score' && e.team === P.team) pass(s, 'Goal! That\'s the whole idea.');
+        else if (st === 'curl' && e.team === P.team){ tu.tries++; if (tu.curled) pass(s, 'Curled it in! Holding up or down as you kick bends the ball.'); else { tu.note = tu.tries >= 3 ? 'Scored. It went in straight, which is fine too; you can go on.' : 'Scored, but straight: hold up or down as you kick to bend it.'; if (tu.tries >= 3) pass(s, tu.note); else tutPanel(s); } }
+        else if (st === 'fk' && e.team === P.team) pass(s, 'Free kick goal!');
+      }
+    }
+    if (G.state !== 1) return;
+    if (st === 'move' && !tu.ok){ const t = tu.targets[tu.n]; if (t && Math.hypot(d.x - t[0], d.y - t[1]) < 24){ tu.n++; sfx.kick && sfx.kick(0.3); if (tu.n >= tu.targets.length) pass(s, 'You can move. Diagonals work too: hold two keys.'); else tutPanel(s); } }
+    if (st === 'fk' && !tu.ok && !G.sp && tu.kicked){ tu.fkT = (tu.fkT || 0) + 1; if (tu.fkT > 150) pass(s, 'That\'s a free kick. The keeper reads your aim: aim one way, curl it the other.'); }
+    if (st === 'kick' || st === 'score' || st === 'curl'){   // (the ball gone off somewhere, or stopped short: put it back)
+      const v = Math.hypot(b.vx, b.vy); if (tu.kicked && !tu.ok && v < 0.05){ tu.wait = (tu.wait || 0) + 1; if (tu.wait > 90){ tu.wait = 0; if (st !== 'kick'){ tu.tries++; tu.note = st === 'curl' && tu.tries < 3 ? 'Not in. Again: hold up or down as you kick.' : 'Not in. Have another go.'; M.setup(s); tu.note = st === 'curl' && tu.tries < 3 ? 'Not in. Again: hold up or down as you kick.' : 'Not in. Have another go.'; tutPanel(s); } } } else tu.wait = 0;
+    }
+    if (tu.ok && performance.now() - tu.okAt > 2200 && st !== 'extrap' && st !== 'done' && G.state === 1) M.next(s);
+  };
+  // the targets of the first step, and the curl's way round
+  M.draw = V => {
+    const now = performance.now(), st = step();
+    if (st === 'move') tu.targets.forEach((t, k) => { if (k < tu.n) return; const cur = k === tu.n, pr = (Math.sin(now / 220) + 1) / 2;
+      ctx.save(); ctx.globalAlpha = cur ? 1 : 0.35; ctx.strokeStyle = '#ffd166'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(t[0], t[1], 22 + (cur ? pr * 4 : 0), 0, C.TAU); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,209,102,.18)'; ctx.fill(); ctx.fillStyle = '#ffd166'; ctx.font = "800 15px 'Barlow Condensed', Rubik, sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.save(); ctx.translate(t[0], t[1]); ctx.scale(Math.sign(ctx.getTransform().a) || 1, 1); ctx.fillText(String(k + 1), 0, 1); ctx.restore(); ctx.restore(); });
+    const Q = sess && cp(sess); if (st === 'curl' && !tu.kicked && Q){ const b = V.discs[0], gm = goalMid(1), q = V.discs[Q.di], sd = 70; ctx.save(); ctx.setLineDash([4, 7]); ctx.strokeStyle = 'rgba(255,209,102,.7)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.quadraticCurveTo(q.x, q.y - sd, gm.x, gm.y - 20); ctx.stroke(); ctx.restore(); }
+  };
+  M.hud = s => `Tutorial · ${tu.i + 1} of ${TUT_STEPS.length}`;
+  return M;
+}
+// the panel: which step, what to do, how it's going; Next (on at any time) and Skip tutorial
+function tutPanel(s){
+  const box = $('tutBox'), m = s && s.mode && s.mode.kind === 'tutorial' ? s.mode : null;
+  if (!m){ box.hidden = true; return; }
+  const tu = m.tu, st = TUT_STEPS[tu.i], K = tutKeys(), kb = t => `<kbd>${t}</kbd>`;
+  const T = {
+    move: ['Move', `Move with ${kb(K.move)}. Run through the yellow circles, in order.`, `${tu.n} of ${tu.targets.length || 3}`],
+    kick: ['Kick', `Walk up to the ball and press ${kb(K.kick)} when you're right next to it. Running into it only nudges it.`, ''],
+    score: ['Score', `Shoot it into the goal on the right: get behind the ball, face the goal, ${kb(K.kick)}.`, ''],
+    curl: ['Curl it', `A man is in the way. Hold ${kb(K.up)} or ${kb(K.down)} as you kick: the ball bends that way and still goes where you aimed. Bend it round him.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    slide: ['Slide tackle', `Press ${kb(K.slide)} to slide. The computer has the ball: slide into the ball, not the man (taking the man first is a foul).`, ''],
+    fk: ['Free kick', `You were fouled: your free kick. ${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)} to power it up and let go to shoot. The dots show where it will go.`, ''],
+    extrap: ['Extrapolation (online)', `Online, what you see of the others comes from the host a moment late (your ping). <b>Extrapolation</b> draws everyone a little ahead, where they'll be, so it feels like there's no delay. 0 shows exactly what arrived (smooth but late); higher feels quicker, but other players can jump a little when they change direction. Most players like about 90. You can change it any time in ⚙ Settings.`, ''],
+    done: ['You\'re ready', `That's the game. Two more things: tap ${kb(K.kick)} twice quickly to call for the ball (your computer teammates pass to you, your keeper comes out when they're through), and Esc or M opens the menu. Have a match against the computer on Easy?`, ''],
+  }[st];
+  $('tutStep').textContent = `${tu.i + 1} / ${TUT_STEPS.length}`; $('tutTitle').textContent = T[0];
+  $('tutText').innerHTML = T[1];
+  $('tutState').textContent = tu.ok ? '✓ ' + tu.note : tu.note || T[2];
+  $('tutState').classList.toggle('ok', tu.ok);
+  const ex = $('tutExtra'); ex.textContent = '';
+  if (st === 'extrap'){ for (const v of [0, 60, 93, 120]){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (Math.round(extrapMs()) === v ? ' on' : ''); b.textContent = v + ' ms'; b.onclick = e => { setExtrap(v); e.target.blur(); tutPanel(s); }; ex.append(b); } }
+  if (st === 'done'){ const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Play the computer (Easy)'; b.onclick = () => { tutEnd(true); start(Object.assign(cfgFor('ai', 1), {diff: 0})); }; ex.append(b); }
+  $('tutNext').textContent = st === 'done' ? 'Back to the menu' : tu.ok || st === 'extrap' ? 'Next ›' : 'Skip this step ›';
+  box.hidden = false;
+}
+function tutStart(){ $('tutWelcome').hidden = true; start(Object.assign(cfgFor('practice', 1), {mode: 'tutorial', slide: true, fk: true, curve: true, diff: 0, timeLimit: 0, scoreLimit: 0})); }
+function tutEnd(finished){ store.set('pb.tut', finished ? 'done' : 'skipped'); $('tutBox').hidden = true; }
+$('tutNext').addEventListener('click', e => { e.target.blur(); const s = sess; if (!s || !s.mode || s.mode.kind !== 'tutorial') return; if (TUT_STEPS[s.mode.tu.i] === 'done'){ tutEnd(true); exitToMenu(); return; } s.mode.next(s); });
+$('tutSkip').addEventListener('click', e => { e.target.blur(); tutEnd(false); exitToMenu(); });
+document.querySelectorAll('.tutb').forEach(b => b.addEventListener('click', tutStart));
+$('tutGo').addEventListener('click', tutStart);
+$('tutNo').addEventListener('click', () => { store.set('pb.tut', 'skipped'); $('tutWelcome').hidden = true; });
+// (first time here: no matches played and never asked)
+setTimeout(() => { if (!store.get('pb.tut', null) && !(you && you.games > 0) && !sess && !$('menu').hidden) $('tutWelcome').hidden = false; }, 400);
 function keeperMode(){
   const kp = {state:'ready', t:0, touchT:-1, away:0, wait:0, saves:0, goals:0, misses:0, attempts:0, streak:0, best:0, speed:0, fast:0};
   const M = {kind:'keeper', kp, quietGoals: true};
@@ -6500,6 +6731,7 @@ function render(dt, clip){
   const SPV = V && V.state === 1 && !V.replaying && !V.practice ? (V.sp ? V : s && s.G && s.G.sp && s.G.state === 1 ? Object.assign({}, V, {sp: s.G.sp}) : null) : null;
   if (SPV) safeDraw('free kick zone', () => drawSetPiece(SPV, s));
   if (V && !clip && SET.ref && !(s && s.mode) && V.nt !== 3 && !V.replaying && !V.practice) safeDraw('spray', () => { const now = performance.now(); sprayTick(V, now); drawSpray(now); });
+  if (V && !clip && s && s.mode && s.mode.draw && !V.replaying) safeDraw('mode', () => s.mode.draw(V));   // (v28.27: the tutorial's targets)
   for (const j of ST.joints){ if (!j.color || !D[j.d0] || !D[j.d1]) continue; ctx.strokeStyle = j.color; ctx.beginPath(); ctx.moveTo(D[j.d0].x, D[j.d0].y); ctx.lineTo(D[j.d1].x, D[j.d1].y); ctx.stroke(); }
   if (V){
     const VP = V.players.filter(p => p.ctrl !== 'gone');   // (an empty place is off the pitch: not drawn)
@@ -7026,6 +7258,7 @@ function autoPause(){
   if (s && s.kind === 'local' && !s.done && !s.rp && !s.replay && s.G && s.G.state !== 3 && s.G.pause < 120){ s.G.pause = 120; if (!document.hidden) focusPaused = s; }
 }
 function start(cfg){
+  $('tutBox').hidden = true; $('tutWelcome').hidden = true;
   // the copy of you needs something to copy first
   const bot = cfg.mode === 'mirror' ? youBot() : null;
   if (cfg.mode === 'mirror' && !bot){ if (sess && sess.kind === 'local') learnLeave(sess); sess = null; for (const id of panels) $(id).hidden = true; showMenu('Vs your copy', 'Your copy is the computer at Insane with your moves. Play a match against the computer first so it can learn them, then come back.'); return; }
@@ -7036,7 +7269,7 @@ function start(cfg){
   useTri(cfg.mode === 'tri');   // (1v1v1 on its own arena)
   const roster = cfg.roster || localRoster(cfg);
   const s = newSession('local', cfg, roster);
-  if (cfg.mode === 'tri') s.mode = triMode(); else if (cfg.mode === 'practice') s.mode = practiceMode(); else if (cfg.mode === 'pens') s.mode = pensMode(!!cfg.two); else if (cfg.mode === 'duel') s.mode = duelMode(!!cfg.two); else if (cfg.mode === 'keeper') s.mode = keeperMode(); else if (cfg.mode === 'wall') s.mode = wallMode(cfg); else if (cfg.mode === 'dribble') s.mode = dribbleMode(); else if (cfg.mode === 'fkdrill') s.mode = fkMode();
+  if (cfg.mode === 'tri') s.mode = triMode(); else if (cfg.mode === 'practice') s.mode = practiceMode(); else if (cfg.mode === 'pens') s.mode = pensMode(!!cfg.two); else if (cfg.mode === 'duel') s.mode = duelMode(!!cfg.two); else if (cfg.mode === 'keeper') s.mode = keeperMode(); else if (cfg.mode === 'wall') s.mode = wallMode(cfg); else if (cfg.mode === 'dribble') s.mode = dribbleMode(); else if (cfg.mode === 'fkdrill') s.mode = fkMode(); else if (cfg.mode === 'tutorial') s.mode = tutorialMode();
   if (s.mode && s.mode.init) s.mode.init(s);
   legIntro(s);
   if (bot){ const opp = s.G.players.find(p => p.team === 1); if (opp) s.custom = new Map([[opp.id, bot]]); }
@@ -7050,7 +7283,7 @@ function start(cfg){
   if (bot) say(`Your copy: Insane skill${bot.aim && bot.trick ? ' + your favourite corner and kick-off move' : bot.aim ? ' + your favourite corner' : bot.trick ? ' + your kick-off move' : ''}`, 1);
   pushInputs();
 }
-const drill = mode => mode === 'practice' || mode === 'pens' || mode === 'duel' || mode === 'keeper' || mode === 'wall' || mode === 'dribble' || mode === 'fkdrill';
+const drill = mode => mode === 'practice' || mode === 'pens' || mode === 'duel' || mode === 'keeper' || mode === 'wall' || mode === 'dribble' || mode === 'fkdrill' || mode === 'tutorial';
 function cfgFor(mode, size){
   const c = {mode, size, diff: SET.diff, timeLimit: drill(mode) ? 0 : SET.time, scoreLimit: drill(mode) ? 0 : SET.goals,
              curve: SET.curve && mode !== 'keeper', slide: SET.slide && !drill(mode), fk: mode === 'fkdrill' || (SET.fk && SET.slide && !drill(mode)), curveLv: SET.curveLv, tie: drill(mode) || mode === 'tri' ? 0 : SET.tie};   // the match rules from the settings
@@ -7273,7 +7506,7 @@ $('setDone').addEventListener('click', closeSettings);
 document.querySelectorAll('.hlpb').forEach(b => b.addEventListener('click', () => { renderKeys(); openPanel('helpPanel'); $('helpPanel').scrollTop = 0; }));
 $('helpDone').addEventListener('click', () => closePanel('helpPanel'));
 function exitToMenu(text){
-  const s = sess, given = !!text;
+  const s = sess, given = !!text; $('tutBox').hidden = true;
   learnLeave(s);
   if (NET.on) leaveOnline();
   sess = null; fx.goal = fx.moment = null; fx.pops.length = 0; lines.length = 0; kitOverride = null; applyKits(); rpHide(); useTri(false);
@@ -8417,7 +8650,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.26';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.27';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10366,6 +10599,10 @@ function fitStage(){
   if (!inFs()) for (const el of stage.children){
     if (el.hidden || !el.classList.contains('overlay') || el.id === 'onlinePanel' || el.id === 'scoresPanel' || el.id === 'setPanel' || el.id === 'helpPanel') continue;   // those fill the screen, or scroll
     const cs = getComputedStyle(el); let h = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0), n = 0;
+    if (cs.display === 'grid'){   // (v28.27: the menu in two columns: down to the lowest thing in it, not the sum of both)
+      let bottom = 0; for (const c of el.children){ if (c.hidden || !c.getClientRects().length || getComputedStyle(c).position === 'absolute') continue; bottom = Math.max(bottom, c.offsetTop + c.offsetHeight); }
+      need = Math.max(need, Math.ceil(bottom + (parseFloat(cs.paddingBottom) || 0))); continue;
+    }
     for (const c of el.children){ if (c.hidden || !c.getClientRects().length) continue; h += c.offsetHeight; n++; }
     need = Math.max(need, Math.ceil(h + Math.max(0, n - 1) * (parseFloat(cs.rowGap) || 0)));
   }
@@ -10440,5 +10677,5 @@ boot();
 })();
 
 </script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800&family=Bungee&family=Rubik:wght@400;500;700&display=swap">
 
