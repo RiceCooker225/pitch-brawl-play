@@ -1042,7 +1042,7 @@
       <section class="hsec"><h3>Play</h3><ul>
         <li>Kick fires as soon as the ball's in reach: hold it as you run in (you run a little slower while you hold it).</li>
         <li>After a goal, press your keys again to move.</li>
-        <li>Tap kick twice quickly: call for the ball. Your computer teammates pass it to you as soon as it's safe (your keeper holds it a moment for you). When one of theirs has it near your goal, it sends your computer keeper out at him. A third quick tap takes the call back.</li>
+        <li>Tap kick twice quickly: call for the ball. Your computer teammates pass it to you as soon as it's safe (your keeper holds it a moment for you). When one of theirs has it near your goal, it sends your computer keeper out at him.</li>
         <li>Keys 1–8 (or 😎 on the pitch): emotes over your player, EZ, Skill issue 💀 and more. Online everyone sees them. Two on one keyboard: P1 has 1–5, P2 has 6–0 (or all eight on the number pad).</li>
         <li><kbd>Esc</kbd> or <kbd>M</kbd> menu · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>+</kbd> <kbd>−</kbd> zoom · online <kbd>Enter</kbd> or <kbd>T</kbd> chat</li>
         <li>In fullscreen inside Claude the browser always takes Esc to leave fullscreen: <kbd>M</kbd> opens the menu and stays fullscreen. Left by Esc, it goes back to fullscreen on your next key or click.</li>
@@ -2207,7 +2207,7 @@ function PBCORE(){
   }
   // v27.2 ("the opponent players for freekicks move slower than usual, so they get less time to prepare and more time for
   // freekick taker"): until a free kick is taken the side defending it runs at FK_SLOW of its speed (slow)
-  const FK_SLOW = 0.6, CALL_TAP = 18, CALL_BALL = 45, CALL_QUIET = 24, CALL_CONFIRM = 10;
+  const FK_SLOW = 0.6, CALL_TAP = 18, CALL_BALL = 45, CALL_QUIET = 24;
   function movePlayer(ST, p, d, slow){
     const pp = ST.pp, m = PU[p.pu] || PU.none, b = p.input;
     if (p.slide > 0){ d.damping = SLIDE_DAMP; return; }   // sliding: no steering
@@ -2239,22 +2239,20 @@ function PBCORE(){
       // goal's replay or at the kick-off (then, with v28.20's longer reach, the keeper took the kick-off himself), and
       // kick mashed by the ball trying to hit it. Now a tap counts only in play (not a goal, a kick-off or a set piece),
       // one at a time (not a burst saved up while the game wasn't running), and not with the ball by your feet
-      // A call is a clean double tap: quiet before it (CALL_QUIET), two taps within CALL_TAP, and no third (mashing) within
-      // CALL_CONFIRM after, when it goes
+      // A call is a double tap: quiet before it (CALL_QUIET), two taps within CALL_TAP
       if (p.ctrl === 'human' || p.ctrl === 'remote'){
         if (p.kPress !== p.kSeen){
           const burst = (p.kPress | 0) - (p.kSeen | 0) > 1; p.kSeen = p.kPress;
           const b0 = D[0], near = Math.hypot(b0.x - d.x, b0.y - d.y) < d.radius + b0.radius + CALL_BALL, live = G.state === 1 && !G.sp && !burst && !near;
           const tp = p.taps || (p.taps = []);
-          if (!live){ tp.length = 0; p.callPend = null; }
+          if (!live) tp.length = 0;
           else { tp.push(G.frame); if (tp.length > 3) tp.shift(); const n = tp.length;
             // (v28.31, "the rush for gk, its so late": the call went CALL_CONFIRM ticks after the second tap, to be sure no
-            // third came; now at once, and a third close behind (mashing) takes it back)
-            if (p.callPend != null && G.frame - p.callPend < CALL_CONFIRM){ p.callAt = null; p.callPend = null; }
-            else if (n >= 2 && tp[n - 1] - tp[n - 2] <= CALL_TAP && (n < 3 || tp[n - 2] - tp[n - 3] > CALL_QUIET)){ p.callPend = G.frame; p.callAt = G.frame; if (ev) ev.push({type:'call', id: ++G.eventId, frame: G.frame, pid: p.id}); }
+            // third came; now at once. v28.33, "idk pressing third time to cancel is a good idea": a third tap no longer
+            // takes it back; more taps close behind (mashing) only make the one call: CALL_QUIET)
+            if (n >= 2 && tp[n - 1] - tp[n - 2] <= CALL_TAP && (n < 3 || tp[n - 2] - tp[n - 3] > CALL_QUIET)){ p.callAt = G.frame; if (ev) ev.push({type:'call', id: ++G.eventId, frame: G.frame, pid: p.id}); }
           }
         }
-        if (p.callPend != null && G.frame - p.callPend >= CALL_CONFIRM){ p.callPend = null; p.taps = []; }
       }
       if (!(p.input & 16)) p.kicking = false;
       if (p.kickMin > 0) p.kickMin--;
@@ -5903,7 +5901,7 @@ function tutPanel(s){
     kick: ['Kick', `Walk up to the ball and ${K.touch ? 'tap' : 'press'} ${kb(K.kick)} when you're right next to it. Running into it only nudges it. ${K.touch ? 'Hold it' : 'Holding it'} as you run in kicks the moment it's in reach (you run a little slower while you hold it).`, ''],
     score: ['Score', `Shoot it into the goal on the right: get behind the ball, face the goal, ${kb(K.kick)}.`, ''],
     curl: ['Curl it', `A man is in the way. Hold ${kb(K.up)} or ${kb(K.down)} as you kick: the ball bends that way and still goes where you aimed. Bend it round him. (Auto curl in Controls curls your shots into the corner by themselves.)`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    call: ['Call for the ball', `Your teammate has it. Tap ${kb(K.kick)} twice quickly (away from the ball) to call for it: your computer teammates pass to you, and your keeper holds it a moment for you. A third quick tap takes the call back.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    call: ['Call for the ball', `Your teammate has it. Tap ${kb(K.kick)} twice quickly (away from the ball) to call for it: your computer teammates pass to you, and your keeper holds it a moment for you.`, tu.tries ? `try ${tu.tries + 1}` : ''],
     slide: ['Slide tackle', `${K.touch ? 'Tap' : 'Press'} ${kb(K.slide)} to slide. The computer has the ball: slide into the ball, not the man (taking the man first is a foul, and in your own area a penalty).`, ''],
     fk: ['Free kick', `You were fouled: your free kick. ${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)} to power it up and let go to shoot. The dots show where it will go.`, ''],
     emote: ['Emotes', K.touch ? `Tap 😎 on the pitch and pick one: it shows over your player (EZ, Skill issue 💀 and more).` : `Press a number, ${kb('1')} to ${kb('8')}: an emote over your player (EZ, Skill issue 💀 and more).`, ''],
@@ -8834,7 +8832,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.32';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.33';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
