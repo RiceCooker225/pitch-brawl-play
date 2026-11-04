@@ -2074,6 +2074,16 @@ function PBCORE(){
     const wall = out.sort((a, b) => dist(a) - dist(b)).slice(0, FK_REF_WALL).sort((a, b) => across(a) - across(b));
     wall.forEach((q, i) => { const d = D[q.di], w = fkWallSpot(sp, u, wall.length, i, d.radius); d.x = w.x; d.y = w.y; d.vx = d.vy = 0; });
   }
+  // v28.36 ("when freekick is in corner, the zone is like in goal so we cant save it"): as in football, the side
+  // defending may stand on its own goal line between the posts (FK_LINE px of depth) inside the zone, FK_LINE_GAP px
+  // clear of the ball. Out by the corner the circle covered most of the goal mouth, and a man inside it was pushed out
+  // along its radius, onto the line somewhere near the middle: the near post was nobody's
+  const FK_LINE = 12, FK_LINE_GAP = 30;
+  function fkLineOk(sp, x, y, r){
+    if (!sp || sp.kind !== 'fk' || sp.gx == null) return false;
+    const depth = (x - sp.gx) * sp.inward;
+    return depth > -r && depth <= r + FK_LINE && Math.abs(y - sp.gy) <= sp.half && Math.hypot(x - sp.x, y - sp.y) >= r + FK_LINE_GAP;
+  }
   // until it's taken: opponents out of the circle (free kick); everyone but the taker behind the ball, the keeper on his
   // line, only sideways (penalty)
   function keepOut(G, sp){
@@ -2084,12 +2094,14 @@ function PBCORE(){
         if (q.team === sp.team && (sp.aim == null || q.id === sp.tk)) continue;   // (a person's: his teammates FK_MATE_R off it)
         const dx = d.x - sp.x, dy = d.y - sp.y, L = Math.sqrt(dx * dx + dy * dy), R = (q.team === sp.team ? FK_MATE_R : FK_R) + d.radius;
         if (L >= R) continue;
+        if (q.team !== sp.team && G.nt !== 3 && fkLineOk(sp, d.x, d.y, d.radius)) continue;   // (v28.36: on his goal line)
         const ux = L > 0.01 ? dx / L : -sp.inward, uy = L > 0.01 ? dy / L : 0;
         d.x = sp.x + ux * R; d.y = sp.y + uy * R;
         const vn = d.vx * ux + d.vy * uy; if (vn < 0){ d.vx -= vn * ux; d.vy -= vn * uy; }
         // (v28.8, the zone 120: a free kick close in pushed their keeper back into his own net; as in football, they
         // may stand on their goal line then)
-        if (q.team !== sp.team && G.nt !== 3 && (d.x - sp.gx) * sp.inward < d.radius + 1 && Math.abs(d.y - sp.gy) < sp.half + 40){ d.x = sp.gx + sp.inward * (d.radius + 1); if (d.vx * sp.inward < 0) d.vx = 0; }
+        if (q.team !== sp.team && G.nt !== 3 && (d.x - sp.gx) * sp.inward < d.radius + 1 && Math.abs(d.y - sp.gy) < sp.half + 40){ d.x = sp.gx + sp.inward * (d.radius + 1); if (d.vx * sp.inward < 0) d.vx = 0;
+          const ex = d.x - sp.x, need = d.radius + FK_LINE_GAP; if (Math.hypot(ex, d.y - sp.y) < need){ const off = Math.sqrt(Math.max(0, need * need - ex * ex)); d.y = sp.y + (d.y >= sp.y ? 1 : -1) * off; } }   // (v28.36: clear of the ball)
       } else if (q.id === sp.kp){
         d.x = sp.gx + sp.inward * (d.radius + 1); d.vx = 0;
         const lo = sp.gy - sp.half + 12, hi = sp.gy + sp.half - 12;
@@ -2227,7 +2239,8 @@ function PBCORE(){
   }
   // v27.2 ("the opponent players for freekicks move slower than usual, so they get less time to prepare and more time for
   // freekick taker"): until a free kick is taken the side defending it runs at FK_SLOW of its speed (slow)
-  const FK_SLOW = 0.6, CALL_TAP = 18, CALL_BALL = 45, CALL_QUIET = 24;
+  // (v28.36, "nerf movement speed to 50% for freekicks": 0.6 -> 0.5)
+  const FK_SLOW = 0.5, CALL_TAP = 18, CALL_BALL = 45, CALL_QUIET = 24;
   // v28.34 ("powershot option somehow"), cfg.power: a person who keeps the ball at his feet (within kick reach) for
   // POWER_T ticks has it charged (p.pw; a few ticks off it, POWER_SLACK, are allowed; anyone else touching it, a goal, a
   // set piece or a slide end it): his next kick of it is POWER_MUL as strong. v28.35 ("ai should get power shots asw"):
@@ -2602,7 +2615,7 @@ function PBCORE(){
 
   return {TAU, TICK, FL, IN, TEAMS, PU, KMH, limitHit, buildStadium, colliders, physics, crossesGoal, newGame, resetPositions, setInput, step, endGame, overtime, topTied,
           copyGame, extrapolate, ballPath, playerDisc, newStats, pstat, timeUp, inArea, areaOf, ballArea, setPiece,
-          CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, slideAim, FK_R, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
+          CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, slideAim, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
           fkPreview, FK_SHOW_PW, FK_AUTO, FK_HOLD, FK_HOLD_AIM, CURL, fkWallLine, fkWallSpot, autoCurl, manualCurl, curlTo, AC_BIT, INV_BIT, POWER_T, POWER_MUL, flightCross, curveMul, CURVE_LV,
           AUTO: {RANGE: AUTO_RANGE, WIDE: AUTO_WIDE, FK_WIDE, MID: AUTO_MID, IN: AUTO_IN, MAX: AUTO_MAX, K: AUTO_K, SAFE: AUTO_SAFE, FAR: AUTO_FAR, SMALL: AUTO_SMALL}, FK_CURVE};
 }
@@ -2880,6 +2893,9 @@ function PBAI(C){
   // and the way there round it: a spot across the circle from me (the straight line through it), a point on its edge a
   // little further round toward it first (the fouler, behind the ball, ran at it trying to get back in goal)
   function fkOut(sp, me, x, y){
+    // (v28.36: their goal line between the posts is allowed inside the zone, clear of the ball: C.fkLineOk; on it
+    // already, along it)
+    if (sp.team !== undefined && C.fkLineOk(sp, x, y, me.radius) && (C.fkLineOk(sp, me.x, me.y, me.radius) || Math.hypot(me.x - sp.x, me.y - sp.y) >= C.FK_R + me.radius)) return [x, y];
     const R0 = C.FK_R + me.radius + 4, dx = x - sp.x, dy = y - sp.y, d = Math.hypot(dx, dy);
     if (d < R0){ if (d > 0.01){ x = sp.x + dx / d * R0; y = sp.y + dy / d * R0; } else { x = sp.x - sp.inward * R0; y = sp.y; } }
     const ex = x - me.x, ey = y - me.y, L2 = ex * ex + ey * ey || 1, u = cl(((sp.x - me.x) * ex + (sp.y - me.y) * ey) / L2, 0, 1);
@@ -7541,6 +7557,7 @@ function updateUI(){
   { const mu = !$('menu').hidden && panelsClosed(); if (shown.mu !== mu){ shown.mu = mu; document.body.classList.toggle('menuup', mu); } }
   { const ns = !s; if (shown.ns !== ns){ shown.ns = ns; document.body.classList.toggle('nosess', ns); } }   // (no match: no empty scoreboard over the menu)
   chatPlace(); setHidden('chatBtn', !(NET.on && s && !s.done && !s.rp));
+  { const sk = $('introSkip'), off = !(s && s.intro); if (sk.hidden !== off) sk.hidden = off; }   // (v28.36: left in the walk-out, its Skip stayed over the menu)
   if (!s){
     setText('s0', 0); setText('s1', 0); setText('clock', SET.time ? `${SET.time}:00` : '0:00'); setText('clockLabel', SET.time ? 'Time left' : 'Time'); boardNames();
     if (shown.late){ shown.late = 0; clockBox.classList.remove('late', 'end'); }
@@ -9046,7 +9063,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.35';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.36';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10131,6 +10148,7 @@ function promoteSession(gs, L, oldMe, me){
                                  role: r[6] === 'k' ? 'keeper' : 'striker', name: clean(r[4], 16), avatar: clean(r[5], 2), pu: Array.isArray(L.pu) && PU[L.pu[r[1] ? 1 : 0]] ? L.pu[r[1] ? 1 : 0] : 'none'}));
   const s = newSession('host', gs.cfg, roster), G = s.G, O = gs.G;
   for (const k of ['frame', 'state', 'timer', 'time', 'koTeam', 'pause', 'et']) if (O[k] !== undefined) G[k] = O[k];
+  if ((gs.hostIntro || gs.intro) && G.pause >= 120) G.pause = 0;   // (v28.36: the old host's walk-out held it: not a pause of anyone's, the match starts)
   G.score = O.score.slice(); G.sp = O.sp ? Object.assign({}, O.sp) : null; G.eventId = Math.max(G.eventId, gs.lastEv + 1);
   G.discs = O.discs.map(d => Object.assign({}, d));
   G.players.forEach((p, i) => { const q = O.players[i]; if (!q) return; for (const k of ['slide', 'slideCd', 'down', 'slideDx', 'slideDy', 'slideBall', 'kickMin', 'kickBurst', 'charge']) if (q[k] !== undefined) p[k] = q[k]; p.peer = roster[i].peer; if (p.ctrl === 'gone') parkSeat(G, p); });
