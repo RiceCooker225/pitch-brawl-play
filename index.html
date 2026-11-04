@@ -614,7 +614,8 @@
   @media (pointer:coarse){ .touch{display:block} #helpPanel .kb{display:none} }
   /* laptops: the pitch, the scoreboard and the stats fit the screen's height (--ar: the stadium's width / height), and
      the title steps aside during a match on a short screen */
-  @media (min-width:641px){ .board,.stats,.stage{width:min(100%,940px,max(min(520px,calc(300px * var(--ar,2.15))),calc((100vh - 190px) * var(--ar,2.15))))} }
+  @media (min-width:641px){ .board,.stats,.stage,.tutbox{width:min(100%,940px,max(min(520px,calc(300px * var(--ar,2.15))),calc((100vh - 190px) * var(--ar,2.15))))}
+    body.tut .board,body.tut .stats,body.tut .stage,body.tut .tutbox{width:min(100%,940px,max(min(480px,calc(260px * var(--ar,2.15))),calc((100vh - 198px - var(--tutH,130px)) * var(--ar,2.15))))} }
   @media (max-height:820px){ body.inmatch > header{display:none} }
   /* keys aren't reaching the game (the website around it or another window has them): over the pitch */
   .focusnote{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px;
@@ -721,8 +722,10 @@
   .tutwel p{max-width:none;color:#c9cfdc;font-size:14px;line-height:1.5}
   .tutwel .row{justify-content:flex-start;margin-top:4px} .tutwel button{border-radius:0}
   /* the tutorial's panel, over the foot of the pitch */
-  .tutbox{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:4;width:min(580px,94%);display:flex;flex-direction:column;gap:6px;text-align:left;
-          background:rgba(34,39,52,.96);border-left:5px solid var(--accent);padding:10px 12px 10px 14px;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+  /* v28.35 ("tutorial blocks my view"): the panel under the pitch, not over it (the pitch makes room: body.tut) */
+  .tutbox{position:relative;z-index:4;width:min(100%,940px);margin:8px auto 0;display:flex;flex-direction:column;gap:6px;text-align:left;box-sizing:border-box;
+          background:rgba(34,39,52,.96);border-left:5px solid var(--accent);padding:9px 12px 9px 14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  #game:fullscreen .tutbox,#game.pfs .tutbox{width:100%;margin:0;flex:none}
   .tutbox[hidden]{display:none}
   .introskip{position:absolute;right:12px;bottom:12px;z-index:5;font-family:'Barlow Condensed',Rubik,sans-serif;font-style:italic;font-weight:800;letter-spacing:.04em;text-transform:uppercase;border-radius:0;padding:8px 16px}
   .introskip[hidden]{display:none}
@@ -985,7 +988,7 @@
     <section class="dsec"><h3>Match rules</h3>
       <label class="opt"><input type="checkbox" id="optSlide"><span><b>Slide tackles</b><small>Get the ball first; take the man in your own area and it's a penalty.</small></span></label>
       <label class="opt"><input type="checkbox" id="optFk"><span><b>Free kicks</b><small>Take the man anywhere else and it's a free kick (off: only penalties).</small></span></label>
-      <label class="opt"><input type="checkbox" id="optPower"><span><b>Power shot</b><small>Keep the ball at your feet for a moment: a ring fills round it, the ball glows, and your next kick is a power shot (about half as hard again). People only, not in practice.</small></span></label>
+      <label class="opt"><input type="checkbox" id="optPower"><span><b>Power shot</b><small>Keep the ball at your feet for a moment: a ring fills round it, the ball glows, and your next kick is a power shot (about half as hard again). The computer charges too: watch for its ring. Not in practice drills.</small></span></label>
       <label class="dline" for="optCurve" title="How much your kicks curl when you hold a direction across them as you kick: 0% never, 60% normal, 100% the most (free kicks: you set their curl with left and right)">Curve <select id="optCurve"><option value="0">0% · off</option><option value="20">20%</option><option value="40">40%</option><option value="60">60% · normal</option><option value="80">80%</option><option value="100">100% · max</option></select></label>
       <p class="note dnote" id="ruleNote">From the next match. Online, the host's settings count.</p>
     </section>
@@ -1051,7 +1054,7 @@
       </section>
       <section class="hsec"><h3>Play</h3><ul>
         <li>Kick fires as soon as the ball's in reach: hold it as you run in (you run a little slower while you hold it).</li>
-        <li>Power shot (when it's on in ⚙ Settings): keep the ball at your feet until the ring round it fills and it glows; your next kick is a power shot.</li>
+        <li>Power shot (when it's on in ⚙ Settings): keep the ball at your feet until the ring round it fills and it glows; your next kick is a power shot. Learn it: Practice → Power shot lesson.</li>
         <li>After a goal, press your keys again to move.</li>
         <li>Tap kick twice quickly: call for the ball. Your computer teammates pass it to you as soon as it's safe (your keeper holds it a moment for you). When one of theirs has it near your goal, it sends your computer keeper out at him.</li>
         <li>Emotes show over your player (EZ, Skill issue 💀 and more); online everyone sees them.</li>
@@ -1096,6 +1099,7 @@
       <div class="tiles c3">
         <button class="tile tutb" type="button"><i class="ic" data-ic="target"></i><span><b>Tutorial</b><small>every control, step by step</small></span></button>
         <button class="tile curlb" type="button"><i class="ic" data-ic="target"></i><span><b>Curl lesson</b><small>bend it round a man, in at the far post, auto curl, free kicks</small></span></button>
+        <button class="tile powerb" type="button"><i class="ic" data-ic="target"></i><span><b>Power shot lesson</b><small>charge it, shoot it, keep it, past a keeper</small></span></button>
         <button class="tile" data-mode="practice" data-size="1" type="button"><i class="ic" data-ic="target"></i><span><b>Shooting</b><small>beat the keeper</small></span></button>
         <button class="tile" data-mode="fkdrill" data-size="1" type="button" title="Free kicks from all over, a wall and a computer keeper: up and down aim, left and right curl it round the wall, hold kick to power it up"><i class="ic" data-ic="fk"></i><span><b>Free kicks</b><small>past the wall and keeper</small></span></button>
         <button class="tile" data-mode="dribble" data-size="1" type="button" title="You have the ball and a computer defender is in your way: get past him and score"><i class="ic" data-ic="cone"></i><span><b>Dribbling</b><small>past the defender</small></span></button>
@@ -2226,7 +2230,8 @@ function PBCORE(){
   const FK_SLOW = 0.6, CALL_TAP = 18, CALL_BALL = 45, CALL_QUIET = 24;
   // v28.34 ("powershot option somehow"), cfg.power: a person who keeps the ball at his feet (within kick reach) for
   // POWER_T ticks has it charged (p.pw; a few ticks off it, POWER_SLACK, are allowed; anyone else touching it, a goal, a
-  // set piece or a slide end it): his next kick of it is POWER_MUL as strong. The computer's players don't charge
+  // set piece or a slide end it): his next kick of it is POWER_MUL as strong. v28.35 ("ai should get power shots asw"):
+  // the computer's players charge too (they know when they have: ai.js)
   const POWER_T = 75, POWER_MUL = 1.55, POWER_SLACK = 8;
   function movePlayer(ST, p, d, slow){
     const pp = ST.pp, m = PU[p.pu] || PU.none, b = p.input;
@@ -2274,7 +2279,7 @@ function PBCORE(){
           }
         }
       }
-      if (G.cfg.power && (p.ctrl === 'human' || p.ctrl === 'remote')){   // (v28.34: the power shot's charge)
+      if (G.cfg.power && p.ctrl !== 'hold' && p.ctrl !== 'gone'){   // (v28.34: the power shot's charge; v28.35: everyone's)
         const b0 = D[0], lt = G.lastTouch, gap = Math.hypot(b0.x - d.x, b0.y - d.y) - d.radius - b0.radius;
         if (G.state !== 1 || G.sp || p.slide > 0 || (p.pw > 0 && lt && lt.id !== p.id && lt.frame >= (p.pwFrom | 0))){ p.pw = 0; p.pwOff = 0; }
         else if (gap < 4){ if (!p.pw) p.pwFrom = G.frame; p.pwOff = 0; if (p.pw < POWER_T && ++p.pw === POWER_T && ev) ev.push({type:'pcharge', id: ++G.eventId, frame: G.frame, pid: p.id}); }
@@ -3025,7 +3030,10 @@ function PBAI(C){
 
   // ---------- roles ----------
   function think(G, ST, p, brain, level, mem){
-    const L = typeof level === 'object' && level ? level : (LEVELS[level] || LEVELS[2]), th = brain || DEFAULT, t = T(ST), D = G.discs, me = D[p.di], ball = D[0];
+    const L = typeof level === 'object' && level ? level : (LEVELS[level] || LEVELS[2]), th = brain || DEFAULT, t0 = T(ST), D = G.discs, me = D[p.di], ball = D[0];
+    // v28.35 ("ai should get power shots asw"): charged (cfg.power: the ball kept at my feet), my next kick goes
+    // C.POWER_MUL as hard: every shot, pass and clearance is judged with that
+    const charged = G.cfg.power && (p.pw | 0) >= C.POWER_T, t = charged ? Object.assign({}, t0, {kickV: t0.kickV * C.POWER_MUL}) : t0;
     if (mem.seed == null) mem.seed = (p.id * 2654435761) >>> 0 || 1;
     p.aiShot = false;   // (set below when this tick's kick is a shot: the engine curls it)
     if (ST.tri) return triThink(G, ST, p, th, L, mem, t, me, ball);   // the 3-way arena: its own plan
@@ -5934,8 +5942,11 @@ const TUT_STEPS = ['move', 'kick', 'score', 'curl', 'call', 'slide', 'fk', 'emot
 // v28.34 ("also have a tutorial on how to curl"): the curl lesson (Practice), the same panel: bend it up round a man,
 // down round him, in from out wide to the far post, auto curl, a free kick's curl; each done by scoring it that way
 const CURL_STEPS = ['cup', 'cdown', 'cfar', 'cauto', 'cfk', 'cdone'];
-const tutSteps = m => m && m.lesson === 'curl' ? CURL_STEPS : TUT_STEPS;
-const tutLast = st => st === 'done' || st === 'cdone';
+// v28.35 ("also make a pwoershot lesson"): charge it, shoot it, what loses it, past a keeper with one (the rule on for it)
+const POWER_STEPS = ['pcharge', 'pshot', 'plose', 'pkeeper', 'pdone'];
+const tutSteps = m => m && m.lesson === 'curl' ? CURL_STEPS : m && m.lesson === 'power' ? POWER_STEPS : TUT_STEPS;
+const tutLast = st => st === 'done' || st === 'cdone' || st === 'pdone';
+const LESSON_NAME = {curl: 'Curl lesson', power: 'Power shot lesson'};
 const tutKeys = () => { const k = (p, a) => bind[p] && bind[p][a] ? kname(bind[p][a]) : '';
   if (coarseScreen() && !kbUsed) return {touch: true, move: 'the stick', up: 'stick up', down: 'stick down', left: 'stick left', right: 'stick right', kick: 'KICK', slide: 'SLIDE'};   // (a phone)
   return {move: `${['up', 'left', 'down', 'right'].map(a => k('p1', a)).join(' ')} or the arrow keys`, up: `${k('p1', 'up')}/↑`, down: `${k('p1', 'down')}/↓`, left: `${k('p1', 'left')}/←`, right: `${k('p1', 'right')}/→`,
@@ -5943,7 +5954,7 @@ const tutKeys = () => { const k = (p, a) => bind[p] && bind[p][a] ? kname(bind[p
           p1: `${['up', 'left', 'down', 'right'].map(a => k('p1', a)).join(' ')}`, k1: k('p1', 'kick'), s1: k('p1', 'slide'), p2: `${['up', 'left', 'down', 'right'].map(a => k('p2', a)).join(' ')}`, k2: k('p2', 'kick'), s2: k('p2', 'slide')}; };
 function tutorialMode(lesson){
   const tu = {i: 0, ok: false, okAt: 0, n: 0, tries: 0, targets: [], curled: false, kicked: false, note: ''};
-  const M = {kind: 'tutorial', tu, lesson: lesson === 'curl' ? 'curl' : null}, STEPS = tutSteps(M);
+  const M = {kind: 'tutorial', tu, lesson: lesson === 'curl' || lesson === 'power' ? lesson : null}, STEPS = tutSteps(M);
   const me = s => s.G.players.find(p => p.ctrl === 'human') || s.G.players[0], cp = s => s.G.players.find(p => p !== me(s));
   const step = () => STEPS[tu.i];
   const curlStep = st => st === 'cup' || st === 'cdown' || st === 'cfar' || st === 'cauto';
@@ -5952,7 +5963,8 @@ function tutorialMode(lesson){
   M.setup = s => {
     const G = s.G, P = me(s), Q = cp(s), d = G.discs[P.di], b = G.discs[0], gm = goalMid(1), dir = Math.sign(gm.x) || 1;
     G.state = 1; G.sp = null; G.lastTouch = null; G.ballHist.length = 0; s.msg = null;
-    Object.assign(tu, {ok: false, okAt: 0, n: 0, curled: false, kicked: false, note: '', targets: [], called: null, passed: false, pz: 0, kn: 0, zi0: zi, bend: 0, keys: 0, wait: 0, fkT: 0});
+    Object.assign(tu, {ok: false, okAt: 0, n: 0, curled: false, kicked: false, note: '', targets: [], called: null, passed: false, pz: 0, kn: 0, zi0: zi, bend: 0, keys: 0, wait: 0, fkT: 0, powered: false, full: false, kickF: 0});
+    P.pw = 0; P.pwOff = 0;
     const q = Q && G.discs[Q.di];
     if (Q){ if (tu.qTeam == null) tu.qTeam = Q.team; if (Q.team !== tu.qTeam){ Q.team = tu.qTeam; Object.assign(q, C.playerDisc(ST, Q)); } }   // (the call step had him on your side)
     const park = () => { if (Q){ Q.ctrl = 'hold'; C.setInput(Q, 0); q.x = 0; q.y = -(ST.height - 16); still(q); } };
@@ -5969,6 +5981,9 @@ function tutorialMode(lesson){
     else if (st === 'cup' || st === 'cdown'){ b.x = gm.x - dir * 210; b.y = 0; d.x = b.x - dir * 45; d.y = 0; park(); if (Q){ q.x = gm.x - dir * 110; q.y = st === 'cup' ? 14 : -14; still(q); Q.role = 'wall'; } }   // (a man in the way, a little to the side it shouldn't go)
     else if (st === 'cfar'){ b.x = gm.x - dir * 150; b.y = 122; d.x = b.x - dir * 38; d.y = 128; park(); }
     else if (st === 'cauto'){ b.x = gm.x - dir * 200; b.y = -35; d.x = b.x - dir * 45; d.y = -35; park(); }
+    else if (st === 'pcharge' || st === 'plose'){ b.x = 0; b.y = 20; d.x = -dir * 90; d.y = 20; park(); }
+    else if (st === 'pshot'){ b.x = gm.x - dir * 230; b.y = 0; d.x = b.x - dir * 60; d.y = 0; park(); }
+    else if (st === 'pkeeper'){ b.x = gm.x - dir * 250; b.y = 10; d.x = b.x - dir * 60; d.y = 10; park(); if (Q){ Q.ctrl = 'ai'; Q.role = 'keeper'; q.x = gm.x - dir * 22; q.y = gm.y; still(q); aiMem(s, Q).plan = null; } }
     else if (st === 'fk' || st === 'cfk'){ park(); if (Q){ Q.ctrl = 'ai'; Q.role = 'keeper'; q.x = gm.x - dir * 20; q.y = gm.y; still(q); } const x = gm.x - dir * 175; d.x = x - dir * 30; d.y = -40; C.setPiece(G, ST, 'fk', P.team, x, -40, P.id); }
     else { park(); d.x = -dir * 60; d.y = 0; b.x = 0; b.y = 0; }
     still(d, b); b.sp = 0; b.atT = 0;
@@ -5989,11 +6004,19 @@ function tutorialMode(lesson){
         if (st === 'slide' && e.slide) pass(s, 'Clean tackle: you got the ball first.'); }
       if (e.type === 'foul' && e.pid === P.id && st === 'slide'){ tu.tries++; tu.note = 'Foul! You took the man first. Slide at the ball, from the side it sticks out.'; setTimeout(() => { if (sess === s && step() === 'slide' && !tu.ok) M.setup(s); }, 1400); tutPanel(s); }
       if (e.type === 'call' && e.pid === P.id && st === 'call' && !tu.ok && tu.called == null){ tu.called = G.frame; tu.note = 'Called! Here it comes…'; const Q = cp(s); if (Q){ Q.ctrl = 'ai'; aiMem(s, Q).plan = null; } tutPanel(s); }
+      if (e.type === 'pcharge' && e.pid === P.id && st === 'pcharge') pass(s, 'Charged: the ball glows. Kick it now and it goes half as hard again; step off it and the charge is gone.');
+      if (e.type === 'power' && e.pid === P.id){ tu.powered = true; if (st === 'plose' && !tu.ok){ tu.full = false; tu.note = 'That one went off: this time, once it glows, step away from it instead.'; tutPanel(s); } }
+      if (e.type === 'kick' && e.pid === P.id && (st === 'pshot' || st === 'pkeeper')){ tu.kicked = true; tu.kickF = G.frame; }
       if (e.type === 'emote' && e.pid === P.id && st === 'emote') pass(s, 'Online everyone sees it. Two on one keyboard: P1 has 1–5, P2 6–0.');
       if (e.type === 'goal'){
         if (st === 'score' && e.team === P.team) pass(s, 'Goal! After a goal everyone\'s keys are let go: press them again to move.');
         else if (st === 'curl' && e.team === P.team){ tu.tries++; if (tu.curled) pass(s, 'Curled it in! Holding up or down as you kick bends the ball.'); else { tu.note = tu.tries >= 3 ? 'Scored. It went in straight, which is fine too; you can go on.' : 'Scored, but straight: hold up or down as you kick to bend it.'; if (tu.tries >= 3) pass(s, tu.note); else tutPanel(s); } }
         else if (st === 'fk' && e.team === P.team) pass(s, 'Free kick goal!');
+        else if ((st === 'pshot' || st === 'pkeeper') && e.team === P.team){   // (the power shot lesson: in, and a power shot)
+          tu.tries++;
+          if (tu.powered) pass(s, st === 'pshot' ? 'Power shot! Charge it, then hit it while it glows.' : 'Past him with a power shot: he has half as long to get there.');
+          else { tu.note = 'In, but a normal kick: stay right by the ball until the ring is full and it glows, then shoot.'; if (tu.tries >= 4) pass(s, tu.note + ' Go on when you like.'); else tutPanel(s); }
+        }
         else if ((curlStep(st) || st === 'cfk') && e.team === P.team){   // (the curl lesson: in, and bent the way asked)
           const dir = Math.sign(goalMid(1).x) || 1, up = tu.bend * dir < 0, inv = !!SET.inv[0]; tu.tries++;
           const ok = st === 'cup' ? tu.curled && !up : st === 'cdown' ? tu.curled && up : st === 'cauto' ? tu.curled && (tu.keys & C.AC_BIT) && !(tu.keys & 3) : tu.curled;
@@ -6019,6 +6042,9 @@ function tutorialMode(lesson){
     }
     if (st === 'move' && !tu.ok){ const t = tu.targets[tu.n]; if (t && Math.hypot(d.x - t[0], d.y - t[1]) < 24){ tu.n++; sfx.kick && sfx.kick(0.3); if (tu.n >= tu.targets.length) pass(s, 'You can move. Diagonals work too: hold two keys.'); else tutPanel(s); } }
     if (st === 'fk' && !tu.ok && !G.sp && tu.kicked){ tu.fkT = (tu.fkT || 0) + 1; if (tu.fkT > 150) pass(s, 'That\'s a free kick. The keeper reads your aim: aim one way, curl it the other.'); }
+    if (st === 'pcharge' || st === 'pshot' || st === 'plose' || st === 'pkeeper'){ const k = Math.min(10, Math.floor(10 * (P.pw | 0) / C.POWER_T)); if (k !== tu.pk){ tu.pk = k; if (!tu.ok) tutPanel(s); } }   // (the charge, as it fills)
+    if (st === 'plose' && !tu.ok){ if ((P.pw | 0) >= C.POWER_T) tu.full = true; else if (tu.full && !(P.pw > 0)) pass(s, 'Gone: the ring emptied. A charge lasts only while the ball stays at your feet: a touch by anyone else, a goal or a slide ends it too.'); }
+    if ((st === 'pshot' || st === 'pkeeper') && !tu.ok && tu.kicked && (G.frame - tu.kickF > 300 || (Math.hypot(b.vx, b.vy) < 0.05 && G.frame - tu.kickF > 60))){ tu.tries++; const nt = tu.powered ? 'Not in. Again: charge it, then shoot at a corner.' : 'Not in, and a normal kick: stay by the ball until it glows first.'; M.setup(s); tu.note = nt; tutPanel(s); }
     if ((st === 'cfk') && !tu.ok && !G.sp && tu.kicked && Math.hypot(b.vx, b.vy) < 0.05 && ++tu.fkT > 90){ tu.tries++; M.setup(s); tu.note = 'Not in. Again: ← or → sets the curl, the dots show it.'; tutPanel(s); }
     if (st === 'kick' || st === 'score' || st === 'curl' || curlStep(st)){   // (the ball gone off somewhere, or stopped short: put it back)
       const v = Math.hypot(b.vx, b.vy); if (tu.kicked && !tu.ok && v < 0.05){ tu.wait = (tu.wait || 0) + 1; if (tu.wait > 90){ tu.wait = 0; if (st !== 'kick'){ tu.tries++; const nt = (st === 'curl' || curlStep(st)) && tu.tries < 3 ? 'Not in. Again: hold the key as you kick.' : 'Not in. Have another go.'; M.setup(s); tu.note = nt; tutPanel(s); } } } else tu.wait = 0;
@@ -6038,9 +6064,11 @@ function tutorialMode(lesson){
     const Q = sess && cp(sess); if (st === 'curl' && !tu.kicked && Q){ const b = V.discs[0], gm = goalMid(1), q = V.discs[Q.di], sd = 70; ctx.save(); ctx.setLineDash([4, 7]); ctx.strokeStyle = 'rgba(255,209,102,.7)'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.quadraticCurveTo(q.x, q.y - sd, gm.x, gm.y - 20); ctx.stroke(); ctx.restore(); }
   };
-  M.hud = s => `${M.lesson === 'curl' ? 'Curl lesson' : 'Tutorial'} · ${tu.i + 1} of ${STEPS.length}`;
+  M.hud = s => `${LESSON_NAME[M.lesson] || 'Tutorial'} · ${tu.i + 1} of ${STEPS.length}`;
   return M;
 }
+// (v28.35) the power shot lesson's state line: how full the charge is
+function P_STATE(s){ const P = s && s.G && s.G.players.find(p => p.ctrl === 'human'); const pw = P ? P.pw | 0 : 0; return pw >= C.POWER_T ? 'charged: it glows' : pw > 0 ? `charging ${Math.round(100 * pw / C.POWER_T)}%` : 'not charging'; }
 // the panel: which step, what to do, how it's going; Next (on at any time) and Skip tutorial
 function tutPanel(s){
   const box = $('tutBox'), m = s && s.mode && s.mode.kind === 'tutorial' ? s.mode : null;
@@ -6065,6 +6093,11 @@ function tutPanel(s){
     cauto: ['Auto curl', `Auto curl bends your shots by themselves, toward the corner and away from the keeper, when you hold no key across the kick. Switch it on below, then shoot at a corner without ${kb(K.up)} or ${kb(K.down)}. It's in ⚙ Settings too (each player's own); ⚙ Settings also has Swap curl keys, if you'd rather up bent it down.`, tu.tries ? `try ${tu.tries + 1}` : ''],
     cfk: ['Free kick curl', `On a free kick ${kb(K.left)} and ${kb(K.right)} set the curl (each press a little more that way; the dots show its path), ${kb(K.up)} ${kb(K.down)} aim, hold ${kb(K.kick)} for power and let go. The keeper reads your aim: aim one way, curl it the other.`, tu.tries ? `try ${tu.tries + 1}` : ''],
     cdone: ['That\'s curling', `Hold ↑ or ↓ as you kick: it swings out the other side and bends that way, back to where you aimed; out wide, aim outside the post and bend it in; auto curl does it for you; on a free kick, left and right. How much it curls: Curve in ⚙ Settings (60% is normal). The computer curls too, so watch for it.`, ''],
+    pcharge: ['Charge a power shot', `Walk up to the ball and stay right next to it, touching it, without kicking: a ring fills round it, and when it's full the ball glows. That's a power shot ready.`, P_STATE(s)],
+    pshot: ['Shoot it', `Charge it (stay on the ball till it glows), then ${kb(K.kick)}: a power shot goes about half as hard again. Score one.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
+    plose: ['Keep it or lose it', `The charge only lasts while the ball stays at your feet. Charge it, then step away and watch the ring empty. (Anyone else touching it, a goal, a set piece or a slide end it too.)`, P_STATE(s)],
+    pkeeper: ['Past the keeper', `Now there's a keeper. Charge it, then hit it at a corner: a power shot gives him half as long to get there.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
+    pdone: ['That\'s the power shot', `Power shot is a match rule: ⚙ Settings → Match rules (online, the room's Match settings, set by the host). The computer's players charge too: when you see the ring round the ball at one of theirs, close him down before it fills. It's off in practice drills. Turn it on for your matches below if you like.`, ''],
     done: ['You\'re ready', `That's every control. They're all in How to play (menu), and Controls changes any key. Have a match against the computer on Easy?`, ''],
   }[st];
   $('tutStep').textContent = `${tu.i + 1} / ${L.length}`; $('tutTitle').textContent = T[0];
@@ -6074,18 +6107,24 @@ function tutPanel(s){
   const ex = $('tutExtra'); ex.textContent = '';
   if (st === 'extrap'){ for (const v of [0, 60, 93, 120]){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (Math.round(extrapMs()) === v ? ' on' : ''); b.textContent = v + ' ms'; b.onclick = e => { setExtrap(v); e.target.blur(); tutPanel(s); }; ex.append(b); } }
   if (st === 'cauto'){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (SET.ac[0] ? ' on' : ''); b.textContent = 'Auto curl: ' + (SET.ac[0] ? 'on' : 'off'); b.onclick = e => { SET.ac[0] = !SET.ac[0]; store.set('pb.ac', SET.ac.map(v => v ? 1 : 0)); pushInputs(); renderCurlOpts(); e.target.blur(); tutPanel(s); }; ex.append(b); }
-  if (st === 'done' || st === 'cdone'){ const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Play the computer (Easy)'; b.onclick = () => { tutEnd(true, m.lesson); start(Object.assign(cfgFor('ai', 1), {diff: 0})); }; ex.append(b); }
-  if (st === 'done'){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = 'The curl lesson'; b.onclick = () => { tutEnd(true); tutStart('curl'); }; ex.append(b); }
-  $('tutSkip').textContent = m.lesson === 'curl' ? 'Leave the lesson' : 'Skip tutorial';
+  if (st === 'pdone'){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (SET.power ? ' on' : ''); b.textContent = 'Power shot in my matches: ' + (SET.power ? 'on' : 'off'); b.onclick = e => { SET.power = !SET.power; store.set('pb.power', SET.power ? 1 : 0); menuSync(); e.target.blur(); tutPanel(s); }; ex.append(b); }
+  if (st === 'done' || st === 'cdone' || st === 'pdone'){ const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Play the computer (Easy)'; b.onclick = () => { tutEnd(true, m.lesson); start(Object.assign(cfgFor('ai', 1), {diff: 0})); }; ex.append(b); }
+  if (st === 'done') for (const [l, name] of [['curl', 'The curl lesson'], ['power', 'The power shot lesson']]){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = name; b.onclick = () => { tutEnd(true); tutStart(l); }; ex.append(b); }
+  $('tutSkip').textContent = m.lesson ? 'Leave the lesson' : 'Skip tutorial';
   $('tutNext').textContent = tutLast(st) ? 'Back to the menu' : tu.ok || st === 'extrap' ? 'Next ›' : 'Skip this step ›';
   box.hidden = false;
 }
-function tutStart(lesson){ $('tutWelcome').hidden = true; start(Object.assign(cfgFor('practice', 1), {mode: 'tutorial', lesson: lesson === 'curl' ? 'curl' : null, slide: true, fk: true, curve: true, curveLv: lesson === 'curl' ? Math.max(3, SET.curveLv || 3) : SET.curveLv, diff: 0, timeLimit: 0, scoreLimit: 0})); }
-function tutEnd(finished, lesson){ if (lesson === 'curl'){ if (finished) store.set('pb.curlLesson', 'done'); } else store.set('pb.tut', finished ? 'done' : 'skipped'); $('tutBox').hidden = true; }
+// (v28.35, "tutorial blocks my view") the panel lives under the pitch; while it shows, the pitch makes room for it
+{ const tb = $('tutBox'); $('stage').after(tb);
+  const sync = () => { const on = !tb.hidden; document.body.classList.toggle('tut', on); if (on) document.documentElement.style.setProperty('--tutH', Math.ceil(tb.offsetHeight) + 'px'); };
+  new MutationObserver(sync).observe(tb, {attributes: true, attributeFilter: ['hidden']}); new ResizeObserver(sync).observe(tb); }
+function tutStart(lesson){ $('tutWelcome').hidden = true; lesson = lesson === 'curl' || lesson === 'power' ? lesson : null; start(Object.assign(cfgFor('practice', 1), {mode: 'tutorial', lesson, power: lesson === 'power', slide: true, fk: true, curve: true, curveLv: lesson === 'curl' ? Math.max(3, SET.curveLv || 3) : SET.curveLv, diff: 0, timeLimit: 0, scoreLimit: 0})); }
+function tutEnd(finished, lesson){ if (lesson === 'curl' || lesson === 'power'){ if (finished) store.set(lesson === 'curl' ? 'pb.curlLesson' : 'pb.powerLesson', 'done'); } else store.set('pb.tut', finished ? 'done' : 'skipped'); $('tutBox').hidden = true; }
 $('tutNext').addEventListener('click', e => { e.target.blur(); const s = sess; if (!s || !s.mode || s.mode.kind !== 'tutorial') return; if (tutLast(tutSteps(s.mode)[s.mode.tu.i])){ tutEnd(true, s.mode.lesson); exitToMenu(); return; } s.mode.next(s); });
 $('tutSkip').addEventListener('click', e => { e.target.blur(); const s = sess; tutEnd(false, s && s.mode && s.mode.lesson); exitToMenu(); });
 document.querySelectorAll('.tutb').forEach(b => b.addEventListener('click', () => tutStart()));
 document.querySelectorAll('.curlb').forEach(b => b.addEventListener('click', () => tutStart('curl')));
+document.querySelectorAll('.powerb').forEach(b => b.addEventListener('click', () => tutStart('power')));
 $('tutGo').addEventListener('click', () => tutStart());
 $('tutNo').addEventListener('click', () => { store.set('pb.tut', 'skipped'); $('tutWelcome').hidden = true; });
 // (first time here: no matches played and never asked)
@@ -9007,7 +9046,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.34';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.35';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
