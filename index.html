@@ -2248,7 +2248,8 @@ function PBCORE(){
   // POWER_T ticks has it charged (p.pw; a few ticks off it, POWER_SLACK, are allowed; anyone else touching it, a goal, a
   // set piece or a slide end it): his next kick of it is POWER_MUL as strong. v28.35 ("ai should get power shots asw"):
   // the computer's players charge too (they know when they have: ai.js)
-  const POWER_T = 75, POWER_MUL = 1.55, POWER_SLACK = 8;
+  // (v28.40, "lower the powershot bar little bit not too much": POWER_T 75 -> 60 ticks, 1.25 s -> 1 s)
+  const POWER_T = 60, POWER_MUL = 1.55, POWER_SLACK = 8;
   function movePlayer(ST, p, d, slow){
     const pp = ST.pp, m = PU[p.pu] || PU.none, b = p.input;
     if (p.slide > 0){ d.damping = SLIDE_DAMP; return; }   // sliding: no steering
@@ -9154,7 +9155,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.39';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.40';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
