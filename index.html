@@ -1015,7 +1015,7 @@
       <div class="gmhead"><div class="gmt"><h2>Menu</h2><p id="gmNote"></p></div><button id="gmResume" type="button">Resume <kbd>Esc</kbd></button></div>
       <div class="lobby gmboard" id="gmBoard" hidden></div>
       <div class="gmbar">
-        <button class="ghost" id="gmPause" type="button" title="Pause the match for everyone (P)" hidden>Pause the match</button><button class="ghost" id="lobbyBtn" type="button" title="Stop the match and take everyone back to the lobby">Back to lobby</button><button class="ghost" id="gmRestart" type="button">Restart</button>
+        <button class="ghost" id="gmPause" type="button" title="Pause the match for everyone (P)" hidden>Pause the match</button><button class="ghost" id="lobbyBtn" type="button" title="Stop the match and take everyone back to the lobby">Back to lobby</button><button class="ghost" id="gmRestart" type="button">Restart</button><button class="ghost" id="gmKeeper" type="button" title="Swap with the computer keeper on your side: you go in goal and the computer plays your man (G; P2: full stop)" hidden>Go in goal <kbd>G</kbd></button>
         <span class="gsp"></span>
         <button class="ghost gmexit" id="exitBtn" type="button">Leave to the main menu</button>
       </div>
@@ -1049,7 +1049,7 @@
         <div class="krow"><em>P1</em><span id="kb1"></span></div>
         <div class="krow"><em>P2</em><span id="kb2"></span></div>
         <div class="krow"><em>P3</em><span id="kb3"></span></div>
-        <div class="krow"><em>All</em><span><kbd>Esc</kbd> or <kbd>M</kbd> menu · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>+</kbd> <kbd>−</kbd> zoom (Follow all, Auto, 1×–3×) · <kbd>1</kbd>–<kbd>8</kbd> emotes (two on one keyboard: P1 1–5, P2 6–0) · online <kbd>Enter</kbd> or <kbd>T</kbd> chat</span></div>
+        <div class="krow"><em>All</em><span><kbd>Esc</kbd> or <kbd>M</kbd> menu · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>+</kbd> <kbd>−</kbd> zoom (Follow all, Auto, 1×–3×) · <kbd>G</kbd> go in goal and back out, the computer taking your man (P2 <kbd>.</kbd>) · <kbd>1</kbd>–<kbd>8</kbd> emotes (two on one keyboard: P1 1–5, P2 6–0) · online <kbd>Enter</kbd> or <kbd>T</kbd> chat</span></div>
         <p>Change them in Controls. In fullscreen inside Claude the browser takes Esc to leave fullscreen: <kbd>M</kbd> opens the menu and stays fullscreen.</p>
       </section>
       <section class="hsec"><h3>Play</h3><ul>
@@ -2194,6 +2194,9 @@ function PBCORE(){
       const q = count[p.team], sp = ST.spawns[p.team] || [];
       if (!sp.length){ let h = (q + 1) >> 1; if (!(q & 1)) h = -h; d.x = ST.spawnDistance * TEAMS[p.team].dir; d.y = 55 * h; }
       else { const s = sp[Math.min(q, sp.length - 1)]; d.x = s.x; d.y = s.y; }
+      // v28.38 ("turn into keeper and let ai striker"): a person in goal (gone in mid-match, or coop's P2) starts each
+      // kick-off in his goal, where a computer keeper walks to before it's taken
+      if (p.role === 'keeper' && (p.ctrl === 'human' || p.ctrl === 'remote') && G.nt !== 3){ const g = ST.goals.find(q => q.team === p.team); if (g){ const gx = (g.x0 + g.x1) / 2; d.x = gx - Math.sign(gx) * 30; d.y = 0; } }
       p.num = ++count[p.team];
     }
     G.ballHist.length = 0; G.lastTouch = null; G.prevTouch = null; G.teamTouch = G.nt === 3 ? [null, null, null] : [null, null];
@@ -2700,13 +2703,15 @@ function PBAI(C){
   //    201-360: passes you got 81% -> 88%, cut out 79 -> 37, your side conceded 108 -> 86 and scored 39 -> 37; the mix
   //    wall 68% / feet 32% -> wall 64% / through 22% / feet 14% (through balls taken 79%). Without THRU_KZONE through
   //    balls were taken only 62%; a bigger margin for them (10 px) left few (23-28) and no better taken
-  let KEEP_FAR = 0, KEEP_FAR_CLAIM = 8, PRESS_SHOT = 0, PRESS_RANGE = 260, SHOT_FLOOR = 0, CORNER_W = 10, LINEUP_SHOT = null, LINEUP_N = 5, WALL_PASS = 1, WALL_BONUS = 0, SHOT_TOL = null, WALL_AHEAD = 150, KNOCK_RANGE = 120;
+  // (v28.38, "better striker also", Insane: SHOT_FLOOR 0 -> 2, a little more willing, against this version's keeper that
+  // stays home: 2v2 Insane, six 12-min games, goals 41 -> 67; 4 scored 47, power charging sooner 60, both 55)
+  let KEEP_FAR = 0, KEEP_FAR_CLAIM = 8, PRESS_SHOT = 0, PRESS_RANGE = 260, SHOT_FLOOR = 2, CORNER_W = 10, LINEUP_SHOT = null, LINEUP_N = 5, WALL_PASS = 1, WALL_BONUS = 0, SHOT_TOL = null, WALL_AHEAD = 150, KNOCK_RANGE = 120;
   // v27.3: a person's call for the ball (CALL_T ticks: v27.4 90 -> 180; a pass to where he is preferred by CALL_NEAR a
   // px); a keeper's wait on the ball for a teammate to get free (KP_HOLD_T ticks at most: none now); v27.4: a keeper
   // leaves a ball to a person of his who gets there no more than KP_YIELD ticks after him (and before them), and passes
   // to a person only from KP_PASS_MIN px off (closer, a full kick bounced off him)
   let SHOW = 1, SHOW_D = [150, 210, 270];   // (v27.7: see showPlan)
-  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 90, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3, KP_RUSH_CHARGE = 1, KP_RUSH_SLIDE = 0.8, KP_RECV = 1, RECV_V = 1.5, RECV_EARLY = 6, RECV_FOE = 60, RECV_AWAY = 0.5, KP_DANCE = 20, KP_HURRY = 30, KP_NOW_FOE = 30, KP_NOW_FWD = 0.35, KP_NOW_GAIN = 40, KP_PATH = 1, KP_PATH_V = 3.5, KP_PATH_R = 0.3, KP_PATH_EARLY = 4, STUCK_T = 90;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
+  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 90, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3, KP_RUSH_CHARGE = 1, KP_RUSH_SLIDE = 0.8, KP_RECV = 1, RECV_V = 1.5, RECV_EARLY = 6, RECV_FOE = 60, RECV_AWAY = 0.5, KP_DANCE = 20, KP_HURRY = 30, KP_NOW_FOE = 30, KP_NOW_FWD = 0.35, KP_NOW_GAIN = 40, KP_PATH = 1, KP_PATH_V = 3.5, KP_PATH_R = 0.3, KP_PATH_EARLY = 4, STUCK_T = 90, AI_POWER = 1, SHOT_FIRST = 1, KO_GUARD = 60, POWER_FOE = 25, POWER_RANGE = 430, POWER_GAIN = 6, POWER_EXTRA = 4, AUTO_RUSH_LATE = 16, KEEP_MAXD = 45;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
   let THRU_PASS = 1, THRU_AHEAD = 100, RECV_REACT = 10, PASS_ADV = 10, PASS_SAFE = -30, KEEP_LINEUP = 12, KEEP_CAREFUL = 1, KEEP_PTOL = 0.07, THRU_KZONE = 240, THRU_MARGIN = 0;
   // v24:
   //  - SHOT_HR: a shot is judged against a person in goal (or in the way) reacting at least this many ticks late, as
@@ -2737,7 +2742,7 @@ function PBAI(C){
   // (slack up to CLOSE_SLACK) is taken rather than carrying it on into him. RUSH: one of theirs through on my goal (the
   // ball at his feet, RUSH_R px or nearer, none of my teammates goal side of him) and nothing struck yet: the keeper comes
   // off his line toward him, to RUSH_GAP px short of the ball (at most RUSH_MAX px out), closing the angle
-  let CLOSE_R = 210, CLOSE_SLACK = 12, RUSH_R = 180, RUSH_GAP = 55, RUSH_MAX = 100, RUSH_WIDE = 60, KEEP_BACK_R = 200, CLOSE_MIN_S = 0.55, PRESS_FOLLOW = 45, PRESS_SIDE = -0.3;
+  let CLOSE_R = 210, CLOSE_SLACK = 12, RUSH_R = 180, RUSH_GAP = 55, RUSH_MAX = 50, RUSH_WIDE = 60, KEEP_BACK_R = 200, CLOSE_MIN_S = 0.55, PRESS_FOLLOW = 45, PRESS_SIDE = -0.3;
   let KEEP_PRESS = 22, KEEP_PRESS_LATE = 10, KP_MARGIN = 4, KP_RCAP = 4, KP_RECHECK = 1;   // (v27.3: KP_MARGIN 0 -> 4, see the wait below)   // (v25 "control their timing": KEEP_PRESS_LATE 15 -> 10, no press when he'd get there well after the man; 0-8 got him there first a little more often, conceded no less, and lost the press on a ball right by him with a man coming, t kpt24)
   // v25 ("in 2v2 they keep walking the ball inside their og"): a keeper caught up the pitch ran back after a ball
   // rolling at his goal and caught it up from behind, pushing it in; he pressed a ball from beside or behind it too.
@@ -3057,7 +3062,10 @@ function PBAI(C){
     const dir = Math.sign(opp.x - own.x) || 1, rr = ball.radius + me.radius;
     // kick-off: wait on your side unless it is your kick
     if (G.state === 0 && G.koTeam !== team){
-      const tx = own.x + dir * (p.role === 'keeper' ? 40 : Math.min(ST.width * 0.5, Math.abs(own.x) * 0.55)), ty = p.role === 'keeper' ? own.y : cl(ball.y * 0.4, -60, 60);
+      // (v28.38: nobody of mine in goal, 1v1 say: I wait as a keeper would, KO_GUARD px out: from halfway out a curled shot
+      // straight from their kick-off was in before I could get across, 1v1 Insane computer v computer nearly every one)
+      const guard = KO_GUARD > 0 && p.role !== 'keeper' && !G.players.some(q => q.team === team && q !== p && q.ctrl !== 'gone' && (q.role === 'keeper' || Math.abs(G.discs[q.di].x - own.x) < Math.abs(me.x - own.x)));
+      const tx = own.x + dir * (p.role === 'keeper' ? 40 : guard ? KO_GUARD : Math.min(ST.width * 0.5, Math.abs(own.x) * 0.55)), ty = p.role === 'keeper' || guard ? own.y : cl(ball.y * 0.4, -60, 60);
       const w = koSway(G, p, dir);
       return finish(G, ST, t, L, mem, me, p, arrive(t, me, tx + w[0], ty + w[1]), false);
     }
@@ -3241,7 +3249,7 @@ function PBAI(C){
     // in, who won't kick it into the end wall, and their keeper pressing it from the other side, who kicks only out from
     // his goal): computer v computer, 283 s with nothing happening (t_stalldump.js, with and without this version's
     // keeper). STUCK_T ticks with it still at my feet: a kick, unless that puts it in my own goal
-    if (STUCK_T && G.state === 1 && !G.sp && !wantKick){
+    if (STUCK_T && G.state === 1 && !G.sp && !wantKick && !pl.charge){
       const bx = ball.x - me.x, by = ball.y - me.y, dist = Math.hypot(bx, by);
       if (dist > 0 && dist - rr < 3 && Math.hypot(ball.vx, ball.vy) < 0.4){
         if ((mem.stuck = (mem.stuck || 0) + 1) > STUCK_T){
@@ -3325,6 +3333,16 @@ function PBAI(C){
     const barge = BARGE_R > 0 && iChase && fd && Math.hypot(fd.x - ballNow.x, fd.y - ballNow.y) < rr + 10 && Math.hypot(fd.x - me.x, fd.y - me.y) < BARGE_R && toOwn > 90
       && (mates.length > 0 || toOwn > BARGE_SOLO)
       && (!BARGE_GS || Math.hypot(me.x - own.x, me.y - own.y) < Math.hypot(fd.x - own.x, fd.y - own.y) - BARGE_GS);
+    // v28.38 ("make gk better at saving", "better striker also", at Insane): their shot on its way into my goal and no
+    // keeper of mine: block its path first. Chasing it as a loose ball, I went for where I'd meet it, often in the net
+    // already: 1v1 Insane, computer v computer, 111 goals in 12 min, nearly all a curled shot straight from the kick-off
+    if (SHOT_FIRST && !mates.some(m => m.role === 'keeper' && m.ctrl !== 'gone')){
+      const lt = G.lastTouch, shot0 = lt && lt.team !== team ? shotOnGoal(ST, P, goalOf(ST, team)) : -1;
+      if (shot0 >= 0){
+        for (let i = 1; i < Math.min(P.length, shot0 + 1); i++) if (slack(t, me, P[i], i, rr * 0.9) >= 0) return {mode:'block', n: i, out: [dir, 0]};
+        const g = goalOf(ST, team); return {mode:'pos', tx: own.x + dir * 18, ty: cl(P[Math.min(shot0, P.length - 1)].y, Math.min(g.y0, g.y1), Math.max(g.y0, g.y1))};
+      }
+    }
     if (iChase && (nMe <= nFoe + th.aggr || nMe < 6 || mem.wait > th.patience || barge)){
       const a = attackPlan(G, ST, t, p, th, L, mem, P, team, own, opp, oppGoal, dir, rr, nMe, nFoe, mates, foes);
       if (barge && a.mode === 'ball') a.barge = foeBest.id;
@@ -3391,6 +3409,23 @@ function PBAI(C){
     const n = Math.max(1, Math.min(nMe, P.length - 1)), B = Object.assign({t: n}, P[n]);
     const distGoal = Math.hypot(opp.x - B.x, opp.y - B.y), toOwn = Math.hypot(own.x - B.x, own.y - B.y);
     let best = null;
+    // v28.38 ("let ai decide if they should powershot or not"): the ball at my feet, nearly still, me behind it, nobody of
+    // theirs able to get to it before my charge is full and POWER_FOE ticks more, within POWER_RANGE of their goal: if a
+    // power shot from here is on and the shot I have now isn't (or the power one is clearly safer, POWER_GAIN px), I keep
+    // it at my feet till it's charged (mode 'charge'), then shoot. Normal and up; not a penalty or a forced shot
+    const charged = (p.pw | 0) >= C.POWER_T;
+    if (AI_POWER && G.cfg.power && !charged && L.err <= 0.1 && !mem.spPen && !mem.forceShot && G.state === 1 && !G.sp && distGoal < POWER_RANGE){
+      const me = G.discs[p.di], ball = G.discs[0], gap = Math.hypot(ball.x - me.x, ball.y - me.y) - rr, gl = Math.hypot(opp.x - ball.x, opp.y - ball.y) || 1, ux = (opp.x - ball.x) / gl, uy = (opp.y - ball.y) / gl;
+      if (gap < 10 && Math.hypot(ball.vx, ball.vy) < 0.8 && (me.x - ball.x) * ux + (me.y - ball.y) * uy < -rr * 0.4 && nFoe > C.POWER_T - (p.pw | 0) + POWER_FOE){
+        const B0 = {x: ball.x, y: ball.y, vx: 0, vy: 0, t: 0}, tp = Object.assign({}, t, {kickV: t.kickV * C.POWER_MUL});
+        const now = pickShot(G, ST, t, p, th, L, B0, team, oppGoal, Infinity, mem.aimPref || 0), pow = pickShot(G, ST, tp, p, th, L, B0, team, oppGoal, Infinity, mem.aimPref || 0);
+        if (pow && pow.slack < th.shotSlack + POWER_EXTRA && (!now || now.slack > th.shotSlack || pow.slack < now.slack - POWER_GAIN)){
+          mem.chargeAt = mem.chargeAt || G.frame;
+          return {mode: 'pos', tx: ball.x - ux * (rr + 1), ty: ball.y - uy * (rr + 1), charge: true};
+        }
+      }
+    }
+    mem.chargeAt = 0;
     // 1. shots at several spots inside the goal, preferring the corners when they are about as safe
     if (distGoal < th.shootRange || mem.spPen){
       const lim = mem.forceShot || mem.spPen ? Infinity : SHOT_FLOOR != null ? Math.max(th.shotSlack, SHOT_FLOOR) : th.shotSlack;
@@ -3774,8 +3809,12 @@ function PBAI(C){
     // v28.4 ("they should auto rush"): no call needed when he's through: one of theirs on the ball first, coming at my
     // goal (AUTO_RUSH_COMING of his speed toward it) within AUTO_RUSH_R px, nobody of mine but me between the ball and
     // the goal (within AUTO_RUSH_LANE px of that line): I come out at it, as on a call
+    // v28.38 ("make gk better at saving", Insane): only when he gets to the ball no more than AUTO_RUSH_LATE ticks after
+    // their man (a heavy touch, a loose ball): charging at a man with it at his feet, the striker shot round him or past
+    // him (e2e t_1v1ai.js, computer striker v keeper from 260-380 px, 60 breakaways: 14 goals with the rush, 0 staying
+    // home, 1-2 with this; t_rush1v1.js NOCALL, a person-like striker: 0 either way)
     let autoRush = false;
-    if (AUTO_RUSH_R > 0 && !rushCall && !back && shot < 0 && foeBest && nFoe < nMe && rx(ball.x) > 0 && bdG < AUTO_RUSH_R){
+    if (AUTO_RUSH_R > 0 && !rushCall && !back && shot < 0 && foeBest && nFoe < nMe && nMe <= nFoe + AUTO_RUSH_LATE && rx(ball.x) > 0 && bdG < AUTO_RUSH_R){
       const fd = D[foeBest.di], fl = Math.hypot(own.x - fd.x, own.y - fd.y) || 1, fv = Math.hypot(fd.vx, fd.vy);
       const coming = fv > 0.5 && (fd.vx * (own.x - fd.x) + fd.vy * (own.y - fd.y)) / (fl * fv) > AUTO_RUSH_COMING;
       const lane = mates.some(m => { const md = D[m.di]; return m.ctrl !== 'gone' && Math.hypot(md.x - own.x, md.y - own.y) < bdG - 6 && Math.abs((md.y - own.y) * (ball.x - own.x) - (md.x - own.x) * (ball.y - own.y)) / (bdG || 1) < AUTO_RUSH_LANE; });
@@ -3851,7 +3890,11 @@ function PBAI(C){
     // otherwise: stand on the line that splits the angle to both posts, stepping out as the ball nears
     const Q = P[Math.min(8, P.length - 1)], n0 = Math.hypot(g.x0 - Q.x, g.y0 - Q.y) || 1, n1 = Math.hypot(g.x1 - Q.x, g.y1 - Q.y) || 1;
     let ax = (g.x0 - Q.x) / n0 + (g.x1 - Q.x) / n1, ay = (g.y0 - Q.y) / n0 + (g.y1 - Q.y) / n1; const al = Math.hypot(ax, ay) || 1; ax /= al; ay /= al;
-    let depth = cl(rx(Q.x) * th.kStep, th.kMin, th.kMax);
+    // (v28.38: no further out than KEEP_MAXD px, and stepping out at a man coming at him (RUSH_MAX) only 50 px, was 100:
+    // standing 60-100 px out, curled shots from 150-250 px bent round him: 2v2 Insane, six 12-min games a side, with
+    // the auto rush above, goals 83 -> 41, e2e t_goalwhy.js SEED 1-6)
+    const theirFk = !!G.sp && G.sp.kind === 'fk' && G.sp.team !== team;   // (not against their free kick: there his old depth saved 32% of those on target, capped 7%, t_fkgk.js)
+    let depth = cl(rx(Q.x) * th.kStep, th.kMin, KEEP_MAXD != null && !theirFk ? Math.min(th.kMax, KEEP_MAXD) : th.kMax);
     // my team has the ball: step up behind the play, a way out for a back pass and a sweeper for long balls
     const ours = mates.length > 0 && Math.min(nMe, nMate) + 4 < nFoe;
     if (ours) depth = cl(rx(Q.x) * 0.3, th.kMin, th.kMax + KEEP_SWEEP);
@@ -4039,7 +4082,7 @@ function PBAI(C){
     if ('kpress' in o) KEEP_PRESS = o.kpress; if ('kpressLate' in o) KEEP_PRESS_LATE = o.kpressLate; if ('kpMargin' in o) KP_MARGIN = o.kpMargin; if ('kpRcap' in o) KP_RCAP = o.kpRcap; if ('kpRecheck' in o) KP_RECHECK = o.kpRecheck;
     if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside;
     if ('show' in o) SHOW = o.show; if ('showD' in o) SHOW_D = o.showD;
-    if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('rushCharge' in o) KP_RUSH_CHARGE = o.rushCharge; if ('rushSlide' in o) KP_RUSH_SLIDE = o.rushSlide; if ('kpRecv' in o) KP_RECV = o.kpRecv; if ('recvV' in o) RECV_V = o.recvV; if ('recvEarly' in o) RECV_EARLY = o.recvEarly; if ('recvFoe' in o) RECV_FOE = o.recvFoe; if ('recvAway' in o) RECV_AWAY = o.recvAway; if ('kpDance' in o) KP_DANCE = o.kpDance; if ('kpHurry' in o) KP_HURRY = o.kpHurry; if ('kpNowFoe' in o) KP_NOW_FOE = o.kpNowFoe; if ('kpNowFwd' in o) KP_NOW_FWD = o.kpNowFwd; if ('kpNowGain' in o) KP_NOW_GAIN = o.kpNowGain; if ('kpPath' in o) KP_PATH = o.kpPath; if ('kpPathV' in o) KP_PATH_V = o.kpPathV; if ('kpPathR' in o) KP_PATH_R = o.kpPathR; if ('kpPathEarly' in o) KP_PATH_EARLY = o.kpPathEarly; if ('stuckT' in o) STUCK_T = o.stuckT; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
+    if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('rushCharge' in o) KP_RUSH_CHARGE = o.rushCharge; if ('rushSlide' in o) KP_RUSH_SLIDE = o.rushSlide; if ('kpRecv' in o) KP_RECV = o.kpRecv; if ('recvV' in o) RECV_V = o.recvV; if ('recvEarly' in o) RECV_EARLY = o.recvEarly; if ('recvFoe' in o) RECV_FOE = o.recvFoe; if ('recvAway' in o) RECV_AWAY = o.recvAway; if ('kpDance' in o) KP_DANCE = o.kpDance; if ('kpHurry' in o) KP_HURRY = o.kpHurry; if ('kpNowFoe' in o) KP_NOW_FOE = o.kpNowFoe; if ('kpNowFwd' in o) KP_NOW_FWD = o.kpNowFwd; if ('kpNowGain' in o) KP_NOW_GAIN = o.kpNowGain; if ('kpPath' in o) KP_PATH = o.kpPath; if ('kpPathV' in o) KP_PATH_V = o.kpPathV; if ('kpPathR' in o) KP_PATH_R = o.kpPathR; if ('kpPathEarly' in o) KP_PATH_EARLY = o.kpPathEarly; if ('stuckT' in o) STUCK_T = o.stuckT; if ('aiPower' in o) AI_POWER = o.aiPower; if ('shotFirst' in o) SHOT_FIRST = o.shotFirst; if ('koGuard' in o) KO_GUARD = o.koGuard; if ('powerFoe' in o) POWER_FOE = o.powerFoe; if ('powerRange' in o) POWER_RANGE = o.powerRange; if ('powerGain' in o) POWER_GAIN = o.powerGain; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushLate' in o) AUTO_RUSH_LATE = o.autoRushLate; if ('keepMaxD' in o) KEEP_MAXD = o.keepMaxD; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
     if ('fkAiRead' in o) FK_AI_READ = o.fkAiRead; if ('fkAiMin' in o) FK_AI_MIN = o.fkAiMin; if ('fkAiStep' in o) FK_AI_STEP = o.fkAiStep;
     if ('fkSee' in o) FK_SEE = o.fkSee; if ('fkSeeT' in o) FK_SEE_T = o.fkSeeT; if ('fkLean' in o) FK_KEEP_LEAN = o.fkLean; if ('fkCurlRead' in o) FK_CURL_READ = o.fkCurlRead; if ('fkWall' in o) FK_WALL = o.fkWall; }};
 }
@@ -6100,7 +6143,7 @@ function tutPanel(s){
     fk: ['Free kick', `You were fouled: your free kick. ${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)} to power it up and let go to shoot. The dots show where it will go.`, ''],
     emote: ['Emotes', K.touch ? `Tap 😎 on the pitch and pick one: it shows over your player (EZ, Skill issue 💀 and more).` : `Press a number, ${kb('1')} to ${kb('8')}: an emote over your player (EZ, Skill issue 💀 and more).`, ''],
     keys: ['Other keys', K.touch ? `The buttons in the corner: Pause, ⚙ Settings (zoom, extrapolation, sound, controls), 😎 emotes, ☰ Menu (restart, leave), ⛶ fullscreen, and Chat online. Try Pause (then again to play on) and a different zoom in ⚙.`
-      : `${kb('Esc')} or ${kb('M')} menu · ${kb('P')} pause · ${kb('R')} restart (here: this step) · ${kb('F')} fullscreen · ${kb('+')} ${kb('−')} zoom · online ${kb('Enter')} or ${kb('T')} to chat. Two on one keyboard: P1 ${kb(K.p1)} ${kb(K.k1)} kick ${kb(K.s1)} slide, P2 ${kb(K.p2)} ${kb(K.k2)} kick ${kb(K.s2)} slide. Try ${kb('P')} twice and ${kb('+')} or ${kb('−')}.`,
+      : `${kb('Esc')} or ${kb('M')} menu · ${kb('P')} pause · ${kb('R')} restart (here: this step) · ${kb('F')} fullscreen · ${kb('+')} ${kb('−')} zoom · ${kb('G')} go in goal (a computer plays your man; again to come back out) · online ${kb('Enter')} or ${kb('T')} to chat. Two on one keyboard: P1 ${kb(K.p1)} ${kb(K.k1)} kick ${kb(K.s1)} slide, P2 ${kb(K.p2)} ${kb(K.k2)} kick ${kb(K.s2)} slide. Try ${kb('P')} twice and ${kb('+')} or ${kb('−')}.`,
       `${tu.pz === 2 ? '✓' : '·'} pause  ${zi !== tu.zi0 ? '✓' : '·'} zoom`],
     extrap: ['Extrapolation (online)', `Online, what you see of the others comes from the host a moment late (your ping). <b>Extrapolation</b> draws everyone a little ahead, where they'll be, so it feels like there's no delay. 0 shows exactly what arrived (smooth but late); higher feels quicker, but other players can jump a little when they change direction. Most players like about 90. You can change it any time in ⚙ Settings.`, ''],
     cup: ['Round him: over the top', `A man is just below your line. Aim at the goal (not round him) and hold ${kb(kDn)}${swapped} as you kick: the ball sets off out above him and bends back down into where you aimed (the dotted line). A curled kick always ends where you aim; the key picks which side it swings out.`, tu.tries ? `try ${tu.tries + 1}` : ''],
@@ -7944,6 +7987,9 @@ function openGameMenu(){
   $('exitBtn').textContent = online ? 'Leave the room' : 'Leave to the main menu';
   for (const b of $('gameMenu').querySelectorAll('.tmb,.pub')) b.hidden = online && !NET.host;   // (only the host changes those; a guest's click did nothing)
   $('gmSound').textContent = 'Sound: ' + (SET.sound ? 'on' : 'off');
+  { const mine = s.locals && s.locals.find(x => x.slot === 'both' || x.slot === 'p1'), p = mine && playerById(s.G, mine.pid), q = s.kind === 'guest' ? null : swapMate(s, p);
+    const gq = s.kind === 'guest' && p && !s.mode && s.G.nt !== 3 && s.G.players.some(o => o !== p && o.team === p.team && o.ctrl === 'ai' && (p.role === 'keeper') !== (o.role === 'keeper'));
+    const b = $('gmKeeper'); b.hidden = !(q || gq) || s.done; if (p) b.firstChild.textContent = p.role === 'keeper' ? 'Back out on the pitch ' : 'Go in goal '; }
   sureClose(); openPanel('gameMenu'); renderGmBoard();
 }
 // v25.9 the room menu (Esc or ☰ in a match; "like when we press esc its menu, it shows who is in and who in in
@@ -7967,6 +8013,7 @@ function localCols(s){
       acts.push([`Move to ${KIT[1 - p.team].name}`, () => localSeat(s, p, 'team', 1 - p.team), '', KIT[1 - p.team].color]);
       if (!Lc){ acts.push(['Take off the pitch', () => localSeat(s, p, 'off')]); if (!s.locals.some(x => x.slot === 'p2')) acts.push(['P2 plays here', () => localSeat(s, p, 'p2')]); }
       else if (Lc.slot === 'p2') acts.push(['Give back to the computer', () => localSeat(s, p, 'cpu')]);
+      if (Lc && swapMate(s, p)) acts.push([p.role === 'keeper' ? 'Back out on the pitch' : 'Go in goal', () => { keeperSwap(s, p); renderGmBoard(); }]);
     }
     cols.find(c => c.t === t).rows.push({id: 'L' + p.id, name, av: Lc ? (Lc.slot === 'p2' ? 'P2' : Lc.slot === 'p3' ? 'P3' : 'P1') : p.role === 'keeper' ? 'GK' : 'CP', me: !!Lc, acts, drag: true});
   }
@@ -7991,6 +8038,48 @@ function localSeat(s, p, what, t){
   } else return;
   renderGmBoard();
 }
+// v28.38 ("add an option where u can join as the keeper vs ur friend midgame, like turn into keeper and let ai
+// striker"): a person swaps places with a computer on their side in the middle of a match: into goal (the computer
+// takes the man they were, and plays him as a striker) or back out on the pitch (the computer goes back in goal).
+// G (P2: the full stop), ☰ Menu, or the teams board. Online the host makes the swap (a joiner's G asks it to)
+function swapMate(s, p){
+  const G = s && s.G; if (!G || !p || G.nt === 3 || s.mode || p.ctrl === 'gone' || p.ctrl === 'hold') return null;
+  const gk = p.role === 'keeper';
+  return G.players.find(q => q !== p && q.team === p.team && q.ctrl === 'ai' && (gk ? q.role !== 'keeper' : q.role === 'keeper')) || null;
+}
+function seatSwap(s, p, q){   // the person on p now plays q, and the computer plays p
+  const ip = s.info.get(p.id), iq = s.info.get(q.id);
+  q.ctrl = p.ctrl; q.peer = p.peer; q.seenK = null; q.seenI = -1; q.tapHold = 0; q.ackK = p.ackK; q.kSeen = q.kPress; q.taps = []; q.callAt = null; q.emSeen = p.emSeen;
+  p.ctrl = 'ai'; p.peer = null; p.taps = []; p.callAt = null; C.setInput(p, 0); C.setInput(q, 0); q.kicking = false;
+  s.info.set(q.id, ip || {name: 'Player', avatar: 'P1'}); s.info.set(p.id, {name: NET.on ? 'Computer' : p.role === 'keeper' ? 'Keeper' : 'Computer', avatar: p.role === 'keeper' ? 'GK' : 'CP'});
+  s.mems.delete(p.id); s.mems.delete(q.id);
+  for (const L of s.locals) if (L.pid === p.id){ L.pid = q.id; L.sent = -1; }
+  if (NET.on && s.kind === 'host' && NET.lobby && NET.lobby.ro){
+    const a = NET.lobby.ro.find(r => r[0] === p.id), b = NET.lobby.ro.find(r => r[0] === q.id);
+    if (a && b){ for (const k of [2, 3, 4, 5]){ const t = a[k]; a[k] = b[k]; b[k] = t; } a[4] = 'Computer'; a[5] = 'CP'; }
+    publishLobby();
+  }
+  pushInputs();
+}
+function keeperSwap(s, p, quiet){
+  const q = swapMate(s, p);
+  if (!q){ if (!quiet) say(!s || s.mode ? 'Not in practice' : p && p.role === 'keeper' ? 'No computer on the pitch on your side to swap with' : 'No computer keeper on your side to swap with'); return false; }
+  const gk = q.role === 'keeper', who = s.info.get(p.id), nm = who && who.name && who.name !== 'You' && (s.locals.length > 1 || NET.on) ? who.name : '';
+  seatSwap(s, p, q);
+  if (NET.on && s.kind === 'host') sysChat(`${(who && who.name) || 'Player'} ${gk ? 'went in goal' : 'came out of goal'}`);
+  say((nm ? nm + (gk ? ' is in goal' : ' is back on the pitch') : gk ? 'You\'re in goal' : 'You\'re back on the pitch') + (gk ? ' · the computer plays up front' : ' · the computer\'s in goal'));
+  if (!$('gameMenu').hidden) openGameMenu();
+  return true;
+}
+// my swap: a joiner asks the host; the host or a local game does it here (slot: whose keys, two on one keyboard)
+function mySwap(slot){
+  const s = sess; if (!s || s.done || s.replay || s.rp || !s.G || s.G.state === 3) return;
+  if (s.kind === 'guest'){ if (s.locals.length) sendCmd('gk'); return; }
+  const L = s.locals.find(x => !slot || x.slot === slot || (slot === 'p1' && x.slot === 'both')) || null;
+  if (!L) return;
+  keeperSwap(s, playerById(s.G, L.pid));
+}
+$('gmKeeper').addEventListener('click', () => mySwap('p1'));
 $('gmBtn').addEventListener('click', openGameMenu);
 { const bar = $('emoBar'); EMOTES.forEach((t, i) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.title = 'Key ' + (i + 1); b.setAttribute('role', 'menuitem'); b.addEventListener('click', () => { sendEmote(i); setHidden('emoBar', true); $('emoBtn').setAttribute('aria-expanded', 'false'); }); bar.append(b); });
   $('emoBtn').addEventListener('click', () => { setHidden('emoBar', !bar.hidden); $('emoBtn').setAttribute('aria-expanded', String(!bar.hidden)); }); }
@@ -9064,7 +9153,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.37';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.38';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -9741,7 +9830,7 @@ function onPeersHost(peers){
     for (const x of m.slice(-3)) if (Array.isArray(x)){ const id = p.id + ':' + (x[0] | 0); if (!NET.chatSeen.has(id)){ NET.chatSeen.add(id); addChat([id, clean(p.st.n, 16) || 'Player', clean(x[1], 100)]); } }
     // a manager's commands (each once, in order; only while they are a manager)
     const X = Array.isArray(p.st.x) ? p.st.x : [];
-    for (const c of X.slice(-4)) if (Array.isArray(c) && (c[0] | 0) > (NET.cmdSeen.get(p.id) || 0)){ NET.cmdSeen.set(p.id, c[0] | 0); if ((L.adm || []).includes(p.id)) runCmd(p.id, c); }
+    for (const c of X.slice(-4)) if (Array.isArray(c) && (c[0] | 0) > (NET.cmdSeen.get(p.id) || 0)){ NET.cmdSeen.set(p.id, c[0] | 0); if ((L.adm || []).includes(p.id) || c[1] === 'gk') runCmd(p.id, c); }
   }
   for (const id of [...NET.guests.keys()]) if (!now.has(id)){
     if (NET.rejoin && NET.rejoin.get(id) > performance.now()) continue;   // (after a hand-off: they're on their way back)
@@ -9765,6 +9854,7 @@ function runCmd(id, c){
   else if (k === 'rs' && L.on === 1){ const e = L.pl.find(x => x[0] === id); restartOnline(e ? e[1] : 'A manager'); }   // (v28.10: a manager's Restart)
   else if (k === 'lobby' && L.on !== 0){ const e = L.pl.find(x => x[0] === id); if (L.on === 1) sysChat(`${e ? e[1] : 'A manager'} stopped the match`); backToLobby(); }
   else if (k === 'pause' && sess && sess.kind === 'host' && !sess.done) togglePause();
+  else if (k === 'gk' && L.on === 1 && sess && sess.kind === 'host' && !sess.done){ const p = seatOf(sess, id); if (p && p.peer === id) keeperSwap(sess, p, true); }   // (v28.38: anyone's own swap, in goal and back out)
 }
 function toggleMgr(id){
   const L = NET.lobby; if (!NET.host || !L) return;
@@ -10712,6 +10802,8 @@ addEventListener('keydown', e => {
   else if (e.code === 'Equal' || e.code === 'NumpadAdd') zoomStep(1);
   else if (e.code === 'Minus' || e.code === 'NumpadSubtract') zoomStep(-1);
   else if (e.code === 'KeyT' && NET.on){ e.preventDefault(); openChat(); }
+  else if (e.code === 'KeyG' && sess && !sess.rp) mySwap('p1');   // (v28.38: in goal and back out; P2 the full stop)
+  else if (e.code === 'Period' && sess && !sess.rp && sess.locals && sess.locals.some(x => x.slot === 'p2')) mySwap('p2');
 });
 addEventListener('keyup', e => { if (held[e.code]){ held[e.code] = false; pushInputs(); } });
 addEventListener('blur', () => { for (const k in held) held[k] = false; touchIn.bits = 0; touchIn.kick = false; pushInputs(); });
