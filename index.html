@@ -1015,7 +1015,7 @@
       <div class="gmhead"><div class="gmt"><h2>Menu</h2><p id="gmNote"></p></div><button id="gmResume" type="button">Resume <kbd>Esc</kbd></button></div>
       <div class="lobby gmboard" id="gmBoard" hidden></div>
       <div class="gmbar">
-        <button class="ghost" id="gmPause" type="button" title="Pause the match for everyone (P)" hidden>Pause the match</button><button class="ghost" id="lobbyBtn" type="button" title="Stop the match and take everyone back to the lobby">Back to lobby</button><button class="ghost" id="gmRestart" type="button">Restart</button><button class="ghost" id="gmKeeper" type="button" title="Swap with the computer keeper on your side: you go in goal and the computer plays your man (G; P2: full stop)" hidden>Go in goal <kbd>G</kbd></button>
+        <button class="ghost" id="gmPause" type="button" title="Pause the match for everyone (P)" hidden>Pause the match</button><button class="ghost" id="lobbyBtn" type="button" title="Stop the match and take everyone back to the lobby">Back to lobby</button><button class="ghost" id="gmRestart" type="button">Restart</button><button class="ghost" id="gmKeeper" type="button" title="Swap with the computer keeper on your side: you go in goal and the computer plays your man (its key is in Controls)" hidden>Go in goal <kbd>G</kbd></button>
         <span class="gsp"></span>
         <button class="ghost gmexit" id="exitBtn" type="button">Leave to the main menu</button>
       </div>
@@ -1049,7 +1049,7 @@
         <div class="krow"><em>P1</em><span id="kb1"></span></div>
         <div class="krow"><em>P2</em><span id="kb2"></span></div>
         <div class="krow"><em>P3</em><span id="kb3"></span></div>
-        <div class="krow"><em>All</em><span><kbd>Esc</kbd> or <kbd>M</kbd> menu · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>+</kbd> <kbd>−</kbd> zoom (Follow all, Auto, 1×–3×) · <kbd>G</kbd> go in goal and back out, the computer taking your man (P2 <kbd>.</kbd>) · <kbd>1</kbd>–<kbd>8</kbd> emotes (two on one keyboard: P1 1–5, P2 6–0) · online <kbd>Enter</kbd> or <kbd>T</kbd> chat</span></div>
+        <div class="krow"><em>All</em><span><kbd>Esc</kbd> or <kbd>M</kbd> menu · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>+</kbd> <kbd>−</kbd> zoom (Follow all, Auto, 1×–3×) · <kbd id="kbGk">G</kbd> go in goal and back out, the computer taking your man (P2 <kbd id="kbGk2">.</kbd>; change it in Controls) · <kbd>1</kbd>–<kbd>8</kbd> emotes (two on one keyboard: P1 1–5, P2 6–0) · online <kbd>Enter</kbd> or <kbd>T</kbd> chat</span></div>
         <p>Change them in Controls. In fullscreen inside Claude the browser takes Esc to leave fullscreen: <kbd>M</kbd> opens the menu and stays fullscreen.</p>
       </section>
       <section class="hsec"><h3>Play</h3><ul>
@@ -4351,11 +4351,11 @@ function kitImage(k){
 }
 
 // ---------- keys ----------
-const PL = ['p1', 'p2', 'p3'], ACT = [['up', 'Up', 1], ['down', 'Down', 2], ['left', 'Left', 4], ['right', 'Right', 8], ['kick', 'Kick', 16], ['slide', 'Slide', 32]];   // (v25.5: the curl kick is gone; curl is the keys held across a kick)
+const PL = ['p1', 'p2', 'p3'], ACT = [['up', 'Up', 1], ['down', 'Down', 2], ['left', 'Left', 4], ['right', 'Right', 8], ['kick', 'Kick', 16], ['slide', 'Slide', 32], ['gk', 'Go in goal', 0]];   // (v28.39: the keeper swap's key, no input bit: keydown runs it)   // (v25.5: the curl kick is gone; curl is the keys held across a kick)
 // v28.10 ("make the default settings as c for slide and space to kick"): P1's slide C (was Left Shift); kick Space as before.
 // Alone, P1's and P2's keys both work: the arrows, Space to kick and C to slide, as in Haxball
-const DEF = {p1: {up:'KeyW', down:'KeyS', left:'KeyA', right:'KeyD', kick:'Space', slide:'KeyC'}, p2: {up:'ArrowUp', down:'ArrowDown', left:'ArrowLeft', right:'ArrowRight', kick:'ShiftRight', slide:'Slash'},   // Enter is the chat
-             p3: {up:'KeyI', down:'KeyK', left:'KeyJ', right:'KeyL', kick:'Semicolon', slide:'Quote'}};                     // the third player (three on one keyboard)
+const DEF = {p1: {up:'KeyW', down:'KeyS', left:'KeyA', right:'KeyD', kick:'Space', slide:'KeyC', gk:'KeyG'}, p2: {up:'ArrowUp', down:'ArrowDown', left:'ArrowLeft', right:'ArrowRight', kick:'ShiftRight', slide:'Slash', gk:'Period'},   // Enter is the chat
+             p3: {up:'KeyI', down:'KeyK', left:'KeyJ', right:'KeyL', kick:'Semicolon', slide:'Quote', gk:'KeyO'}};                     // the third player (three on one keyboard)
 const bind = {p1: Object.assign({}, DEF.p1), p2: Object.assign({}, DEF.p2), p3: Object.assign({}, DEF.p3)};
 { const sv = store.get('pb.keys', null); for (const p of PL) for (const [a] of ACT) if (sv && sv[p] && typeof sv[p][a] === 'string' && sv[p][a]) bind[p][a] = sv[p][a];
   // a saved set from before slide keys (or the third player) existed: a default key already used for something else stays unbound
@@ -6143,7 +6143,7 @@ function tutPanel(s){
     fk: ['Free kick', `You were fouled: your free kick. ${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)} to power it up and let go to shoot. The dots show where it will go.`, ''],
     emote: ['Emotes', K.touch ? `Tap 😎 on the pitch and pick one: it shows over your player (EZ, Skill issue 💀 and more).` : `Press a number, ${kb('1')} to ${kb('8')}: an emote over your player (EZ, Skill issue 💀 and more).`, ''],
     keys: ['Other keys', K.touch ? `The buttons in the corner: Pause, ⚙ Settings (zoom, extrapolation, sound, controls), 😎 emotes, ☰ Menu (restart, leave), ⛶ fullscreen, and Chat online. Try Pause (then again to play on) and a different zoom in ⚙.`
-      : `${kb('Esc')} or ${kb('M')} menu · ${kb('P')} pause · ${kb('R')} restart (here: this step) · ${kb('F')} fullscreen · ${kb('+')} ${kb('−')} zoom · ${kb('G')} go in goal (a computer plays your man; again to come back out) · online ${kb('Enter')} or ${kb('T')} to chat. Two on one keyboard: P1 ${kb(K.p1)} ${kb(K.k1)} kick ${kb(K.s1)} slide, P2 ${kb(K.p2)} ${kb(K.k2)} kick ${kb(K.s2)} slide. Try ${kb('P')} twice and ${kb('+')} or ${kb('−')}.`,
+      : `${kb('Esc')} or ${kb('M')} menu · ${kb('P')} pause · ${kb('R')} restart (here: this step) · ${kb('F')} fullscreen · ${kb('+')} ${kb('−')} zoom · ${kb(bind.p1.gk ? kname(bind.p1.gk) : '—')} go in goal (a computer plays your man; again to come back out) · online ${kb('Enter')} or ${kb('T')} to chat. Two on one keyboard: P1 ${kb(K.p1)} ${kb(K.k1)} kick ${kb(K.s1)} slide, P2 ${kb(K.p2)} ${kb(K.k2)} kick ${kb(K.s2)} slide. Try ${kb('P')} twice and ${kb('+')} or ${kb('−')}.`,
       `${tu.pz === 2 ? '✓' : '·'} pause  ${zi !== tu.zi0 ? '✓' : '·'} zoom`],
     extrap: ['Extrapolation (online)', `Online, what you see of the others comes from the host a moment late (your ping). <b>Extrapolation</b> draws everyone a little ahead, where they'll be, so it feels like there's no delay. 0 shows exactly what arrived (smooth but late); higher feels quicker, but other players can jump a little when they change direction. Most players like about 90. You can change it any time in ⚙ Settings.`, ''],
     cup: ['Round him: over the top', `A man is just below your line. Aim at the goal (not round him) and hold ${kb(kDn)}${swapped} as you kick: the ball sets off out above him and bends back down into where you aimed (the dotted line). A curled kick always ends where you aim; the key picks which side it swings out.`, tu.tries ? `try ${tu.tries + 1}` : ''],
@@ -7989,7 +7989,8 @@ function openGameMenu(){
   $('gmSound').textContent = 'Sound: ' + (SET.sound ? 'on' : 'off');
   { const mine = s.locals && s.locals.find(x => x.slot === 'both' || x.slot === 'p1'), p = mine && playerById(s.G, mine.pid), q = s.kind === 'guest' ? null : swapMate(s, p);
     const gq = s.kind === 'guest' && p && !s.mode && s.G.nt !== 3 && s.G.players.some(o => o !== p && o.team === p.team && o.ctrl === 'ai' && (p.role === 'keeper') !== (o.role === 'keeper'));
-    const b = $('gmKeeper'); b.hidden = !(q || gq) || s.done; if (p) b.firstChild.textContent = p.role === 'keeper' ? 'Back out on the pitch ' : 'Go in goal '; }
+    const b = $('gmKeeper'); b.hidden = !(q || gq) || s.done; if (p) b.firstChild.textContent = p.role === 'keeper' ? 'Back out on the pitch ' : 'Go in goal ';
+    const kk = b.querySelector('kbd'); if (kk){ kk.textContent = bind.p1.gk ? kname(bind.p1.gk) : ''; kk.hidden = !bind.p1.gk; } }
   sureClose(); openPanel('gameMenu'); renderGmBoard();
 }
 // v25.9 the room menu (Esc or ☰ in a match; "like when we press esc its menu, it shows who is in and who in in
@@ -8075,7 +8076,7 @@ function keeperSwap(s, p, quiet){
 function mySwap(slot){
   const s = sess; if (!s || s.done || s.replay || s.rp || !s.G || s.G.state === 3) return;
   if (s.kind === 'guest'){ if (s.locals.length) sendCmd('gk'); return; }
-  const L = s.locals.find(x => !slot || x.slot === slot || (slot === 'p1' && x.slot === 'both')) || null;
+  const L = s.locals.find(x => !slot || x.slot === slot) || s.locals.find(x => x.slot === 'both' && slot !== 'p3') || null;   // (alone, P2's key works for you too)
   if (!L) return;
   keeperSwap(s, playerById(s.G, L.pid));
 }
@@ -9153,7 +9154,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.38';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.39';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10785,6 +10786,8 @@ addEventListener('keydown', e => {
     else if (game.classList.contains('pfs')) toggleFs();
     return;
   }
+  // (v28.38) the keeper swap: in goal and back out (v28.39: its key is set in Controls, each player's own)
+  { const who = PL.find(q => bind[q].gk && bind[q].gk === e.code); if (who && panelsClosed() && sess && !sess.rp){ mySwap(who); return; } }
   if (!panelsClosed() || isBound(e.code)) return;
   // (v27.9: emotes, 1-8. v28.1, "what about 2 player how to emote": two or three on one keyboard, P1 (WASD) has 1-5 and
   // P2 (the arrows) 6-0, the first five each; P2 all eight on the number pad)
@@ -10802,8 +10805,6 @@ addEventListener('keydown', e => {
   else if (e.code === 'Equal' || e.code === 'NumpadAdd') zoomStep(1);
   else if (e.code === 'Minus' || e.code === 'NumpadSubtract') zoomStep(-1);
   else if (e.code === 'KeyT' && NET.on){ e.preventDefault(); openChat(); }
-  else if (e.code === 'KeyG' && sess && !sess.rp) mySwap('p1');   // (v28.38: in goal and back out; P2 the full stop)
-  else if (e.code === 'Period' && sess && !sess.rp && sess.locals && sess.locals.some(x => x.slot === 'p2')) mySwap('p2');
 });
 addEventListener('keyup', e => { if (held[e.code]){ held[e.code] = false; pushInputs(); } });
 addEventListener('blur', () => { for (const k in held) held[k] = false; touchIn.bits = 0; touchIn.kick = false; pushInputs(); });
@@ -10894,6 +10895,7 @@ function renderKeys(){
     const x = document.createElement('kbd'); x.textContent = k.kick ? kname(k.kick) : '—'; const y = document.createElement('kbd'); y.textContent = k.slide ? kname(k.slide) : '—'; el.append(x, ' kick · ', y, ' slide'); };
   row(bind.p1, $('kb1')); const n = document.createElement('small'); n.textContent = 'vs computer, P2 keys work for you too'; $('kb1').append(document.createElement('br'), n);
   row(bind.p2, $('kb2')); if ($('kb3')) row(bind.p3, $('kb3'));
+  if ($('kbGk')) $('kbGk').textContent = bind.p1.gk ? kname(bind.p1.gk) : '—'; if ($('kbGk2')) $('kbGk2').textContent = bind.p2.gk ? kname(bind.p2.gk) : '—';
 }
 document.querySelectorAll('.ctl').forEach(b => b.addEventListener('click', () => { rebind = null; renderKeys(); openPanel('keysPanel'); }));
 $('keyDone').addEventListener('click', () => { rebind = null; closePanel('keysPanel'); });
