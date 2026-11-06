@@ -2425,9 +2425,11 @@ function PBCORE(){
     tt[p.team] = {id: p.id, on: kicked ? false : !!(prev && prev.id === p.id && prev.on)};
     if (kicked) G.stats.kicks[p.team]++;
   }
-  // a save: the ball's speed as it reached him (km/h; v28.24, was as it was struck) goes with it; the fastest of the match (not the first) is a record
+  // a save: the shot's speed goes with it (km/h); the fastest of the match (not the first) is a record
+  // (v28.24 had it as the ball reached him; v28.43, "save speeds doesnt match goal speeds" -> "match them": as it was
+  // struck, as a goal's and a post's are, so one shot shows the same number saved or in; no struck speed: as it reached him)
   function saveMade(G, p, lt){
-    const st = G.stats, kmh = (G.bv0 != null ? G.bv0 : lt.sp || Math.hypot(G.discs[0].vx, G.discs[0].vy)) * KMH;   // (v28.24: as it reached him, not as it was struck: a slow ball was a "104 km/h save")
+    const st = G.stats, kmh = (lt.sp > 0 ? lt.sp : G.bv0 != null ? G.bv0 : Math.hypot(G.discs[0].vx, G.discs[0].vy)) * KMH;
     const list = st.saveList || (st.saveList = []), hs = st.hardSave || (st.hardSave = [0, 0]);
     const record = list.length > 0 && (!st.bestSave || kmh > st.bestSave.v);
     list.push({team: p.team, pid: p.id, kmh, frame: G.frame}); if (list.length > 500) list.shift();
@@ -2577,7 +2579,10 @@ function PBCORE(){
     }
     const pp = G.postPend;
     if (pp){ G.postPend = null; if (!(pp.team === scorer && pp.goal === 1 - scorer && (!lt || lt.frame <= pp.frame))) postCount(G, pp, true); }   // in off the post: a goal, not a post
-    const kmh = Math.hypot(ball.vx, ball.vy) * KMH;
+    // (v28.43, "match them": the shot's speed as it was struck, as a save's and a post's; pushed in, walked in or an own
+    // goal: as it crossed the line. arr: as it crossed the line, for "it trickles in")
+    const arr = Math.hypot(ball.vx, ball.vy) * KMH, shotBy = og ? null : lt && lt.id === pid ? lt : pt && pt.id === pid ? pt : null;
+    const kmh = shotBy && shotBy.kick && shotBy.sp > 0 ? shotBy.sp * KMH : arr;
     const st = G.stats, rec = !st.best || kmh > st.best.v;
     if (rec) st.best = {v: kmh, team: scorer};
     const p = pid != null ? G.players.find(q => q.id === pid) : null;
@@ -2596,8 +2601,8 @@ function PBCORE(){
     }
     if (assist != null){ const a = G.players.find(q => q.id === assist); if (a) pstat(G, a).assists++; }
     const t = Math.floor(G.time);
-    st.goals.push({team: scorer, pid, assist, og, kmh, t, slide});
-    return {type:'goal', id: ++G.eventId, frame: G.frame, team: scorer, pid, assist, og, kmh, slide, m, record: rec && st.goals.length > 1, t};
+    st.goals.push({team: scorer, pid, assist, og, kmh, arr, t, slide});
+    return {type:'goal', id: ++G.eventId, frame: G.frame, team: scorer, pid, assist, og, kmh, arr, slide, m, record: rec && st.goals.length > 1, t};
   }
   const KMH = 11.74;   // 1 px/tick in km/h on a 40 m futsal court
 
@@ -4742,7 +4747,7 @@ function onEvent(s, e){
     if (!s.mode){
       const lead = G.score[e.team] - G.score[1 - e.team];
       say(e.og ? `${late ? LATE_WORDS[late][1] + ': o' : 'O'}wn goal${who ? ' by ' + who.replace(/ \(own goal\)$/, '') : ''}! ${G.score[0]}–${G.score[1]}${lead > 0 ? ', ' + KIT[e.team].name + ' ahead' : lead === 0 ? ', all square' : ''}` :
-          `${late ? LATE_WORDS[late][0] + ' ' : e.slide ? 'TACKLE GOAL! ' : e.post ? 'BANGER, in off the post! ' : e.kmh >= 85 ? 'What a strike! ' : e.kmh < 30 ? 'It trickles in! ' : 'GOAL! '}${who || KIT[e.team].name} · ${e.m ? e.m + ' m, ' : ''}${Math.round(e.kmh)} km/h${e.assist != null ? ', assist ' + nameOf(s, playerById(G, e.assist)) : ''}${e.tag ? ' · ' + e.tag.toLowerCase() : ''}`);
+          `${late ? LATE_WORDS[late][0] + ' ' : e.slide ? 'TACKLE GOAL! ' : e.post ? 'BANGER, in off the post! ' : e.kmh >= 85 ? 'What a strike! ' : (e.arr != null ? e.arr : e.kmh) < 30 ? 'It trickles in! ' : 'GOAL! '}${who || KIT[e.team].name} · ${e.m ? e.m + ' m, ' : ''}${Math.round(e.kmh)} km/h${e.assist != null ? ', assist ' + nameOf(s, playerById(G, e.assist)) : ''}${e.tag ? ' · ' + e.tag.toLowerCase() : ''}`);
       s.replayFrom = Math.max(0, s.ticks - 170); s.replayTo = s.ticks + 40;
     }
     achGoal(s, e);
@@ -8159,7 +8164,7 @@ function rateOf(p, st, G, won, lost){
   r -= 1 * (s.og || 0) + 0.25 * (s.fouls || 0) + 0.3 * (s.yc || 0);   // (v28.21: booked)
   const minder = kp || solo, against = (st.goals || []).filter(g => g.team !== p.team && g.team >= 0);
   r -= (kp ? 0.4 : solo ? 0.35 : 0.1) * conc;
-  if (minder) r -= 0.25 * against.filter(g => g.kmh < 40).length + (kp ? 0.4 : 0.3) * (s.spills || 0);   // soft goals and spills: mistakes
+  if (minder) r -= 0.25 * against.filter(g => (g.arr != null ? g.arr : g.kmh) < 40).length + (kp ? 0.4 : 0.3) * (s.spills || 0);   // soft goals and spills: mistakes
   if (minder && !conc && G.time >= 60) r += kp ? 0.5 : 0.3;
   if (r > 6) r = 6 + 4 * (1 - Math.pow(Math.max(0, 1 - (r - 6) / RATE_TOP), RATE_P));   // (over 6: squeezed toward 10)
   return Math.max(3, Math.min(10, Math.round(r * 10) / 10));
@@ -9171,7 +9176,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.42';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.43';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -9653,16 +9658,20 @@ function directNote(){
   const any = direct === true || relayOk;
   $('viaField').hidden = !any; if (!any) $('roomVia').value = 'room';
   if (any && !$('roomVia').dataset.set){ $('roomVia').value = 'peer'; $('roomVia').dataset.set = '1'; }
-  $('onNote').textContent = direct === null && !relayOk ? 'Checking direct connections…' : direct ? 'Direct connections work here: rooms for "Everyone" can be joined from the downloaded file too, and the file\'s rooms show above.' :
-    relayOk ? 'Direct connections are blocked in this view, but the relay works: rooms for "Everyone" go through it, so friends with the downloaded file can join.' :
+  $('onNote').textContent = direct === null && !relayOk ? 'Checking direct connections…' : direct ? 'Direct connections work here: rooms for "Everyone" can be joined from the website and the downloaded file too, and their rooms show above.' :
+    relayOk ? 'Direct connections are blocked in this view, but the relay works: rooms for "Everyone" go through it, so friends on the website or with the downloaded file can join.' :
     NOTE_CLAUDE_ONLY;
-  if (direct === false && !relayOk) showPageLink(true);
+  if (direct === false && !relayOk){ showPageLink(true); siteLink($('onNote')); }
 }
 // v27.0 ("when i was on claude and i sent the html to my friend, they hosted but on claude i couldnt join, i went to a
 // html viewer online and then i could join"): in a view of Claude that keeps the page off the internet the file's rooms
 // can't be reached, and it said only "No room with that code". Say how to play together instead
-const NOTE_CLAUDE_ONLY = 'Claude keeps this page off the internet here, so rooms made in the downloaded file can\'t be seen or joined from here, and the file can\'t join rooms made here. To play together, both use the downloaded file (any browser, or an online HTML viewer), or both use this page in Claude: send your friend the link below.';
-function noConnection(){ $('onNote').textContent = ''; onErr(cantConnect().message); showPageLink(true); $('hostBtn').disabled = $('joinBtn').disabled = true; $('roomsNote').textContent = 'Not available here'; }
+// (v28.43, "i was on claude and my friend on github, we couldnt play": it spoke only of the downloaded file; now the
+// website too, with a link to it)
+const SITE_URL = 'https://ricecooker225.github.io/pitch-brawl-play/';
+const NOTE_CLAUDE_ONLY = 'Claude keeps this page off the internet here, so it can\'t reach rooms on the website (or the downloaded file), and they can\'t join rooms made here. To play together, both play here in Claude (send your friend this page\'s link), or both play on the website:';
+function siteLink(el){ if (!el || el.querySelector('.sitelink')) return; const a = document.createElement('a'); a.className = 'sitelink'; a.href = SITE_URL; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Open the website version'; el.append(' ', a); }
+function noConnection(){ $('onNote').textContent = ''; onErr(cantConnect().message); showPageLink(true); siteLink($('onNote')); $('hostBtn').disabled = $('joinBtn').disabled = true; $('roomsNote').textContent = 'Not available here'; }
 // this page's own address on claude.ai: inside Claude the page can't read it, and people need it to reopen the game in a browser
 const PAGE_URL = 'https://claude.ai/artifact/XeWawgAGw48C1haMLyoHKj';
 function showPageLink(on){ const show = !!on && inArtifact; $('onLink').hidden = !show; if (show) $('onLinkTxt').textContent = PAGE_URL; }
