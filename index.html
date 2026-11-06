@@ -2738,7 +2738,7 @@ function PBAI(C){
   // leaves a ball to a person of his who gets there no more than KP_YIELD ticks after him (and before them), and passes
   // to a person only from KP_PASS_MIN px off (closer, a full kick bounced off him)
   let SHOW = 1, SHOW_D = [150, 210, 270];   // (v27.7: see showPlan)
-  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 90, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3, KP_RUSH_CHARGE = 1, KP_RUSH_SLIDE = 0.8, KP_RECV = 1, RECV_V = 1.5, RECV_EARLY = 6, RECV_FOE = 60, RECV_AWAY = 0.5, KP_DANCE = 20, KP_HURRY = 30, KP_NOW_FOE = 30, KP_NOW_FWD = 0.35, KP_NOW_GAIN = 40, KP_PATH = 1, KP_PATH_V = 3.5, KP_PATH_R = 0.3, KP_PATH_EARLY = 4, STUCK_T = 90, AI_POWER = 1, SHOT_FIRST = 1, KO_GUARD = 60, POWER_FOE = 25, POWER_RANGE = 430, POWER_GAIN = 6, POWER_EXTRA = 4, AUTO_RUSH_LATE = 16, KEEP_MAXD = 45;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
+  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 90, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3, KP_RUSH_CHARGE = 1, KP_RUSH_SLIDE = 0.8, KP_RECV = 1, RECV_V = 1.5, RECV_EARLY = 6, RECV_FOE = 60, RECV_AWAY = 0.5, KP_DANCE = 20, KP_HURRY = 30, KP_NOW_FOE = 30, KP_NOW_FWD = 0.35, KP_NOW_GAIN = 40, KP_PATH = 1, KP_PATH_V = 3.5, KP_PATH_R = 0.3, KP_PATH_EARLY = 4, STUCK_T = 90, AI_POWER = 1, SHOT_FIRST = 1, KO_GUARD = 60, POWER_FOE = 25, POWER_RANGE = 430, POWER_GAIN = 6, POWER_EXTRA = 4, AUTO_RUSH_LATE = 16, KEEP_MAXD = 45, KNOCK_WIN = 1, KNOCK_MARGIN = 2;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
   let THRU_PASS = 1, THRU_AHEAD = 100, RECV_REACT = 10, PASS_ADV = 10, PASS_SAFE = -30, KEEP_LINEUP = 12, KEEP_CAREFUL = 1, KEEP_PTOL = 0.07, THRU_KZONE = 240, THRU_MARGIN = 0;
   // v24:
   //  - SHOT_HR: a shot is judged against a person in goal (or in the way) reacting at least this many ticks late, as
@@ -3223,7 +3223,18 @@ function PBAI(C){
         wantKick = false; mem.clrUp = (mem.clrUp || 0) + 1; mem.planAt = -1e9;
       }
       else if (wantKick || gap >= 8) mem.clrUp = 0;
-      if (pl.kind === 'dribble' && gap < 4 && pl.press && dist > 0 && (bx * Dx + by * Dy) / dist > Math.cos(th.tol * 1.4)) wantKick = !(END_GUARD && intoEndWall(G, ST, t, ball, bx / dist, by / dist, oppGoal));
+      if (pl.kind === 'dribble' && gap < 4 && pl.press && dist > 0 && (bx * Dx + by * Dy) / dist > Math.cos(th.tol * 1.4)){
+        wantKick = !(END_GUARD && intoEndWall(G, ST, t, ball, bx / dist, by / dist, oppGoal));
+        // v28.45 ("sometimes their striker just kick the ball away"): the knock past a man closing in went whatever was in
+        // front of it: half a striker's kicks, and 69% of them theirs within 2 s, most at once off the man (t_kicks.js, 2v2
+        // Insane). Now only a knock that I or one of mine get to first (by KNOCK_MARGIN ticks); else I keep it
+        if (wantKick && KNOCK_WIN){
+          const S = C.ballPath(ST, {x: ball.x, y: ball.y, vx: ball.vx + bx / dist * t.kickV, vy: ball.vy + by / dist * t.kickV, gx: 0, gy: 0, radius: ball.radius, bCoef: ball.bCoef, invMass: ball.invMass, damping: ball.damping, cMask: ball.cMask, cGroup: ball.cGroup}, 90, D);
+          let us = intercept(t, me, S, rr, 2), them = 999;
+          for (const o of G.players){ if (o === p || o.ctrl === 'gone') continue; const n = intercept(t, D[o.di], S, rr, 2); if (o.team === team){ if (n < us) us = n; } else if (n < them) them = n; }
+          if (!(us + KNOCK_MARGIN <= them)) wantKick = false;
+        }
+      }
       // a keeper with room: a ball still running at him against the way he wants to pass is stopped first (a pass struck
       // into its run keeps only half its pace)
       if (wantKick && KEEP_CONTROL && careful && pl.kind === 'pass' && ball.vx * Dx + ball.vy * Dy < -KEEP_CONTROL) wantKick = false;
@@ -4109,7 +4120,7 @@ function PBAI(C){
     if ('kpress' in o) KEEP_PRESS = o.kpress; if ('kpressLate' in o) KEEP_PRESS_LATE = o.kpressLate; if ('kpMargin' in o) KP_MARGIN = o.kpMargin; if ('kpRcap' in o) KP_RCAP = o.kpRcap; if ('kpRecheck' in o) KP_RECHECK = o.kpRecheck;
     if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside;
     if ('show' in o) SHOW = o.show; if ('showD' in o) SHOW_D = o.showD;
-    if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('rushCharge' in o) KP_RUSH_CHARGE = o.rushCharge; if ('rushSlide' in o) KP_RUSH_SLIDE = o.rushSlide; if ('kpRecv' in o) KP_RECV = o.kpRecv; if ('recvV' in o) RECV_V = o.recvV; if ('recvEarly' in o) RECV_EARLY = o.recvEarly; if ('recvFoe' in o) RECV_FOE = o.recvFoe; if ('recvAway' in o) RECV_AWAY = o.recvAway; if ('kpDance' in o) KP_DANCE = o.kpDance; if ('kpHurry' in o) KP_HURRY = o.kpHurry; if ('kpNowFoe' in o) KP_NOW_FOE = o.kpNowFoe; if ('kpNowFwd' in o) KP_NOW_FWD = o.kpNowFwd; if ('kpNowGain' in o) KP_NOW_GAIN = o.kpNowGain; if ('kpPath' in o) KP_PATH = o.kpPath; if ('kpPathV' in o) KP_PATH_V = o.kpPathV; if ('kpPathR' in o) KP_PATH_R = o.kpPathR; if ('kpPathEarly' in o) KP_PATH_EARLY = o.kpPathEarly; if ('stuckT' in o) STUCK_T = o.stuckT; if ('aiPower' in o) AI_POWER = o.aiPower; if ('shotFirst' in o) SHOT_FIRST = o.shotFirst; if ('koGuard' in o) KO_GUARD = o.koGuard; if ('powerFoe' in o) POWER_FOE = o.powerFoe; if ('powerRange' in o) POWER_RANGE = o.powerRange; if ('powerGain' in o) POWER_GAIN = o.powerGain; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushLate' in o) AUTO_RUSH_LATE = o.autoRushLate; if ('keepMaxD' in o) KEEP_MAXD = o.keepMaxD; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
+    if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('rushCharge' in o) KP_RUSH_CHARGE = o.rushCharge; if ('rushSlide' in o) KP_RUSH_SLIDE = o.rushSlide; if ('kpRecv' in o) KP_RECV = o.kpRecv; if ('recvV' in o) RECV_V = o.recvV; if ('recvEarly' in o) RECV_EARLY = o.recvEarly; if ('recvFoe' in o) RECV_FOE = o.recvFoe; if ('recvAway' in o) RECV_AWAY = o.recvAway; if ('kpDance' in o) KP_DANCE = o.kpDance; if ('kpHurry' in o) KP_HURRY = o.kpHurry; if ('kpNowFoe' in o) KP_NOW_FOE = o.kpNowFoe; if ('kpNowFwd' in o) KP_NOW_FWD = o.kpNowFwd; if ('kpNowGain' in o) KP_NOW_GAIN = o.kpNowGain; if ('kpPath' in o) KP_PATH = o.kpPath; if ('kpPathV' in o) KP_PATH_V = o.kpPathV; if ('kpPathR' in o) KP_PATH_R = o.kpPathR; if ('kpPathEarly' in o) KP_PATH_EARLY = o.kpPathEarly; if ('stuckT' in o) STUCK_T = o.stuckT; if ('aiPower' in o) AI_POWER = o.aiPower; if ('shotFirst' in o) SHOT_FIRST = o.shotFirst; if ('koGuard' in o) KO_GUARD = o.koGuard; if ('powerFoe' in o) POWER_FOE = o.powerFoe; if ('powerRange' in o) POWER_RANGE = o.powerRange; if ('powerGain' in o) POWER_GAIN = o.powerGain; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushLate' in o) AUTO_RUSH_LATE = o.autoRushLate; if ('knockWin' in o) KNOCK_WIN = o.knockWin; if ('knockMargin' in o) KNOCK_MARGIN = o.knockMargin; if ('keepMaxD' in o) KEEP_MAXD = o.keepMaxD; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
     if ('fkAiRead' in o) FK_AI_READ = o.fkAiRead; if ('fkAiMin' in o) FK_AI_MIN = o.fkAiMin; if ('fkAiStep' in o) FK_AI_STEP = o.fkAiStep;
     if ('fkSee' in o) FK_SEE = o.fkSee; if ('fkSeeT' in o) FK_SEE_T = o.fkSeeT; if ('fkLean' in o) FK_KEEP_LEAN = o.fkLean; if ('fkCurlRead' in o) FK_CURL_READ = o.fkCurlRead; if ('fkWall' in o) FK_WALL = o.fkWall; }};
 }
@@ -7058,6 +7069,16 @@ let wpMemo = null;
 // WP_FLOOR of the average, and the side behind pushing (WP_PUSH a goal behind, up to 3) which opens the game for the
 // leader too (WP_OPEN). Shown never 0% or 100% while it can still change: "<1%", ">99%" (wpPct), the three making 100
 const WP_T0 = 180, WP_PRIOR = 2, WP_FLOOR = 0.45, WP_PUSH = 0.25, WP_OPEN = 0.1, WP_K = 12;
+// v28.45 ("fix the win percentage asw, like as time goes it increases etc, like make it in sync"): a side 1-0 up in a
+// 3-minute match went 86% -> 80% over the first minute and a half with nothing happening, then back up: each side's
+// rate came from its goals over the time played, so one early goal made it look far the better side and the rates fell
+// as the clock ran. Now the goals expected from here run at a steady rate for both together (WP_LAM a second, as a
+// prior worth WP_LT seconds, with the goals so far), split by how the match has gone shrunk toward even (WP_EVK goals'
+// worth each side; a shot on target WP_SW of a goal): 1-0 at the kick-off of 3 minutes 72%, then only up. And while the
+// score and the shots on target stay as they are, time passing never takes the side ahead down (wpHold: the sums can
+// still dip a fraction of a point near a goal limit). Worked out every second, with the clock (was every 2 s)
+const WP_LAM = 1 / 60, WP_LT = 360, WP_EVK = 3, WP_SW = 0.3;
+let wpHold = null;
 // the chance of each score (start + [i, j]) after T seconds; stop(a, b): the match is over at that score
 function wpDist(a0, b0, T, rate, stop){
   const K = WP_K, n = K + 1, idx = (i, j) => i * n + j, R0 = new Float64Array(n * n), R1 = new Float64Array(n * n), ab = new Uint8Array(n * n);
@@ -7086,12 +7107,11 @@ function wpDist(a0, b0, T, rate, stop){
 function wpRound(v){ const f = v.map(x => Math.floor(x)), r = 100 - f.reduce((a, b) => a + b, 0), o = v.map((x, i) => [x - Math.floor(x), i]).sort((p, q) => q[0] - p[0]); for (let k = 0; k < r && k < o.length; k++) f[o[k][1]]++; return f; }
 const wpPct = (raw, shown) => raw < 0.5 ? '<1%' : raw > 99.5 ? '>99%' : shown + '%';
 function winChance(G, st){
-  const cf = G.cfg, sot = (st && st.sot) || [0, 0], key = G.score.join() + '|' + Math.floor(G.time / 2) + '|' + sot.join() + '|' + G.state + '|' + (cf.leg || 0) + (cf.agg || []).join() + '|' + cf.timeLimit + '|' + cf.scoreLimit + '|' + cf.tie;
+  const cf = G.cfg, sot = (st && st.sot) || [0, 0], sit = G.score.join() + '|' + sot.join() + '|' + G.state + '|' + (cf.leg || 0) + (cf.agg || []).join() + '|' + cf.timeLimit + '|' + cf.scoreLimit + '|' + cf.tie, key = sit + '|' + Math.floor(G.time);
   if (wpMemo && wpMemo.key === key) return wpMemo.v;
   const cfg = G.cfg, tl = cfg.timeLimit > 0, sl = cfg.scoreLimit > 0 ? cfg.scoreLimit : 0, left = tl ? timeLeft(G) : sl ? 1800 : 600, el = Math.max(0, G.time);
-  const sh = (sot[0] + 1) / (sot[0] + sot[1] + 2);
-  let base = [0, 1].map(t => (G.score[t] + WP_PRIOR * 2 * (t ? 1 - sh : sh)) / (el + WP_T0));   // (each side's goals, and the prior split by the shots on target)
-  { const m = (base[0] + base[1]) / 2; base = base.map(r => Math.max(r, WP_FLOOR * m)); }
+  const lam = (G.score[0] + G.score[1] + WP_LAM * WP_LT) / (el + WP_LT), ev = [0, 1].map(t => G.score[t] + WP_SW * sot[t] + WP_EVK), share = ev[0] / (ev[0] + ev[1]);
+  const base = [lam * share, lam * (1 - share)];   // (v28.45: a steady rate for both, split by how it's gone)
   const agg = Array.isArray(cfg.agg) ? [+cfg.agg[0] || 0, +cfg.agg[1] || 0] : [0, 0];
   const rate = off => (a, b) => { const d = (a + off[0]) - (b + off[1]), k = Math.min(3, Math.abs(d)); if (!d) return base; const r = base.slice(), tr = d < 0 ? 0 : 1; r[tr] *= 1 + WP_PUSH * k; r[1 - tr] *= 1 + WP_OPEN * k; return r; };
   // the goal limit as the engine has it (v28.25): a second leg only for a side ahead on the total
@@ -7113,6 +7133,10 @@ function winChance(G, st){
       for (const [c, e, q] of wpDist(0, 0, L2, rate(off), stopAt(off))) settle(off[0] + c, off[1] + e, p * q, off); }
   }
   const tot = w[0] + w[1] + draw || 1, raw = [w[0] / tot * 100, w[1] / tot * 100, canDraw ? draw / tot * 100 : null];
+  // (v28.45) nothing changed but the clock: the side ahead keeps at least what it had, the rest shared as worked out
+  { const lead = G.score[0] + (cfg.agg ? agg[0] : 0) > G.score[1] + (cfg.agg ? agg[1] : 0) ? 0 : G.score[1] + (cfg.agg ? agg[1] : 0) > G.score[0] + (cfg.agg ? agg[0] : 0) ? 1 : -1;
+    if (lead >= 0 && wpHold && wpHold.sit === sit && raw[lead] < wpHold.v){ const o = 1 - lead, rest = 100 - raw[lead], need = wpHold.v - raw[lead], k = rest > 0 ? (rest - need) / rest : 0; raw[lead] = wpHold.v; raw[o] *= k; if (raw[2] != null) raw[2] *= k; }
+    wpHold = lead >= 0 ? {sit, v: raw[lead]} : null; }
   const ints = wpRound(raw[2] == null ? [raw[0], raw[1]] : [raw[0], raw[1], raw[2]]);
   // [win 0, win 1, draw or null] as whole numbers for the bar, then the raw ones (for "<1%", and the record)
   const v = [ints[0], ints[1], raw[2] == null ? null : ints[2]]; v.raw = raw;
@@ -9189,7 +9213,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.44';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.45';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
