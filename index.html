@@ -6692,7 +6692,7 @@ function burst(x, y, cols, count, style){
 // the rockets climbing, their sparks, and the shockwaves (world space); called from render
 function fxWorld(k){
   for (const r of fx.rockets){
-    r.tr.push({x: r.x, y: r.y}); if (r.tr.length > 9) r.tr.shift();
+    r.tr.push({x: r.x, y: r.y}); while (r.tr.length > Math.max(3, Math.round(9 / Math.max(0.25, k)))) r.tr.shift();   // (v28.42: as long at 120 fps as at 60)
     r.x += r.vx * k; r.y += r.vy * k; r.vy += 0.06 * k;
     if (r.y <= r.ty || r.vy >= -0.4){ r.done = true; burst(r.x, r.y, r.cols, r.style === 'ring' ? 90 : 130, r.style); }
     ctx.lineCap = 'round';
@@ -7235,7 +7235,7 @@ function render(dt, clip){
     // ball trail when it really flies
     const b = V.discs[0], last = fx.trail[fx.trail.length - 1];
     if (last && Math.hypot(b.x - last.x, b.y - last.y) > 40) fx.trail.length = 0;
-    fx.trail.push({x: b.x, y: b.y, t: performance.now()}); if (fx.trail.length > 12) fx.trail.shift();
+    { const now = performance.now(); fx.trail.push({x: b.x, y: b.y, t: now}); while (fx.trail.length > 2 && (now - fx.trail[0].t > 200 || fx.trail.length > 40)) fx.trail.shift(); }   // (v28.42: the last 200 ms, at any frame rate: 12 frames at 60 fps, 24 at 120)
     const sp = Math.hypot(b.vx, b.vy);
     if (sp > 4.2 && fx.trail.length > 2 && !reduceMotion){
       ctx.lineCap = 'round';
@@ -9171,7 +9171,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.41';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.42';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
