@@ -418,6 +418,10 @@
   .keys b{font-weight:500;color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
   .keys button{min-width:84px}
   .keys button.wait{background:var(--accent);color:var(--accent-ink)}
+  .keys .kfix{margin-top:8px}
+  .keys .kfixed{grid-column:2 / span 3;color:var(--muted);opacity:.8}
+  .keys .kfixed kbd{margin-right:2px}
+  .keymsg{min-height:1.2em;margin:6px 0 0;color:var(--accent);font-size:13px}
   #pu,#tm{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 10px;align-items:center;font-size:13px;max-width:100%}
   #pu b,#tm b{font-weight:500;color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase;text-align:left}
   #tm span{display:flex;align-items:center;gap:8px;min-width:0}
@@ -852,7 +856,8 @@
   <div class="overlay" id="keysPanel" hidden>
     <h2>Controls</h2>
     <div class="keys" id="keys"></div>
-    <p>Click a key, then press the new one. Esc cancels. A key already in use is swapped. Auto curl and Swap curl keys are in ⚙ Settings (Your curl).</p>
+    <p class="keymsg" id="keyMsg" aria-live="polite"></p>
+    <p>Click a key, then press the new one. Esc cancels. A key already in use is swapped. The fixed keys can't be used. Auto curl and Swap curl keys are in ⚙ Settings (Your curl).</p>
     <div class="row"><button class="ghost" id="keyReset" type="button">Reset</button><button id="keyDone" type="button">Done</button></div>
   </div>
   <div class="overlay" id="goalsPanel" hidden>
@@ -4378,11 +4383,19 @@ const PL = ['p1', 'p2', 'p3'], ACT = [['up', 'Up', 1], ['down', 'Down', 2], ['le
 // Alone, P1's and P2's keys both work: the arrows, Space to kick and C to slide, as in Haxball
 const DEF = {p1: {up:'KeyW', down:'KeyS', left:'KeyA', right:'KeyD', kick:'Space', slide:'KeyC', gk:'KeyG'}, p2: {up:'ArrowUp', down:'ArrowDown', left:'ArrowLeft', right:'ArrowRight', kick:'ShiftRight', slide:'Slash', gk:'Period'},   // Enter is the chat
              p3: {up:'KeyI', down:'KeyK', left:'KeyJ', right:'KeyL', kick:'Semicolon', slide:'Quote', gk:'KeyO'}};                     // the third player (three on one keyboard)
+// v28.44 ("add a thing where some controls cant be changed, like full screen etc"): the keys the game itself uses. Shown
+// in Controls as fixed, and never given to a player's key (a player's key comes first, so the shortcut stopped working)
+const FIXED_KEYS = [['Menu', ['Escape', 'KeyM']], ['Pause', ['KeyP']], ['Restart', ['KeyR']], ['Fullscreen', ['KeyF']], ['Zoom', ['Equal', 'Minus']], ['Chat (online)', ['Enter', 'KeyT']], ['Emotes', ['Digit1', 'Digit8'], '1–8 (two on one keyboard: P1 1–5, P2 6–0)']];
+const RESERVED = new Set(['Escape', 'KeyM', 'KeyP', 'KeyR', 'KeyF', 'KeyT', 'Enter', 'NumpadEnter', 'Equal', 'Minus', 'NumpadAdd', 'NumpadSubtract', ...Array.from({length: 10}, (_, i) => 'Digit' + i), ...Array.from({length: 10}, (_, i) => 'Numpad' + i)]);
+const fixedName = c => { const f = FIXED_KEYS.find(([, ks]) => ks.includes(c)) || (/^Numpad\d$|^Digit\d$/.test(c) ? FIXED_KEYS[6] : /Numpad(Add|Subtract)/.test(c) ? FIXED_KEYS[4] : c === 'NumpadEnter' ? FIXED_KEYS[5] : null); return f ? f[0].toLowerCase().replace(' (online)', '') : 'used by the game'; };
 const bind = {p1: Object.assign({}, DEF.p1), p2: Object.assign({}, DEF.p2), p3: Object.assign({}, DEF.p3)};
 { const sv = store.get('pb.keys', null); for (const p of PL) for (const [a] of ACT) if (sv && sv[p] && typeof sv[p][a] === 'string' && sv[p][a]) bind[p][a] = sv[p][a];
   // a saved set from before slide keys (or the third player) existed: a default key already used for something else stays unbound
   for (const p of PL) for (const [a] of ACT) if (!(sv && sv[p] && sv[p][a])){ const k = DEF[p][a], used = PL.some(q => ACT.some(([b]) => (q !== p || b !== a) && bind[q][b] === k)); if (used) bind[p][a] = ''; }
   for (const p of PL) for (const [a] of ACT) if (bind[p][a] === 'Enter' || bind[p][a] === 'NumpadEnter') bind[p][a] = p === 'p2' && a === 'kick' ? 'ShiftRight' : DEF[p][a];   // Enter opens the chat now
+  // (v28.44) a saved key that's now one of the game's own: back to the default if that's free, else unset
+  { let ch = false; for (const p of PL) for (const [a] of ACT) if (RESERVED.has(bind[p][a])){ const d = DEF[p][a]; bind[p][a] = d && !RESERVED.has(d) && !PL.some(q => ACT.some(([b]) => bind[q][b] === d)) ? d : ''; ch = true; }
+    if (ch && sv) store.set('pb.keys', bind); }
   // (v28.10: a saved set with the old default slide, Left Shift, gets C, once, unless C is in use; and kick on Space if it has none)
   if (sv && !store.get('pb.keys28', 0)){ store.set('pb.keys28', 1);
     if (bind.p1.slide === 'ShiftLeft' && !isBoundIn('KeyC')){ bind.p1.slide = 'KeyC'; store.set('pb.keys', bind); }
@@ -9176,7 +9189,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.43';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.44';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10779,6 +10792,7 @@ addEventListener('keydown', e => {
   kbUsed = true;
   if (rebind){
     e.preventDefault();
+    if (e.code !== 'Escape' && RESERVED.has(e.code)){ keyMsg(`${kname(e.code)} is ${fixedName(e.code)}: it can't be changed. Pick another key, or Esc.`); return; }   // (v28.44: still waiting)
     if (e.code !== 'Escape'){ const {p, a} = rebind, old = bind[p][a];
       for (const q of PL) for (const [b] of ACT) if (bind[q][b] === e.code) bind[q][b] = old;   // swap with whoever had this key
       bind[p][a] = e.code; store.set('pb.keys', bind); }
@@ -10902,8 +10916,9 @@ function renderCurlOpts(){
       b.onclick = () => { curlOpt(key, i); b.blur(); }; el.append(b); }); }
 }
 renderCurlOpts();
+function keyMsg(t){ const m = $('keyMsg'); if (m) m.textContent = t || ''; }
 function renderKeys(){
-  const g = $('keys'); g.textContent = '';
+  const g = $('keys'); g.textContent = ''; keyMsg('');
   const add = (tag, text, cls) => { const e = document.createElement(tag); e.textContent = text; if (cls) e.className = cls; g.append(e); return e; };
   add('span', ''); add('b', `P1 · ${KIT[0].name || 'Left'}`); add('b', `P2 · ${KIT[1].name || 'Right'}`); add('b', 'P3 · three players');
   for (const [a, name] of ACT){
@@ -10913,6 +10928,14 @@ function renderKeys(){
       b.type = 'button'; b.className = 'ghost' + (wait ? ' wait' : ''); b.textContent = wait ? 'Press a key…' : bind[p][a] ? kname(bind[p][a]) : '—';
       b.onclick = () => { rebind = {p, a}; renderKeys(); }; g.append(b);
     }
+  }
+  // (v28.44) the game's own keys: shown, locked
+  { const h = add('b', 'Fixed · can\'t be changed', 'kfix'); h.style.gridColumn = '1 / -1'; }
+  for (const [name, ks, txt] of FIXED_KEYS){
+    add('span', name);
+    const c = add('span', null, 'kfixed'); c.title = 'Can\'t be changed';
+    if (txt){ const k = document.createElement('kbd'); k.textContent = txt; c.append(k); }
+    else ks.forEach((k0, i) => { if (i) c.append(' '); const k = document.createElement('kbd'); k.textContent = k0 === 'Equal' ? '+' : k0 === 'Minus' ? '−' : k0 === 'Escape' ? 'Esc' : kname(k0); c.append(k); });
   }
   // v25.9: each player's auto curl lives with their keys ("dont put the legs in settings, put it where it should be,
   // same is other stuff")
