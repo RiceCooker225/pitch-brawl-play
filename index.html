@@ -1410,8 +1410,14 @@ function PBCORE(){
   // the spin dies away (SPIN_END a tick) and the kicker can't add to it
   // v25.4 ("the curls got nerfed", "the percentage doesnt feel right"): the curve level is the % it says, in even steps,
   // and 100% curls more than before: CURVE_LV 0.44 .. 2.2 (was 0.5, 0.75, 1, 1.4, 1.9; the default 60% 1.32, was 1)
-  const CURVE_K = 0.09, CURVE_FADE = 0.975, AT_T = 32, AT_K = 0.0065, SPIN_MAX = 0.12, CURVE_LV = [0.44, 0.88, 1.32, 1.76, 2.2], FK_CURVE = 2.3;
-  const CURL = 1, SPIN_S0 = 8, SPIN_TURN = 1.45, SPIN_END = 0.75;
+  const CURVE_K = 0.09, CURVE_FADE = 0.975, AT_T = 32, AT_K = 0.0065, SPIN_MAX = 0.12, CURVE_LV = [0.66, 1.32, 1.98, 2.64, 3.3], FK_CURVE = 1.533;
+  // v28.41 ("curls feel less curly and less powerful", "no like compared to before"; nothing had changed since v28.12,
+  // timed the same in v28.12, v28.20, v28.33, v28.40): every curve level a quarter more (CURVE_LV x1.25, free kicks kept
+  // as they were: FK_CURVE and FK_SPIN /1.25), the turn that keeps it ending where aimed allowed as much more (CURL_ROT,
+  // CURL_ROT_FAR, CURL_BACK_ROT; and curlTo no longer gives up on a big curl that kicked straight bends away before the
+  // goal: that had capped every level at about 60% on longer shots), and a person's curled kick in play (not a free
+  // kick, not a keeper's save) leaves the foot CURL_PACE times as fast
+  const CURL = 1, SPIN_S0 = 8, SPIN_TURN = 1.45, SPIN_END = 0.75, CURL_PACE = 1.08;
   const curveMul = G => CURVE_LV[Math.max(0, Math.min(4, (G.cfg.curveLv || 3) - 1))];
   function spin(d, dt){
     const s = Math.sqrt(d.vx * d.vx + d.vy * d.vy);
@@ -1538,7 +1544,7 @@ function PBCORE(){
   // there, or not at their goal (a pass, a cross): the whole curl toward the side held.
   // Free kicks: left and right set the curl (kicker's right: + spin) while up and down aim (sp.side; see fkAim); it
   // bends from where it's aimed, the dots show it (fkCurl)
-  const CURL_WIDE = 1.5, CURL_STEPS = [1, 0.8, 0.6, 0.4], CURL_LAT = 0.6, CURL_IN = 5, CURL_ROT = 0.6, CURL_MORE = 4, CURL_IN_STEP = 8, CURL_IN_TRIES = 4, CURL_IN_COST = 2;
+  const CURL_WIDE = 1.5, CURL_STEPS = [1, 0.8, 0.6, 0.4], CURL_LAT = 0.6, CURL_IN = 5, CURL_ROT = 0.75, CURL_MORE = 4, CURL_IN_STEP = 8, CURL_IN_TRIES = 4, CURL_IN_COST = 2;
   function curlGoal(ST, p, b){   // their goal a kick (ball b) is at, {g, W}, or null
     let g = null, W = 0, best = Infinity;
     for (const q of ST.goals){
@@ -1579,12 +1585,15 @@ function PBCORE(){
           // the turn nearest straight that puts it there: out from straight both ways in steps of CURL_ROT / 12 until
           // it crosses the spot, then halve the gap
           let br = null;
+          // (v28.41, "curls feel less curly": a big curl that, kicked straight, bends away before it gets to the goal
+          // line was given up at once, so on a longer shot only the smaller amounts were ever tried, whatever the curve
+          // level. Now it turns on until it does get there, then looks for the spot as before)
           for (const side of [1, -1]){
             let pd = 0, pc = at(0);
-            for (let k = 1; k <= 12 && pc != null; k++){
+            for (let k = 1; k <= 12; k++){
               const d = side * k * RM / 12, c = at(d);
-              if (c == null) break;
-              if ((pc - cT) * (c - cT) <= 0){ if (!br || k < br.k) br = {k, a: pd, z: d}; break; }
+              if (c == null){ if (pc != null) break; pd = d; continue; }
+              if (pc != null && (pc - cT) * (c - cT) <= 0){ if (!br || k < br.k) br = {k, a: pd, z: d}; break; }
               pd = d; pc = c;
             }
           }
@@ -1613,7 +1622,7 @@ function PBCORE(){
   // only bowed 28-38 px off its line)
   // a shot from further out may also be turned further first, up to CURL_ROT_FAR radians more (so the bigger curl still
   // ends where it was aimed)
-  const CURL_FAR0 = 150, CURL_FAR_PX = 250, CURL_FAR_MAX = 1.8, CURL_ROT_FAR = 0.4;
+  const CURL_FAR0 = 150, CURL_FAR_PX = 250, CURL_FAR_MAX = 1.8, CURL_ROT_FAR = 0.5;
   // v25.6.5 ("sometimes when i hold up down it doesnt curl, it could be because i was aiming toohigh/toodown"): the keys
   // count across the line to their goal's middle, not the kick (aimed at a top corner with up and right held, the
   // diagonal was only ~30 degrees off the kick: no curl); a straight line that meets the end wall beside the goal is
@@ -1638,7 +1647,7 @@ function PBCORE(){
   // unclear and it agrees (aimed at a top corner with up and right held). And a kick heading for the side wall or far
   // past the post is a shot when its curl takes it in (curlsIn: the goal, no side wall first); otherwise a wall pass
   // stays straight
-  const CURL_BACK_ROT = 0.5;   // (how much more it may be turned to bring it back in)
+  const CURL_BACK_ROT = 0.6;   // (how much more it may be turned to bring it back in)
   function nearGoal(ST, p, b){   // their nearest goal in range, whatever the kick's line
     let best = null, bd = Infinity;
     for (const q of ST.goals){ if (q.team === p.team) continue; const w = Math.hypot(q.x1 - q.x0, q.y1 - q.y0), d = Math.hypot((q.x0 + q.x1) / 2 - b.x, (q.y0 + q.y1) / 2 - b.y); if (w > 0 && d <= AUTO_RANGE && d < bd){ bd = d; best = {g: q, W: w}; } }
@@ -1703,8 +1712,11 @@ function PBCORE(){
     if (!held){   // (auto curl: only for a straight shot)
       if (!shot) return NO;
       // (which way + spin moves where it crosses; aimed wide of a post, + spin may bend it away and never get there)
-      const cp = flightCross(b, m, g, AUTO_N), cm = cp == null ? flightCross(b, -m, g, AUTO_N) : null;
-      const pd = c == null ? 0 : cp != null ? Math.sign(cp - c) : cm != null ? Math.sign(c - cm) : 0;
+      // (v28.41: probed with less spin when the whole amount bends it away before the goal line, which with the bigger
+      // curve levels it can: auto curl stopped curling)
+      let pd = 0;
+      for (const f of [1, 0.6, 0.3]){ if (c == null) break; const cp = flightCross(b, m * f, g, AUTO_N), cm = cp == null ? flightCross(b, -m * f, g, AUTO_N) : null;
+        pd = cp != null ? Math.sign(cp - c) : cm != null ? Math.sign(c - cm) : 0; if (pd) break; }
       if (!pd) return NO;
       let want = W / 2 - c;
       if (Math.abs(want) < AC_MID * W){
@@ -1840,7 +1852,7 @@ function PBCORE(){
   // from where it's aimed: nothing turns it first (v25.5 had it end where aimed, like a shot, but then
   // "when adjusted curls, the line doesnt move": aimed wide it always ended in the same corner). The dots show it all
   // v27.3: FK_SPIN times more than before (with the wall and keeper now set, it's the curl round them that scores)
-  const FK_CURL_N = CURVE_LV.length, FK_SPIN = 1.5;
+  const FK_CURL_N = CURVE_LV.length, FK_SPIN = 1.0;
   function fkCurl(G, ST, p, b){ const s = G.sp ? Math.max(-FK_CURL_N, Math.min(FK_CURL_N, G.sp.side | 0)) : 0; return {sp: s ? Math.sign(s) * AUTO_MAX * CURVE_LV[Math.abs(s) - 1] * FK_SPIN : 0, rot: 0}; }
   // where a person's free kick would go: from his aim, with pw of the bar, straight or curled (v25.5: the side picked with left and right); n ticks
   function fkPreview(G, ST, p, pw, n){
@@ -2221,6 +2233,7 @@ function PBCORE(){
       const lt = G.lastTouch, saving = (lt && ((lt.id === p.id && lt.save && G.frame - lt.save < SAVE_T) || (lt.team !== p.team && lt.shot && lt.kick)))
         || (p.role === 'keeper' && !ST.tri);   // (and any keeper's kick: on a moving ball, out of his area too, it went off at 120-140)
       if (saving){ const v = Math.sqrt(o.vx * o.vx + o.vy * o.vy), cap = Math.max(ks * o.invMass, vIn * SAVE_KEEP); if (v > cap){ o.vx *= cap / v; o.vy *= cap / v; } }
+      o.kpSave = !!saving;
     }
     d.vx += -pp.kickback * x * d.invMass; d.vy += -pp.kickback * y * d.invMass;
     if (o === G.discs[0]){
@@ -2233,7 +2246,10 @@ function PBCORE(){
       const cv = p.ctrl === 'ai' && p.aiShot, mul = G.cfg.curve ? curveMul(G) : 1;
       // v25.5: a person's kick curls by the keys held across it (manualCurl), a free kick by the side picked (fkCurl), each
       // turned first so it still ends where it was aimed; the computer's shots curl by themselves (autoCurl)
-      const ck = fkc === 2 ? fkCurl(G, ST, p, o) : !fkc && (p.ctrl === 'human' || p.ctrl === 'remote') ? manualCurl(G, ST, p, o) : !fkc && cv && AI_CURL ? manualCurl(G, ST, p, o, G.cfg.curve ? mul : CURVE_LV[2]) : null;
+      const curlNow = () => fkc === 2 ? fkCurl(G, ST, p, o) : !fkc && (p.ctrl === 'human' || p.ctrl === 'remote') ? manualCurl(G, ST, p, o) : !fkc && cv && AI_CURL ? manualCurl(G, ST, p, o, G.cfg.curve ? mul : CURVE_LV[2]) : null;
+      let ck = curlNow();
+      // (v28.41) a kick that will curl goes CURL_PACE harder; its curl worked out again at that speed, so it still ends where aimed
+      if (ck && ck.sp && !fkc && !o.kpSave && CURL_PACE !== 1 && (p.ctrl === 'human' || p.ctrl === 'remote')){ o.vx *= CURL_PACE; o.vy *= CURL_PACE; ck = curlNow(); }   // (a person's: the computer's at that pace scored 55 -> 98 in six 2v2 Insane games, with only the bigger bend 61)
       if (ck && ck.rot){ const t = turned(o, ck.rot); o.vx = t.vx; o.vy = t.vy; }
       o.sp = ck ? ck.sp : cv ? autoCurl(G, ST, p, o, G.cfg.curve ? mul : CURVE_LV[2], false) : 0; o.spA = 0; o.spSkip = p.di; o.spT = 5; o.spF = G.frame;
       o.atT = 0; o.atBy = p.id; o.atAdd = 0; o.atK = AT_K * mul; o.atMax = SPIN_MAX * mul;
@@ -9155,7 +9171,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.40';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.41';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
