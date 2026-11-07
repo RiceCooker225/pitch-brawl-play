@@ -2251,12 +2251,15 @@ function PBCORE(){
       const cv = p.ctrl === 'ai' && p.aiShot, mul = G.cfg.curve ? curveMul(G) : 1;
       // v25.5: a person's kick curls by the keys held across it (manualCurl), a free kick by the side picked (fkCurl), each
       // turned first so it still ends where it was aimed; the computer's shots curl by themselves (autoCurl)
-      const curlNow = () => fkc === 2 ? fkCurl(G, ST, p, o) : !fkc && (p.ctrl === 'human' || p.ctrl === 'remote') ? manualCurl(G, ST, p, o) : !fkc && cv && AI_CURL ? manualCurl(G, ST, p, o, G.cfg.curve ? mul : CURVE_LV[2]) : null;
+      // (v28.46, "i tunred off curls, why the hell does cpu still have curls": with Curve off nobody's kick in play curls,
+      // the computer's either (v25.5.2 had it curl at 60% with Curve off); free kicks keep theirs ("dont worry about
+      // freekicks, curls still on should be fine")
+      const curlNow = () => fkc === 2 ? fkCurl(G, ST, p, o) : !G.cfg.curve ? null : !fkc && (p.ctrl === 'human' || p.ctrl === 'remote') ? manualCurl(G, ST, p, o) : !fkc && cv && AI_CURL ? manualCurl(G, ST, p, o, mul) : null;
       let ck = curlNow();
       // (v28.41) a kick that will curl goes CURL_PACE harder; its curl worked out again at that speed, so it still ends where aimed
       if (ck && ck.sp && !fkc && !o.kpSave && CURL_PACE !== 1 && (p.ctrl === 'human' || p.ctrl === 'remote')){ o.vx *= CURL_PACE; o.vy *= CURL_PACE; ck = curlNow(); }   // (a person's: the computer's at that pace scored 55 -> 98 in six 2v2 Insane games, with only the bigger bend 61)
       if (ck && ck.rot){ const t = turned(o, ck.rot); o.vx = t.vx; o.vy = t.vy; }
-      o.sp = ck ? ck.sp : cv ? autoCurl(G, ST, p, o, G.cfg.curve ? mul : CURVE_LV[2], false) : 0; o.spA = 0; o.spSkip = p.di; o.spT = 5; o.spF = G.frame;
+      o.sp = ck ? ck.sp : cv && G.cfg.curve ? autoCurl(G, ST, p, o, mul, false) : 0; o.spA = 0; o.spSkip = p.di; o.spT = 5; o.spF = G.frame;
       o.atT = 0; o.atBy = p.id; o.atAdd = 0; o.atK = AT_K * mul; o.atMax = SPIN_MAX * mul;
     }
     return true;
@@ -2476,11 +2479,16 @@ function PBCORE(){
       const g = ST.goals.find(q => q.team === hit.team), P = g ? ballPath(ST, b, 90, G.discs) : [];
       let inside = false; for (let i = 1; i < P.length && !inside; i++) inside = crossesGoal(g, P[i].x, P[i].y, P[i - 1].x, P[i - 1].y);
       if (G.postPend) postCount(G, G.postPend, true);
-      if (inside) G.postPend = o; else { G.postPend = null; postCount(G, o, false); }
+      if (inside){ G.postPend = o;
+        // (v28.46, "someshots didnt show save or post": off the post and on its way in, it's on target now, so the
+        // keeper who stops it makes a save; it wasn't, as it was struck at the post)
+        if (!lt.shot){ const t = lt.team, sp = G.players.find(q => q.id === lt.id); if (!lt.cnt){ G.stats.shots[t]++; if (sp) pstat(G, sp).shots++; } G.stats.sot[t]++; if (sp) pstat(G, sp).sot++; lt.shot = true; lt.cnt = true; }
+      } else { G.postPend = null; postCount(G, o, false); }
     }
     G.postNear = !!hit;
     const pp = G.postPend;
-    if (pp && ((lt && lt.frame > pp.frame) || G.frame - pp.frame > 150)){ G.postPend = null; postCount(G, pp, true); }
+    // (v28.46: settled by a touch, a save off the post say, it shows as a post then and there; only a 2.5 s wait is "late")
+    if (pp && ((lt && lt.frame > pp.frame) || G.frame - pp.frame > 150)){ G.postPend = null; postCount(G, pp, !(lt && lt.frame > pp.frame)); }
   }
   function postCount(G, o, late){
     const st = G.stats, sp = G.players.find(q => q.id === o.pid);
@@ -9213,7 +9221,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.45';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.46';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
