@@ -7014,7 +7014,15 @@ function drawRef(fl){
     ctx.strokeStyle = '#11141b'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x + r * 0.4, y - r * 0.4); ctx.lineTo(hx, hy + 8); ctx.stroke();
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(0.12); ctx.fillStyle = '#ffd400'; ctx.strokeStyle = '#1a1e28'; ctx.lineWidth = 2; ctx.beginPath(); ctx.rect(-7, -11, 14, 20); ctx.fill(); ctx.stroke(); ctx.restore();
   }
-  if (refS.say && now < refS.say.until) refBubble(refS.say, x, y - r - (G2 && (G2.kind === 'var' || G2.kind === 'arms' || G2.kind === 'clap' || G2.kind === 'dodge') ? 34 : refS.card && now - refS.card < CARD_MS ? 36 : 12), now, fl);
+  if (refS.say && now < refS.say.until){
+    const by = y - r - (G2 && (G2.kind === 'var' || G2.kind === 'arms' || G2.kind === 'clap' || G2.kind === 'dodge') ? 34 : refS.card && now - refS.card < CARD_MS ? 36 : 12);
+    // (v28.49, "sometimes we dont see refs comment": with the camera on the play he was often off the screen, and his
+    // words with him. Now off it, they're kept at the edge of the screen nearest him, "Ref:" in front)
+    const z = cam.zoom || 1, hw = cssW / (2 * z), hh = cssH / (2 * z), S = 1 / z, mx = Math.min(hw * 0.9, 95 * S);   // (S: a screen px in pitch units; the top kept clear of the buttons there)
+    const cx = Math.max(cam.x - hw + mx, Math.min(cam.x + hw - mx, x)), cy = Math.max(cam.y - hh + 86 * S, Math.min(cam.y + hh - 10 * S, by));
+    const off = Math.abs(cx - x) > 1 || Math.abs(cy - by) > 1;
+    refBubble(off ? Object.assign({}, refS.say, {text: 'Ref: ' + refS.say.text}) : refS.say, cx, cy, now, fl, off ? Math.min(1, 1.25 / z) : 1);   // (pinned: about the same size on the screen at any zoom)
+  }
   const fresh = now - refS.foul < 1600;   // just blown for a foul: the whistle shows in his hand
   ctx.save(); ctx.translate(x, y); ctx.scale(fl, 1); ctx.font = `900 ${Math.round(r * 0.62)}px 'Arial Black', Rubik, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#11141b'; ctx.fillText(fresh ? '!' : 'R', 0, 1); ctx.restore();
 }
@@ -7048,9 +7056,9 @@ function refGesture(g, x, y, r, now, fl){
     ctx.stroke();
   }
 }
-function refBubble(sy, x, y, now, fl){
+function refBubble(sy, x, y, now, fl, k){
   const age = now - sy.t0, a = Math.min(1, age / 120, (sy.until - now) / 250); if (a <= 0) return;
-  ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y - 14); ctx.scale(fl * (0.85 + 0.15 * Math.min(1, age / 150)), 0.85 + 0.15 * Math.min(1, age / 150));
+  k = k || 1; ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y - 14 * k); ctx.scale(fl * k * (0.85 + 0.15 * Math.min(1, age / 150)), k * (0.85 + 0.15 * Math.min(1, age / 150)));
   ctx.font = "700 12px Rubik, system-ui, sans-serif"; const tw = ctx.measureText(sy.text).width, w = tw + 14, h = 20;
   ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#11141b'; ctx.lineWidth = 2;
   ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(-w / 2, -h, w, h, 8); else ctx.rect(-w / 2, -h, w, h); ctx.fill(); ctx.stroke();
@@ -7330,7 +7338,7 @@ function render(dt, clip){
       const d = V.discs[i]; if (!d.color) continue;
       ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fillStyle = i === 0 ? d.color : tint(d.color); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
       if (i === 0 && V.cfg && V.cfg.power){   // (v28.34) a power shot charging: an arc filling round the ball; charged: it glows
-        let pw = 0; for (const p of V.players) if ((p.pw | 0) > pw) pw = p.pw | 0;
+        let pw = 0; { const RG = (sess && sess.G) || V; for (const p of RG.players) if ((p.pw | 0) > pw) pw = p.pw | 0; }   // (v28.49, "the moment its charged and we press shoot, its not powershot": the charge as it really is, not as the picture drawn a moment ahead has it: the ring went full a tick or more early)
         if (pw > 0){ const full = pw >= C.POWER_T, t = performance.now();
           ctx.lineWidth = 2.5; ctx.lineCap = 'round';
           if (full){ const k = 0.55 + 0.45 * Math.sin(t / 90); ctx.strokeStyle = `rgba(255,140,40,${0.5 + 0.5 * k})`; ctx.beginPath(); ctx.arc(d.x, d.y, d.radius + 4 + 2 * k, 0, C.TAU); ctx.stroke();
@@ -9255,7 +9263,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.48';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.49';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
