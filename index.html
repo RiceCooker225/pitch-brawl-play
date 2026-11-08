@@ -2749,7 +2749,7 @@ function PBAI(C){
   // leaves a ball to a person of his who gets there no more than KP_YIELD ticks after him (and before them), and passes
   // to a person only from KP_PASS_MIN px off (closer, a full kick bounced off him)
   let SHOW = 1, SHOW_D = [150, 210, 270];   // (v27.7: see showPlan)
-  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 90, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3, KP_RUSH_CHARGE = 1, KP_RUSH_SLIDE = 0.8, KP_RECV = 1, RECV_V = 1.5, RECV_EARLY = 6, RECV_FOE = 60, RECV_AWAY = 0.5, KP_DANCE = 20, KP_HURRY = 30, KP_NOW_FOE = 30, KP_NOW_FWD = 0.35, KP_NOW_GAIN = 40, KP_PATH = 1, KP_PATH_V = 3.5, KP_PATH_R = 0.3, KP_PATH_EARLY = 4, STUCK_T = 90, AI_POWER = 1, SHOT_FIRST = 1, KO_GUARD = 60, POWER_FOE = 25, POWER_RANGE = 430, POWER_GAIN = 6, POWER_EXTRA = 4, AUTO_RUSH_LATE = 16, KEEP_MAXD = 45, KNOCK_WIN = 1, KNOCK_MARGIN = 2, KP_OPEN_RUSH = 1, OPEN_R = 280, OPEN_SLACK = 0, OPEN_FOE = 8, SHOT_KREACH = 1.15, CLOSE_STRAIGHT = 0, STRAIGHT_FLOOR = -4;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
+  let CALL_T = 180, CALL_NEAR = 0.1, KP_HOLD_T = 0, KP_YIELD = 6, KP_PASS_MIN = 80, KP_CLEAR_T = 20, KP_CLEAR_N = 10, KP_RUSH_CALL = 1, CALL_RUSH_T = 90, CALL_RUSH_R = 420, KP_WON = 0, KP_WON_T = 90, KP_WON_BY = 4, KP_AT_GAP = 8, KP_RUSH_THRU = 0, CALL_HOLD_T = 60, CALL_HOLD_GAP = 20, AUTO_RUSH_R = 300, AUTO_RUSH_LANE = 60, AUTO_RUSH_COMING = 0.3, KP_RUSH_CHARGE = 1, KP_RUSH_SLIDE = 0.8, KP_RECV = 1, RECV_V = 1.5, RECV_EARLY = 6, RECV_FOE = 60, RECV_AWAY = 0.5, KP_DANCE = 20, KP_HURRY = 30, KP_NOW_FOE = 30, KP_NOW_FWD = 0.35, KP_NOW_GAIN = 40, KP_PATH = 1, KP_PATH_V = 3.5, KP_PATH_R = 0.3, KP_PATH_EARLY = 4, STUCK_T = 90, AI_POWER = 1, SHOT_FIRST = 1, KO_GUARD = 60, POWER_FOE = 25, POWER_RANGE = 430, POWER_GAIN = 6, POWER_EXTRA = 4, AUTO_RUSH_LATE = 16, KEEP_MAXD = 45, KNOCK_WIN = 1, KNOCK_MARGIN = 2, KP_OPEN_RUSH = 1, OPEN_R = 280, OPEN_SLACK = 0, OPEN_FOE = 8, SHOT_KREACH = 1.15, CLOSE_STRAIGHT = 0, STRAIGHT_FLOOR = 2;   // (*RUSH*: v27.6)   // (KP_CLEAR_*: v27.5, see clearBlocked)
   let THRU_PASS = 1, THRU_AHEAD = 100, RECV_REACT = 10, PASS_ADV = 10, PASS_SAFE = -30, KEEP_LINEUP = 12, KEEP_CAREFUL = 1, KEEP_PTOL = 0.07, THRU_KZONE = 240, THRU_MARGIN = 0;
   // v24:
   //  - SHOT_HR: a shot is judged against a person in goal (or in the way) reacting at least this many ticks late, as
@@ -9263,7 +9263,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.49';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.50';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
