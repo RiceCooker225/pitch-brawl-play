@@ -1423,9 +1423,9 @@ function PBCORE(){
   // goal: that had capped every level at about 60% on longer shots), and a person's curled kick in play (not a free
   // kick, not a keeper's save) leaves the foot CURL_PACE times as fast
   const CURL = 1, SPIN_S0 = 8, SPIN_TURN = 1.45, SPIN_END = 0.75, CURL_PACE = 1.08;
-  // (v28.47: the computer's shots curl as they did before v28.41, the curve levels' half more taken off (AI_CURL_K): with
-  // it, a keeper called out by a person conceded 6, 5, 4 -> 10, 11, 8 of 40 breakaways at Normal, e2e t_callrush.js)
-  const AI_CURL_K = 1.5;
+  // (v28.47 had the computer's shots curl as before v28.41, AI_CURL_K 1.5 off the level, and v28.41 its curled kicks
+  // not CURL_PACE harder; v28.53, "bro make everything identical": the computer's curl and its pace are a person's)
+  const AI_CURL_K = 1;
   const curveMul = G => CURVE_LV[Math.max(0, Math.min(4, (G.cfg.curveLv || 3) - 1))];
   function spin(d, dt){
     const s = Math.sqrt(d.vx * d.vx + d.vy * d.vy);
@@ -2260,7 +2260,7 @@ function PBCORE(){
       const curlNow = () => fkc === 2 ? fkCurl(G, ST, p, o) : !G.cfg.curve ? null : !fkc && (p.ctrl === 'human' || p.ctrl === 'remote') ? manualCurl(G, ST, p, o) : !fkc && cv && AI_CURL ? manualCurl(G, ST, p, o, mul / AI_CURL_K) : null;
       let ck = curlNow();
       // (v28.41) a kick that will curl goes CURL_PACE harder; its curl worked out again at that speed, so it still ends where aimed
-      if (ck && ck.sp && !fkc && !o.kpSave && CURL_PACE !== 1 && (p.ctrl === 'human' || p.ctrl === 'remote')){ o.vx *= CURL_PACE; o.vy *= CURL_PACE; ck = curlNow(); }   // (a person's: the computer's at that pace scored 55 -> 98 in six 2v2 Insane games, with only the bigger bend 61)
+      if (ck && ck.sp && !fkc && !o.kpSave && CURL_PACE !== 1){ o.vx *= CURL_PACE; o.vy *= CURL_PACE; ck = curlNow(); }   // (v28.53: anyone's curled kick, the computer's too)
       if (ck && ck.rot){ const t = turned(o, ck.rot); o.vx = t.vx; o.vy = t.vy; }
       o.sp = ck ? ck.sp : cv && G.cfg.curve ? autoCurl(G, ST, p, o, mul / AI_CURL_K, false) : 0; o.spA = 0; o.spSkip = p.di; o.spT = 5; o.spF = G.frame;
       o.atT = 0; o.atBy = p.id; o.atAdd = 0; o.atK = AT_K * mul; o.atMax = SPIN_MAX * mul;
@@ -9273,7 +9273,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.52';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.53';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
