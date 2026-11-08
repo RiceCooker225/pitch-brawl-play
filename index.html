@@ -6906,8 +6906,8 @@ const spray = {key: '', x: 0, y: 0, ax: 1, ay: 0, t0: 0, end: 0};
 // to go; both arms up at the end; and out of the way, with a hop, of a ball hit at him
 function refAct(kind, text, o){
   if (!SET.ref) return; const now = performance.now(); o = o || {};
-  if (kind) refS.gest = {kind, t0: now, until: now + (o.ms || 1500), dir: o.dir || 1};
-  if (text) refS.say = {text, t0: now, until: now + (o.sayMs || o.ms || 1600)};
+  if (kind) refS.gest = {kind, t0: now, until: now + (o.ms || 1500), dir: o.dir || 1, ko: !!o.ko};
+  if (text) refS.say = {text, t0: now, until: now + (o.sayMs || o.ms || 1600), ko: !!o.ko};
 }
 function refPlayOn(team){ const g = ST.goals.find(q => q.team !== team); refAct('playon', ['Play on!', 'Play on, play on!', 'No foul!'][Math.floor(Math.random() * 3)], {ms: 1300, dir: g && (g.x0 + g.x1) / 2 < 0 ? -1 : 1}); }
 // v28.23 ("make the ref do smth after each goal"): every goal gets his say: first what it was (the special ones as before,
@@ -6917,7 +6917,12 @@ const refPick = a => a[Math.floor(Math.random() * a.length)];
 let refGoalT = 0;
 // (held till the players line up for the kick-off: over the goal's title and its replay he wasn't seen)
 function refGoal(g){ refS.goalQ = g; }
-function refGoalNow(){ const g = refS.goalQ; refS.goalQ = null; if (g && SET.ref) setTimeout(() => refGoalSay(g), 250); }
+// (v28.54, "the ref says restart etc when game already started" / "he also says stuff like back in centre": nothing waits
+// after the line-up and the computer kicks off at once, so his "Restart!", "Back to the middle!" came with the play going
+// again. Now only while the kick-off waits: taken, it's dropped (see refTick); what he says about the goal stays)
+function refGoalNow(){ const g = refS.goalQ; refS.goalQ = null; if (g && SET.ref){ refS.koWait = true; setTimeout(() => refGoalSay(g), 250); } }
+function refGoalStop(){ refS.koWait = false; clearTimeout(refGoalT); const now = performance.now();
+  for (const k of ['say', 'gest']) if (refS[k] && refS[k].ko && refS[k].until > now + 250) refS[k].until = now + 250; }
 function refGoalSay(g){
   const tag = String(g.tag || '');
   let first = 1500;
@@ -6937,7 +6942,7 @@ function refGoalSay(g){
   else if (/^PULLS ONE BACK/.test(tag)) refAct('point', refPick(['Game on!', 'One back!']), {ms: 1400});
   else refAct('point', refPick(['Goal!', 'It\'s in!', 'Good goal!', 'Nice finish!']), {ms: 1400});
   if (/BRACE/.test(tag) && first < 2900){ setTimeout(() => refAct('clap', refPick(['Two for the day!', 'Another one!']), {ms: 1100}), first); first += 1200; }
-  clearTimeout(refGoalT); refGoalT = setTimeout(() => refAct('centre', refPick(['Back to the middle!', 'Kick-off!', 'Centre!', 'Restart!']), {ms: 1400}), first);
+  clearTimeout(refGoalT); refGoalT = setTimeout(() => { if (refS.koWait) refAct('centre', refPick(['Back to the middle!', 'Kick-off!', 'Centre!', 'Restart!']), {ms: 1400, ko: true}); }, first);
 }
 const SPRAY_RUN = 1100, SPRAY_FADE = 2500, CARD_MS = 2200;
 function sprayTick(V, now){
@@ -6968,6 +6973,7 @@ function drawCards(V, now){
 }
 function refWhistle(foul){ refS.wh = performance.now(); if (foul) refS.foul = refS.wh; }
 function refTick(V, dt){
+  if (refS.koWait && V.state !== 0 && V.state !== 2) refGoalStop();   // (the kick-off taken: his goal lines are done)
   const lim = C.ballArea(ST), b = V.discs[0], sp = V.sp, k = Math.min(3, dt * 0.06);
   let tx, ty, pt = null, run = false;
   if (sp && V.state === 1){
@@ -9273,7 +9279,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.53';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.54';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -11341,7 +11347,7 @@ function boot(){
   requestAnimationFrame(loop);
   joinFromLink();
 }
-window.pitchBrawl = {get session(){ return sess; }, get stadium(){ return ST; }, get net(){ return NET; }, core: C, ai: A, get brain(){ return brain; },
+window.pitchBrawl = {get session(){ return sess; }, get ref(){ return refS; }, get stadium(){ return ST; }, get net(){ return NET; }, core: C, ai: A, get brain(){ return brain; },
   get adapt(){ return adapt; }, get trick(){ return trick; }, get you(){ return you; }, get fx(){ return fx; }, get cam(){ return cam; }, youBot, test: {lesson, trickPlay, guestView: (...a) => guestView(...a), winChance: (...a) => winChance(...a), get lines(){ return lines; }, showResults, start, comebackOf}};
 // (v28.34) the walk-out's Skip, or a click or tap on the pitch
 $('introSkip').addEventListener('click', e => { e.currentTarget.blur(); introSkip(); });
