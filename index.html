@@ -942,6 +942,44 @@
   #dmForm{display:flex;gap:6px} #dmForm input{flex:1;min-width:0;padding:6px 8px;font:inherit;color:var(--text);background:#1d222c;border:1px solid var(--line)} #dmForm button{border-radius:0;padding:4px 12px}
   .frrow button.dmnew{border-color:#7ee2a0;color:#7ee2a0}
   html.nlb .dmbox{bottom:76px}
+  /* v28.65: the moving banner over the game while no match is on (the sites, your data, the daily, friends) */
+  .ticker{display:none;position:relative;z-index:3;width:100%;flex:none;overflow:hidden;white-space:nowrap;cursor:pointer;height:28px;line-height:28px;font-size:12.5px;color:#d9dee8;
+          background:linear-gradient(90deg,rgba(240,138,43,.22),rgba(20,24,32,.92) 18%,rgba(20,24,32,.92) 82%,rgba(126,226,160,.18));border-bottom:1px solid rgba(240,138,43,.45);
+          -webkit-mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 40px),transparent)}
+  body.nosess .ticker{display:block}
+  .ticker .tk{display:inline-flex;animation:tickMove 55s linear infinite;will-change:transform}
+  .ticker:hover .tk,.ticker:focus-visible .tk{animation-play-state:paused}
+  .ticker .tkr{display:inline-flex;flex:none}
+  .ticker .ti{display:inline-flex;align-items:center;gap:6px;padding:0 26px 0 0}
+  .ticker .ti::after{content:'✦';color:var(--accent);margin-left:26px;font-size:10px}
+  .ticker .ti i{font-style:normal} .ticker .ti b{color:#ffd166;font-weight:600} .ticker .ti b.here{color:#fff;text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+  @keyframes tickMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  html.calm .ticker .tk{animation:none}
+  #game:not(.tabfill):not(.pfs):not(:fullscreen) .ticker{border-radius:8px 8px 0 0;margin-bottom:4px}
+  /* v28.65: lobby motion */
+  .lobby .pl.pin{animation:plIn .42s cubic-bezier(.2,1.3,.4,1) both;animation-delay:calc(var(--i,0) * 70ms)}
+  @keyframes plIn{from{opacity:0;transform:translateY(8px) scale(.92)}to{opacity:1;transform:none}}
+  .lobby .slot{border:1px dashed rgba(255,255,255,.18);border-radius:9px;padding:6px 8px;font-size:12px;color:var(--muted);text-align:center;animation:slotBreathe 2.4s ease-in-out infinite;animation-delay:calc(var(--i,0) * 400ms)}
+  @keyframes slotBreathe{0%,100%{opacity:.45;border-color:rgba(255,255,255,.14)}50%{opacity:.9;border-color:var(--tc,rgba(255,255,255,.35))}}
+  .lobby section{position:relative;overflow:hidden}
+  .lobby section::before{content:'';position:absolute;top:-4px;left:-40%;width:40%;height:4px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:topShine 3.6s ease-in-out infinite;pointer-events:none}
+  .lobby section:nth-child(2)::before{animation-delay:1.2s} .lobby section:nth-child(3)::before{animation-delay:2.4s}
+  @keyframes topShine{0%{left:-40%}60%,100%{left:110%}}
+  #startOnline:not([hidden]){animation:goGlow 1.8s ease-in-out infinite}
+  @keyframes goGlow{0%,100%{box-shadow:0 0 0 0 rgba(240,138,43,0)}50%{box-shadow:0 0 0 6px rgba(240,138,43,.28)}}
+  #rWait.wt:not(:empty)::after{content:'';display:inline-block;width:1.2em;text-align:left;animation:dots 1.4s steps(4,end) infinite}
+  @keyframes dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+  #onLobby:not([hidden]) .rbar{animation:barIn .35s ease-out both}
+  @keyframes barIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  /* ...and the menu: a tab's pane fades up, the play button's shine, cards lift */
+  #menu .mpane:not([hidden]){animation:paneIn .28s ease-out both}
+  @keyframes paneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  #menu .mgo{position:relative;overflow:hidden}
+  #menu .mgo::after{content:'';position:absolute;top:0;bottom:0;left:-30%;width:22%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-18deg);animation:goShine 4.5s ease-in-out infinite;pointer-events:none}
+  @keyframes goShine{0%,70%{left:-30%}100%{left:120%}}
+  #menu .dcard{transition:transform .15s ease,background-color .15s} #menu .dcard:hover{transform:translateY(-2px)}
+  html.calm .lobby .pl.pin,html.calm .lobby .slot,html.calm .lobby section::before,html.calm #startOnline,html.calm #rWait::after,html.calm #onLobby .rbar,html.calm #menu .mpane,html.calm #menu .mgo::after{animation:none!important}
+  @media (max-width:640px){ #game.tabfill #menu{align-content:start} }   /* (v28.65: a phone's menu is taller than the screen: from the top, so its first row isn't cut off above) */
 </style>
 
 <header>
@@ -950,6 +988,7 @@
 </header>
 
 <div id="game">
+<div class="ticker" id="ticker" role="button" tabindex="0" title="Where to play, and your data: click for more"><div class="tk" id="tickerT"></div></div>
 <div class="board" aria-live="polite">
   <div class="team"><span class="dot a"></span><span id="s0">0</span><small id="bn0">Orange</small></div>
   <div class="clock" id="clockBox"><span id="clock">3:00</span><small id="clockLabel">Time left</small><small id="legLbl" class="leg" hidden></small></div>
@@ -2700,7 +2739,7 @@ function PBCORE(){
     if (kmh > hs[p.team]) hs[p.team] = kmh;
     if (!st.bestSave || kmh > st.bestSave.v) st.bestSave = {v: kmh, team: p.team, pid: p.id};
     const ps = pstat(G, p), slide = p.slide > 0; if (kmh > (ps.bestSave || 0)) ps.bestSave = kmh; if (slide) ps.slideSaves++;   // (a sliding save)
-    G.events.push({type:'save', id: ++G.eventId, frame: G.frame, team: p.team, pid: p.id, kmh, record, slide, t: Math.floor(G.time)});
+    G.events.push({type:'save', id: ++G.eventId, frame: G.frame, team: p.team, pid: p.id, kmh, record, slide, dive: slide && !!p.diving, t: Math.floor(G.time)});   // (v28.65: a keeper's dive, WHAT A SAVE!; anyone else's slide, TACKLE SAVE!)
   }
   // ...and taken back with the save when the ball still went in (see goalEvent)
   function unsave(G, pid, frame){
@@ -3045,7 +3084,7 @@ function PBAI(C){
   //  - KP_GSIDE: he presses only from this many px goal-side of the ball (null: from anywhere, as before)
   //  - KP_DEFLECT: ...and only where it doesn't come off him into the goal (a touch from behind, or from the side of a
   //    slow ball, only helps it on its way); with none of those he goes to his line in front of it
-  let KP_FRONT = null, KP_DEFLECT = 1, KP_AVOID = 1, KP_SAFEKICK = 1, KP_GSIDE = 4, KP_DIVE = 30, KP_DIVE_LINE = 12, KP_DIVE_AI = 1, KP_DIVE_P = 1;
+  let KP_FRONT = null, KP_DEFLECT = 1, KP_AVOID = 1, KP_SAFEKICK = 1, KP_GSIDE = 4, KP_DIVE = 30, KP_DIVE_LINE = 12, KP_DIVE_AI = 1, KP_DIVE_P = 1, SHOT_BLOCK = 1, SB_P = 1;
   const clampBrain = b => { const o = {}; for (const [k, d, lo, hi] of SPEC){ const v = b && typeof b[k] === 'number' && isFinite(b[k]) ? b[k] : d; o[k] = Math.max(lo, Math.min(hi, v)); } return o; };
 
   const DIRS = [[0, 0, 0], [0, -1, 1], [0, 1, 2], [-1, 0, 4], [1, 0, 8], [-1, -1, 5], [1, -1, 9], [-1, 1, 6], [1, 1, 10]];
@@ -3553,6 +3592,12 @@ function PBAI(C){
       const k = slideTry(G, ST, t, p, me, L, mem, P, rr);
       if (k) return k | 32;
     }
+    // v28.65 ("make strikers do the tackle saves"): a shot of theirs going in that I can't get in front of running, but
+    // can sliding (my body on its path before it reaches the line): slide into it, a tackle save
+    if (SHOT_BLOCK && SLIDE_AI && G.cfg.slide && G.state === 1 && !G.sp && p.role !== 'keeper' && !p.slide && !p.slideCd && !(p.down > 0) && (L.sl || 0) > 0 && G.lastTouch && G.lastTouch.team !== team && Math.hypot(ball.vx, ball.vy) > 2.5){
+      const k = blockTry(G, ST, t, p, me, L, mem, P, rr, team);
+      if (k) return k | 32;
+    }
     // (v28.31) ...except out on a rush: then a slide that gets the ball first (out of his area, as anyone's) is his too
     // v28.57 ("possibly dives for keeper"): a shot I can't get to running but can with a dive (its path within a dive's
     // reach in the ticks it lasts): dive at it. From Normal up, a roll each shot: the chance of a slide tackle (L.sl x KP_DIVE_P)
@@ -3593,6 +3638,33 @@ function PBAI(C){
     }
     p.aiShot = wantKick && pl.mode === 'ball' && (pl.kind === 'shot' || !!mem.spPen);
     return finish(G, ST, t, L, mem, me, p, v, wantKick);
+  }
+  // (v28.65) a shot block: the shot crosses my goal line within 45 ticks; sliding one of
+  // the 8 ways puts my body on it (ball and body touching) before it gets there, without going into one of theirs on
+  // the way (in my area, a penalty). A level goes for it with chance L.sl x SB_P (rolled once a second)
+  function blockTry(G, ST, t, p, me, L, mem, P, rr, team){
+    const g = goalOf(ST, team), shot = shotOnGoal(ST, P, g);
+    if (shot < 2 || shot > 45) return 0;
+    const S = C.SLIDE, D = G.discs, R = me.radius + D[0].radius + 1;
+    const foes = G.players.filter(o => o.team !== team).map(o => D[o.di]).filter(q => Math.hypot(q.x - me.x, q.y - me.y) < 160);
+    let best = 0, bt = 99;
+    for (let k = 1; k < 9; k++){
+      let ux = DIRS[k][0], uy = DIRS[k][1]; if (ux && uy){ ux *= Math.SQRT1_2; uy *= Math.SQRT1_2; }
+      if (C.slideAim) [ux, uy] = C.slideAim(G, me, ux, uy);
+      const along = me.vx * ux + me.vy * uy, s0 = S.V + 0.35 * Math.max(0, along);
+      let x = me.x, y = me.y, vx = ux * s0, vy = uy * s0, hit = 0, foul = false;
+      const F = foes.map(q => ({x: q.x, y: q.y, vx: q.vx, vy: q.vy, r: q.radius}));
+      for (let i = 1; i <= Math.min(S.T, shot) && i < P.length; i++){
+        x += vx; y += vy; vx *= S.DAMP; vy *= S.DAMP;
+        for (const f of F){ f.x += f.vx; f.y += f.vy; f.vx *= 0.96; f.vy *= 0.96; if (Math.hypot(f.x - x, f.y - y) <= f.r + me.radius + 4) foul = true; }
+        if (foul) break;
+        if (Math.hypot(P[i].x - x, P[i].y - y) <= R){ hit = i; break; }
+      }
+      if (hit && hit < bt){ bt = hit; best = DIRS[k][2]; }
+    }
+    if (!best) return 0;
+    if (mem.sbAt == null || G.frame - mem.sbAt > 60 || G.frame < mem.sbAt){ mem.sbAt = G.frame; mem.sbRoll = rnd(mem); }
+    return mem.sbRoll < Math.min(1, (L.sl || 0) * SB_P) ? best : 0;
   }
   // a slide tackle that wins the ball cleanly: an opponent has it (or gets there first), it is 25-85 px away, and
   // sliding one of the 8 ways reaches it a few ticks before touching him. Never in or into my own area, and not again for
@@ -4487,7 +4559,7 @@ function PBAI(C){
     if ('shotHr' in o) SHOT_HR = o.shotHr; if ('endGuard' in o) END_GUARD = o.endGuard; if ('cutback' in o) CUTBACK = o.cutback; if ('backpass' in o) BACKPASS = o.backpass; if ('leadRun' in o) LEAD_RUN = o.leadRun; if ('barge' in o) BARGE_R = o.barge; if ('slideAi' in o) SLIDE_AI = o.slideAi; if ('control' in o) KEEP_CONTROL = o.control; if ('slideGap' in o) SLIDE_GAP = o.slideGap; if ('postAim' in o) POST_AIM = o.postAim; if ('bargeGs' in o) BARGE_GS = o.bargeGs; if ('bargeSolo' in o) BARGE_SOLO = o.bargeSolo; if ('slideSolo' in o) SLIDE_SOLO = o.slideSolo;
     if ('pressFollow' in o) PRESS_FOLLOW = o.pressFollow; if ('pressSide' in o) PRESS_SIDE = o.pressSide; if ('rushWide' in o) RUSH_WIDE = o.rushWide; if ('backR' in o) KEEP_BACK_R = o.backR; if ('closeMinS' in o) CLOSE_MIN_S = o.closeMinS; if ('closeR' in o) CLOSE_R = o.closeR; if ('closeSlack' in o) CLOSE_SLACK = o.closeSlack; if ('rushR' in o) RUSH_R = o.rushR; if ('rushGap' in o) RUSH_GAP = o.rushGap; if ('rushMax' in o) RUSH_MAX = o.rushMax;
     if ('kpress' in o) KEEP_PRESS = o.kpress; if ('kpressLate' in o) KEEP_PRESS_LATE = o.kpressLate; if ('kpMargin' in o) KP_MARGIN = o.kpMargin; if ('kpRcap' in o) KP_RCAP = o.kpRcap; if ('kpRecheck' in o) KP_RECHECK = o.kpRecheck;
-    if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside; if ('kpDive' in o) KP_DIVE = o.kpDive; if ('kpDiveLine' in o) KP_DIVE_LINE = o.kpDiveLine; if ('kpDiveAi' in o) KP_DIVE_AI = o.kpDiveAi; if ('kpDiveP' in o) KP_DIVE_P = o.kpDiveP;
+    if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside; if ('kpDive' in o) KP_DIVE = o.kpDive; if ('kpDiveLine' in o) KP_DIVE_LINE = o.kpDiveLine; if ('kpDiveAi' in o) KP_DIVE_AI = o.kpDiveAi; if ('kpDiveP' in o) KP_DIVE_P = o.kpDiveP; if ('shotBlock' in o) SHOT_BLOCK = o.shotBlock; if ('sbP' in o) SB_P = o.sbP;
     if ('show' in o) SHOW = o.show; if ('showD' in o) SHOW_D = o.showD;
     if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('rushCharge' in o) KP_RUSH_CHARGE = o.rushCharge; if ('rushSlide' in o) KP_RUSH_SLIDE = o.rushSlide; if ('kpRecv' in o) KP_RECV = o.kpRecv; if ('recvV' in o) RECV_V = o.recvV; if ('recvEarly' in o) RECV_EARLY = o.recvEarly; if ('recvFoe' in o) RECV_FOE = o.recvFoe; if ('recvAway' in o) RECV_AWAY = o.recvAway; if ('kpDance' in o) KP_DANCE = o.kpDance; if ('kpHurry' in o) KP_HURRY = o.kpHurry; if ('kpNowFoe' in o) KP_NOW_FOE = o.kpNowFoe; if ('kpNowFwd' in o) KP_NOW_FWD = o.kpNowFwd; if ('kpNowGain' in o) KP_NOW_GAIN = o.kpNowGain; if ('kpPath' in o) KP_PATH = o.kpPath; if ('kpPathV' in o) KP_PATH_V = o.kpPathV; if ('kpPathR' in o) KP_PATH_R = o.kpPathR; if ('kpPathEarly' in o) KP_PATH_EARLY = o.kpPathEarly; if ('stuckT' in o) STUCK_T = o.stuckT; if ('aiPower' in o) AI_POWER = o.aiPower; if ('shotFirst' in o) SHOT_FIRST = o.shotFirst; if ('koGuard' in o) KO_GUARD = o.koGuard; if ('powerFoe' in o) POWER_FOE = o.powerFoe; if ('powerRange' in o) POWER_RANGE = o.powerRange; if ('powerGain' in o) POWER_GAIN = o.powerGain; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushLate' in o) AUTO_RUSH_LATE = o.autoRushLate; if ('knockWin' in o) KNOCK_WIN = o.knockWin; if ('knockContest' in o) KNOCK_CONTEST = o.knockContest; if ('openRush' in o) KP_OPEN_RUSH = o.openRush; if ('shotKreach' in o) SHOT_KREACH = o.shotKreach; if ('closeStraight' in o) CLOSE_STRAIGHT = o.closeStraight; if ('straightFloor' in o) STRAIGHT_FLOOR = o.straightFloor; if ('aggrMin' in o) AGGR_MIN = o.aggrMin; if ('gsReach' in o) GS_REACH = o.gsReach; if ('gsSpeed' in o) GS_SPEED = o.gsSpeed; if ('gsMargin' in o) GS_MARGIN = o.gsMargin; if ('gsPath' in o) GS_PATH = o.gsPath; if ('gsWall' in o) GS_WALL = o.gsWall; if ('gsRun' in o) GS_RUN = o.gsRun; if ('gsKeep' in o) GS_KEEP = o.gsKeep; if ('gsTol' in o) GS_TOL = o.gsTol; if ('gsWallRun' in o) GS_WALLRUN = o.gsWallRun; if ('gsFront' in o) GS_FRONT = o.gsFront; if ('slideWall' in o) SLIDE_WALL = o.slideWall; if ('bargeV' in o) BARGE_V = o.bargeV; if ('openR' in o) OPEN_R = o.openR; if ('openSlack' in o) OPEN_SLACK = o.openSlack; if ('openFoe' in o) OPEN_FOE = o.openFoe; if ('knockMargin' in o) KNOCK_MARGIN = o.knockMargin; if ('keepMaxD' in o) KEEP_MAXD = o.keepMaxD; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
     if ('fkAiRead' in o) FK_AI_READ = o.fkAiRead; if ('fkAiMin' in o) FK_AI_MIN = o.fkAiMin; if ('fkAiStep' in o) FK_AI_STEP = o.fkAiStep;
@@ -5153,12 +5225,7 @@ function onEvent(s, e){
     }
     achGoal(s, e);
   } else if (e.type === 'save'){
-    if (realMatch(s)){
-      popFx('save', e.pid, 0, 0, e.kmh, e.record);
-      if (e.record) say(`Save of the match! ${nameOf(s, playerById(G, e.pid)) || KIT[e.team].name} · ${Math.round(e.kmh)} km/h`);
-      else if (e.slide) say(`Sliding save! ${nameOf(s, playerById(G, e.pid)) || KIT[e.team].name} · ${Math.round(e.kmh)} km/h`);
-      if (e.slide) tackleFx(s, 'save', playerById(G, e.pid), null, e.kmh);
-    }
+    if (realMatch(s)){ const p = playerById(G, e.pid); if (p) saveFx(s, p, e.kmh, e.record, e.dive ? 'dive' : e.slide ? 'slide' : ''); }
   } else if (e.type === 'tackle'){
     if (realMatch(s)) tackleFx(s, 'tackle', playerById(G, e.pid), playerById(G, e.vid), 0);
   } else if (e.type === 'post'){
@@ -7373,6 +7440,15 @@ function callFx(pid){
   }
   fx.pops = fx.pops.filter(f => !((f.kind === 'call' || f.kind === 'rush') && (f.pid === pid || f.pid === at))); popFx(kind, at, 0, 0, 0, false); sfx.kick(0.4);
 }
+// a save's pop and line (host, offline, and a guest from the host's events). v28.65 ("dives from gk called what a save!,
+// and strikers called maybe tackle save"): a keeper's dive WHAT A SAVE! (gold); anyone's slide TACKLE SAVE!
+function saveFx(s, p, kmh, record, how){
+  const who = nameOf(s, p) || (KIT[p.team] && KIT[p.team].name) || '', v = Math.round(kmh);
+  if (how === 'dive'){ fx.pops = fx.pops.filter(f => !(f.pid === p.id && (f.kind === 'save' || f.kind === 'tsave'))); popFx('wsave', p.id, 0, 0, kmh, record); say(`${record ? 'Save of the match! ' : ''}What a save! ${who} · ${v} km/h`); return; }
+  popFx('save', p.id, 0, 0, kmh, record);
+  if (how === 'slide'){ tackleFx(s, 'save', p, null, kmh); say(`${record ? 'Save of the match! ' : ''}Tackle save! ${who} · ${v} km/h`); return; }
+  if (record) say(`Save of the match! ${who} · ${v} km/h`);
+}
 function tackleFx(s, kind, p, v, kmh){
   if (!p) return;
   // v27.3 ("tackle and tackle save might have a bug showing both at same time"): a slide that stops a shot is a save
@@ -8167,9 +8243,9 @@ function drawPops(V, now){
     if (!isFinite(wx) || !isFinite(wy)) continue;
     const a = (now - f.t0) / LIFE, x = Math.max(44, Math.min(cssW - 44, cssW / 2 + fl * (wx - cam.x) * z)), y = Math.max(40, Math.min(cssH - 4, cssH / 2 + (wy - cam.y) * z - r * z - 8 - a * 18));
     ctx.globalAlpha = a < 0.65 ? 1 : Math.max(0, (1 - a) / 0.35);
-    const t1 = f.kind === 'post' ? 'POST!' : f.kind === 'foul' ? 'FOUL!' : f.kind === 'tackle' ? 'TACKLE!' : f.kind === 'tsave' ? 'TACKLE SAVE!' : f.kind === 'call' ? 'PASS!' : f.kind === 'rush' ? 'RUSH!' : f.kind === 'power' ? 'POWER SHOT!' : 'SAVE!', t2 = f.kind === 'foul' ? (f.record ? 'penalty' : 'free kick') : f.kind === 'tackle' ? 'won it' : `${Math.round(f.kmh)} km/h${f.record ? ' · record!' : ''}`;
+    const t1 = f.kind === 'post' ? 'POST!' : f.kind === 'foul' ? 'FOUL!' : f.kind === 'tackle' ? 'TACKLE!' : f.kind === 'tsave' ? 'TACKLE SAVE!' : f.kind === 'wsave' ? 'WHAT A SAVE!' : f.kind === 'call' ? 'PASS!' : f.kind === 'rush' ? 'RUSH!' : f.kind === 'power' ? 'POWER SHOT!' : 'SAVE!', t2 = f.kind === 'foul' ? (f.record ? 'penalty' : 'free kick') : f.kind === 'tackle' ? 'won it' : `${Math.round(f.kmh)} km/h${f.record ? ' · record!' : ''}`;
     ctx.font = '400 15px Bungee, Impact, sans-serif'; ctx.lineWidth = 4; ctx.strokeStyle = '#1a1e28';
-    ctx.strokeText(t1, x, y - 14); ctx.fillStyle = f.kind === 'foul' ? '#ff6b6b' : f.kind === 'tackle' || f.kind === 'tsave' ? '#7ee8ff' : f.kind === 'call' || f.kind === 'rush' ? '#ffd166' : f.kind === 'power' ? '#ff9f43' : f.record ? '#ffd166' : f.kind === 'post' ? '#d9dee8' : '#ffffff'; ctx.fillText(t1, x, y - 14);
+    ctx.strokeText(t1, x, y - 14); ctx.fillStyle = f.kind === 'foul' ? '#ff6b6b' : f.kind === 'tackle' || f.kind === 'tsave' ? '#7ee8ff' : f.kind === 'wsave' ? '#ffd166' : f.kind === 'call' || f.kind === 'rush' ? '#ffd166' : f.kind === 'power' ? '#ff9f43' : f.record ? '#ffd166' : f.kind === 'post' ? '#d9dee8' : '#ffffff'; ctx.fillText(t1, x, y - 14);
     if (f.kmh > 0 || f.kind === 'foul' || f.kind === 'tackle'){ ctx.font = '600 12px Rubik, system-ui, sans-serif'; ctx.lineWidth = 3; ctx.strokeText(t2, x, y); ctx.fillStyle = '#e8e3e3'; ctx.fillText(t2, x, y); }
   }
   ctx.globalAlpha = 1;
@@ -8368,6 +8444,31 @@ function renderSites(){
 document.querySelectorAll('.sitesb').forEach(b => b.addEventListener('click', e => { e.currentTarget.blur(); renderSites(); openPanel('sitesPanel'); $('sitesPanel').scrollTop = 0; }));
 $('sitesClose').addEventListener('click', () => closePanel('sitesPanel'));
 $('sitesMove').addEventListener('click', () => { closePanel('sitesPanel'); openSettings(); setTimeout(() => { const x = $('xferSec'); if (x) x.scrollIntoView({block: 'start'}); }, 30); });
+// v28.65 ("make the sites innformation like one of the moving banner on top of the game showing the sites"): a strip
+// over the game while no match is on (the menu, its panels, a room's lobby) that scrolls the three sites, where your
+// data is, today's daily challenge and the friends tab; it stops under the pointer, and a click opens Sites & your
+// data. Still (no scrolling) with Celebrations: Calm
+function renderTicker(){
+  const box = $('tickerT'); if (!box) return; const here = siteHere(), K = dailyKind(dailyId());
+  const items = [
+    ['🌐', 'Play Pitch Brawl on ', ['pitchbrawl.netlify.app', here === 'netlify'], ' · ', ['ricecooker225.github.io/pitch-brawl-play', here === 'github'], ' · ', ['in Claude', here === 'claude']],
+    ['🤝', 'Both websites play together: friends and rooms work across them'],
+    ['🔒', 'In Claude you play people in Claude only, not the website players'],
+    ['💾', 'Your data stays on each site: take it with you in ⚙ Settings → Move to another copy (export, then import)'],
+    ['📅', `Daily challenge today: ${K.name}, ${DAILY_N} tries, the same for everyone`],
+    ['💬', 'Friends tab: add friends with your code, chat to them, watch their matches'],
+  ];
+  const one = () => { const f = document.createDocumentFragment();
+    for (const it of items){ const sp = document.createElement('span'); sp.className = 'ti';
+      const ic = document.createElement('i'); ic.textContent = it[0]; sp.append(ic);
+      for (const part of it.slice(1)){ if (Array.isArray(part)){ const b = document.createElement('b'); b.textContent = part[0]; if (part[1]){ b.className = 'here'; b.title = 'you are here'; } sp.append(b); } else sp.append(part); }
+      f.append(sp); }
+    return f; };
+  box.textContent = ''; const a = document.createElement('div'), b = document.createElement('div'); a.className = b.className = 'tkr'; b.setAttribute('aria-hidden', 'true'); a.append(one()); b.append(one()); box.append(a, b);
+}
+{ const t = $('ticker'), go = () => { renderSites(); openPanel('sitesPanel'); $('sitesPanel').scrollTop = 0; };
+  t.addEventListener('click', go); t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
+  setTimeout(renderTicker, 0); setInterval(renderTicker, 600000); }
 // v28.65 ("powered by netify is blocking some view and buttons"): on the Netlify site, Netlify's free plan puts a
 // "Powered by Netlify" badge in the bottom right corner (it can't be switched off there). html.nlb keeps our buttons
 // and the pitch out of that corner (styles: the help bar, the tutorial's buttons, a strip under the pitch in a match)
@@ -10003,7 +10104,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.65';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.66';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10872,7 +10973,7 @@ function hostNet(s){
     for (const e of s2.G.events){
       if (e.type === 'goal') N.ring.push([e.id, 'g', e.team, e.pid == null ? -1 : e.pid, e.assist == null ? -1 : e.assist, e.og ? 1 : 0, r4(e.kmh), Math.floor(e.t), e.record ? 1 : 0, e.post ? 1 : 0, e.late || '', r4(timeLeft(s2.G)), e.slide ? 1 : 0, e.m | 0, s2.G.lastTouch ? r4(s2.G.lastTouch.bx) : 0, s2.G.lastTouch ? r4(s2.G.lastTouch.by) : 0, e.tag || '']);
       else if (e.type === 'kick') N.ring.push([e.id, 'k', e.pid, r4(e.speed)]);
-      else if (e.type === 'save') N.ring.push([e.id, 's', e.team, e.pid, r4(e.kmh), e.record ? 1 : 0, e.slide ? 1 : 0]);
+      else if (e.type === 'save') N.ring.push([e.id, 's', e.team, e.pid, r4(e.kmh), e.record ? 1 : 0, e.dive ? 2 : e.slide ? 1 : 0]);
       else if (e.type === 'tackle') N.ring.push([e.id, 'c', e.team, e.pid, e.vid]);
       else if (e.type === 'post') N.ring.push([e.id, 'p', e.team, e.pid, r4(e.kmh), r4(e.x), r4(e.y), e.late ? 1 : 0]);
       else if (e.type === 'end') N.ring.push([e.id, 'e', e.winner]);
@@ -11215,7 +11316,7 @@ function guestApply(s, o){
       if (p && !ev[5] && p.team === team && s.locals.some(L => L.pid === p.id)){ if (kmh >= 90) achUnlock('rocket'); s.myGoals = (s.myGoals || 0) + 1; if (s.myGoals >= 3) achUnlock('hattrick'); }
       fullGoal(s, team, p ? nameOf(s, p) : '', !!ev[5], kmh);
     } else if (t === 's'){ const p = G.players.find(q => q.id === ev[3]), kmh = +ev[4] || 0;
-      if (p && kmh > 0){ popFx('save', p.id, 0, 0, kmh, !!ev[5]); if (ev[6]) tackleFx(s, 'save', p, null, kmh); if (ev[5]) say(`Save of the match! ${nameOf(s, p)} · ${Math.round(kmh)} km/h`); } }
+      if (p && kmh > 0) saveFx(s, p, kmh, !!ev[5], ev[6] === 2 ? 'dive' : ev[6] ? 'slide' : ''); }
     else if (t === 'c'){ const p = G.players.find(q => q.id === ev[3]), v = G.players.find(q => q.id === ev[4]); if (p) tackleFx(s, 'tackle', p, v, 0); }
     else if (t === 'p'){ const p = G.players.find(q => q.id === ev[3]), kmh = +ev[4] || 0, x = +ev[5], y = +ev[6];
       if (isFinite(x) && isFinite(y)){ if (!ev[7]){ sfx.post(Math.max(1.3, kmh / C.KMH)); popFx('post', null, x, y, kmh, false); } say(`Off the post! ${p ? nameOf(s, p) : KIT[ev[2] ? 1 : 0].name}${kmh > 0 ? ' · ' + Math.round(kmh) + ' km/h' : ''}`); } }
@@ -11611,7 +11712,7 @@ function renderLobby(){
   $('rcode').hidden = !NET.code;
   $('startOnline').hidden = !boss || !L || on;
   $('startOnline').textContent = !L ? 'Start match' : L.pm === 2 ? 'Start the duel' : L.pm ? 'Start the shootout' : L.lgs === 2 && Array.isArray(L.leg2) ? `Start leg 2 · ${L.leg2[0]}–${L.leg2[1]}` : L.lgs === 2 ? 'Start leg 1' : 'Start match';
-  $('rWait').textContent = !L ? '' : on ? (boss ? 'Match on: ☰ or Esc in the match moves people' : 'Match on…') : boss ? (L.pl.length < 2 ? 'The computer fills empty places, or wait for friends.' : '') : 'Waiting for the host to start…';
+  $('rWait').textContent = !L ? '' : on ? (boss ? 'Match on: ☰ or Esc in the match moves people' : 'Match on…') : boss ? (L.pl.length < 2 ? 'The computer fills empty places, or wait for friends.' : '') : 'Waiting for the host to start'; $('rWait').classList.toggle('wt', !!L && !on && !boss);
   const lock = !boss || on, ho = $('hostOpts');
   ho.classList.toggle('ro', lock);
   for (const el of ho.querySelectorAll('select,input')) el.disabled = lock || (!!(L && L.pm) && ['hoTime', 'hoGoals', 'hoTie', 'hoSlide', 'hoFk', 'hoLegs'].includes(el.id));
@@ -11645,6 +11746,9 @@ const initials = n => Array.from(String(n || '?')).filter(ch => /\S/.test(ch)).s
 function drawBoard(box, cols){
   if (!box) return;
   box.textContent = '';
+  // (v28.65, "some animation in lobby"): someone new pops in (everyone, one after another, the first time), the open
+  // places in a team breathe, the teams' tops shine; none of it with Celebrations: Calm
+  const seen = box._seen || null, now = new Set(); let nth = 0;
   if (!cols){ const n = document.createElement('p'); n.className = 'note'; n.textContent = 'Connecting to the host…'; box.append(n); return; }
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   for (const c of cols){
@@ -11655,6 +11759,7 @@ function drawBoard(box, cols){
     sec.append(h);
     for (const r of c.rows){
       const b = el('button', 'pl' + (r.me ? ' me' : '') + (r.cpu ? ' cpu' : '') + (r.acts.length ? ' act' : '')); b.type = 'button';
+      now.add(r.id); if (!seen || !seen.has(r.id)){ b.classList.add('pin'); b.style.setProperty('--i', String(seen ? 0 : nth++)); }
       const av = el('span', 'av', r.av); if (!r.cpu){ av.style.setProperty('--tc', c.t < 0 ? '#5b6377' : c.color); av.style.setProperty('--tt', c.t < 0 ? '#ffffff' : c.text); }
       b.append(av, el('span', 'nm', r.name + (r.me && r.name !== 'You' ? ' (you)' : '')));
       if (r.tag) b.append(el('span', 'tag' + (r.host ? ' h' : ''), r.tag === 'host' ? '👑 host' : r.tag));
@@ -11665,7 +11770,8 @@ function drawBoard(box, cols){
       sec.append(b);
     }
     if (c.add) for (const a of c.add){ const ab = el('button', 'add', a[0]); ab.type = 'button'; ab.addEventListener('click', a[1]); sec.append(ab); }
-    if (!c.rows.length && !(c.add && c.add.length)) sec.append(el('div', 'empty', c.t >= 0 ? 'Empty' : c.name === 'Spectators' ? 'Nobody watching' : 'Nobody'));
+    if (c.t >= 0 && c.cap > 0 && !c.add){ const open = Math.min(4, c.cap - c.rows.length); for (let k = 0; k < open; k++){ const o = el('div', 'slot', 'open place'); o.style.setProperty('--i', String(k)); sec.append(o); } }
+    else if (!c.rows.length && !(c.add && c.add.length)) sec.append(el('div', 'empty', c.t >= 0 ? 'Empty' : c.name === 'Spectators' ? 'Nobody watching' : 'Nobody'));
     if (c.move){
       sec.addEventListener('dragover', ev => { ev.preventDefault(); sec.classList.add('drop'); });
       sec.addEventListener('dragleave', () => sec.classList.remove('drop'));
@@ -11673,6 +11779,7 @@ function drawBoard(box, cols){
     }
     box.append(sec);
   }
+  box._seen = now;
 }
 // a player's menu, by their chip
 function plMenu(anchor, title, acts){
@@ -12105,7 +12212,8 @@ function zoomStep(d){ const k = ZOOM_KEYS.indexOf(zi), n = ZOOM_KEYS[Math.max(0,
 $('zoom').addEventListener('change', e => { setZoom(e.target.selectedIndex); e.target.blur(); });
 // celebrations (v26.7): full or calm; until one is picked, as the device asks (reduced motion: calm)
 $('fxSel').value = reduceMotion ? 'calm' : 'full';
-$('fxSel').addEventListener('change', e => { const v = e.target.value === 'calm' ? 'calm' : 'full'; reduceMotion = v === 'calm'; store.set('pb.fx', v); e.target.blur(); });
+$('fxSel').addEventListener('change', e => { const v = e.target.value === 'calm' ? 'calm' : 'full'; reduceMotion = v === 'calm'; store.set('pb.fx', v); document.documentElement.classList.toggle('calm', reduceMotion); e.target.blur(); });
+document.documentElement.classList.toggle('calm', reduceMotion);   // (v28.65: the menu's moving banner and the lobby's motion stop with Calm)
 setZoom(zi);
 const extrapEl = $('extrap'), exNum = $('extrapNum'), EX_MIN = -200, EX_MAX = 1000;
 // Auto (on by default): online as a guest the game is drawn ahead by most of your ping over 50 ms, so your own moves show sooner
