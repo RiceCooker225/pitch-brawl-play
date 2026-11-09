@@ -901,6 +901,47 @@
   #menu .frback{font-size:12px} #menu .linkish{background:none;border:0;padding:0;font:inherit;color:#ffd166;text-decoration:underline;cursor:pointer;text-transform:none;letter-spacing:0}
   @media (max-width:640px){ #menu .frtop{grid-template-columns:1fr} }
   #menu .ldeep{display:block;margin:6px 0 -4px}
+  /* v28.65: 🌐 Sites & your data */
+  #sitesPanel .sites{display:flex;flex-direction:column;gap:8px;width:min(100%,560px);text-align:left}
+  #sitesPanel .site{background:rgba(12,14,19,.45);border-left:4px solid #5a6378;padding:8px 12px;display:flex;flex-direction:column;gap:3px}
+  #sitesPanel .site.here{border-left-color:var(--accent)}
+  #sitesPanel .site > b{font-size:14px;color:#fff} #sitesPanel .site em{font-style:normal;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-left:6px}
+  #sitesPanel .srow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:none;border:0;padding:0;margin:0} #sitesPanel .srow a{color:#ffd166;word-break:break-all;font-size:13px} #sitesPanel .srow button{border-radius:0;padding:2px 10px}
+  #sitesPanel .site small{color:var(--muted);font-size:12px;line-height:1.4}
+  #sitesPanel .sitesdata{width:min(100%,560px);max-width:none;box-sizing:border-box;text-align:left;margin:2px 0 0}
+  /* v28.65: Netlify's free-plan badge (bottom right, about 200 × 60, can't be hidden there): our buttons and the pitch
+     keep out of its corner on that site (html.nlb) */
+  html.nlb #game:is(.tabfill,.pfs) > .helpbar{padding-right:214px}
+  html.nlb #game:is(.tabfill,.pfs) > .tutbox .tutfoot{padding-right:204px}
+  html.nlb #game:is(.tabfill,.pfs):not(:has(#menu:not([hidden]))):not(:has(> .helpbar:not([hidden]))):not(:has(> .tutbox:not([hidden]))){padding-bottom:60px}
+  html.nlb #game:is(.tabfill,.pfs) .overlay:not(#menu){padding-bottom:76px}
+  @media (min-width:641px){ html.nlb #game.tabfill #menu{padding-bottom:62px} }
+  @media (max-width:640px){ html.nlb #game.tabfill #menu{padding-bottom:84px} }
+  html.nlb .frtoast{bottom:78px}
+  html.nlb body:not(.tabfilled){padding-bottom:72px}
+  /* v28.65: the daily challenge */
+  #menu .tiles .dtile{grid-column:1 / -1} #menu .tiles .dtile .ic{color:#ffd166}
+  #dailyPanel > p{max-width:min(100%,560px)}
+  .dboard{width:min(100%,520px);display:flex;flex-direction:column;gap:6px;text-align:left}
+  .dboard .dtabs{display:flex;gap:6px} .dboard .dtabs button{border-radius:0} .dboard .dtabs button.on{border-color:var(--accent);color:#fff;background:rgba(240,138,43,.18)}
+  .dboard .note{margin:2px 0;text-align:left}
+  .dlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;max-height:min(46vh,340px);overflow:auto}
+  .dlist li{display:grid;grid-template-columns:2em minmax(0,1fr) auto 4.2em;align-items:center;gap:8px;padding:6px 10px;background:rgba(12,14,19,.45);border-left:4px solid transparent;font-size:14px}
+  .dlist li i{font-style:normal;color:var(--muted);font-weight:700} .dlist li b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}
+  .dlist li span{font-weight:700;color:#fff} .dlist li small{color:var(--muted);text-align:right}
+  .dlist li.fr{border-left-color:#7ee2a0} .dlist li.me{border-left-color:var(--accent);background:rgba(240,138,43,.14)}
+  #res .dboard{margin:6px auto 0}
+  /* v28.65: chat with a friend, anywhere */
+  .dmbox{position:fixed;left:12px;bottom:12px;z-index:205;width:min(340px,calc(100vw - 24px));background:rgba(34,39,52,.98);border-left:5px solid #7ee2a0;box-shadow:0 10px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:6px;padding:8px 10px;font-size:13px}
+  .dmbox[hidden]{display:none}
+  .dmhead{display:flex;align-items:center;justify-content:space-between;gap:8px} .dmhead b{color:#fff;font-size:14px;margin-right:8px} .dmhead small{color:var(--muted);font-size:11px} .dmhead button{border-radius:0;padding:2px 8px}
+  .dmlog{max-height:min(34vh,220px);min-height:60px;overflow:auto;display:flex;flex-direction:column;gap:4px;-webkit-user-select:text;user-select:text}
+  .dmlog .note{margin:4px 0;color:var(--muted)}
+  .dmm{align-self:flex-start;max-width:85%;background:#2b3242;padding:4px 8px;overflow-wrap:anywhere;display:flex;flex-direction:column}
+  .dmm.me{align-self:flex-end;background:rgba(240,138,43,.22)} .dmm small{color:var(--muted);font-size:10px;align-self:flex-end}
+  #dmForm{display:flex;gap:6px} #dmForm input{flex:1;min-width:0;padding:6px 8px;font:inherit;color:var(--text);background:#1d222c;border:1px solid var(--line)} #dmForm button{border-radius:0;padding:4px 12px}
+  .frrow button.dmnew{border-color:#7ee2a0;color:#7ee2a0}
+  html.nlb .dmbox{bottom:76px}
 </style>
 
 <header>
@@ -931,7 +972,7 @@
     <p id="tutText"></p>
     <div class="tutx" id="tutExtra"></div>
     <div class="keystrip" id="tutKeys" aria-hidden="true"></div>
-    <div class="tutfoot"><span id="tutState"></span><button class="ghost sm" id="tutBack" type="button" title="The step before">‹ Back</button><button class="ghost sm" id="tutAgain" type="button" title="Back to the first step">↺ Start over</button><button id="tutNext" type="button">Next ›</button></div>
+    <div class="tutfoot"><span id="tutState"></span><button class="ghost sm" id="tutBack" type="button" title="The step before">‹ Back</button><button class="ghost sm" id="tutAgain" type="button" title="Back to the first step">↺ Start over</button><button class="ghost sm" id="tutPartNext" type="button" hidden>⏭ Next part</button><button id="tutNext" type="button">Next ›</button></div>
   </div>
   <div class="helpbar" id="helpBar" hidden>
     <div class="keystrip" id="hbKeys" aria-hidden="true"></div>
@@ -1135,8 +1176,8 @@
     <section class="dsec"><h3>Stadium</h3>
       <div class="drow"><button class="ghost sm" id="loadBtn" type="button">Load stadium (.hbs)</button><button class="ghost sm" id="defStBtn" type="button" hidden>Default stadium</button><input type="file" id="file" accept=".hbs,.json,application/json" hidden></div>
     </section>
-    <section class="dsec"><h3>Move to another copy</h3>
-      <p class="dnote">Everything (controls, settings, saved goals, scores, achievements, cup and league, your trained copy) to another copy of the game, such as the website: Save it as a file here and open the file there, or Copy here and Load there.</p>
+    <section class="dsec" id="xferSec"><h3>Move to another copy</h3>
+      <p class="dnote">Everything (controls, settings, saved goals, scores, achievements, cup and league, your trained copy) to another copy of the game, such as another site (pitchbrawl.netlify.app, the GitHub site, or Claude): Save it as a file here and open the file there, or Copy here and Load there.</p>
       <div class="drow"><button class="ghost sm" id="xferSave" type="button">Save everything as a file</button><button class="ghost sm" id="xferCopy" type="button">Copy everything</button><span class="dnote" id="xferMsg"></span></div>
       <textarea id="xferBox" rows="3" spellcheck="false" placeholder="Load takes a copied code (or paste it here first)"></textarea>
       <div class="drow"><button class="ghost sm" id="xferLoad" type="button">Load</button><label class="ghost sm fbtn" for="xferFile" title="A code saved in a file (.txt)">Open a code file…</label><input type="file" id="xferFile" accept=".txt,text/plain" hidden></div>
@@ -1166,6 +1207,20 @@
     <div class="row"><button id="sugSend" type="button">Send</button><button class="ghost" id="sugClose" type="button">Close</button></div>
   </div>
   <form name="suggestions" data-netlify="true" netlify-honeypot="bot-field" hidden><input type="hidden" name="form-name" value="suggestions"><input name="bot-field"><input name="name"><textarea name="text"></textarea><input name="where"><input name="ver"></form>
+  <div class="overlay" id="dailyPanel" hidden>
+    <h2>Daily challenge</h2>
+    <p id="dailyWhat"></p>
+    <p class="note" id="dailyMine"></p>
+    <div class="row"><button id="dailyGo" type="button">Play today's</button><button class="ghost" id="dailyClose" type="button">Close</button></div>
+    <div class="dboard" id="dailyBoard"></div>
+  </div>
+  <div class="overlay" id="sitesPanel" hidden>
+    <h2>Where to play</h2>
+    <p>Pitch Brawl is on three sites: the same game on each.</p>
+    <div class="sites" id="sitesList"></div>
+    <p class="note sitesdata"><b>Your data</b> (settings, scores, friends, tutorial) stays on the site you played on. To take it to another one: <b>⚙ Settings → Move to another copy</b>. Save or copy everything here, then load it there.</p>
+    <div class="row"><button class="ghost" id="sitesMove" type="button">Open it in Settings</button><button id="sitesClose" type="button">Close</button></div>
+  </div>
   <div class="overlay" id="mapPanel" hidden>
     <h2>Shot map</h2>
     <p id="mapNote"></p>
@@ -1240,6 +1295,7 @@
       <div class="tiles c2">
         <button class="tile" id="cupBtn" type="button"><i class="ic" data-ic="cup"></i><span><b>World Cup</b><small>three knockout matches</small></span></button>
         <button class="tile" id="leagueBtn" type="button"><i class="ic" data-ic="table"></i><span><b>League</b><small>a season, every team once</small></span></button>
+        <button class="tile dtile" id="dailyBtn" type="button"><i class="ic" data-ic="cal"></i><span><b>Daily challenge</b><small id="dailySub">the same 10 tries for everyone today</small></span></button>
       </div>
     </div>
     <div class="mpane" data-pane="train" role="tabpanel" hidden>
@@ -1299,7 +1355,7 @@
     <div class="mdash" id="mDash"></div>
     </div>
     <div class="mfoot">
-      <button class="ghost sm setb" type="button" title="Settings: rules, curve, sound, view"><span aria-hidden="true">⚙</span> Settings</button><button class="ghost sm ctl" type="button" title="Change your keys"><span aria-hidden="true">⌨</span> Controls</button><button class="ghost sm tmb" type="button" title="Each side's kit"><span aria-hidden="true">◐</span> Kits</button><button class="ghost sm pub" type="button" title="A power-up for each side"><span aria-hidden="true">✦</span> Power-ups</button><button class="ghost sm hlpb" type="button" title="How to play, the controls and the modes"><span aria-hidden="true">?</span> How to play</button>
+      <button class="ghost sm setb" type="button" title="Settings: rules, curve, sound, view"><span aria-hidden="true">⚙</span> Settings</button><button class="ghost sm ctl" type="button" title="Change your keys"><span aria-hidden="true">⌨</span> Controls</button><button class="ghost sm tmb" type="button" title="Each side's kit"><span aria-hidden="true">◐</span> Kits</button><button class="ghost sm pub" type="button" title="A power-up for each side"><span aria-hidden="true">✦</span> Power-ups</button><button class="ghost sm hlpb" type="button" title="How to play, the controls and the modes"><span aria-hidden="true">?</span> How to play</button><button class="ghost sm sitesb" type="button" title="The three sites Pitch Brawl is on, and taking your data from one to another"><span aria-hidden="true">🌐</span> Sites &amp; your data</button>
       <span class="mst" id="mStadium"></span>
     </div>
     <div class="tutwel" id="tutWelcome" hidden><div>
@@ -1312,6 +1368,11 @@
 </div>
 </div>
 
+<div class="dmbox" id="dmBox" hidden role="dialog" aria-label="Chat with a friend">
+  <div class="dmhead"><span><b id="dmWho"></b><small id="dmSt"></small></span><button class="ghost sm" id="dmX" type="button" title="Close (Esc)">✕</button></div>
+  <div class="dmlog" id="dmLog" aria-live="polite"></div>
+  <form id="dmForm" autocomplete="off"><input type="text" id="dmIn" maxlength="120" placeholder="Message" spellcheck="false" aria-label="Message"><button type="submit">Send</button></form>
+</div>
 <div class="frtoast" id="frToast" hidden role="alertdialog" aria-live="polite"><p id="frToastT"></p><div class="row"><button id="frToastYes" type="button">Join</button><button class="ghost" id="frToastNo" type="button">Not now</button></div></div>
 <div class="chat" id="chat" hidden>
   <div class="log" id="chatLog" aria-live="polite"></div>
@@ -5901,7 +5962,7 @@ function practiceMode(){
   M.init = s => M.place(s);
   M.before = s => { if (s.G.state === 2 && s.G.timer <= 1){ if (M.over) drillEnd(s); else M.place(s); } };
   M.done = (s, out, kmh) => {
-    pr.attempts++; pr[out === 'goal' ? 'goals' : out === 'saved' ? 'saves' : 'misses']++; if (pr.attempts >= DRILL_N) M.over = true;
+    pr.attempts++; pr[out === 'goal' ? 'goals' : out === 'saved' ? 'saves' : 'misses']++; if (pr.attempts >= drillN(s)) M.over = true;
     pr.streak = out === 'goal' ? pr.streak + 1 : 0; pr.best = Math.max(pr.best, pr.streak); pr.state = 'done';
     if (out === 'goal' && s.cfg.diff >= 1){ achBest('sharp', pr.streak); if (pr.streak >= 10) achUnlock('sharp'); }
     if (out === 'goal'){ pr.fast = Math.max(pr.fast, kmh || 0); s.G.timer = 75; }
@@ -5971,7 +6032,7 @@ function fkMode(){
   M.init = s => M.place(s);
   M.before = s => { if (s.G.state === 2 && s.G.timer <= 1){ if (M.over) drillEnd(s); else M.place(s); } };
   M.done = (s, out, kmh) => {
-    fp.attempts++; fp[out === 'goal' ? 'goals' : out === 'saved' ? 'saves' : out === 'wall' ? 'blocked' : 'misses']++; if (fp.attempts >= DRILL_N) M.over = true;
+    fp.attempts++; fp[out === 'goal' ? 'goals' : out === 'saved' ? 'saves' : out === 'wall' ? 'blocked' : 'misses']++; if (fp.attempts >= drillN(s)) M.over = true;
     fp.streak = out === 'goal' ? fp.streak + 1 : 0; fp.best = Math.max(fp.best, fp.streak); fp.state = 'done';
     if (out === 'goal'){ fp.fast = Math.max(fp.fast, kmh || 0); s.G.timer = 75; }
     else { s.G.state = 2; s.G.timer = 70; s.msg = {text: out === 'saved' ? 'SAVED!' : out === 'wall' ? 'THE WALL' : fp.postHit ? 'OFF THE POST' : 'MISSED', sub: fp.speed ? Math.round(fp.speed) + ' km/h' : '', until: s.ticks + 70, team: -1}; if (out === 'saved') sfx.save(); }
@@ -6158,7 +6219,7 @@ function wallMode(cfg){
   };
   const control = (ok, text) => { wp.verdict = true; wp.judged++; if (ok){ wp.controlled++; wp.streak++; wp.best = Math.max(wp.best, wp.streak); achBest('wall', wp.streak); if (wp.streak >= 10) achUnlock('wall10'); } else wp.streak = 0; if (text) say(text, 1); };
   M.done = (s, out, kmh) => {
-    wp.state = 'done'; wp.tries++; if (M.keeper) wp.kOn = (wp.kOn || 0) + 1; else wp.kOff = (wp.kOff || 0) + 1; if (wp.tries >= DRILL_N) M.over = true;
+    wp.state = 'done'; wp.tries++; if (M.keeper) wp.kOn = (wp.kOn || 0) + 1; else wp.kOff = (wp.kOff || 0) + 1; if (wp.tries >= drillN(s)) M.over = true;
     if (out === 'goal'){
       wp.goals++;
       if (!wp.verdict) control(wp.first, wp.first ? 'First-time finish off the wall!' : '');
@@ -6310,7 +6371,7 @@ function dribbleMode(){
     M.quietGoals = (G.discs[0].x - (goalMid(0).x + goalMid(1).x) / 2) * dirOf() < 0;
   };
   M.done = (s, out, kmh) => {
-    const G = s.G; dp.state = 'done'; dp.tries++; if (dp.tries >= DRILL_N) M.over = true;
+    const G = s.G; dp.state = 'done'; dp.tries++; if (dp.tries >= drillN(s)) M.over = true;
     if (out === 'goal'){ dp.goals++; dp.streak++; dp.best = Math.max(dp.best, dp.streak); dp.fast = Math.max(dp.fast, kmh || 0); G.timer = 75; if (s.cfg.diff >= 1){ achBest('drib', dp.streak); if (dp.streak >= 5) achUnlock('drib5'); } }
     else {
       dp.streak = 0; dp[out]++;   // 'stopped', 'wide' or 'slow'
@@ -6611,6 +6672,7 @@ function tutPanel(s){
     { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = m.lesson === 'quick' ? 'Go deeper: the parts' : 'All the parts'; b.onclick = () => { tutEnd(true, m.lesson); exitToMenu(); openLearn(); }; ex.append(b); } }
   { const dots = $('tutDots'); dots.textContent = ''; L.forEach((k, j) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tdot' + (j === tu.i ? ' on' : j < tu.i ? ' done' : ''); b.title = `${j + 1}. ${TUT_TITLE[k] || k}`; b.setAttribute('aria-label', b.title); b.onclick = e => { e.currentTarget.blur(); m.goto(s, j); }; dots.append(b); }); }
   $('tutBack').hidden = tu.i === 0; $('tutAgain').hidden = tu.i === 0;
+  { const nx = tutNextPart(m), b = $('tutPartNext'); b.hidden = !nx || tutLast(st); if (nx) b.title = `Skip to the next part: ${LESSONS[nx].name}`; }   // (v28.65, "add a button to skip to next tutorial")
   keyStrip($('tutKeys'), true);
   $('tutSkip').textContent = 'Leave';
   $('tutNext').textContent = tutLast(st) ? 'Back to the menu' : tu.ok || tutInfo(st) ? 'Next ›' : 'Skip this step ›';
@@ -6620,6 +6682,8 @@ function tutPanel(s){
 { const tb = $('tutBox'), hb = $('helpBar'); $('stage').after(tb); tb.after(hb);
   const sync = () => { const h = (tb.hidden ? 0 : tb.offsetHeight) + (hb.hidden ? 0 : hb.offsetHeight + 6), on = h > 0; document.body.classList.toggle('tut', on); if (on) document.documentElement.style.setProperty('--tutH', Math.ceil(h) + 'px'); };
   for (const el of [tb, hb]){ new MutationObserver(sync).observe(el, {attributes: true, attributeFilter: ['hidden']}); new ResizeObserver(sync).observe(el); } }
+// the part after this one (after the quick start: the first part not done yet)
+const tutNextPart = m => m.lesson === 'quick' ? (PARTS.find(k => !learnDone()[k]) || null) : nextPart(m.lesson);
 function tutStart(lesson){ $('tutWelcome').hidden = true; lesson = LESSONS[lesson] ? lesson : PARTS[0]; start(Object.assign(cfgFor('practice', 1), {mode: 'tutorial', lesson, power: lesson === 'power', slide: true, fk: true, curve: true, curveLv: lesson === 'curl' ? Math.max(3, SET.curveLv || 3) : SET.curveLv, diff: 0, timeLimit: 0, scoreLimit: 0})); }
 const learnDone = () => { let v = store.get('pb.learnParts', null); if (!v || typeof v !== 'object'){ const o = store.get('pb.learn', null); v = {}; if (o && typeof o === 'object') for (const k of Object.keys(LESSONS)) if (o[k]) v[k] = 1; } return v; };   // (v28.60: was kept in pb.learn by mistake, the computer-learning switches' key)
 function tutEnd(finished, lesson){
@@ -6645,6 +6709,7 @@ function openLearn(){ for (const id of ['helpPanel', 'setPanel']) if (!$(id).hid
 $('tutNext').addEventListener('click', e => { e.target.blur(); const s = sess; if (!s || !s.mode || s.mode.kind !== 'tutorial') return; if (tutLast(tutSteps(s.mode)[s.mode.tu.i])){ tutEnd(true, s.mode.lesson); exitToMenu(); openLearn(); return; } s.mode.next(s); });
 $('tutSkip').addEventListener('click', e => { e.target.blur(); const s = sess; tutEnd(false, s && s.mode && s.mode.lesson); exitToMenu(); });
 $('tutBack').addEventListener('click', e => { e.target.blur(); const s = sess; if (s && s.mode && s.mode.kind === 'tutorial') s.mode.goto(s, s.mode.tu.i - 1); });
+$('tutPartNext').addEventListener('click', e => { e.currentTarget.blur(); const s = sess; if (!s || !s.mode || s.mode.kind !== 'tutorial') return; const nx = tutNextPart(s.mode); if (!nx) return; tutEnd(false, s.mode.lesson); tutStart(nx); });
 $('tutAgain').addEventListener('click', e => { e.target.blur(); const s = sess; if (s && s.mode && s.mode.kind === 'tutorial') s.mode.goto(s, 0); });
 $('tutAgainBtn').addEventListener('click', e => { e.target.blur(); closePanel('setPanel'); if (sess && sess.kind !== 'local') return; if (sess) exitToMenu(); openLearn(); });
 
@@ -6743,7 +6808,7 @@ function keeperMode(){
     if (cpu.ctrl === 'hold' && cpu.input) C.setInput(cpu, 0);
   };
   M.done = (s, out, kmh) => {
-    kp.attempts++; kp[out === 'saved' ? 'saves' : out === 'goal' ? 'goals' : 'misses']++; if (kp.attempts >= DRILL_N) M.over = true;
+    kp.attempts++; kp[out === 'saved' ? 'saves' : out === 'goal' ? 'goals' : 'misses']++; if (kp.attempts >= drillN(s)) M.over = true;
     if (out === 'saved'){ kp.streak++; kp.best = Math.max(kp.best, kp.streak); kp.fast = Math.max(kp.fast, kp.speed); if (s.cfg.diff >= 1){ achBest('brick', kp.streak); if (kp.streak >= 10) achUnlock('brick'); } } else if (out === 'goal') kp.streak = 0;
     kp.state = 'done';
     const sub = kp.speed ? Math.round(kp.speed) + ' km/h' : '';
@@ -8251,7 +8316,7 @@ $('kpBtn').addEventListener('click', () => {
 // ---------- menus ----------
 let pausedForPanel = null;   // the match paused while panels are open over it
 const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one at a time
-const panels = ['sugPanel', 'teamPanel', 'puPanel', 'keysPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'mapPanel', 'scoresPanel', 'cupPanel', 'leaguePanel', 'onlinePanel', 'resPanel', 'gameMenu', 'cbPanel', 'setPanel', 'helpPanel'];
+const panels = ['sugPanel', 'sitesPanel', 'dailyPanel', 'teamPanel', 'puPanel', 'keysPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'mapPanel', 'scoresPanel', 'cupPanel', 'leaguePanel', 'onlinePanel', 'resPanel', 'gameMenu', 'cbPanel', 'setPanel', 'helpPanel'];
 const panelsClosed = () => panels.every(id => $(id).hidden);
 function showMenu(title, text){ $('menuTitle').textContent = title; $('menuText').textContent = text; $('menu').hidden = false; renderDash(); try { fitMenu(); } catch (e) {} }
 // v28.63 ("add a tiny thing in corner saying like recommendations, and ppl could write what they think we should do and
@@ -8276,6 +8341,39 @@ $('sugSend').addEventListener('click', async e => {
   } catch (err) { $('sugMsg').textContent = 'It couldn\'t be sent just now. Try again in a moment.'; }
   $('sugSend').disabled = false;
 });
+// v28.65 ("add the note stating all 3 websites for pitch brawl, but say like in claude, u cant play with the website
+// people", "say u can export and import ur data in settings"): 🌐 Sites & your data in the menu's links. The two websites
+// share players (one relay: rooms, friends, players online); the Claude page is kept off the internet, so it only meets
+// people who are in Claude too. Each site keeps its own data: Settings → Move to another copy carries it across
+const SITES = [
+  {k: 'netlify', name: 'Website', url: 'https://pitchbrawl.netlify.app/', note: 'Play online with everyone on both websites.'},
+  {k: 'github', name: 'Website (GitHub)', url: 'https://ricecooker225.github.io/pitch-brawl-play/', note: 'The same game and the same players as the website above: you can play each other.'},
+  {k: 'claude', name: 'In Claude', url: 'https://claude.ai/artifact/XeWawgAGw48C1haMLyoHKj', note: 'Online you only play people who are also in Claude, not the website players (Claude keeps the page off the internet).'},
+];
+const siteHere = () => inArtifact ? 'claude' : /\.netlify\.app$/.test(location.hostname) ? 'netlify' : /github\.io$/.test(location.hostname) ? 'github' : '';
+function renderSites(){
+  const box = $('sitesList'); box.textContent = ''; const here = siteHere();
+  for (const st of SITES){
+    const row = document.createElement('div'); row.className = 'site' + (st.k === here ? ' here' : '');
+    const h = document.createElement('b'); h.textContent = st.name; if (st.k === here){ const y = document.createElement('em'); y.textContent = 'you are here'; h.append(' ', y); }
+    const a = document.createElement('a'); a.href = st.url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = st.url.replace(/^https:\/\//, '').replace(/\/$/, '');
+    const c = document.createElement('button'); c.type = 'button'; c.className = 'ghost sm'; c.textContent = 'Copy';
+    c.onclick = () => { const ok = () => { c.textContent = 'Copied'; setTimeout(() => { c.textContent = 'Copy'; }, 1500); };
+      try { navigator.clipboard.writeText(st.url).then(ok, () => { c.textContent = 'Select the link'; }); } catch (e) { c.textContent = 'Select the link'; } };
+    const n = document.createElement('small'); n.textContent = st.note;
+    const l = document.createElement('div'); l.className = 'srow'; l.append(a, c);
+    row.append(h, l, n); box.append(row);
+  }
+}
+document.querySelectorAll('.sitesb').forEach(b => b.addEventListener('click', e => { e.currentTarget.blur(); renderSites(); openPanel('sitesPanel'); $('sitesPanel').scrollTop = 0; }));
+$('sitesClose').addEventListener('click', () => closePanel('sitesPanel'));
+$('sitesMove').addEventListener('click', () => { closePanel('sitesPanel'); openSettings(); setTimeout(() => { const x = $('xferSec'); if (x) x.scrollIntoView({block: 'start'}); }, 30); });
+// v28.65 ("powered by netify is blocking some view and buttons"): on the Netlify site, Netlify's free plan puts a
+// "Powered by Netlify" badge in the bottom right corner (it can't be switched off there). html.nlb keeps our buttons
+// and the pitch out of that corner (styles: the help bar, the tutorial's buttons, a strip under the pitch in a match)
+{ const nlb = () => /\.netlify\.app$/.test(location.hostname) || !!document.querySelector('script[data-nf-variant], #nl-badge-frame');
+  const mark = () => { if (nlb() && !document.documentElement.classList.contains('nlb')){ document.documentElement.classList.add('nlb'); try { fitMenu(); } catch (e) {} } };
+  mark(); addEventListener('load', mark); setTimeout(mark, 3000); }
 // v28.60 ("some stuff are bit plain like too much spaces", the menu filling the tab): under the match settings, four
 // cards that open what they show: friends online, the tutorial's parts done, your matches, achievements
 function renderDash(){
@@ -8329,6 +8427,7 @@ function start(cfg){
   const roster = cfg.roster || localRoster(cfg);
   const s = newSession('local', cfg, roster);
   if (cfg.mode === 'tri') s.mode = triMode(); else if (cfg.mode === 'practice') s.mode = practiceMode(); else if (cfg.mode === 'pens') s.mode = pensMode(!!cfg.two); else if (cfg.mode === 'duel') s.mode = duelMode(!!cfg.two); else if (cfg.mode === 'keeper') s.mode = keeperMode(); else if (cfg.mode === 'wall') s.mode = wallMode(cfg); else if (cfg.mode === 'dribble') s.mode = dribbleMode(); else if (cfg.mode === 'fkdrill') s.mode = fkMode(); else if (cfg.mode === 'tutorial') s.mode = tutorialMode(cfg.lesson);
+  if (cfg.daily && s.mode) dailyWrap(s);
   if (s.mode && s.mode.init) s.mode.init(s);
   if (introWanted(s)) introStart(s); else legIntro(s);   // (v28.34: the walk-out first; a leg's banner after it)
   if (bot){ const opp = s.G.players.find(p => p.team === 1); if (opp) s.custom = new Map([[opp.id, bot]]); }
@@ -8376,7 +8475,7 @@ $('optPower').addEventListener('change', e => { if (roomRule('optPower', e.targe
 // v25.5 ("i changed it and restarted its still the original curl, i need to leave the match and then comeback"): a restart
 // or a rematch kept the rules the match began with. Now they take the settings as they are, and in a match on this device
 // a change to curve, slide tackles or free kicks counts at once (cfgFor: a drill keeps the rules it has to have)
-function freshRules(cfg){ const c = Object.assign({}, cfg); if (cfg.mode === 'tutorial') return c;   // (v28.32: the tutorial keeps its own rules: slide tackles, free kicks and curve on)
+function freshRules(cfg){ const c = Object.assign({}, cfg); if (cfg.mode === 'tutorial' || cfg.daily) return c;   // (v28.65: the daily challenge's rules are the same for everyone)   // (v28.32: the tutorial keeps its own rules: slide tackles, free kicks and curve on)
   const r = cfgFor(cfg.mode, cfg.size); for (const k of ['curve', 'curveLv', 'slide', 'fk', 'tie', 'power']) c[k] = r[k]; return c; }
 function liveRules(){
   const s = sess; if (!s || s.kind !== 'local' || s.done || !s.G) return;
@@ -8407,6 +8506,7 @@ const ICONS = {
   three: '<circle cx="6" cy="6" r="2.3"/><circle cx="6" cy="12" r="2.3"/><circle cx="6" cy="18" r="2.3"/><circle cx="18" cy="6" r="2.3"/><circle cx="18" cy="12" r="2.3"/><circle cx="18" cy="18" r="2.3"/>',
   cup: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 20h6M10 17h4"/>',
   table: '<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M4 14h16M9 4v16"/>',
+  cal: '<rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/><path d="M10 14.5l1.6 1.6 3-3.2"/>',
   target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/>',
   cone: '<path d="M12 4l5 14H7z"/><path d="M5 20h14M9.5 11h5M8.5 14.5h7"/>',
   glove: '<path d="M7 20v-8l-2-3 1.5-1.5L9 10V5a1.5 1.5 0 0 1 3 0v4-5a1.5 1.5 0 0 1 3 0v5-3a1.5 1.5 0 0 1 3 0v8a6 6 0 0 1-6 6z"/>',
@@ -9139,6 +9239,7 @@ $('resAgain').addEventListener('click', () => {
   const s = sess; $('resPanel').hidden = true;
   if (s && s.cfg && s.cfg.cup){ cupAfterMatch(s); return; }
   if (s && s.cfg && s.cfg.league){ leagueAfterMatch(s); return; }
+  if (s && s.cfg && s.cfg.daily){ dailyStart(); return; }
   if (NET.on){ if (isMgr()) sendCmd('lobby'); backToLobby(); return; }
   if (s && s.cfg.leg === 1 && !s.cfg.agg && s.G){ start(legNext(s)); return; }   // (two legs: on to the second)
   if (s) start(legOver(freshRules(s.cfg))); else exitToMenu();
@@ -9602,7 +9703,7 @@ const DRILLS = {shoot: ['Shooting', 'goals'], fk: ['Free kicks', 'goals'], keep:
                 wallk: ['Wall control + keeper', 'controlled'], wallmix: ['Wall control, keeper in and out', 'controlled']};
 const DRILL_ROWS = ['shoot', 'fk', 'keep', 'drib', 'wall', 'wallk', 'wallmix'], LV_NAME = ['Easy', 'Normal', 'Hard', 'Insane'];
 const DRILL_X = ['goals', 'saves', 'misses', 'conceded', 'streak', 'fast', 'beaten', 'stopped', 'wide', 'slow', 'controlled', 'posts', 'blocked', 'curve'];   // (v25.1: blocked by the wall, the curve %)
-function drillCount(n, over){ return `${Math.min(DRILL_N, n + (over ? 0 : 1))}/${DRILL_N}`; }
+function drillCount(n, over){ const N = drillN(); return `${Math.min(N, n + (over ? 0 : 1))}/${N}`; }
 function drillRec(v){   // checked before use: it could come from another device, an older version, or be edited
   if (!v || typeof v !== 'object' || !Object.prototype.hasOwnProperty.call(DRILLS, v.drill) || typeof v.id !== 'string' || !/^[\w.-]{1,60}$/.test(v.id)) return null;
   const of = Math.floor(+v.of), score = Math.floor(+v.score), at = +v.at;
@@ -9666,6 +9767,7 @@ function drillWhen(at){ const d = new Date(at); return isFinite(d) ? d.toLocaleD
 const drillEl = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 // the drill is over (after the last try's message): stop, show the card, keep the score
 function drillEnd(s){
+  if (s.cfg && s.cfg.daily){ dailyEnd(s); return; }
   if (s.drillRec !== undefined) return;
   const r0 = s.mode.result(s);
   const rec = drillRec(Object.assign({id: 'd' + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36), at: Date.now(), of: DRILL_N, level: s.cfg.diff}, r0));
@@ -9703,6 +9805,96 @@ function drillCard(s, r, list){
   $('resFull').hidden = true; $('resGoals').hidden = true; $('resScores').hidden = false;
   $('resPanel').hidden = false;
 }
+// ---------- Daily challenge (v28.65) ----------
+// ("Daily challenge: the same challenge for everyone each day ... with a leaderboard among your friends"): each day (UTC)
+// one of four drills, DAILY_N tries, the same spots for everyone (the drill's placing draws from a sequence seeded by
+// the day) and the same rules (Normal computer, curve 60%, no power shot). Play it as often as you like: your best
+// today counts (more, then quicker). The board: on the websites, everyone who played it today (through the relay;
+// your friends marked, and a Friends tab); in Claude, the people in Claude with the game open now (the room)
+const DAILY_N = 10;
+const DAILY_KINDS = [
+  {k: 'shoot', mode: 'practice', name: 'Shooting', what: `${DAILY_N} shots at the keeper`},
+  {k: 'fk', mode: 'fkdrill', name: 'Free kicks', what: `${DAILY_N} free kicks over the wall`},
+  {k: 'drib', mode: 'dribble', name: 'Dribbling', what: `${DAILY_N} runs: get past the defender and score`},
+  {k: 'keep', mode: 'keeper', name: 'Keeper', what: `${DAILY_N} shots to keep out`},
+];
+function drillN(s){ const x = s || sess; return x && x.cfg && x.cfg.daily ? DAILY_N : DRILL_N; }
+const dailyId = (t = Date.now()) => new Date(t).toISOString().slice(0, 10);
+const dailyKind = id => DAILY_KINDS[((Math.floor(Date.parse(id + 'T00:00:00Z') / 864e5) % DAILY_KINDS.length) + DAILY_KINDS.length) % DAILY_KINDS.length];
+function dailySeed(id){ let h = 2166136261; for (const ch of 'pb-daily-' + id){ h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function mulberry(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const dailyBest = () => { const d = store.get('pb.daily', null); return d && typeof d === 'object' && d.id === dailyId() && d.s >= 0 && d.s <= DAILY_N ? d : null; };
+const dailyLeft = () => { const t = Date.now(), end = Date.parse(dailyId(t) + 'T00:00:00Z') + 864e5, m = Math.max(1, Math.round((end - t) / 60000)); return m >= 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m} min`; };
+function dailyStart(){
+  const id = dailyId(), K = dailyKind(id);
+  for (const p of ['dailyPanel', 'resPanel']) if (!$(p).hidden) closePanel(p);
+  start(Object.assign(cfgFor(K.mode, 1), {daily: {id, k: K.k}, diff: 1, curve: K.mode !== 'keeper', curveLv: 3, power: false}));
+}
+function dailyWrap(s){
+  const M = s.mode, rng = mulberry(dailySeed(s.cfg.daily.id)), place = M.place, K = DAILY_KINDS.find(k => k.k === s.cfg.daily.k) || DAILY_KINDS[0];
+  if (place) M.place = s2 => { const r0 = Math.random; Math.random = rng; try { return place(s2); } finally { Math.random = r0; } };
+  const clock = M.clock; if (clock) M.clock = s2 => { const c = clock(s2); return ['Daily · ' + c[0], c[1]]; };
+  M.hud = s2 => { const r = M.result(s2); return `Daily challenge · ${K.name}: ${K.what}, the same for everyone today · ${r.score} so far\nNormal computer, curve 60%. Your best today goes on the board (Daily challenge in the menu).`; };
+}
+function dailyEnd(s){
+  if (s.drillRec !== undefined) return;
+  const id = s.cfg.daily.id, r = s.mode.result(s), sc = Math.max(0, Math.min(DAILY_N, Math.floor(+r.score) || 0)), secs = Math.max(1, Math.round(s.G.frame / 60));
+  s.drillRec = null; s.done = true; sfx.whistle(1);
+  const d0 = store.get('pb.daily', null), old = d0 && d0.id === id ? d0 : null, better = !old || sc > old.s || (sc === old.s && secs < old.t);
+  store.set('pb.daily', better ? {id, k: s.cfg.daily.k, s: sc, t: secs, n: (old ? old.n || 1 : 0) + 1} : Object.assign({}, old, {n: (old.n || 1) + 1}));
+  if (id === dailyId()) try { dailyPost(); } catch (e) {}
+  dailyCard(s, {s: sc, t: secs, better, old});
+  dailyTile();
+}
+function dailyCard(s, res){
+  const box = $('res'), el = drillEl, K = DAILY_KINDS.find(k => k.k === s.cfg.daily.k) || DAILY_KINDS[0]; box.textContent = '';
+  $('resTitle').textContent = 'Daily · ' + K.name;
+  const sc = el('div', 'dsc'), big = el('b', null, String(res.s)); big.append(el('small', null, ' / ' + DAILY_N));
+  sc.append(big, el('span', null, `${DRILLS[K.k][1]} · ${res.t} s`)); box.append(sc);
+  const b = dailyBest() || {s: res.s, t: res.t};
+  box.append(el('div', 'pbn' + (res.better ? '' : ' was'), res.better ? (res.old ? `New best today! (was ${res.old.s})` : 'On the board: see how you did') : `Your best today: ${b.s} / ${DAILY_N} (${b.t} s)`));
+  const lb = el('div', 'dboard'); box.append(lb); dailyBoard(lb, 'friends');
+  box.append(el('div', 'motm lesson', `A new one in ${dailyLeft()}. Play it as often as you like: your best today counts.`));
+  $('resAgain').textContent = 'Try again'; $('resAgain').hidden = false; $('resMenu').textContent = 'Menu';
+  $('resFull').hidden = true; $('resGoals').hidden = true; $('resScores').hidden = true;
+  $('resPanel').hidden = false;
+}
+// the board: Friends (you and your friends) or Everyone, best first (more, then quicker)
+function dailyBoard(box, tab){
+  DC.box = box; DC.tab = tab; box.textContent = ''; const el = drillEl, id = dailyId(), me = FR.fid, fr = new Set(FR.list.map(x => x.f));
+  const rows = new Map(); for (const [f, o] of DC.rows) if (o.id === id) rows.set(f, o);
+  const b = dailyBest(); if (b) rows.set(me, {n: myNick(), s: b.s, t: b.t}); else rows.delete(me);
+  let L = [...rows.entries()].map(([f, o]) => ({f, n: o.n, s: o.s, t: o.t, me: f === me, fr: fr.has(f)}));
+  if (tab === 'friends') L = L.filter(o => o.me || o.fr);
+  L.sort((p, q) => q.s - p.s || p.t - q.t || (p.me ? -1 : q.me ? 1 : 0));
+  const tabs = el('div', 'dtabs');
+  for (const [k, t] of [['friends', 'Friends'], ['all', 'Everyone']]){ const x = el('button', 'ghost sm' + (k === tab ? ' on' : ''), t); x.type = 'button'; x.onclick = e => { e.currentTarget.blur(); dailyBoard(box, k); }; tabs.append(x); }
+  box.append(tabs);
+  if (!L.length || (tab === 'friends' && L.length === 1 && L[0].me)) box.append(el('p', 'note', tab === 'friends' ? (FR.list.length ? 'None of your friends has played today\'s yet.' : 'Add friends (the Friends tab) to see their scores here.') : 'Nobody has played today\'s yet: be the first.'));
+  const top = tab === 'all' ? 20 : 50, ol = el('ol', 'dlist'), row = (o, i) => { const li = el('li', (o.me ? 'me' : '') + (o.fr ? ' fr' : '')); li.append(el('i', null, String(i + 1)), el('b', null, o.me ? 'You' : (clean(o.n, 16) || 'Player') + (o.fr && tab === 'all' ? ' ★' : '')), el('span', null, `${o.s} / ${DAILY_N}`), el('small', null, o.t + ' s')); return li; };
+  L.slice(0, top).forEach((o, i) => ol.append(row(o, i)));
+  { const i = L.findIndex(o => o.me); if (i >= top) ol.append(row(L[i], i)); }
+  if (ol.childNodes.length) box.append(ol);
+  box.append(el('p', 'note', inArtifact ? 'In Claude the board shows the people in Claude with the game open now.' : FR.cls ? (tab === 'all' ? 'Everyone on the websites who played it today (★ your friends).' : 'You and your friends, today.') : 'Connecting to the board…'));
+}
+function dailyTile(){
+  const sub = $('dailySub'); if (!sub) return; const K = dailyKind(dailyId()), b = dailyBest();
+  sub.textContent = `today: ${K.name.toLowerCase()} · ` + (b ? `your best ${b.s}/${DAILY_N}` : `${DAILY_N} tries, the same for everyone`);
+}
+function openDaily(){
+  const id = dailyId(), K = dailyKind(id), b = dailyBest();
+  try { dcSub(); } catch (e) {}
+  $('dailyWhat').textContent = `Today: ${K.name}. ${K.what}, from the same spots for everyone, against the Normal computer (curve 60%). A new one in ${dailyLeft()}.`;
+  $('dailyMine').textContent = b ? `Your best today: ${b.s} / ${DAILY_N} in ${b.t} s (${b.n || 1} ${b.n === 1 ? 'go' : 'goes'}). Play again as often as you like: your best counts.` : 'You haven\'t played today\'s yet.';
+  $('dailyGo').textContent = b ? 'Play it again' : 'Play today\'s';
+  dailyBoard($('dailyBoard'), FR.list.length ? 'friends' : 'all');
+  if (!sess) $('menu').hidden = true;
+  openPanel('dailyPanel');
+}
+$('dailyBtn').addEventListener('click', e => { e.currentTarget.blur(); openDaily(); });
+$('dailyGo').addEventListener('click', e => { e.currentTarget.blur(); dailyStart(); });
+$('dailyClose').addEventListener('click', () => { closePanel('dailyPanel'); if (!sess) $('menu').hidden = false; });
+setTimeout(dailyTile, 0); setInterval(dailyTile, 60000);
 // My scores: your best at each drill and level on top; then your own leaderboard (top 10 for a drill and level, ranked)
 // or your history (every finished drill, newest first, with delete), picked by drill and level
 const SCV = {list: null, where: 'device', tab: 'top', drill: null, lv: null, now: null, arm: null, armT: 0};
@@ -9811,7 +10003,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.64';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.65';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10472,13 +10664,14 @@ function onPeersHost(peers){
       if (why){ if (!(L.deny || []).some(x => x[0] === p.id && x[1] === why)){ L.deny = (L.deny || []).filter(x => x[0] !== p.id).concat([[p.id, why]]).slice(-8); publishLobby(); } continue; }
       const nm = clean(p.st.n, 16) || 'Player', bk = backOf(p.st, nm);
       const want = bk ? bk.team : p.st.w === 0 || p.st.w === 1 ? p.st.w : (teamCount(L, 0) <= teamCount(L, 1) ? 0 : 1);
-      const team = L.on === 1 ? -1 : teamCount(L, want) < L.sz ? want : teamCount(L, 1 - want) < L.sz ? 1 - want : -1;
-      const row = [p.id, nm, clean(p.st.a, 2), team, undefined, p.rl ? 'r' : 'p']; L.pl.push(row);   // (5: how they're connected, for the hand-off)
+      const watch = p.st.w === 2 && !bk;   // (v28.65: came to watch, from a friend's 👁 Watch: Spectators)
+      const team = watch || L.on === 1 ? -1 : teamCount(L, want) < L.sz ? want : teamCount(L, 1 - want) < L.sz ? 1 - want : -1;
+      const row = [p.id, nm, clean(p.st.a, 2), team, watch ? 2 : undefined, p.rl ? 'r' : 'p']; L.pl.push(row);   // (5: how they're connected, for the hand-off)
       if (L.deny) L.deny = L.deny.filter(x => x[0] !== p.id);
       NET.guests.set(p.id, p.st);
       const back = bk && L.on === 1 && bk.gid === L.gid && sess && sess.kind === 'host' && reseat(sess, row, bk);
       if (bk && bk.mgr && !(L.adm || []).includes(p.id)) L.adm = (L.adm || []).concat([p.id]);
-      sysChat(back ? `${nm} is back` : `${nm} joined${L.on === 1 ? ' (watching)' : ''}`);
+      sysChat(back ? `${nm} is back` : `${nm} joined${L.on === 1 || watch ? ' (watching)' : ''}`);
       publishLobby();
     } else {
       const e = L.pl.find(x => x[0] === p.id), n = clean(p.st.n, 16) || 'Player', a = clean(p.st.a, 2);
@@ -10772,14 +10965,14 @@ function backToLobby(){
 }
 
 // ----- joining -----
-let joinVia = '';
+let joinVia = '', joinWatch = false;   // (v28.65: 👁 Watch from the Friends tab: in the room as a spectator)
 async function joinGame(code, pass, via){
-  if (connecting || NET.on){ joinVia = ''; return; }
+  if (connecting || NET.on){ joinVia = ''; joinWatch = false; return; }
   connecting = true; const tk = ++waitTok;
   try { await joinGame1(code, pass, via, tk); } finally { if (tk === waitTok) connecting = false; }
 }
 async function joinGame1(code, pass, via, tk){
-  if (via == null) via = joinVia || ''; joinVia = '';
+  if (via == null) via = joinVia || ''; joinVia = ''; const watch = joinWatch; joinWatch = false;
   saveIdentity(); onErr('');
   code = String(code || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 6);
   if (code.length < 4){ onErr('Type the room code your friend sent you.'); return; }
@@ -10803,7 +10996,7 @@ async function joinGame1(code, pass, via, tk){
   $('joinBtn').disabled = $('passBtn').disabled = false;
   Object.assign(NET, {on: true, host: false, T, code, me: T.myId || null, lobby: null, chat: [], chatSeen: new Set(), myChat: [], hostSeen: false, hostGoneAt: 0, shownRes: -1, startedGid: -1, want: -1, cmdSeq: 0, cmds: [], typing: false}); resetPing();
   if (ST !== DEFAULT_ST){ ST = DEFAULT_ST; applyStadiumLayout(); }
-  T.set({pb: 2, r: 'c', v: NET_VER, n: myNick(), a: myAvatar(), i: 0, k: 0, m: [], pw: clean(pass || '', 12), tb: tabId()});
+  T.set({pb: 2, r: 'c', v: NET_VER, n: myNick(), a: myAvatar(), i: 0, k: 0, m: [], pw: clean(pass || '', 12), tb: tabId(), w: watch ? 2 : undefined});
   // (v28.8: the room first, then what the host says: through the relay the host's state is already here and a match on
   // started at once, and this put the room over it)
   showLobby(); $('onTitle').textContent = 'Joining…'; waitSub('Connected · waiting for the room…');
@@ -11214,11 +11407,12 @@ function frMsg(m){   // an invite or a friend request, to me
   const nm = clean(m.n || '', 16) || 'A friend', known = FR.list.some(q => q.f === m.from);
   if (m.k === 'inv' && /^[a-z0-9]{4,6}$/.test(m.c || '') && known && !(NET.on && NET.code === m.c)) frToast(`${nm} invites you to their room`, 'Join', () => frJoin(m.c));
   else if (m.k === 'add' && !known) frToast(`${nm} added you as a friend (code ${m.from})`, 'Add back', () => frAdd(m.from, nm));
+  else if (m.k === 'msg' && known) dmGot(m);
 }
 async function frStart(){
   if (FR.on) { frPub(); return; }
   FR.on = true; renderFriends();
-  FR.beat = setInterval(() => { frPub(true); let ch = false; for (const [f, x] of FR.st) if (Date.now() - x.t > 70000){ FR.st.delete(f); ch = true; } if (ch) renderFriends(); if (!inArtifact){ for (const [f, t] of FR.all) if (Date.now() - t > 70000) FR.all.delete(f); onlineN(); } }, 20000);
+  FR.beat = setInterval(() => { frPub(true); try { dcSub(); } catch (e) {} let ch = false; for (const [f, x] of FR.st) if (Date.now() - x.t > 70000){ FR.st.delete(f); ch = true; } if (ch) renderFriends(); if (!inArtifact){ for (const [f, t] of FR.all) if (Date.now() - t > 70000) FR.all.delete(f); onlineN(); } }, 20000);
   if (inArtifact){
     const lobby = await getRoom(); if (!FR.on || !lobby) { renderFriends(); return; }
     FR.lobby = lobby;
@@ -11228,17 +11422,21 @@ async function frStart(){
         if (pr.fr && typeof pr.fr === 'object'){ frGot(pr.fr); live.add(pr.fr.f); }
         const f = pr.fr && pr.fr.f;
         if (pr.finv && Array.isArray(pr.finv.to) && pr.finv.to.includes(FR.fid)) frMsg({k: 'inv', from: f, n: pr.finv.n, c: pr.finv.c, t: pr.finv.t});
-        if (pr.fadd && Array.isArray(pr.fadd.to) && pr.fadd.to.includes(FR.fid)) frMsg({k: 'add', from: f, n: pr.fadd.n, t: pr.fadd.t}); }
-      let chg = false; for (const f of [...FR.st.keys()]) if (!live.has(f)){ FR.st.delete(f); chg = true; } if (chg) renderFriends(); }); } catch (e) {}
-    frPub(); return;
+        if (pr.fadd && Array.isArray(pr.fadd.to) && pr.fadd.to.includes(FR.fid)) frMsg({k: 'add', from: f, n: pr.fadd.n, t: pr.fadd.t});
+        if (pr.fdm && Array.isArray(pr.fdm.l)) for (const d of pr.fdm.l.slice(-5)) if (d && d.to === FR.fid) frMsg({k: 'msg', from: f, n: pr.fdm.n, x: d.x, t: d.t}); }
+      let chg = false; for (const f of [...FR.st.keys()]) if (!live.has(f)){ FR.st.delete(f); chg = true; } if (chg) renderFriends();
+      { const dc = new Map(); for (const p of ch.peers || []){ const d = p && p.kind !== 'agent' && p.presence && p.presence.dc; if (d && typeof d === 'object' && /^[a-z0-9]{6}$/.test(d.f) && d.f !== FR.fid){ const r = dcRow(d.id, d); if (r) dc.set(d.f, r); } } DC.rows = dc; dcRefresh(); } }); } catch (e) {}
+    frPub(); dailyPost(); return;
   }
   const cls = await relayAll({topic: frTopic(FR.fid), payload: '', retain: true, qos: 0});
   if (!FR.on){ for (const c of cls) try { c.end(true); } catch (e) {} return; }
-  FR.cls = cls;
+  FR.cls = cls; DC.sub = '';
+  setTimeout(() => { try { dcSub(); dailyPost(); } catch (e) {} }, 0);
   for (const c of cls){
     c.subscribe([frInbox(FR.fid), `${RELAY_P}/u/+`]);   // (v28.63: everyone's, for players online; friends among them)
     c.on('message', (topic, buf) => { const o = buf && buf.length ? relayJSON(buf) : null;
       if (topic === frInbox(FR.fid)){ frMsg(o); return; }
+      if (topic.startsWith(RELAY_P + '/dc/')){ dcGot(topic, o); return; }
       const f = topic.slice(`${RELAY_P}/u/`.length); if (!/^[a-z0-9]{6}$/.test(f)) return;
       if (o && o.f === f && Date.now() - (+o.t || 0) < 70000) FR.all.set(f, +o.t || Date.now()); else FR.all.delete(f); onlineN();
       if (!FR.list.some(x => x.f === f)) return;
@@ -11256,12 +11454,13 @@ function onlineN(){
 function frStop(){
   if (!FR.on) return; FR.on = false; clearInterval(FR.beat);
   if (FR.cls){ for (const c of FR.cls){ try { c.publish(frTopic(FR.fid), '', {retain: true}); } catch (e) {} setTimeout(() => { try { c.end(false); } catch (e) {} }, 300); } FR.cls = null; }
-  if (FR.lobby){ FR.lobby.presence({fr: null, finv: null, fadd: null}).catch(() => {}); if (FR.unsub) try { FR.unsub(); } catch (e) {} FR.lobby = null; FR.unsub = null; }
+  if (FR.lobby){ FR.lobby.presence({fr: null, finv: null, fadd: null, fdm: null}).catch(() => {}); if (FR.unsub) try { FR.unsub(); } catch (e) {} FR.lobby = null; FR.unsub = null; }
   FR.st.clear(); FR.inv = []; FR.add = [];
 }
 function frSend(f, m){
   m = Object.assign({from: FR.fid, n: myNick(), t: Date.now()}, m);
   if (FR.cls) for (const c of FR.cls) try { c.publish(frInbox(f), JSON.stringify(m)); } catch (e) {}
+  if (FR.lobby && m.k === 'msg'){ FR.dmOut = FR.dmOut.concat([{to: f, x: m.x, t: m.t}]).slice(-5); FR.lobby.presence({fdm: {n: m.n, l: FR.dmOut}}).catch(() => {}); return; }
   if (FR.lobby){ if (m.k === 'inv'){ FR.inv = FR.inv.filter(x => x !== f).concat(f); FR.invT = m.t; } else { FR.add = FR.add.filter(x => x !== f).concat(f); FR.addT = m.t; } frPub(); }
 }
 function frAdd(code, name){
@@ -11274,12 +11473,76 @@ function frAdd(code, name){
   if (FR.cls) for (const cl of FR.cls) try { cl.subscribe(frTopic(c)); } catch (e) {}
   frSend(c, {k: 'add'}); renderFriends(); frPub();
 }
-async function frJoin(code){   // (v28.58: from anywhere: a match against the computer ends, the Online panel opens)
+// v28.65, the daily challenge's board: on the websites each player's best today is a retained message on the relay
+// (pitchbrawl/v1/dc/<day>/<friend code>: name, score, seconds), everyone's for today read back; yesterday's own one is
+// cleared when today's goes up. In Claude it's in the room's presence (dc), so it shows the people there now
+const DC = {rows: new Map(), sub: '', box: null, tab: 'friends', rt: 0};
+const dcTopic = (id, f) => `${RELAY_P}/dc/${id}/${f}`;
+function dcRow(id, o){
+  if (!o || typeof o !== 'object' || !/^\d{4}-\d\d-\d\d$/.test(id || '')) return null;
+  const s = Math.floor(+o.s), t = Math.floor(+o.t);
+  if (!(s >= 0 && s <= DAILY_N) || !(t >= 1 && t < 36000)) return null;
+  return {id, n: clean(o.n, 16), s, t};
+}
+function dcSub(){
+  if (inArtifact || !FR.cls) return; const id = dailyId(); if (DC.sub === id) return;
+  for (const c of FR.cls){ try { if (DC.sub) c.unsubscribe(dcTopic(DC.sub, '+')); c.subscribe(dcTopic(id, '+')); } catch (e) {} }
+  DC.sub = id; for (const [f, r] of DC.rows) if (r.id !== id) DC.rows.delete(f);
+}
+function dcGot(topic, o){
+  const m = topic.slice(RELAY_P.length + 4).split('/'); if (m.length !== 2 || !/^[a-z0-9]{6}$/.test(m[1]) || m[1] === FR.fid) return;
+  const r = o ? dcRow(m[0], o) : null; if (r) DC.rows.set(m[1], r); else DC.rows.delete(m[1]); dcRefresh();
+}
+function dailyPost(){
+  const b = dailyBest(); if (!b || !FR.on || !FR.fid) return;
+  const o = {n: myNick(), s: b.s, t: b.t};
+  if (inArtifact){ if (FR.lobby) FR.lobby.presence({dc: Object.assign({id: b.id, f: FR.fid}, o)}).catch(() => {}); return; }
+  if (!FR.cls) return; dcSub();
+  const prev = store.get('pb.dailyPosted', '');
+  for (const c of FR.cls){ try { if (prev && prev !== b.id) c.publish(dcTopic(prev, FR.fid), '', {retain: true}); c.publish(dcTopic(b.id, FR.fid), JSON.stringify(o), {retain: true}); } catch (e) {} }
+  store.set('pb.dailyPosted', b.id);
+}
+function dcRefresh(){ clearTimeout(DC.rt); DC.rt = setTimeout(() => { if (DC.box && document.contains(DC.box) && !DC.box.closest('[hidden]')) dailyBoard(DC.box, DC.tab); }, 250); }
+async function frJoin(code, watch){   // (v28.58: from anywhere: a match against the computer ends, the Online panel opens)
   if (NET.on) return;
   if (sess && sess.kind === 'local') exitToMenu();
   if ($('onlinePanel').hidden) await openOnline();
-  $('joinCode').value = code; $('joinBtn').click();
+  joinWatch = !!watch; $('joinCode').value = code; $('joinBtn').click();
 }
+// v28.65 ("and like chat with friends even out lobby"): 💬 by a friend who's online (the Friends tab, or the room's
+// friends list) opens a small chat box, anywhere in the game: the menu, a match against the computer, a room. On the
+// websites it goes to the friend's relay inbox (not kept: they get it while they have the game open); in Claude, the
+// room's presence (fdm: your last five, each to one friend). From friends only. A message for a closed box shows as a
+// toast with Reply and a count on the friend's 💬. Each conversation's last 40 lines are kept in this browser (pb.dm)
+FR.dm = (() => { const v = store.get('pb.dm', {}); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; })();
+FR.unread = new Map(); FR.dmWith = ''; FR.dmOut = []; FR.dmAt = 0;
+function dmSave(){ const keep = {}; for (const x of FR.list) if (Array.isArray(FR.dm[x.f])) keep[x.f] = FR.dm[x.f].slice(-40); FR.dm = keep; store.set('pb.dm', keep); }
+function dmAdd(f, me, x, t){ const a = Array.isArray(FR.dm[f]) ? FR.dm[f] : (FR.dm[f] = []); a.push([me ? 1 : 0, t, x]); dmSave(); }
+function dmName(f){ const x = FR.list.find(q => q.f === f), o = FR.st.get(f); return clean((o && o.n) || (x && x.n) || '', 16) || f.toUpperCase(); }
+function dmRender(){
+  const f = FR.dmWith; if (!f) return; const box = $('dmLog'); box.textContent = '';
+  const a = (Array.isArray(FR.dm[f]) ? FR.dm[f] : []).filter(e => Array.isArray(e) && typeof e[2] === 'string');
+  if (!a.length){ const p = document.createElement('p'); p.className = 'note'; p.textContent = 'Say hi! They see it while they have the game open.'; box.append(p); }
+  for (const [me, t, x] of a){ const d = document.createElement('div'); d.className = 'dmm' + (me ? ' me' : ''); const sp = document.createElement('span'); sp.textContent = x; const tm = document.createElement('small'); const dt = new Date(+t); tm.textContent = isFinite(dt) ? dt.toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}) : ''; d.append(sp, tm); box.append(d); }
+  box.scrollTop = box.scrollHeight;
+  const o = FR.st.get(f); $('dmWho').textContent = dmName(f); $('dmSt').textContent = o ? 'online' : 'offline: messages reach them when they\'re on';
+  $('dmIn').disabled = !o; $('dmForm').querySelector('button').disabled = !o;
+}
+function dmOpen(f){ if (!FR.list.some(q => q.f === f)) return; FR.dmWith = f; FR.unread.delete(f); $('dmBox').hidden = false; dmRender(); renderFriends(); setTimeout(() => { try { $('dmIn').focus(); } catch (e) {} }, 30); }
+function dmClose(){ FR.dmWith = ''; $('dmBox').hidden = true; try { $('dmIn').blur(); } catch (e) {} }
+function dmGot(m){
+  const f = m.from, x = clean(m.x, 120); if (!x) return;
+  dmAdd(f, false, x, +m.t || Date.now());
+  if (FR.dmWith === f && !$('dmBox').hidden){ dmRender(); try { sfx.chime && sfx.chime(); } catch (e) {} return; }
+  FR.unread.set(f, (FR.unread.get(f) || 0) + 1); renderFriends();
+  frToast(`💬 ${dmName(f)}: ${x}`, 'Reply', () => dmOpen(f));
+}
+$('dmForm').addEventListener('submit', e => { e.preventDefault(); const f = FR.dmWith, x = clean($('dmIn').value, 120); if (!f || !x) return;
+  if (Date.now() - FR.dmAt < 600) return; FR.dmAt = Date.now();
+  if (!FR.st.get(f)){ dmRender(); return; }
+  frSend(f, {k: 'msg', x}); dmAdd(f, true, x, Date.now()); $('dmIn').value = ''; dmRender(); });
+$('dmX').addEventListener('click', dmClose);
+$('dmIn').addEventListener('keydown', e => { if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); dmClose(); } });
 let frToastDo = null;
 function frToast(text, yes, fn){ $('frToastT').textContent = text; $('frToastYes').textContent = yes; frToastDo = fn; $('frToast').hidden = false; sfx.chime && sfx.chime(); clearTimeout(frToast.t); frToast.t = setTimeout(() => { $('frToast').hidden = true; frToastDo = null; }, 30000); }
 $('frToastYes').addEventListener('click', () => { const f = frToastDo; frToastDo = null; $('frToast').hidden = true; if (f) f(); });
@@ -11300,13 +11563,17 @@ function renderFriends(){
       st.textContent = !o ? 'offline' : o.s === 'free' ? 'online' : o.s === 'solo' ? 'playing the computer' : o.s === 'prac' ? 'practising' : o.s === 'room' ? `in room ${o.r ? '“' + o.r + '” ' : ''}(${o.k}/${o.z ? o.z * 2 : '?'})${o.lk ? ' 🔒' : ''}` : `playing${o.r ? ' in “' + o.r + '”' : ''}${o.sc ? ' · ' + o.sc.join('–') : ''}`;
       r.append(st);
       const act = (t, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (cls ? ' ' + cls : ''); b.textContent = t; b.onclick = e => { e.currentTarget.blur(); fn(); }; r.append(b); };
-      if (o && o.c && !NET.on && (o.s === 'room' || o.s === 'match')) act('Join', () => frJoin(o.c));
+      // (v28.65, spectate friends: 👁 Watch joins as a spectator; in a match that's what Join did anyway, so it says Watch)
+      if (o){ const u = FR.unread.get(x.f) || 0; act(u ? `💬 ${u}` : '💬', () => dmOpen(x.f), u ? 'dmnew' : 'dmb'); r.lastChild.title = `Chat with ${nm.textContent}`; }
+      if (o && o.c && !NET.on && o.s === 'room') act('Join', () => frJoin(o.c));
+      if (o && o.c && !NET.on && (o.s === 'room' || o.s === 'match')) act('👁 Watch', () => frJoin(o.c, true));
       if (o && NET.on && NET.code && (o.s === 'free' || o.s === 'solo' || o.s === 'prac')) act('Invite', () => { frSend(x.f, {k: 'inv', c: NET.code}); sysChat(`Invited ${(o && o.n) || x.n || 'your friend'}`); });
       if (!lobbyView) act('✕', () => { FR.list = FR.list.filter(q => q.f !== x.f); FR.st.delete(x.f); frSave(); renderFriends(); }, 'frx');
       box.append(r);
     }
   }
   $('frLobby').hidden = !(NET.on && rows.some(r => r.o));
+  if (FR.dmWith && !$('dmBox').hidden) dmRender();
   { const n = rows.filter(r => r.o).length, sm = $('onlineBtn') && $('onlineBtn').querySelector('small'); if (sm) sm.textContent = 'host a game or join one with a code' + (n ? ` · ${n} friend${n > 1 ? 's' : ''} online` : ''); }
 }
 $('frBackup').addEventListener('click', e => { e.currentTarget.blur(); openPanel('setPanel'); const sec = $('xferSave') && $('xferSave').closest('.dsec'); if (sec) setTimeout(() => sec.scrollIntoView({block: 'start'}), 50); });
