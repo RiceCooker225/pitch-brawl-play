@@ -643,7 +643,7 @@
   #menu{--cond:'Barlow Condensed','Arial Narrow',Rubik,sans-serif;--rule:#454d61;--dim:#a8b0c2;
         display:grid;grid-template-columns:minmax(200px,30%) minmax(0,1fr);grid-template-rows:auto auto auto auto;column-gap:36px;row-gap:16px;
         align-items:start;align-content:start;justify-items:stretch;justify-content:stretch;padding:28px 34px 22px 40px;text-align:left;
-        background:linear-gradient(90deg,var(--accent) 0 6px,transparent 6px),repeating-linear-gradient(115deg,rgba(255,255,255,.028) 0 26px,transparent 26px 52px),linear-gradient(180deg,#2a3040,#222735)}   /* (v28.29: lighter, "menus a bit dark") */
+        background:linear-gradient(90deg,var(--accent) 0 6px,transparent 6px),linear-gradient(180deg,#2a3040,#222735);isolation:isolate}   /* (v28.29: lighter, "menus a bit dark"; v28.71: the stripes are #menu::before, moving) */
   #menu[hidden]{display:none}
   #menu > .mhead{grid-column:1;grid-row:1;align-items:flex-start;text-align:left;gap:8px}
   #menu > .mtabs{grid-column:1;grid-row:2}
@@ -998,6 +998,14 @@
   .tutbox .qk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 18px;margin:2px 0 6px}
   @media (max-width:900px){ .tutbox .qk{grid-template-columns:repeat(2,minmax(0,1fr))} } @media (max-width:520px){ .tutbox .qk{grid-template-columns:1fr} }
   .tutbox .qk > span{display:flex;align-items:center;gap:8px;min-width:0} .tutbox .qk b{flex:none;font-weight:400} .tutbox .qk i{font-style:normal;color:#c9ced8;min-width:0}
+  /* v28.71 ("add background move aswell, maybe opposite direction as the banner so the website looks more alive"): the
+     menu's stripes drift to the right (the banner goes left), one stripe (57.4 px across at 115deg) every 4.5 s, so it
+     loops without a jump; a layer behind the menu's content, tall enough for a phone's long menu as it scrolls */
+  #menu::before{content:'';position:absolute;top:-120px;left:-120px;right:-120px;height:max(300%,2400px);z-index:-1;pointer-events:none;
+                background:repeating-linear-gradient(115deg,rgba(255,255,255,.034) 0 26px,transparent 26px 52px);animation:bgDrift 4.5s linear infinite;will-change:transform}
+  @keyframes bgDrift{from{transform:translateX(0)}to{transform:translateX(57.39px)}}
+  html.calm #menu::before{animation:none}
+  @media (prefers-reduced-motion:reduce){ html:not(.calm) #menu::before{animation:bgDrift 4.5s linear infinite!important} }
 </style>
 
 <header>
@@ -2976,10 +2984,10 @@ function PBCORE(){
 function PBAI(C){
   'use strict';
   const LEVELS = [
-    {name:'Easy',   see:14, err:0.2,   every:5, duty:0.72, kickP:0.6, sl:0,    read:0.3},    // see: reaction (ticks), err: aim error (rad), every: replan,
-    {name:'Normal', see:6,  err:0.08,  every:2, duty:1,    kickP:0.9, sl:0.25, read:0.5},    // duty: share of ticks it presses keys (below 1 it accelerates slower),
-    {name:'Hard',   see:3,  err:0.03,  every:1, duty:1,    kickP:1,   sl:0.45, read:0.65},   // kickP: chance it takes a kick it wants,
-    {name:'Insane', see:0,  err:0,     every:1, duty:1,    kickP:1,   sl:0.6,  read:0.8}     // sl: chance it goes for a clean slide tackle it sees
+    {name:'Easy',   see:14, err:0.2,   every:5, duty:0.72, kickP:0.6, sl:0,    read:0.3, dv:0,    sb:0},    // see: reaction (ticks), err: aim error (rad), every: replan,
+    {name:'Normal', see:6,  err:0.08,  every:2, duty:1,    kickP:0.9, sl:0.25, read:0.5, dv:0.25, sb:0.25},    // duty: share of ticks it presses keys (below 1 it accelerates slower),
+    {name:'Hard',   see:3,  err:0.03,  every:1, duty:1,    kickP:1,   sl:0.45, read:0.65, dv:0.5, sb:0.45},   // kickP: chance it takes a kick it wants,
+    {name:'Insane', see:0,  err:0,     every:1, duty:1,    kickP:1,   sl:0.6,  read:0.8, dv:1, sb:1}   // (v28.71 dv: dive chance, sb: shot-block chance)     // sl: chance it goes for a clean slide tackle it sees
   ];                                                                                         // read: how far a keeper goes with a free kick's aim (fkAimY)
   // [name, default, min, max]
   const SPEC = [
@@ -3102,7 +3110,7 @@ function PBAI(C){
   //  - KP_GSIDE: he presses only from this many px goal-side of the ball (null: from anywhere, as before)
   //  - KP_DEFLECT: ...and only where it doesn't come off him into the goal (a touch from behind, or from the side of a
   //    slow ball, only helps it on its way); with none of those he goes to his line in front of it
-  let KP_FRONT = null, KP_DEFLECT = 1, KP_AVOID = 1, KP_SAFEKICK = 1, KP_GSIDE = 4, KP_DIVE = 30, KP_DIVE_LINE = 12, KP_DIVE_AI = 1, KP_DIVE_P = 1, SHOT_BLOCK = 1, SB_P = 1;
+  let KP_FRONT = null, KP_DEFLECT = 1, KP_AVOID = 1, KP_SAFEKICK = 1, KP_GSIDE = 4, KP_DIVE = 30, KP_DIVE_LINE = 12, KP_DIVE_AI = 1, KP_DIVE_P = 1, SHOT_BLOCK = 1, SB_P = 1, KP_DIVE_TIGHT = 5;
   const clampBrain = b => { const o = {}; for (const [k, d, lo, hi] of SPEC){ const v = b && typeof b[k] === 'number' && isFinite(b[k]) ? b[k] : d; o[k] = Math.max(lo, Math.min(hi, v)); } return o; };
 
   const DIRS = [[0, 0, 0], [0, -1, 1], [0, 1, 2], [-1, 0, 4], [1, 0, 8], [-1, -1, 5], [1, -1, 9], [-1, 1, 6], [1, 1, 10]];
@@ -3619,20 +3627,27 @@ function PBAI(C){
     // (v28.31) ...except out on a rush: then a slide that gets the ball first (out of his area, as anyone's) is his too
     // v28.57 ("possibly dives for keeper"): a shot I can't get to running but can with a dive (its path within a dive's
     // reach in the ticks it lasts): dive at it. From Normal up, a roll each shot: the chance of a slide tackle (L.sl x KP_DIVE_P)
-    if (KP_DIVE_AI && G.state === 1 && !G.sp && p.role === 'keeper' && !p.slide && !p.slideCd && !(p.down > 0) && (L.sl || 0) > 0 && C.canDive && C.canDive(G, ST, p, me)){
-      const g = goalOf(ST, team), shot = shotOnGoal(ST, P, g);
+    if (KP_DIVE_AI && G.state === 1 && !G.sp && p.role === 'keeper' && !p.slide && !p.slideCd && !(p.down > 0) && (L.dv != null ? L.dv : L.sl || 0) > 0 && C.canDive && C.canDive(G, ST, p, me)){
+      const g = goalOf(ST, team), shot = shotOnGoal(ST, P, g), dv = L.dv != null ? L.dv : L.sl || 0;
       if (shot >= 1 && shot <= 40){
-        let run = false; for (let i = 1; i <= shot && i < P.length && !run; i++) if (slack(t, me, P[i], i, rr * KEEP_REACH) >= 0) run = true;
+        // (v28.71, "make the insane gk dive more often and better"): Insane (dv 1) dives every time it's the call, and also
+        // when running only just gets there (by less than KP_DIVE_TIGHT px); the way he dives is the one of the 8 (as the
+        // dive turns onto the ball, slideAim) whose path meets the ball soonest, played out tick by tick, not the rough
+        // way to where it crosses
+        const margin = dv >= 1 ? KP_DIVE_TIGHT : 0;
+        let run = false; for (let i = 1; i <= shot && i < P.length && !run; i++) if (slack(t, me, P[i], i, rr * KEEP_REACH) >= margin) run = true;
         if (!run){
-          const V = C.DIVE.V, K = C.DIVE.DAMP, R = rr + C.DIVE.REACH;
-          let hit = null; for (let i = 1; i <= Math.min(shot, C.DIVE.T) && i < P.length; i++){ const q = P[i], dd = Math.hypot(q.x - me.x, q.y - me.y), reach = V * (1 - Math.pow(K, i)) / (1 - K); if (dd - R <= reach){ hit = q; break; } }
-          if (hit){
+          const V = C.DIVE.V, K = C.DIVE.DAMP, R = rr + C.DIVE.REACH, T = Math.min(shot, C.DIVE.T);
+          let best = 0, bt = 99;
+          for (let k = 1; k < 9; k++){
+            let ux = DIRS[k][0], uy = DIRS[k][1]; if (ux && uy){ ux *= Math.SQRT1_2; uy *= Math.SQRT1_2; }
+            if (C.slideAim) [ux, uy] = C.slideAim(G, me, ux, uy);
+            let x = me.x, y = me.y, vx = ux * V, vy = uy * V;
+            for (let i = 1; i <= T && i < P.length; i++){ x += vx; y += vy; vx *= K; vy *= K; if (Math.hypot(P[i].x - x, P[i].y - y) <= R){ if (i < bt){ bt = i; best = DIRS[k][2]; } break; } }
+          }
+          if (best){
             if (mem.dvAt == null || G.frame - mem.dvAt > 60){ mem.dvAt = G.frame; mem.dvRoll = rnd(mem); }
-            if (mem.dvRoll < Math.min(1, (L.sl || 0) * KP_DIVE_P)){
-              const dx = hit.x - me.x, dy = hit.y - me.y, l = Math.hypot(dx, dy) || 1; let b = 32;
-              if (dx > 0.38 * l) b |= 8; else if (dx < -0.38 * l) b |= 4; if (dy > 0.38 * l) b |= 2; else if (dy < -0.38 * l) b |= 1;
-              return b;
-            }
+            if (mem.dvRoll < Math.min(1, dv * KP_DIVE_P)) return best | 32;
           }
         }
       }
@@ -3682,7 +3697,7 @@ function PBAI(C){
     }
     if (!best) return 0;
     if (mem.sbAt == null || G.frame - mem.sbAt > 60 || G.frame < mem.sbAt){ mem.sbAt = G.frame; mem.sbRoll = rnd(mem); }
-    return mem.sbRoll < Math.min(1, (L.sl || 0) * SB_P) ? best : 0;
+    return mem.sbRoll < Math.min(1, (L.sb != null ? L.sb : L.sl || 0) * SB_P) ? best : 0;
   }
   // a slide tackle that wins the ball cleanly: an opponent has it (or gets there first), it is 25-85 px away, and
   // sliding one of the 8 ways reaches it a few ticks before touching him. Never in or into my own area, and not again for
@@ -4577,7 +4592,7 @@ function PBAI(C){
     if ('shotHr' in o) SHOT_HR = o.shotHr; if ('endGuard' in o) END_GUARD = o.endGuard; if ('cutback' in o) CUTBACK = o.cutback; if ('backpass' in o) BACKPASS = o.backpass; if ('leadRun' in o) LEAD_RUN = o.leadRun; if ('barge' in o) BARGE_R = o.barge; if ('slideAi' in o) SLIDE_AI = o.slideAi; if ('control' in o) KEEP_CONTROL = o.control; if ('slideGap' in o) SLIDE_GAP = o.slideGap; if ('postAim' in o) POST_AIM = o.postAim; if ('bargeGs' in o) BARGE_GS = o.bargeGs; if ('bargeSolo' in o) BARGE_SOLO = o.bargeSolo; if ('slideSolo' in o) SLIDE_SOLO = o.slideSolo;
     if ('pressFollow' in o) PRESS_FOLLOW = o.pressFollow; if ('pressSide' in o) PRESS_SIDE = o.pressSide; if ('rushWide' in o) RUSH_WIDE = o.rushWide; if ('backR' in o) KEEP_BACK_R = o.backR; if ('closeMinS' in o) CLOSE_MIN_S = o.closeMinS; if ('closeR' in o) CLOSE_R = o.closeR; if ('closeSlack' in o) CLOSE_SLACK = o.closeSlack; if ('rushR' in o) RUSH_R = o.rushR; if ('rushGap' in o) RUSH_GAP = o.rushGap; if ('rushMax' in o) RUSH_MAX = o.rushMax;
     if ('kpress' in o) KEEP_PRESS = o.kpress; if ('kpressLate' in o) KEEP_PRESS_LATE = o.kpressLate; if ('kpMargin' in o) KP_MARGIN = o.kpMargin; if ('kpRcap' in o) KP_RCAP = o.kpRcap; if ('kpRecheck' in o) KP_RECHECK = o.kpRecheck;
-    if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside; if ('kpDive' in o) KP_DIVE = o.kpDive; if ('kpDiveLine' in o) KP_DIVE_LINE = o.kpDiveLine; if ('kpDiveAi' in o) KP_DIVE_AI = o.kpDiveAi; if ('kpDiveP' in o) KP_DIVE_P = o.kpDiveP; if ('shotBlock' in o) SHOT_BLOCK = o.shotBlock; if ('sbP' in o) SB_P = o.sbP;
+    if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside; if ('kpDive' in o) KP_DIVE = o.kpDive; if ('kpDiveLine' in o) KP_DIVE_LINE = o.kpDiveLine; if ('kpDiveAi' in o) KP_DIVE_AI = o.kpDiveAi; if ('kpDiveP' in o) KP_DIVE_P = o.kpDiveP; if ('kpDiveTight' in o) KP_DIVE_TIGHT = o.kpDiveTight; if ('shotBlock' in o) SHOT_BLOCK = o.shotBlock; if ('sbP' in o) SB_P = o.sbP;
     if ('show' in o) SHOW = o.show; if ('showD' in o) SHOW_D = o.showD;
     if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('rushCharge' in o) KP_RUSH_CHARGE = o.rushCharge; if ('rushSlide' in o) KP_RUSH_SLIDE = o.rushSlide; if ('kpRecv' in o) KP_RECV = o.kpRecv; if ('recvV' in o) RECV_V = o.recvV; if ('recvEarly' in o) RECV_EARLY = o.recvEarly; if ('recvFoe' in o) RECV_FOE = o.recvFoe; if ('recvAway' in o) RECV_AWAY = o.recvAway; if ('kpDance' in o) KP_DANCE = o.kpDance; if ('kpHurry' in o) KP_HURRY = o.kpHurry; if ('kpNowFoe' in o) KP_NOW_FOE = o.kpNowFoe; if ('kpNowFwd' in o) KP_NOW_FWD = o.kpNowFwd; if ('kpNowGain' in o) KP_NOW_GAIN = o.kpNowGain; if ('kpPath' in o) KP_PATH = o.kpPath; if ('kpPathV' in o) KP_PATH_V = o.kpPathV; if ('kpPathR' in o) KP_PATH_R = o.kpPathR; if ('kpPathEarly' in o) KP_PATH_EARLY = o.kpPathEarly; if ('stuckT' in o) STUCK_T = o.stuckT; if ('aiPower' in o) AI_POWER = o.aiPower; if ('shotFirst' in o) SHOT_FIRST = o.shotFirst; if ('koGuard' in o) KO_GUARD = o.koGuard; if ('powerFoe' in o) POWER_FOE = o.powerFoe; if ('powerRange' in o) POWER_RANGE = o.powerRange; if ('powerGain' in o) POWER_GAIN = o.powerGain; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushLate' in o) AUTO_RUSH_LATE = o.autoRushLate; if ('knockWin' in o) KNOCK_WIN = o.knockWin; if ('knockContest' in o) KNOCK_CONTEST = o.knockContest; if ('openRush' in o) KP_OPEN_RUSH = o.openRush; if ('shotKreach' in o) SHOT_KREACH = o.shotKreach; if ('closeStraight' in o) CLOSE_STRAIGHT = o.closeStraight; if ('straightFloor' in o) STRAIGHT_FLOOR = o.straightFloor; if ('aggrMin' in o) AGGR_MIN = o.aggrMin; if ('gsReach' in o) GS_REACH = o.gsReach; if ('gsSpeed' in o) GS_SPEED = o.gsSpeed; if ('gsMargin' in o) GS_MARGIN = o.gsMargin; if ('gsPath' in o) GS_PATH = o.gsPath; if ('gsWall' in o) GS_WALL = o.gsWall; if ('gsRun' in o) GS_RUN = o.gsRun; if ('gsKeep' in o) GS_KEEP = o.gsKeep; if ('gsTol' in o) GS_TOL = o.gsTol; if ('gsWallRun' in o) GS_WALLRUN = o.gsWallRun; if ('gsFront' in o) GS_FRONT = o.gsFront; if ('slideWall' in o) SLIDE_WALL = o.slideWall; if ('bargeV' in o) BARGE_V = o.bargeV; if ('openR' in o) OPEN_R = o.openR; if ('openSlack' in o) OPEN_SLACK = o.openSlack; if ('openFoe' in o) OPEN_FOE = o.openFoe; if ('knockMargin' in o) KNOCK_MARGIN = o.knockMargin; if ('keepMaxD' in o) KEEP_MAXD = o.keepMaxD; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
     if ('fkAiRead' in o) FK_AI_READ = o.fkAiRead; if ('fkAiMin' in o) FK_AI_MIN = o.fkAiMin; if ('fkAiStep' in o) FK_AI_STEP = o.fkAiStep;
@@ -7989,11 +8004,15 @@ function render(dt, clip){
       ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fillStyle = i === 0 ? d.color : tint(d.color); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
       if (i === 0 && V.cfg && V.cfg.power){   // (v28.34) a power shot charging: an arc filling round the ball; charged: it glows
         let pw = 0; { const RG = (sess && sess.G) || V; for (const p of RG.players) if ((p.pw | 0) > pw) pw = p.pw | 0; }   // (v28.49, "the moment its charged and we press shoot, its not powershot": the charge as it really is, not as the picture drawn a moment ahead has it: the ring went full a tick or more early)
-        if (pw > 0){ const full = pw >= C.POWER_T, t = performance.now();
-          ctx.lineWidth = 2.5; ctx.lineCap = 'round';
-          if (full){ const k = 0.55 + 0.45 * Math.sin(t / 90); ctx.strokeStyle = `rgba(255,140,40,${0.5 + 0.5 * k})`; ctx.beginPath(); ctx.arc(d.x, d.y, d.radius + 4 + 2 * k, 0, C.TAU); ctx.stroke();
-            ctx.fillStyle = `rgba(255,120,30,${0.35 + 0.25 * k})`; ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fill(); }
-          else { ctx.strokeStyle = 'rgba(255,159,67,.9)'; ctx.beginPath(); ctx.arc(d.x, d.y, d.radius + 4, -Math.PI / 2, -Math.PI / 2 + C.TAU * pw / C.POWER_T); ctx.stroke(); }
+        // (v28.71, "i didnt see the ring": it was thin, orange on the yellow ball, and tiny zoomed out: now bolder, on a
+        // dark track, and at least about 14 px from the ball's middle on the screen at any zoom)
+        if (pw > 0){ const full = pw >= C.POWER_T, t = performance.now(), z = cam.zoom || 1, R = Math.max(d.radius + 6, 14 / z), lw = Math.max(3.5, 4 / z);
+          ctx.lineCap = 'round';
+          ctx.strokeStyle = 'rgba(10,12,18,.55)'; ctx.lineWidth = lw + 2.5; ctx.beginPath(); ctx.arc(d.x, d.y, R, 0, C.TAU); ctx.stroke();
+          if (full){ const k = 0.55 + 0.45 * Math.sin(t / 90); ctx.strokeStyle = `rgba(255,140,40,${0.6 + 0.4 * k})`; ctx.lineWidth = lw; ctx.beginPath(); ctx.arc(d.x, d.y, R + 2 * k, 0, C.TAU); ctx.stroke();
+            ctx.strokeStyle = `rgba(255,200,120,${0.25 + 0.35 * k})`; ctx.lineWidth = lw * 0.6; ctx.beginPath(); ctx.arc(d.x, d.y, R + 5 + 3 * k, 0, C.TAU); ctx.stroke();
+            ctx.fillStyle = `rgba(255,110,20,${0.4 + 0.25 * k})`; ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fill(); }
+          else { ctx.strokeStyle = '#ff8c28'; ctx.lineWidth = lw; ctx.beginPath(); ctx.arc(d.x, d.y, R, -Math.PI / 2, -Math.PI / 2 + C.TAU * pw / C.POWER_T); ctx.stroke(); }
         }
       }
       if (i === 0 && d.sp){   // a curving ball: a little arc going round it the way it spins
@@ -10170,7 +10189,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.70';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.71';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
