@@ -8312,7 +8312,7 @@ function updateUI(){
   { const im = !!s && $('menu').hidden; if (shown.im !== im){ shown.im = im; document.body.classList.toggle('inmatch', im); } }
   { const tri = !!(s && s.G && s.G.nt === 3); if (shown.tri !== tri){ shown.tri = tri; document.body.classList.toggle('tri', tri); } }
   { const mu = !$('menu').hidden && panelsClosed(); if (shown.mu !== mu){ shown.mu = mu; document.body.classList.toggle('menuup', mu); } }
-  { const ns = !s; if (shown.ns !== ns){ shown.ns = ns; document.body.classList.toggle('nosess', ns); } }   // (no match: no empty scoreboard over the menu)
+  { const ns = !s; if (shown.ns !== ns){ shown.ns = ns; document.body.classList.toggle('nosess', ns); if (ns) try { renderTicker(); } catch (e) {} } }   // (v28.67: measured again as the banner shows)   // (no match: no empty scoreboard over the menu)
   chatPlace(); setHidden('chatBtn', !(NET.on && s && !s.done && !s.rp));
   { const sk = $('introSkip'), off = !(s && s.intro); if (sk.hidden !== off) sk.hidden = off; }   // (v28.36: left in the walk-out, its Skip stayed over the menu)
   if (!s){
@@ -8465,13 +8465,10 @@ $('sitesMove').addEventListener('click', () => { closePanel('sitesPanel'); openS
 // stops with Calm)
 function renderTicker(){
   const box = $('tickerT'); if (!box) return; const here = siteHere(), K = dailyKind(dailyId());
+  // (v28.67, "mainly the website thing in there, maybe daily, we fitting too much"): the sites and today's daily only
   const items = [
-    ['🌐', 'Play Pitch Brawl on ', ['pitchbrawl.netlify.app', here === 'netlify'], ' · ', ['ricecooker225.github.io/pitch-brawl-play', here === 'github'], ' · ', ['in Claude', here === 'claude']],
-    ['🤝', 'Both websites play together: friends and rooms work across them'],
-    ['🔒', 'In Claude you play people in Claude only, not the website players'],
-    ['💾', 'Your data stays on each site: take it with you in ⚙ Settings → Move to another copy (export, then import)'],
-    ['📅', `Daily challenge today: ${K.name}, ${DAILY_N} tries, the same for everyone`],
-    ['💬', 'Friends tab: add friends with your code, chat to them, watch their matches'],
+    ['🌐', 'Play Pitch Brawl on ', ['pitchbrawl.netlify.app', here === 'netlify'], ' · ', ['ricecooker225.github.io/pitch-brawl-play', here === 'github'], ' · ', ['in Claude', here === 'claude'], ' (Claude plays Claude only)'],
+    ['📅', `Daily challenge today: ${K.name}, the same ${DAILY_N} tries for everyone`],
   ];
   const one = () => { const f = document.createDocumentFragment();
     for (const it of items){ const sp = document.createElement('span'); sp.className = 'ti';
@@ -8479,11 +8476,19 @@ function renderTicker(){
       for (const part of it.slice(1)){ if (Array.isArray(part)){ const b = document.createElement('b'); b.textContent = part[0]; if (part[1]){ b.className = 'here'; b.title = 'you are here'; } sp.append(b); } else sp.append(part); }
       f.append(sp); }
     return f; };
-  box.textContent = ''; const a = document.createElement('div'), b = document.createElement('div'); a.className = b.className = 'tkr'; b.setAttribute('aria-hidden', 'true'); a.append(one()); b.append(one()); box.append(a, b);
+  // each half holds the items as many times as it takes to be wider than the window (two halves, the strip moving one
+  // half's width: it loops with no gap), at the same speed whatever its length (about 60 px a second)
+  box.textContent = ''; const a = document.createElement('div'); a.className = 'tkr'; a.append(one()); box.append(a);
+  const w1 = a.scrollWidth, need = Math.max(innerWidth, 320) + 40, n = w1 > 0 ? Math.max(1, Math.ceil(need / w1)) : 4;
+  for (let k = 1; k < n; k++) a.append(one());
+  const b = a.cloneNode(true); b.setAttribute('aria-hidden', 'true'); box.append(b);
+  box.style.setProperty('animation-duration', Math.max(12, Math.round((w1 > 0 ? w1 * n : 1400) / 60)) + 's', 'important');
+  renderTicker.w = innerWidth;
 }
 { const t = $('ticker'), go = () => { renderSites(); openPanel('sitesPanel'); $('sitesPanel').scrollTop = 0; };
   t.addEventListener('click', go); t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); go(); } });
-  setTimeout(renderTicker, 0); setInterval(renderTicker, 600000); }
+  setTimeout(renderTicker, 0); setInterval(renderTicker, 600000);
+  addEventListener('resize', () => { clearTimeout(renderTicker.rt); renderTicker.rt = setTimeout(() => { if (Math.abs(innerWidth - (renderTicker.w || 0)) > 40) renderTicker(); }, 300); }); }
 // v28.65 ("powered by netify is blocking some view and buttons"): on the Netlify site, Netlify's free plan puts a
 // "Powered by Netlify" badge in the bottom right corner (it can't be switched off there). html.nlb keeps our buttons
 // and the pitch out of that corner (styles: the help bar, the tutorial's buttons, a strip under the pitch in a match)
@@ -10119,7 +10124,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.67';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.68';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
