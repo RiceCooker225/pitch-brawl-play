@@ -818,7 +818,7 @@
   .frrow{display:flex;align-items:center;gap:8px;padding:4px 8px;background:rgba(255,255,255,.035);font-size:13px;min-width:0}
   .frrow b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%} .frrow .frst{flex:1;color:var(--muted);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .frrow:not(.on) b{color:var(--muted)} .frrow button{border-radius:0;padding:2px 9px} .frrow .frx{opacity:.6} .frrow .frx:hover{opacity:1}
-  .frdot{width:9px;height:9px;border-radius:50%;flex:none;background:#596173} .frdot.free{background:#7ee2a0} .frdot.room{background:#ffd166} .frdot.match{background:var(--accent)}
+  .frdot{width:9px;height:9px;border-radius:50%;flex:none;background:#596173} .frdot.free{background:#7ee2a0} .frdot.room{background:#ffd166} .frdot.match{background:var(--accent)} .frdot.solo,.frdot.prac{background:#7cc4ff}
   .frlobby{margin:6px 0 8px;font-size:12px} .frlobby > b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px} .frlobby[hidden]{display:none}
   .frtoast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:200;max-width:min(92vw,420px);background:rgba(34,39,52,.98);border-left:5px solid #7ee2a0;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
   .frtoast[hidden]{display:none} .frtoast p{margin:0 0 8px;font-size:14px;color:#fff} .frtoast .row{display:flex;gap:8px} .frtoast button{border-radius:0}
@@ -1131,7 +1131,7 @@
       </ul></section>
       <section class="hsec"><h3>New here?</h3><ul>
         <li>⚙ Settings → Help for beginners: your keys under the pitch, lit as you press them, and a tip for what to do right now.</li>
-        <li>Online → Friends: share your friend code, add theirs, see when they're online and join or invite them.</li>
+        <li>Online → Friends: share your friend code, add theirs, and see whenever they have the game open (in the menu, playing, in a room); join them or invite them.</li>
       </ul></section>
       <section class="hsec"><h3>On a phone</h3><ul>
         <li>Stick moves, KICK kicks, SLIDE slides. Hold the stick across your shot to curl it.</li>
@@ -6495,7 +6495,7 @@ function keyStrip(el, show){
     const one = t => String(t).split('/')[0];
     chip(one(K.up), 'up', 1); chip(one(K.left), 'left', 4); chip(one(K.down), 'down', 2); chip(one(K.right), 'right', 8);
     chip(K.kick, 'kick', 16); chip(K.slide, kp ? 'dive' : 'slide', 32);
-    if (gk && P && !s.mode && G.players.some(q => q.team === P.team && q !== P && q.ctrl === 'ai' && (kp || q.role === 'keeper'))) chip(gk, kp ? 'come out' : 'go in goal', 0);
+    if (gk && P && !s.mode && G.players.some(q => q.team === P.team && q !== P && (q.ctrl === 'ai' || q.ctrl === 'human') && (kp ? q.role !== 'keeper' : q.role === 'keeper'))) chip(gk, kp ? 'come out' : 'go in goal', 0);
   }
   if (el.hidden) return;
   const bits = P ? P.input | 0 : 0;
@@ -8104,6 +8104,7 @@ function autoPause(){
   if (s && s.kind === 'local' && !s.done && !s.rp && !s.replay && s.G && s.G.state !== 3 && s.G.pause < 120){ s.G.pause = 120; if (!document.hidden) focusPaused = s; }
 }
 function start(cfg){
+  setTimeout(() => { try { frPub(); } catch (e) {} }, 300);   // (v28.58: friends see what you're playing)
   $('tutBox').hidden = true; $('tutWelcome').hidden = true;
   // the copy of you needs something to copy first
   const bot = cfg.mode === 'mirror' ? youBot() : null;
@@ -8354,6 +8355,7 @@ $('setDone').addEventListener('click', closeSettings);
 document.querySelectorAll('.hlpb').forEach(b => b.addEventListener('click', () => { renderKeys(); openPanel('helpPanel'); $('helpPanel').scrollTop = 0; }));
 $('helpDone').addEventListener('click', () => closePanel('helpPanel'));
 function exitToMenu(text){
+  setTimeout(() => { try { frPub(); } catch (e) {} }, 0);   // (v28.58: friends see you're back in the menu)
   const s = sess, given = !!text; $('tutBox').hidden = true;
   learnLeave(s);
   if (NET.on) leaveOnline();
@@ -8440,17 +8442,37 @@ function swapMate(s, p){
   const gk = p.role === 'keeper';
   return G.players.find(q => q !== p && q.team === p.team && q.ctrl === 'ai' && (gk ? q.role !== 'keeper' : q.role === 'keeper')) || null;
 }
+// (v28.57, "the ratings is very weird when u r gk and then striker": the stats were the place's, so you took the
+// computer keeper's saves in with you and left your goals with the computer up front. Now they go with whoever made
+// them: the two players' stats, saves, goals, assists and who was in goal swap over too)
+function swapStats(s, p, q){
+  const st = s.G.stats, P = st.players, a = P[p.id], b = P[q.id], sw = v => v === p.id ? q.id : v === q.id ? p.id : v;
+  if (a) P[q.id] = a; else delete P[q.id]; if (b) P[p.id] = b; else delete P[p.id];
+  for (const o of st.saveList || []) o.pid = sw(o.pid);
+  for (const g of st.goals || []){ g.pid = sw(g.pid); g.assist = sw(g.assist); g.kpid = sw(g.kpid); }
+  for (const o of st.postList || []) o.pid = sw(o.pid);
+  if (st.bestSave) st.bestSave.pid = sw(st.bestSave.pid);
+}
+// (v28.58, "what about when 2v2 on same keybaord and same team"): two people on one keyboard on one team, one in goal:
+// the go-in-goal key (either's) has them change places, keys and all
+function humanMate(s, p){
+  const G = s && s.G; if (!G || !p || s.kind !== 'local' || G.nt === 3 || s.mode) return null;
+  const gk = p.role === 'keeper';
+  return G.players.find(q => q !== p && q.team === p.team && q.ctrl === 'human' && s.locals.some(L => L.pid === q.id) && (gk ? q.role !== 'keeper' : q.role === 'keeper')) || null;
+}
+function humanSwap(s, p, q){
+  const ip = s.info.get(p.id), iq = s.info.get(q.id);
+  swapStats(s, p, q);
+  const Lp = s.locals.find(L => L.pid === p.id), Lq = s.locals.find(L => L.pid === q.id);
+  if (Lp){ Lp.pid = q.id; Lp.sent = -1; } if (Lq){ Lq.pid = p.id; Lq.sent = -1; }
+  if (ip) s.info.set(q.id, ip); if (iq) s.info.set(p.id, iq);
+  for (const x of [p, q]){ x.taps = []; x.callAt = null; x.tapHold = 0; C.setInput(x, 0); x.kicking = false; x.seenK = null; x.seenI = -1; x.kSeen = x.kPress; }
+  s.mems.delete(p.id); s.mems.delete(q.id);
+  pushInputs();
+}
 function seatSwap(s, p, q){   // the person on p now plays q, and the computer plays p
   const ip = s.info.get(p.id), iq = s.info.get(q.id);
-  // (v28.57, "the ratings is very weird when u r gk and then striker": the stats were the place's, so you took the
-  // computer keeper's saves in with you and left your goals with the computer up front. Now they go with whoever made
-  // them: the two players' stats, saves, goals, assists and who was in goal swap over too)
-  { const st = s.G.stats, P = st.players, a = P[p.id], b = P[q.id], sw = v => v === p.id ? q.id : v === q.id ? p.id : v;
-    if (a) P[q.id] = a; else delete P[q.id]; if (b) P[p.id] = b; else delete P[p.id];
-    for (const o of st.saveList || []) o.pid = sw(o.pid);
-    for (const g of st.goals || []){ g.pid = sw(g.pid); g.assist = sw(g.assist); g.kpid = sw(g.kpid); }
-    for (const o of st.postList || []) o.pid = sw(o.pid);
-    if (st.bestSave) st.bestSave.pid = sw(st.bestSave.pid); }
+  swapStats(s, p, q);
   q.ctrl = p.ctrl; q.peer = p.peer; q.seenK = null; q.seenI = -1; q.tapHold = 0; q.ackK = p.ackK; q.kSeen = q.kPress; q.taps = []; q.callAt = null; q.emSeen = p.emSeen;
   p.ctrl = 'ai'; p.peer = null; p.taps = []; p.callAt = null; C.setInput(p, 0); C.setInput(q, 0); q.kicking = false;
   s.info.set(q.id, ip || {name: 'Player', avatar: 'P1'}); s.info.set(p.id, {name: NET.on ? 'Computer' : p.role === 'keeper' ? 'Keeper' : 'Computer', avatar: p.role === 'keeper' ? 'GK' : 'CP'});
@@ -8464,7 +8486,15 @@ function seatSwap(s, p, q){   // the person on p now plays q, and the computer p
   pushInputs();
 }
 function keeperSwap(s, p, quiet){
-  const q = swapMate(s, p);
+  const q = swapMate(s, p), hm = q ? null : humanMate(s, p);
+  if (hm){   // two of you on one team: you change places
+    humanSwap(s, p, hm);
+    const inG = hm.role === 'keeper' ? (s.info.get(hm.id) || {}).name : (s.info.get(p.id) || {}).name, out = hm.role === 'keeper' ? (s.info.get(p.id) || {}).name : (s.info.get(hm.id) || {}).name;
+    say(`${inG || 'P1'} in goal · ${out || 'P2'} up front`);
+    s.msg = {text: `${String(inG || 'P1').toUpperCase().slice(0, 12)} IN GOAL`, sub: `${out || 'P2'} up front · ${bind.p1.gk ? kname(bind.p1.gk) : 'G'} (or ${bind.p2.gk ? kname(bind.p2.gk) : '.'}) to swap back`, until: (s.ticks || 0) + 100, untilMs: performance.now() + 1800, team: -1};
+    if (!$('gameMenu').hidden) openGameMenu();
+    return true;
+  }
   if (!q){ if (!quiet) say(!s || s.mode ? 'Not in practice' : p && p.role === 'keeper' ? 'No computer on the pitch on your side to swap with' : 'No computer keeper on your side to swap with'); return false; }
   const gk = q.role === 'keeper', who = s.info.get(p.id), nm = who && who.name && who.name !== 'You' && (s.locals.length > 1 || NET.on) ? who.name : '';
   seatSwap(s, p, q);
@@ -9567,7 +9597,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.57';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.58';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10026,7 +10056,7 @@ let roomNameEdited = false;
 const defaultRoomName = () => `${clean($('nick').value, 16) || SET.nick || 'My'}'s room`;
 async function openOnline(){
   $('nick').value = SET.nick || ''; $('avatar').value = SET.avatar || '';
-  setTimeout(frStart, 0);   // (v28.57: friends)
+  setTimeout(frStart, 0);   // (v28.57: friends; v28.58 on all the time anyway)
   if (!roomNameEdited) $('roomName').value = defaultRoomName();
   onErr(''); showPageLink(false); $('hostBtn').disabled = $('joinBtn').disabled = false;
   $('onStart').hidden = NET.on; $('onLobby').hidden = !NET.on; $('onTitle').textContent = NET.on ? 'Room' : 'Online';
@@ -10926,7 +10956,7 @@ function leaveOnline(){
   Object.assign(NET, {on: false, host: false, T: null, code: '', lobby: null, guests: new Map(), hostSeen: false, hostGoneAt: 0, ackR: null}); resetPing();
   kitOverride = null; applyKits(); $('chatLog').textContent = ''; $('onTitle').textContent = 'Play online';
   menuSync();   // (your own rules again, v27.1)
-  setTimeout(() => { if ($('onlinePanel').hidden) frStop(); else { frPub(); renderFriends(); } }, 0);
+  setTimeout(() => { frPub(true); renderFriends(); }, 0);   // (v28.58: friends stay on)
 }
 function stopOnlineGameView(){ if (NET.on) leaveOnline(); }
 // ---------- friends (v28.57, "friends thing like to friend each other") ----------
@@ -10943,7 +10973,8 @@ const frSave = () => store.set('pb.friends', FR.list.map(x => ({f: x.f, n: clean
 const frTopic = f => `${RELAY_P}/u/${f}`, frInbox = f => `${RELAY_P}/i/${f}`;
 function frMe(){   // where I am, for my friends
   const L = NET.on && NET.lobby, s = sess;
-  return {f: FR.fid, n: myNick(), a: myAvatar(), s: !L ? 'free' : L.on === 1 ? 'match' : 'room', c: L ? NET.code : '', r: L ? clean(L.nm || '', 24) : '', k: L ? L.pl.length : 0, z: L ? L.sz : 0, lk: L && L.lk ? 1 : 0,
+  const solo = !L && s && s.kind === 'local' && !s.done && s.G;   // (v28.58: playing on my own, the computer or practice)
+  return {f: FR.fid, n: myNick(), a: myAvatar(), s: !L ? (solo ? (s.mode ? 'prac' : 'solo') : 'free') : L.on === 1 ? 'match' : 'room', c: L ? NET.code : '', r: L ? clean(L.nm || '', 24) : '', k: L ? L.pl.length : 0, z: L ? L.sz : 0, lk: L && L.lk ? 1 : 0,
     sc: L && L.on === 1 && s && s.G ? s.G.score.slice(0, 2) : null, t: Date.now()};
 }
 function frPub(force){
@@ -10958,7 +10989,7 @@ function frGot(o){   // a friend's notice
   if (!o || typeof o !== 'object' || !/^[a-z0-9]{6}$/.test(o.f) || o.f === FR.fid) return;
   const x = FR.list.find(q => q.f === o.f); if (!x) return;
   if (o.gone){ FR.st.delete(o.f); renderFriends(); return; }
-  FR.st.set(o.f, {n: clean(o.n || '', 16), a: clean(o.a || '', 2), s: o.s === 'match' || o.s === 'room' ? o.s : 'free', c: /^[a-z0-9]{4,6}$/.test(o.c || '') ? o.c : '', r: clean(o.r || '', 24), k: +o.k | 0, z: +o.z | 0, lk: !!o.lk, sc: Array.isArray(o.sc) ? o.sc.slice(0, 2).map(v => +v | 0) : null, t: +o.t || Date.now()});
+  FR.st.set(o.f, {n: clean(o.n || '', 16), a: clean(o.a || '', 2), s: ['match', 'room', 'solo', 'prac'].includes(o.s) ? o.s : 'free', c: /^[a-z0-9]{4,6}$/.test(o.c || '') ? o.c : '', r: clean(o.r || '', 24), k: +o.k | 0, z: +o.z | 0, lk: !!o.lk, sc: Array.isArray(o.sc) ? o.sc.slice(0, 2).map(v => +v | 0) : null, t: +o.t || Date.now()});
   if (o.n && x.n !== clean(o.n, 16)){ x.n = clean(o.n, 16); frSave(); }
   renderFriends();
 }
@@ -11016,11 +11047,16 @@ function frAdd(code, name){
   if (c === FR.fid){ $('frMsg').textContent = 'That\'s your own code.'; return; }
   if (FR.list.some(x => x.f === c)){ $('frMsg').textContent = 'Already a friend.'; return; }
   if (FR.list.length >= 40){ $('frMsg').textContent = 'That\'s the most friends (40).'; return; }
-  FR.list.push({f: c, n: clean(name || '', 16)}); frSave(); $('frAdd').value = ''; $('frMsg').textContent = 'Added. They see you when you both have Online open.';
+  FR.list.push({f: c, n: clean(name || '', 16)}); frSave(); $('frAdd').value = ''; $('frMsg').textContent = 'Added. You see each other whenever you both have the game open.';
   if (FR.cls) for (const cl of FR.cls) try { cl.subscribe(frTopic(c)); } catch (e) {}
   frSend(c, {k: 'add'}); renderFriends(); frPub();
 }
-function frJoin(code){ if (NET.on) return; $('joinCode').value = code; $('joinBtn').click(); }
+async function frJoin(code){   // (v28.58: from anywhere: a match against the computer ends, the Online panel opens)
+  if (NET.on) return;
+  if (sess && sess.kind === 'local') exitToMenu();
+  if ($('onlinePanel').hidden) await openOnline();
+  $('joinCode').value = code; $('joinBtn').click();
+}
 let frToastDo = null;
 function frToast(text, yes, fn){ $('frToastT').textContent = text; $('frToastYes').textContent = yes; frToastDo = fn; $('frToast').hidden = false; sfx.chime && sfx.chime(); clearTimeout(frToast.t); frToast.t = setTimeout(() => { $('frToast').hidden = true; frToastDo = null; }, 30000); }
 $('frToastYes').addEventListener('click', () => { const f = frToastDo; frToastDo = null; $('frToast').hidden = true; if (f) f(); });
@@ -11038,21 +11074,26 @@ function renderFriends(){
       const dot = document.createElement('i'); dot.className = 'frdot ' + (!o ? 'off' : o.s); r.append(dot);
       const nm = document.createElement('b'); nm.textContent = (o && o.n) || x.n || x.f.toUpperCase(); r.append(nm);
       const st = document.createElement('span'); st.className = 'frst';
-      st.textContent = !o ? 'offline' : o.s === 'free' ? 'online' : o.s === 'room' ? `in room ${o.r ? '“' + o.r + '” ' : ''}(${o.k}/${o.z ? o.z * 2 : '?'})${o.lk ? ' 🔒' : ''}` : `playing${o.r ? ' in “' + o.r + '”' : ''}${o.sc ? ' · ' + o.sc.join('–') : ''}`;
+      st.textContent = !o ? 'offline' : o.s === 'free' ? 'online' : o.s === 'solo' ? 'playing the computer' : o.s === 'prac' ? 'practising' : o.s === 'room' ? `in room ${o.r ? '“' + o.r + '” ' : ''}(${o.k}/${o.z ? o.z * 2 : '?'})${o.lk ? ' 🔒' : ''}` : `playing${o.r ? ' in “' + o.r + '”' : ''}${o.sc ? ' · ' + o.sc.join('–') : ''}`;
       r.append(st);
       const act = (t, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (cls ? ' ' + cls : ''); b.textContent = t; b.onclick = e => { e.currentTarget.blur(); fn(); }; r.append(b); };
       if (o && o.c && !NET.on && (o.s === 'room' || o.s === 'match')) act('Join', () => frJoin(o.c));
-      if (o && NET.on && NET.code && o.s === 'free') act('Invite', () => { frSend(x.f, {k: 'inv', c: NET.code}); sysChat(`Invited ${(o && o.n) || x.n || 'your friend'}`); });
+      if (o && NET.on && NET.code && (o.s === 'free' || o.s === 'solo' || o.s === 'prac')) act('Invite', () => { frSend(x.f, {k: 'inv', c: NET.code}); sysChat(`Invited ${(o && o.n) || x.n || 'your friend'}`); });
       if (!lobbyView) act('✕', () => { FR.list = FR.list.filter(q => q.f !== x.f); FR.st.delete(x.f); frSave(); renderFriends(); }, 'frx');
       box.append(r);
     }
   }
   $('frLobby').hidden = !(NET.on && rows.some(r => r.o));
+  { const n = rows.filter(r => r.o).length, sm = $('onlineBtn') && $('onlineBtn').querySelector('small'); if (sm) sm.textContent = 'host a game or join one with a code' + (n ? ` · ${n} friend${n > 1 ? 's' : ''} online` : ''); }
 }
 $('frCopy').addEventListener('click', e => { e.currentTarget.blur(); const t = FR.fid.toUpperCase(); (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { $('frMsg').textContent = 'Copied: ' + t; }, () => { $('frMsg').textContent = 'Your code: ' + t; }); });
 $('frAddBtn').addEventListener('click', e => { e.currentTarget.blur(); frAdd($('frAdd').value); });
 $('frAdd').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); frAdd($('frAdd').value); } });
 renderFriends();
+// (v28.58, "wdy cant the friend thing be there forever not just online": on while the game is open, whatever you're doing;
+// friends see you in the menu, playing the computer or practising, and invites and friend requests reach you anywhere)
+setTimeout(() => { try { frStart(); } catch (e) {} }, 1500);
+addEventListener('pagehide', () => { try { frStop(); } catch (e) {} });
 
 // ----- lobby view -----
 function showLobby(){
@@ -11171,7 +11212,7 @@ $('joinBtn').addEventListener('click', () => joinGame($('joinCode').value, $('pa
 $('joinCode').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame($('joinCode').value); });
 $('startOnline').addEventListener('click', () => { if (isMgr()) sendCmd('go'); else startOnline(); });
 $('leaveOnline').addEventListener('click', () => { leaveOnline(); openOnline(); });
-$('onClose').addEventListener('click', () => { if (NET.on){ leaveOnline(); openOnline(); return; } $('onlinePanel').hidden = true; frStop(); stopProbe(); stopRelayList(); if (NET.listUnsub){ NET.listUnsub(); NET.listUnsub = null; } if (!sess) $('menu').hidden = false; });
+$('onClose').addEventListener('click', () => { if (NET.on){ leaveOnline(); openOnline(); return; } $('onlinePanel').hidden = true; stopProbe(); stopRelayList(); if (NET.listUnsub){ NET.listUnsub(); NET.listUnsub = null; } if (!sess) $('menu').hidden = false; });
 $('copyCode').addEventListener('click', () => { const c = NET.code; try { navigator.clipboard.writeText(c).then(() => { $('copyCode').textContent = 'Copied'; setTimeout(() => $('copyCode').textContent = 'Copy', 1500); }, () => {}); } catch (e) {} });
 $('copyLink').addEventListener('click', () => { const u = inviteBase(); if (!u || !NET.code) return; const link = u + '#join=' + NET.code;
   try { navigator.clipboard.writeText(link).then(() => { $('copyLink').textContent = 'Link copied'; setTimeout(() => $('copyLink').textContent = 'Copy invite link', 1500); }, () => { onErr('Copy this link: ' + link); }); } catch (e) { onErr('Copy this link: ' + link); } });
