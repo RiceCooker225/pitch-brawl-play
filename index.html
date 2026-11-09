@@ -864,6 +864,11 @@
   @media (max-width:640px){ #menu .mpane[data-pane="learn"] .lparts{grid-template-columns:minmax(0,1fr)} }
   #menu[data-tab="learn"] > .mlearn{display:none}
   #menu > .mlearn[hidden]{display:none}
+  /* v28.60 ("on netify theres slight borders on the side"): filling the tab, edge to edge: no frame round it, square corners */
+  #game.tabfill{padding:0;gap:4px}
+  #game.tabfill .stage{border-radius:0;box-shadow:none}
+  #game.tabfill .board,#game.tabfill .stats{border-radius:0;border-left:0;border-right:0}
+  body.menuup #game.tabfill{gap:0}
 </style>
 
 <header>
@@ -9724,7 +9729,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.60';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.61';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
