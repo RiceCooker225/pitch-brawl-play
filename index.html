@@ -2239,7 +2239,7 @@ function PBCORE(){
             // kicks on; otherwise he is just bumped and play goes on
             const q = D[foe.di], qb = Math.sqrt((b.x - q.x) ** 2 + (b.y - q.y) ** 2) - b.radius - q.radius;
             if (qb < SLIDE_HAS && (G.cfg.fk || inArea(ST, p.team, q.x, q.y))) foul(G, ST, p, foe, ev);
-            else if (!p.slideBump){ p.slideBump = true; if (ev) ev.push({type:'playon', id: ++G.eventId, frame: G.frame, pid: p.id, vid: foe.id, team: foe.team}); }   // (v28.22: a bump, no foul: the referee waves play on)
+            else if (!p.slideBump){ p.slideBump = true; if (ev) ev.push({type:'playon', id: ++G.eventId, frame: G.frame, pid: p.id, vid: foe.id, team: foe.team, had: qb < SLIDE_HAS}); }   // (v28.70: had: he had the ball, a real challenge)   // (v28.22: a bump, no foul: the referee waves play on)
           }
         }
         if (p.slide > 0 && --p.slide === 0) p.down = SLIDE_DOWN;
@@ -5251,7 +5251,7 @@ function onEvent(s, e){
     else if ((s.mode.kind === 'practice' || s.mode.kind === 'pens' || s.mode.kind === 'fkdrill') && !e.late) popFx('post', null, e.x, e.y, e.kmh, false);
   } else if (e.type === 'slide'){ const p = playerById(G, e.pid); if (p && (s.locals || []).some(L => L.pid === p.id)) coachCount(e.dive ? 'dive' : 'slide'); sfx.slide(); if (p) dustFx(G.discs[p.di], p.slideDx, p.slideDy); }
   else if (e.type === 'foul') foulFx(s, e, nameOf(s, playerById(G, e.pid)), nameOf(s, playerById(G, e.vid)));
-  else if (e.type === 'playon'){ if (realMatch(s)) refPlayOn(e.team); }
+  else if (e.type === 'playon'){ if (realMatch(s) && e.had) refPlayOn(e.team); }
   else if (e.type === 'call'){ callFx(e.pid); if ((s.locals || []).some(L => L.pid === e.pid)) coachCount('call'); }
   else if (e.type === 'pcharge'){ const p = playerById(G, e.pid); if (p && (s.locals || []).some(L => L.pid === p.id)) sfx.chime(); }   // (v28.34: your power shot is ready)
   else if (e.type === 'power'){ if ((s.locals || []).some(L => L.pid === e.pid)) coachCount('power'); popFx('power', e.pid, 0, 0, e.speed * C.KMH, false); fx.powerUntil = performance.now() + 900; sfx.boom(0.7); }
@@ -7518,7 +7518,10 @@ function refAct(kind, text, o){
   if (kind) refS.gest = {kind, t0: now, until: now + (o.ms || 1500), dir: o.dir || 1, ko: !!o.ko};
   if (text) refS.say = {text, t0: now, until: now + (o.sayMs || o.ms || 1600), ko: !!o.ko};
 }
-function refPlayOn(team){ const g = ST.goals.find(q => q.team !== team); refAct('playon', ['Play on!', 'Play on, play on!', 'No foul!'][Math.floor(Math.random() * 3)], {ms: 1300, dir: g && (g.x0 + g.x1) / 2 < 0 ? -1 : 1}); }
+// v28.70 ("when i just tackle into opponent with no [ball], he still says no foul, maybe only say no foul [at] specific
+// times"): only when the man he hit had the ball (a challenge that would be a foul with free kicks on, so play goes on),
+// and not again within 12 s; a slide that just bumps someone away from the ball gets nothing from him
+function refPlayOn(team){ const now = performance.now(); if (refPlayOn.at != null && now - refPlayOn.at < 12000) return; refPlayOn.at = now; const g = ST.goals.find(q => q.team !== team); refAct('playon', ['Play on!', 'Play on, play on!', 'No foul!'][Math.floor(Math.random() * 3)], {ms: 1300, dir: g && (g.x0 + g.x1) / 2 < 0 ? -1 : 1}); }
 // v28.69 ("make the ref do a bit more"): a coin toss before the first kick-off; he claps a diving or sliding save (and
 // a record one), holds his head when it hits the post, a thumbs up for a clean tackle (half the time), "Time out!" on a
 // pause and "Let's go!" after it, and now and then tells off a taunting emote. Not over his say about a goal or a foul
@@ -10167,7 +10170,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.69';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.70';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -11044,7 +11047,7 @@ function hostNet(s){
       else if (e.type === 'reset') N.ring.push([e.id, 'r']);
       else if (e.type === 'foul') N.ring.push([e.id, 'f', e.team, e.pid, e.vid, r4(e.x), r4(e.y), e.pen ? 1 : 0, e.card ? 1 : 0]);
       else if (e.type === 'slide') N.ring.push([e.id, 'l', e.pid]);
-      else if (e.type === 'playon') N.ring.push([e.id, 'o', e.team]);
+      else if (e.type === 'playon') N.ring.push([e.id, 'o', e.team, e.had ? 1 : 0]);
       else if (e.type === 'call') N.ring.push([e.id, 'q', e.pid]);
       else if (e.type === 'emote') N.ring.push([e.id, 'm', e.pid, e.e]);
     }
@@ -11385,7 +11388,7 @@ function guestApply(s, o){
       if (isFinite(x) && isFinite(y)){ if (!ev[7]){ sfx.post(Math.max(1.3, kmh / C.KMH)); popFx('post', null, x, y, kmh, false); } say(`Off the post! ${p ? nameOf(s, p) : KIT[ev[2] ? 1 : 0].name}${kmh > 0 ? ' · ' + Math.round(kmh) + ' km/h' : ''}`); } }
     else if (t === 't'){ sfx.whistle(1); say('Time is up!'); refAct('arms', 'Time!', {ms: 1800}); }
     else if (t === 'e'){ sfx.whistle(1.2); const w = ev[2]; if (w === 0 || w === 1) fireworks(w, 7); refAct('arms', 'Full time!', {ms: 2600}); }
-    else if (t === 'o') refPlayOn(ev[2] ? 1 : 0);   // (v28.22: a bump, no foul)
+    else if (t === 'o'){ if (ev[3]) refPlayOn(ev[2] ? 1 : 0); }   // (v28.22: a bump, no foul; v28.70: only when he had the ball)
     else if (t === 'r'){ for (const L of s.locals) L.hold = L.sent; if (s.full) s.full.cut = G.frame; fxEnd(); refGoalNow(); }
     else if (t === 'f'){ const fo = G.players.find(q => q.id === ev[3]), vi = G.players.find(q => q.id === ev[4]); foulFx(s, {team: ev[2] ? 1 : 0, pid: ev[3], vid: ev[4], pen: !!ev[7], card: !!ev[8]}, fo ? nameOf(s, fo) : '', vi ? nameOf(s, vi) : ''); }
     else if (t === 'q'){ if (G.players.some(q => q.id === ev[2])) callFx(ev[2]); }
