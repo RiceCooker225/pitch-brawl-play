@@ -869,6 +869,12 @@
   #game.tabfill .stage{border-radius:0;box-shadow:none}
   #game.tabfill .board,#game.tabfill .stats{border-radius:0;border-left:0;border-right:0}
   body.menuup #game.tabfill{gap:0}
+
+  /* v28.62: no page scroll at all while the game fills the tab; the menu sized to fit (fitMenu sets --mz) */
+  html.tabfilled,html.tabfilled body{overflow:hidden;overscroll-behavior:none;height:100%}
+  #game.tabfill #menu > *{zoom:var(--mz,1)}
+  @media (min-width:641px){ #game.tabfill #menu{overflow:hidden} }
+  @media (min-width:641px){ #game.tabfill #menu{grid-template-rows:auto auto auto auto 1fr;padding-top:calc(22px + var(--mtop,0px));padding-bottom:16px} #game.tabfill #menu > .mright{grid-row:1 / 6} }   /* (the left column stays together when the right one is taller) */
 </style>
 
 <header>
@@ -8195,7 +8201,7 @@ let pausedForPanel = null;   // the match paused while panels are open over it
 const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one at a time
 const panels = ['teamPanel', 'puPanel', 'keysPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'mapPanel', 'scoresPanel', 'cupPanel', 'leaguePanel', 'onlinePanel', 'resPanel', 'gameMenu', 'cbPanel', 'setPanel', 'helpPanel'];
 const panelsClosed = () => panels.every(id => $(id).hidden);
-function showMenu(title, text){ $('menuTitle').textContent = title; $('menuText').textContent = text; $('menu').hidden = false; renderDash(); }
+function showMenu(title, text){ $('menuTitle').textContent = title; $('menuText').textContent = text; $('menu').hidden = false; renderDash(); try { fitMenu(); } catch (e) {} }
 // v28.60 ("some stuff are bit plain like too much spaces", the menu filling the tab): under the match settings, four
 // cards that open what they show: friends online, the tutorial's parts done, your matches, achievements
 function renderDash(){
@@ -8207,6 +8213,7 @@ function renderDash(){
   card(`${ld}/${PARTS.length}`, 'tutorial parts', ld >= PARTS.length ? 'all done · again ›' : 'Tutorial ›', () => openLearn());
   card(String((you && you.games) || 0), 'matches played', 'My scores ›', () => $('scoresBtn').click());
   card(`${na}/${ACH.length}`, 'achievements', 'see them ›', () => $('achBtn').click());
+  try { fitMenu(); } catch (e) {}
 }
 setInterval(() => { if (!$('menu').hidden) renderDash(); }, 5000);
 function openPanel(id){
@@ -8309,6 +8316,7 @@ function menuTab(t){
   document.querySelectorAll('#menu .mpane').forEach(p => { p.hidden = p.dataset.pane !== t; });
   $('menu').dataset.tab = t;   // (the match settings show only what that tab uses)
   if (t === 'learn') renderLearn();
+  try { fitMenu(); } catch (e) {}   // (v28.62: each tab its own size)
   store.set('pb.mtab', t);
 }
 document.querySelectorAll('#menu .mtabs button').forEach(b => b.addEventListener('click', () => menuTab(b.dataset.tab)));
@@ -9729,7 +9737,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.61';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.62';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -11804,8 +11812,30 @@ const game = $('game'), fsBtn = $('fsBtn');
 let filled = false;
 function syncFill(){
   const on = !!(SET.fill && !fsEl() && !game.classList.contains('pfs'));   // (v28.60, "u didnt do the think where u open it its full screen like haxbakll": from the start, the menu too)
-  if (on === filled) return; filled = on; game.classList.toggle('tabfill', on); document.body.classList.toggle('tabfilled', on); if (on) scrollTo(0, 0);
+  if (on === filled) return; filled = on; game.classList.toggle('tabfill', on); document.body.classList.toggle('tabfilled', on); document.documentElement.classList.toggle('tabfilled', on); if (on) scrollTo(0, 0); fitMenu();
 }
+// v28.62 ("why can i scroll up and down, and the format is a bit weird, like too high"): filling the tab, the menu is
+// sized to fit the window it has (--mz: smaller on a short screen, down to 0.7; bigger on a big one, up to 1.32), so it
+// never needs scrolling and stays in the middle; again on a resize and on each tab
+function fitMenu(){
+  const m = $('menu'); if (!m) return;
+  if (!filled || m.hidden || innerWidth <= 640){ m.style.removeProperty('--mz'); m.style.removeProperty('--mtop'); return; }   // (a phone: one column, it scrolls)
+  m.style.setProperty('--mz', '1'); m.style.setProperty('--mtop', '0px');
+  const kids = [...m.children].filter(e => !e.hidden && e.offsetParent && !e.classList.contains('tutwel'));
+  if (!kids.length) return;
+  let top = Infinity, bot = -Infinity, right = -Infinity, left = Infinity;
+  for (const e of kids){ const r = e.getBoundingClientRect(); top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); left = Math.min(left, r.left); right = Math.max(right, r.right); }
+  const cs = getComputedStyle(m), H = m.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 6, W = m.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const big = innerWidth >= 1850 && innerHeight >= 1000 ? 1.32 : innerWidth >= 1500 && innerHeight >= 860 ? 1.18 : 1;
+  const z = Math.max(0.7, Math.min(big, H / Math.max(1, bot - top), W / Math.max(1, right - left)));
+  m.style.setProperty('--mz', z.toFixed(3));
+  // in the middle, top to bottom (the grid's last row takes what's left, so the left column stays together)
+  let t2 = Infinity, b2 = -Infinity; for (const e of kids){ const r = e.getBoundingClientRect(); t2 = Math.min(t2, r.top); b2 = Math.max(b2, r.bottom); }
+  m.style.setProperty('--mtop', Math.max(0, Math.round((H + 6 - (b2 - t2)) / 2)) + 'px');
+}
+addEventListener('resize', () => fitMenu());
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitMenu());
+addEventListener('load', () => setTimeout(fitMenu, 50));
 const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
 const inFs = () => !!fsEl() || game.classList.contains('pfs');
 const syncFs = () => { const w = document.createElement('span'); w.className = 'wide'; w.textContent = inFs() ? ' Exit' : ' Fullscreen'; fsBtn.replaceChildren('⛶', w); fsBtn.title = inFs() ? 'Leave fullscreen (F' + (escLocked ? ', or hold Esc)' : ')') : 'Fullscreen (F)'; };
