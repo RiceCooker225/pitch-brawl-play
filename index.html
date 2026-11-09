@@ -994,6 +994,10 @@
     html:not(.calm) #menu .mgo::after{animation:goShine 4.5s ease-in-out infinite!important}
     html:not(.calm) #menu .dcard{transition:transform .15s ease,background-color .15s!important}
   }
+  /* v28.69: the Quick start's other keys, one a line */
+  .tutbox .qk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 18px;margin:2px 0 6px}
+  @media (max-width:900px){ .tutbox .qk{grid-template-columns:repeat(2,minmax(0,1fr))} } @media (max-width:520px){ .tutbox .qk{grid-template-columns:1fr} }
+  .tutbox .qk > span{display:flex;align-items:center;gap:8px;min-width:0} .tutbox .qk b{flex:none;font-weight:400} .tutbox .qk i{font-style:normal;color:#c9ced8;min-width:0}
 </style>
 
 <header>
@@ -5013,7 +5017,7 @@ function introEnd(s){
   s.intro = null; s.introDone = true; $('introSkip').hidden = true;
   if (s.kind !== 'guest' && s.G.pause >= 120) s.G.pause = 0;
   refS.x = 0; refS.y = -70; refS.vx = refS.vy = 0;
-  sfx.whistle(0.3); if (SET.ref){ refWhistle(); refAct(null, ['Let\'s play!', 'Good luck!', 'Play!'][Math.floor(Math.random() * 3)], {sayMs: 1300}); }
+  sfx.whistle(0.3); if (SET.ref){ refWhistle(); refStart(s); setTimeout(() => { if (sess === s && !s.done) refAct(null, refPick(['Let\'s play!', 'Good luck!', 'Play!']), {sayMs: 1200}); }, 1450); }
   legIntro(s);
 }
 function introSkip(){ const s = sess; if (!s || !s.intro) return; if (s.kind === 'guest') introEnd(s); else s.intro.skip = true; }
@@ -5234,16 +5238,16 @@ function onEvent(s, e){
     if (!s.mode){
       const lead = G.score[e.team] - G.score[1 - e.team];
       say(e.og ? `${late ? LATE_WORDS[late][1] + ': o' : 'O'}wn goal${who ? ' by ' + who.replace(/ \(own goal\)$/, '') : ''}! ${G.score[0]}–${G.score[1]}${lead > 0 ? ', ' + KIT[e.team].name + ' ahead' : lead === 0 ? ', all square' : ''}` :
-          `${late ? LATE_WORDS[late][0] + ' ' : e.slide ? 'TACKLE GOAL! ' : e.post ? 'BANGER, in off the post! ' : e.kmh >= 85 ? 'What a strike! ' : (e.arr != null ? e.arr : e.kmh) < 30 ? 'It trickles in! ' : 'GOAL! '}${who || KIT[e.team].name} · ${e.m ? e.m + ' m, ' : ''}${Math.round(e.kmh)} km/h${e.assist != null ? ', assist ' + nameOf(s, playerById(G, e.assist)) : ''}${e.tag ? ' · ' + e.tag.toLowerCase() : ''}`);
+          `${late ? LATE_WORDS[late][0] + ' ' : e.slide ? 'SLIDE FINISH! ' : e.post ? 'BANGER, in off the post! ' : e.kmh >= 85 ? 'What a strike! ' : (e.arr != null ? e.arr : e.kmh) < 30 ? 'It trickles in! ' : 'GOAL! '}${who || KIT[e.team].name} · ${e.m ? e.m + ' m, ' : ''}${Math.round(e.kmh)} km/h${e.assist != null ? ', assist ' + nameOf(s, playerById(G, e.assist)) : ''}${e.tag ? ' · ' + e.tag.toLowerCase() : ''}`);
       s.replayFrom = Math.max(0, s.ticks - 170); s.replayTo = s.ticks + 40;
     }
     achGoal(s, e);
   } else if (e.type === 'save'){
     if (realMatch(s)){ const p = playerById(G, e.pid); if (p) saveFx(s, p, e.kmh, e.record, e.dive ? 'dive' : e.slide ? 'slide' : ''); }
   } else if (e.type === 'tackle'){
-    if (realMatch(s)) tackleFx(s, 'tackle', playerById(G, e.pid), playerById(G, e.vid), 0);
+    if (realMatch(s)){ tackleFx(s, 'tackle', playerById(G, e.pid), playerById(G, e.vid), 0); refReact('thumb', ['Clean tackle!', 'Good tackle!', 'Fair challenge!'], 0.5); }
   } else if (e.type === 'post'){
-    if (realMatch(s)){ if (!e.late) popFx('post', null, e.x, e.y, e.kmh, false); say(`Off the post! ${nameOf(s, playerById(G, e.pid)) || KIT[e.team].name}${e.kmh > 0 ? ' · ' + Math.round(e.kmh) + ' km/h' : ''}`); }
+    if (realMatch(s)){ if (!e.late){ popFx('post', null, e.x, e.y, e.kmh, false); refReact('head', ['So close!', 'Off the post!', 'Ooh, unlucky!'], 1); } say(`Off the post! ${nameOf(s, playerById(G, e.pid)) || KIT[e.team].name}${e.kmh > 0 ? ' · ' + Math.round(e.kmh) + ' km/h' : ''}`); }
     else if ((s.mode.kind === 'practice' || s.mode.kind === 'pens' || s.mode.kind === 'fkdrill') && !e.late) popFx('post', null, e.x, e.y, e.kmh, false);
   } else if (e.type === 'slide'){ const p = playerById(G, e.pid); if (p && (s.locals || []).some(L => L.pid === p.id)) coachCount(e.dive ? 'dive' : 'slide'); sfx.slide(); if (p) dustFx(G.discs[p.di], p.slideDx, p.slideDy); }
   else if (e.type === 'foul') foulFx(s, e, nameOf(s, playerById(G, e.pid)), nameOf(s, playerById(G, e.vid)));
@@ -5251,7 +5255,7 @@ function onEvent(s, e){
   else if (e.type === 'call'){ callFx(e.pid); if ((s.locals || []).some(L => L.pid === e.pid)) coachCount('call'); }
   else if (e.type === 'pcharge'){ const p = playerById(G, e.pid); if (p && (s.locals || []).some(L => L.pid === p.id)) sfx.chime(); }   // (v28.34: your power shot is ready)
   else if (e.type === 'power'){ if ((s.locals || []).some(L => L.pid === e.pid)) coachCount('power'); popFx('power', e.pid, 0, 0, e.speed * C.KMH, false); fx.powerUntil = performance.now() + 900; sfx.boom(0.7); }
-  else if (e.type === 'emote') emoteFx(e.pid, e.e);
+  else if (e.type === 'emote'){ emoteFx(e.pid, e.e); if (realMatch(s) && e.e !== 6) refReact('wag', ['Calm down!', 'Behave!', 'Respect!', 'Easy now!'], 0.4, 8000); }
   else if (e.type === 'kickoff'){ if (!s.mode && s.ticks < 30 && !s.introDone){ sfx.whistle(0.25); refWhistle(); refAct(null, ['Let\'s play!', 'Good luck!', 'Play!'][Math.floor(Math.random() * 3)], {sayMs: 1300}); } s.koAt = {frame: G.frame, team: G.koTeam}; fxEnd(); }
   else if (e.type === 'reset'){ fxEnd(); refGoalNow(); }   // (lined up for the kick-off: the celebration is over; the referee has his say about it)
   else if (e.type === 'timeup'){ sfx.whistle(1); refWhistle(); say('Time is up!'); refAct('arms', 'Time!', {ms: 1800}); }
@@ -6668,6 +6672,24 @@ function tutorialMode(lesson){
     if (st === 'move') tu.targets.forEach((t, k) => { if (k < tu.n) return; const cur = k === tu.n, pr = (Math.sin(now / 220) + 1) / 2;
       ctx.save(); ctx.globalAlpha = cur ? 1 : 0.35; ctx.strokeStyle = '#ffd166'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(t[0], t[1], 22 + (cur ? pr * 4 : 0), 0, C.TAU); ctx.stroke();
       ctx.fillStyle = 'rgba(255,209,102,.18)'; ctx.fill(); ctx.fillStyle = '#ffd166'; ctx.font = "800 15px 'Barlow Condensed', Rubik, sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.save(); ctx.translate(t[0], t[1]); ctx.scale(Math.sign(ctx.getTransform().a) || 1, 1); ctx.fillText(String(k + 1), 0, 1); ctx.restore(); ctx.restore(); });
+    // (v28.69, "are the tutorial really begineer friendly"): Kick and Score show where the kick goes (an arrow from the
+    // ball, the way from you through it: green when it's going in) and, for Score, where to stand (a ring behind the ball)
+    if ((st === 'kick' || st === 'score') && !tu.ok){
+      const P = sess && sess.G && sess.G.players.find(p => p.ctrl === 'human'), d = P && V.discs[P.di], b = V.discs[0];
+      if (d){
+        const gm = goalMid(1), g = goalOf(1), pr = (Math.sin(now / 200) + 1) / 2;
+        if (st === 'score'){ const L = Math.hypot(b.x - gm.x, b.y - gm.y) || 1, sx = b.x + (b.x - gm.x) / L * (d.radius + b.radius + 6), sy = b.y + (b.y - gm.y) / L * (d.radius + b.radius + 6);
+          if (Math.hypot(d.x - sx, d.y - sy) > 8){ ctx.save(); ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(255,209,102,.9)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(sx, sy, d.radius + 2 + pr * 3, 0, C.TAU); ctx.stroke(); ctx.restore(); } }
+        const dx = b.x - d.x, dy = b.y - d.y, dl = Math.hypot(dx, dy);
+        if (dl > 0 && dl < 110){
+          const ux = dx / dl, uy = dy / dl, len = 150, ex = b.x + ux * len, ey = b.y + uy * len;
+          let on = false; if (ux * (gm.x - b.x) > 0){ const tt = (gm.x - b.x) / ux, yy = b.y + uy * tt, y0 = Math.min(g.y0, g.y1), y1 = Math.max(g.y0, g.y1); on = yy > y0 + 4 && yy < y1 - 4; }
+          const col = on ? '#7ee2a0' : '#ffd166', a = Math.max(0.35, 1 - dl / 110);
+          ctx.save(); ctx.globalAlpha = a; ctx.setLineDash([6, 6]); ctx.strokeStyle = col; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(b.x + ux * (b.radius + 3), b.y + uy * (b.radius + 3)); ctx.lineTo(ex, ey); ctx.stroke();
+          ctx.setLineDash([]); ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(ex + ux * 9, ey + uy * 9); ctx.lineTo(ex - uy * 6, ey + ux * 6); ctx.lineTo(ex + uy * 6, ey - ux * 6); ctx.closePath(); ctx.fill(); ctx.restore();
+        }
+      }
+    }
     if ((st === 'cup' || st === 'cdown' || st === 'cfar') && !tu.kicked){   // (the way round: a dotted bend)
       const b = V.discs[0], gm = goalMid(1), dir = Math.sign(gm.x) || 1, cx = st === 'cfar' ? gm.x - dir * 90 : (b.x + gm.x) / 2, cy = st === 'cup' ? -90 : st === 'cdown' ? 90 : -40, ey = st === 'cfar' ? gm.y - 45 : gm.y + (st === 'cup' ? -18 : 18);
       ctx.save(); ctx.setLineDash([4, 7]); ctx.strokeStyle = 'rgba(255,209,102,.75)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.quadraticCurveTo(cx, cy, gm.x, ey); ctx.stroke(); ctx.restore();
@@ -6686,7 +6708,7 @@ function tutPanel(s){
   if (!m){ box.hidden = true; return; }
   const tu = m.tu, L = tutSteps(m), st = L[tu.i], K = tutKeys(), kb = t => `<kbd>${t}</kbd>`, inv = !!SET.inv[0], kUp = inv ? K.down : K.up, kDn = inv ? K.up : K.down, swapped = inv ? ' (your curl keys are swapped)' : '';
   const T = {
-    qKeys: ['The other keys', `Hold ${kb(K.up)} or ${kb(K.down)} as you kick: it curls · tap ${kb(K.kick)} twice: call for the ball · ${kb(K.slide)} slide tackle (in goal: dive) · ${kb(bind.p1.gk ? kname(bind.p1.gk) : 'G')} go in goal (2v2) · ${kb('P')} pause · ${kb('Esc')} menu. Curling, slides and power shots start off: their parts in the Tutorial switch them on.`, ''],
+    qKeys: ['The other keys', `<span class="qk">${[[kb(K.up) + ' / ' + kb(K.down) + ' while kicking', 'curl it'], [kb(K.kick) + ' ×2', 'call for the ball'], [kb(K.slide), 'slide tackle (in goal: dive)'], [kb(bind.p1.gk ? kname(bind.p1.gk) : 'G'), 'go in goal (2v2)'], [kb('P'), 'pause'], [kb('Esc'), 'menu']].map(([k, w]) => `<span><b>${k}</b><i>${w}</i></span>`).join('')}</span>Curling, slides and power shots start off: their parts of the Tutorial switch them on.`, ''],   // (v28.69: one per line, was one long sentence)
     qDone: ['You\'re ready!', `That's enough to play. Want more? Each part of the Tutorial goes deeper, one thing at a time.`, ''],
     sLevel: ['Computer level', `How good the computer is. ★ <b>Easy</b> while you learn, Normal once you score, Hard or Insane for a fight. Or set everything at once: <b>Use all recommended</b>.`, ''],
     sHelp: ['Help bar', `Your keys under the pitch, lit as you press them, with a tip for what to do. ★ <b>On</b> while you learn.`, ''],
@@ -6703,8 +6725,8 @@ function tutPanel(s){
     fDone: ['That\'s free kicks', `Aim one way, curl it the other. Switch free kicks on below (they need slide tackles on). Next: the extras.`, ''],
     xDone: ['All done!', `That's every control. All the keys are in ☰ Menu → How to play.`, ''],
     move: ['Move', `Move with ${kb(K.move)}. Run through the yellow circles.`, `${tu.n} of ${tu.targets.length || 3}`],
-    kick: ['Kick', `Walk up to the ball and ${K.touch ? 'tap' : 'press'} ${kb(K.kick)}.`, ''],
-    score: ['Score', `Get behind the ball, face the goal on the right, ${kb(K.kick)}.`, ''],
+    kick: ['Kick', `Walk up to the ball and ${K.touch ? 'tap' : 'press'} ${kb(K.kick)}. It goes the way the arrow shows: from you, through the ball.`, ''],
+    score: ['Score', `Stand in the ring behind the ball, then ${kb(K.kick)}. The arrow turns green when it's going in.`, ''],   // (v28.69: was "face the goal": nothing faces, the kick goes from you through the ball)
     curl: ['Curl it', `Hold ${kb(K.up)} or ${kb(K.down)} while you kick: it bends round the man.`, tu.tries ? `try ${tu.tries + 1}` : ''],
     call: ['Call for the ball', `Tap ${kb(K.kick)} twice, quickly: your teammate passes to you.`, tu.tries ? `try ${tu.tries + 1}` : ''],
     slide: ['Slide tackle', `${kb(K.slide)} slides in. Hit the ball, not the man (that's a foul).`, tu.tries ? `try ${tu.tries + 1}` : ''],
@@ -7455,12 +7477,15 @@ function callFx(pid){
   fx.pops = fx.pops.filter(f => !((f.kind === 'call' || f.kind === 'rush') && (f.pid === pid || f.pid === at))); popFx(kind, at, 0, 0, 0, false); sfx.kick(0.4);
 }
 // a save's pop and line (host, offline, and a guest from the host's events). v28.65 ("dives from gk called what a save!,
-// and strikers called maybe tackle save"): a keeper's dive WHAT A SAVE! (gold); anyone's slide TACKLE SAVE!
+// and strikers called maybe tackle save"): a keeper's dive WHAT A SAVE! (gold); anyone's slide TACKLE SAVE!; v28.69
+// ("maybe change tackle save all into what a save, and cahnge tackle goal into like idk something else"): both WHAT A
+// SAVE! (gold), and a goal scored with a slide is a SLIDE FINISH!
 function saveFx(s, p, kmh, record, how){
   const who = nameOf(s, p) || (KIT[p.team] && KIT[p.team].name) || '', v = Math.round(kmh);
+  if (how || record) refReact('clap', ['What a save!', 'Great stop!', 'Brilliant!'], 1);   // (v28.69: the ref claps the big ones)
   if (how === 'dive'){ fx.pops = fx.pops.filter(f => !(f.pid === p.id && (f.kind === 'save' || f.kind === 'tsave'))); popFx('wsave', p.id, 0, 0, kmh, record); say(`${record ? 'Save of the match! ' : ''}What a save! ${who} · ${v} km/h`); return; }
   popFx('save', p.id, 0, 0, kmh, record);
-  if (how === 'slide'){ tackleFx(s, 'save', p, null, kmh); say(`${record ? 'Save of the match! ' : ''}Tackle save! ${who} · ${v} km/h`); return; }
+  if (how === 'slide'){ tackleFx(s, 'save', p, null, kmh); say(`${record ? 'Save of the match! ' : ''}What a save! ${who} · ${v} km/h`); return; }
   if (record) say(`Save of the match! ${who} · ${v} km/h`);
 }
 function tackleFx(s, kind, p, v, kmh){
@@ -7494,6 +7519,19 @@ function refAct(kind, text, o){
   if (text) refS.say = {text, t0: now, until: now + (o.sayMs || o.ms || 1600), ko: !!o.ko};
 }
 function refPlayOn(team){ const g = ST.goals.find(q => q.team !== team); refAct('playon', ['Play on!', 'Play on, play on!', 'No foul!'][Math.floor(Math.random() * 3)], {ms: 1300, dir: g && (g.x0 + g.x1) / 2 < 0 ? -1 : 1}); }
+// v28.69 ("make the ref do a bit more"): a coin toss before the first kick-off; he claps a diving or sliding save (and
+// a record one), holds his head when it hits the post, a thumbs up for a clean tackle (half the time), "Time out!" on a
+// pause and "Let's go!" after it, and now and then tells off a taunting emote. Not over his say about a goal or a foul
+function refReact(kind, words, p, gap){
+  if (!SET.ref || Math.random() > p) return; const now = performance.now();
+  if (refS.koWait || refS.goalQ || (refS.say && refS.say.until > now + 300)) return;   // (he's still saying something: a goal, a foul)
+  if (gap && now - (refReact.at || 0) < gap) return; refReact.at = now;
+  refAct(kind, refPick(words), {ms: 1400});
+}
+function refStart(s){
+  const kt = s && s.G ? s.G.koTeam : 0, nm = KIT[kt] && KIT[kt].name;
+  refAct('coin', `${refPick(['Heads!', 'Tails!'])}${nm ? ' ' + nm + ' start' : ''}`, {ms: 1400, sayMs: 1300});
+}
 // v28.23 ("make the ref do smth after each goal"): every goal gets his say: first what it was (the special ones as before,
 // else what it means from the goal's label: all square, in front, a comeback, two up, game on, a hat-trick; else just
 // the goal), then, on his way back, pointing to the middle for the restart
@@ -7615,7 +7653,7 @@ function drawRef(fl){
     ctx.save(); ctx.translate(hx, hy); ctx.rotate(0.12); ctx.fillStyle = '#ffd400'; ctx.strokeStyle = '#1a1e28'; ctx.lineWidth = 2; ctx.beginPath(); ctx.rect(-7, -11, 14, 20); ctx.fill(); ctx.stroke(); ctx.restore();
   }
   if (refS.say && now < refS.say.until){
-    const by = y - r - (G2 && (G2.kind === 'var' || G2.kind === 'arms' || G2.kind === 'clap' || G2.kind === 'dodge') ? 34 : refS.card && now - refS.card < CARD_MS ? 36 : 12);
+    const by = y - r - (G2 && (G2.kind === 'var' || G2.kind === 'arms' || G2.kind === 'clap' || G2.kind === 'dodge' || G2.kind === 'coin') ? 34 : refS.card && now - refS.card < CARD_MS ? 36 : 12);
     // (v28.49, "sometimes we dont see refs comment": with the camera on the play he was often off the screen, and his
     // words with him. Now off it, they're kept at the edge of the screen nearest him, "Ref:" in front)
     const z = cam.zoom || 1, hw = cssW / (2 * z), hh = cssH / (2 * z), S = 1 / z, mx = Math.min(hw * 0.9, 95 * S);   // (S: a screen px in pitch units; the top kept clear of the buttons there)
@@ -7642,6 +7680,11 @@ function refGesture(g, x, y, r, now, fl){
   else if (g.kind === 'clap'){ const o = 0.12 + Math.abs(Math.sin(t * 10)) * 0.32; refArm(x, y, r, up - o, 12 * e); refArm(x, y, r, up + o, 12 * e);
     if (Math.sin(t * 10) > 0.85){ ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 1.5; for (const k of [-1, 0, 1]){ const a = up + k * 0.5; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * (r + 18), y + Math.sin(a) * (r + 18)); ctx.lineTo(x + Math.cos(a) * (r + 23), y + Math.sin(a) * (r + 23)); ctx.stroke(); } } }
   else if (g.kind === 'shrug'){ refArm(x, y, r, Math.PI + 0.45, 11 * e); refArm(x, y, r, -0.45, 11 * e); }
+  else if (g.kind === 'head'){ refArm(x, y, r, up - 1.05, 7 * e); refArm(x, y, r, up + 1.05, 7 * e); }   // (v28.69: hands on his head)
+  else if (g.kind === 'thumb'){ const a = up + 0.75 * d, [hx, hy] = refArm(x, y, r, a, 12 * e); ctx.strokeStyle = '#f2c9a0'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(hx, hy - 1); ctx.lineTo(hx, hy - 7 * e); ctx.stroke(); }
+  else if (g.kind === 'coin'){   // (v28.69: the toss: up off his thumb, turning over, and caught)
+    const [hx, hy] = refArm(x, y, r, up + 0.25, 12 * e), f = Math.min(1, t / 0.95), hgt = Math.sin(Math.PI * f) * 30, sq = f < 1 ? Math.abs(Math.cos(t * 22)) : 1;
+    ctx.save(); ctx.translate(hx, hy - 5 - hgt); ctx.scale(1, Math.max(0.12, sq)); ctx.fillStyle = '#ffd166'; ctx.strokeStyle = '#8a5a00'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(0, 0, 5, 0, C.TAU); ctx.fill(); ctx.stroke(); ctx.restore(); }
   else if (g.kind === 'dodge'){ refArm(x, y, r, up - 0.8, 12 * e); refArm(x, y, r, up + 0.8, 12 * e); }
   else if (g.kind === 'point'){ refArm(x, y, r, up, 14 * e); }
   else if (g.kind === 'centre'){ const dd = Math.hypot(x, y); refArm(x, y, r, dd < 30 ? up : Math.atan2(-y, -x), 15 * e); }   // (v28.23: to the middle, for the restart)
@@ -8115,7 +8158,7 @@ function overlayText(s, V){
     // (v28.31, "celebration colour with teams doesnt look good": no kit colours in it, one look for every goal: white
     // letters, gold for a banger and the late ones, the band's stripes orange; who scored is in the words under it)
     const fade = Math.min(1, left / 0.35), col = g.post ? '#ffd166' : '#ffffff', size = g.post ? Math.min(Math.max(66, cssH * 0.27), cssW / 7) : Math.min(Math.max(60, cssH * 0.26), cssW / 7.5), y = cssH * 0.3;   // (v26.7: was 0.18 / 0.17 of the height, small on a laptop)
-    const lw = g.late && LATE_WORDS[g.late], word = lw ? lw[0] : g.slide ? 'TACKLE GOAL!' : g.post ? 'BANGER!' : 'GOAL!', wc = lw ? '#ffd166' : col, wsz = Math.min(size, cssW / (Array.from(word).length * 0.62));
+    const lw = g.late && LATE_WORDS[g.late], word = lw ? lw[0] : g.slide ? 'SLIDE FINISH!' : g.post ? 'BANGER!' : 'GOAL!', wc = lw ? '#ffd166' : col, wsz = Math.min(size, cssW / (Array.from(word).length * 0.62));
     if (reduceMotion){ ctx.save(); ctx.globalAlpha = fade; bigText(word, null, wc, y, wsz); ctx.restore(); }
     else goalTitle(word, wc, CEL_BAND, y, wsz, age, fade);
     if (g.tag){   // (v28.21: what it means, a gold line over the word)
@@ -8257,9 +8300,9 @@ function drawPops(V, now){
     if (!isFinite(wx) || !isFinite(wy)) continue;
     const a = (now - f.t0) / LIFE, x = Math.max(44, Math.min(cssW - 44, cssW / 2 + fl * (wx - cam.x) * z)), y = Math.max(40, Math.min(cssH - 4, cssH / 2 + (wy - cam.y) * z - r * z - 8 - a * 18));
     ctx.globalAlpha = a < 0.65 ? 1 : Math.max(0, (1 - a) / 0.35);
-    const t1 = f.kind === 'post' ? 'POST!' : f.kind === 'foul' ? 'FOUL!' : f.kind === 'tackle' ? 'TACKLE!' : f.kind === 'tsave' ? 'TACKLE SAVE!' : f.kind === 'wsave' ? 'WHAT A SAVE!' : f.kind === 'call' ? 'PASS!' : f.kind === 'rush' ? 'RUSH!' : f.kind === 'power' ? 'POWER SHOT!' : 'SAVE!', t2 = f.kind === 'foul' ? (f.record ? 'penalty' : 'free kick') : f.kind === 'tackle' ? 'won it' : `${Math.round(f.kmh)} km/h${f.record ? ' · record!' : ''}`;
+    const t1 = f.kind === 'post' ? 'POST!' : f.kind === 'foul' ? 'FOUL!' : f.kind === 'tackle' ? 'TACKLE!' : f.kind === 'tsave' || f.kind === 'wsave' ? 'WHAT A SAVE!' : f.kind === 'call' ? 'PASS!' : f.kind === 'rush' ? 'RUSH!' : f.kind === 'power' ? 'POWER SHOT!' : 'SAVE!', t2 = f.kind === 'foul' ? (f.record ? 'penalty' : 'free kick') : f.kind === 'tackle' ? 'won it' : `${Math.round(f.kmh)} km/h${f.record ? ' · record!' : ''}`;
     ctx.font = '400 15px Bungee, Impact, sans-serif'; ctx.lineWidth = 4; ctx.strokeStyle = '#1a1e28';
-    ctx.strokeText(t1, x, y - 14); ctx.fillStyle = f.kind === 'foul' ? '#ff6b6b' : f.kind === 'tackle' || f.kind === 'tsave' ? '#7ee8ff' : f.kind === 'wsave' ? '#ffd166' : f.kind === 'call' || f.kind === 'rush' ? '#ffd166' : f.kind === 'power' ? '#ff9f43' : f.record ? '#ffd166' : f.kind === 'post' ? '#d9dee8' : '#ffffff'; ctx.fillText(t1, x, y - 14);
+    ctx.strokeText(t1, x, y - 14); ctx.fillStyle = f.kind === 'foul' ? '#ff6b6b' : f.kind === 'tackle' ? '#7ee8ff' : f.kind === 'tsave' || f.kind === 'wsave' ? '#ffd166' : f.kind === 'call' || f.kind === 'rush' ? '#ffd166' : f.kind === 'power' ? '#ff9f43' : f.record ? '#ffd166' : f.kind === 'post' ? '#d9dee8' : '#ffffff'; ctx.fillText(t1, x, y - 14);
     if (f.kmh > 0 || f.kind === 'foul' || f.kind === 'tackle'){ ctx.font = '600 12px Rubik, system-ui, sans-serif'; ctx.lineWidth = 3; ctx.strokeText(t2, x, y); ctx.fillStyle = '#e8e3e3'; ctx.fillText(t2, x, y); }
   }
   ctx.globalAlpha = 1;
@@ -8524,8 +8567,8 @@ function togglePause(){
   const s = sess; if (s && s.kind === 'guest' && !s.done && isMgr()){ sendCmd('pause'); return; }   // a manager asks the host
   if (!s || s.done || s.kind === 'guest' || !s.G) return;
   const G = s.G;
-  if (G.pause >= 120) G.pause = 119;   // resuming counts down two seconds, like Haxball online
-  else G.pause = 120;   // (during the countdown: paused again)
+  if (G.pause >= 120){ G.pause = 119; refAct('point', 'Let\'s go!', {ms: 1000}); }   // resuming counts down two seconds, like Haxball online
+  else { G.pause = 120; refAct('watch', refPick(['Time out!', 'Hold on!']), {ms: 1600}); }   // (during the countdown: paused again)
 }
 // the tab hidden or the window left (another tab, another app, the page around the game): a local match pauses itself.
 // Left with the tab still showing, it carries on when you click back in (focusCheck, with the countdown); a hidden tab
@@ -8550,7 +8593,7 @@ function start(cfg){
   if (cfg.mode === 'tri') s.mode = triMode(); else if (cfg.mode === 'practice') s.mode = practiceMode(); else if (cfg.mode === 'pens') s.mode = pensMode(!!cfg.two); else if (cfg.mode === 'duel') s.mode = duelMode(!!cfg.two); else if (cfg.mode === 'keeper') s.mode = keeperMode(); else if (cfg.mode === 'wall') s.mode = wallMode(cfg); else if (cfg.mode === 'dribble') s.mode = dribbleMode(); else if (cfg.mode === 'fkdrill') s.mode = fkMode(); else if (cfg.mode === 'tutorial') s.mode = tutorialMode(cfg.lesson);
   if (cfg.daily && s.mode) dailyWrap(s);
   if (s.mode && s.mode.init) s.mode.init(s);
-  if (introWanted(s)) introStart(s); else legIntro(s);   // (v28.34: the walk-out first; a leg's banner after it)
+  if (introWanted(s)) introStart(s); else { legIntro(s); if (!s.mode) setTimeout(() => { if (sess === s && !s.done && s.G && s.G.state === 0) refStart(s); }, 250); }   // (v28.69: the coin toss while the kick-off waits)   // (v28.34: the walk-out first; a leg's banner after it)
   if (bot){ const opp = s.G.players.find(p => p.team === 1); if (opp) s.custom = new Map([[opp.id, bot]]); }
   sess = s; cam.x = cam.y = 0; cam.z = 0; cam.fk = 0; fx.goal = fx.moment = null; fx.pops.length = 0; fx.trail.length = 0; lines.length = 0;
   for (const id of ['menu', ...panels]) $(id).hidden = true;
@@ -9248,7 +9291,7 @@ function showResults(R, s, after){
       box.append(rl);
     }
     const quick = [R.best ? `Fastest goal ${R.best} km/h` : '', Array.isArray(R.bs) && +R.bs[2] > 0 ? `Best save ${Math.round(+R.bs[2])} km/h by ${R.bs[0] || R.names[R.bs[1] ? 1 : 0]}` : ''].filter(Boolean);
-    if (Array.isArray(R.sl)) for (const t of [0, 1]){ const a = R.sl[t] || []; if (+a[0] > 0) quick.push(`Slide tackle goal${+a[0] > 1 ? 's' : ''} ${R.names[t]} ${+a[0]}`); if (+a[1] > 0) quick.push(`Sliding save${+a[1] > 1 ? 's' : ''} ${R.names[t]} ${+a[1]}`); }
+    if (Array.isArray(R.sl)) for (const t of [0, 1]){ const a = R.sl[t] || []; if (+a[0] > 0) quick.push(`Slide finish${+a[0] > 1 ? 'es' : ''} ${R.names[t]} ${+a[0]}`); if (+a[1] > 0) quick.push(`Diving and sliding saves ${R.names[t]} ${+a[1]}`); }
     if (quick.length) box.append(el('div', 'motm', quick.join(' · ')));
     if (R.motm){ const m = el('div', 'motm'); m.append('Player of the match: ', el('b', null, R.motm[0] || R.names[R.motm[1]]), `${+R.motm[5] > 0 ? ' · ' + (+R.motm[5] / 10).toFixed(1) : ''} (${[R.motm[2] ? R.motm[2] + ' goal' + (R.motm[2] > 1 ? 's' : '') : '', R.motm[3] ? R.motm[3] + ' assist' + (R.motm[3] > 1 ? 's' : '') : '', R.motm[4] ? R.motm[4] + ' save' + (R.motm[4] > 1 ? 's' : '') : ''].filter(Boolean).join(', ') || R.names[R.motm[1]]})`); box.append(m); }
   }
@@ -10124,7 +10167,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.68';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.69';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
