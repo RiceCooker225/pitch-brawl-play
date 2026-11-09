@@ -414,12 +414,15 @@
   #game.pfs{position:fixed;inset:0;z-index:50}
   #game:fullscreen .board,#game.pfs .board,#game:fullscreen .stats,#game.pfs .stats{width:100%}
   #game:fullscreen .stage,#game.pfs .stage{flex:1;min-height:0;width:100%;max-width:none;aspect-ratio:auto!important}
-  .keys{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:6px 10px;align-items:center;font-size:13px}
+  .keys{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(90px,1fr);gap:6px 10px;align-items:center;font-size:13px}
+  .keys.all{grid-template-columns:minmax(0,1.4fr) repeat(3,minmax(0,1fr))}
+  .keys .kact{display:flex;flex-direction:column;gap:1px;min-width:0} .keys .kact b{font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--text)} .keys .kact small{font-size:11px;color:var(--muted);line-height:1.3}
+  .keys .kall{justify-self:start;margin-top:4px}
   .keys b{font-weight:500;color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
   .keys button{min-width:84px}
   .keys button.wait{background:var(--accent);color:var(--accent-ink)}
   .keys .kfix{margin-top:8px}
-  .keys .kfixed{grid-column:2 / span 3;color:var(--muted);opacity:.8}
+  .keys .kfixed{grid-column:2 / -1;color:var(--muted);opacity:.8}
   .keys .kfixed kbd{margin-right:2px}
   .keymsg{min-height:1.2em;margin:6px 0 0;color:var(--accent);font-size:13px}
   #pu,#tm{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 10px;align-items:center;font-size:13px;max-width:100%}
@@ -742,6 +745,28 @@
   .tutx{display:flex;flex-wrap:wrap;gap:6px} .tutx:empty{display:none} .tutx button{border-radius:0} .tutx button.on{border-color:var(--accent);color:#fff;box-shadow:inset 0 0 0 1px var(--accent)}
   .tutfoot{display:flex;align-items:center;gap:12px} .tutfoot button{border-radius:0}
   #tutState{flex:1;font-size:13px;color:var(--muted)} #tutState.ok{color:#7ee2a0;font-weight:600}
+  .tutfoot button[hidden]{display:none}
+  .tutlv{align-self:center;font-size:12px;color:var(--muted);margin-right:-2px}
+  /* v28.57: the tutorial's steps as dots (click one to go to it); your keys as chips, lit while pressed (the tutorial and
+     the help bar under the pitch); the help bar's tip; the ratings' role; which you are, keeper or out */
+  .tutdots{display:flex;flex-wrap:wrap;gap:5px;margin-top:-2px}
+  .tdot{width:12px;height:12px;min-width:0;padding:0;border-radius:50%;border:2px solid #5a6274;background:transparent;cursor:pointer}
+  .tdot.done{background:#5a6274} .tdot.on{border-color:var(--accent);background:var(--accent);transform:scale(1.15)} .tdot:hover{border-color:#fff}
+  .keystrip{display:flex;flex-wrap:wrap;gap:4px;align-items:flex-end} .keystrip[hidden]{display:none}
+  .kc{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:34px}
+  .kc kbd{display:inline-block;min-width:22px;text-align:center;padding:1px 6px;border:1px solid #5a6274;border-bottom-width:3px;border-radius:4px;background:#20252f;font:700 12px/1.4 Rubik,sans-serif;color:#fff;white-space:nowrap;transition:transform .05s,background .05s}
+  .kc small{font:600 9.5px/1 Rubik,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  .kc.on kbd{background:var(--accent);border-color:var(--accent);color:#111;transform:translateY(2px);border-bottom-width:1px}
+  .kc.on small{color:#fff}
+  .helpbar{position:relative;z-index:4;width:min(100%,940px);margin:6px auto 0;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:6px 8px 6px 12px;background:rgba(34,39,52,.92);border-left:5px solid #ffd166}
+  .helpbar[hidden]{display:none} #game:fullscreen .helpbar,#game.pfs .helpbar{width:100%;margin:0;flex:none}
+  .hbtip{flex:1;font-size:13px;line-height:1.4;color:#e3e6ec;min-width:0}
+  .hbtip kbd{display:inline-block;padding:0 6px;border:1px solid #5a6274;border-bottom-width:2px;border-radius:3px;background:#20252f;font:600 12px/1.45 Rubik,sans-serif;color:#fff;white-space:nowrap}
+  .hbdim{color:var(--muted)} .helpbar button{border-radius:0;padding:2px 8px}
+  @media (max-width:640px){ .helpbar{flex-wrap:wrap} .helpbar .keystrip{display:none} }
+  .hlearn{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+  .rrole{display:block;font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+  .rolebtn{font-weight:700}
 
   /* v28.30 ("bro now the menu doesnt suit the stuff we press"): every screen in the menu's look. The same slate with
      the orange edge behind each panel, headings in the menu's condensed italic capitals with the orange slash, square
@@ -786,6 +811,17 @@
   .res .big .sc{font-size:clamp(40px,8vw,64px)}
   .res .pensline{font-family:var(--cond);font-weight:800;font-style:italic;font-size:22px;text-transform:uppercase}
   .res .cbtag{border-radius:0;font-family:var(--cond);font-weight:800;font-style:italic;font-size:15px;text-transform:uppercase;transform:skewX(-8deg)}
+
+  /* v28.57: friends (the Online panel, the room), and a friend's invite or request */
+  .frme{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:6px} .frme b.code{font-size:16px;letter-spacing:.12em;color:#fff}
+  .frlist{display:flex;flex-direction:column;gap:4px;margin-bottom:6px} .frlist .note{margin:2px 0}
+  .frrow{display:flex;align-items:center;gap:8px;padding:4px 8px;background:rgba(255,255,255,.035);font-size:13px;min-width:0}
+  .frrow b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40%} .frrow .frst{flex:1;color:var(--muted);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .frrow:not(.on) b{color:var(--muted)} .frrow button{border-radius:0;padding:2px 9px} .frrow .frx{opacity:.6} .frrow .frx:hover{opacity:1}
+  .frdot{width:9px;height:9px;border-radius:50%;flex:none;background:#596173} .frdot.free{background:#7ee2a0} .frdot.room{background:#ffd166} .frdot.match{background:var(--accent)}
+  .frlobby{margin:6px 0 8px;font-size:12px} .frlobby > b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px} .frlobby[hidden]{display:none}
+  .frtoast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:200;max-width:min(92vw,420px);background:rgba(34,39,52,.98);border-left:5px solid #7ee2a0;padding:10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  .frtoast[hidden]{display:none} .frtoast p{margin:0 0 8px;font-size:14px;color:#fff} .frtoast .row{display:flex;gap:8px} .frtoast button{border-radius:0}
 </style>
 
 <header>
@@ -812,13 +848,20 @@
   <button class="introskip" id="introSkip" type="button" hidden>Skip ›</button>
   <div class="tutbox" id="tutBox" hidden>
     <div class="tuthead"><span id="tutStep">1 / 8</span><b id="tutTitle"></b><button class="ghost sm" id="tutSkip" type="button">Skip tutorial</button></div>
+    <div class="tutdots" id="tutDots" aria-label="Steps"></div>
     <p id="tutText"></p>
     <div class="tutx" id="tutExtra"></div>
-    <div class="tutfoot"><span id="tutState"></span><button id="tutNext" type="button">Next ›</button></div>
+    <div class="keystrip" id="tutKeys" aria-hidden="true"></div>
+    <div class="tutfoot"><span id="tutState"></span><button class="ghost sm" id="tutBack" type="button" title="The step before">‹ Back</button><button class="ghost sm" id="tutAgain" type="button" title="Back to the first step">↺ Start over</button><button id="tutNext" type="button">Next ›</button></div>
+  </div>
+  <div class="helpbar" id="helpBar" hidden>
+    <div class="keystrip" id="hbKeys" aria-hidden="true"></div>
+    <span class="hbtip" id="hbTip"></span>
+    <button class="ghost sm" id="hbOff" type="button" title="Hide the help (it's in ⚙ Settings → Game: Help for beginners)">✕</button>
   </div>
   <canvas id="c"></canvas>
   <div class="hud" id="hud" hidden></div>
-  <div class="corner"><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (P)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
+  <div class="corner"><button class="ghost fsb rolebtn" id="roleBtn" type="button" hidden></button><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (P)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
   <div class="rpbar" id="rpBar" hidden>
     <button class="ghost" id="rpBack" type="button" title="5 s back (←)">« 5 s</button>
     <button id="rpPlay" type="button" title="Pause or play (Space)">Pause</button>
@@ -922,6 +965,12 @@
           <label class="avin" for="avatar" title="Up to two letters or an emoji, shown on your player"><input type="text" id="avatar" maxlength="2" autocomplete="off" spellcheck="false" placeholder="P1" aria-label="Avatar"></label>
           <label class="ofield grow" for="nick"><small>Your name</small><input type="text" id="nick" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Player"></label>
         </section>
+        <section class="ocard" id="frCard">
+          <div class="ochead"><h3>Friends</h3><span class="note" id="frNote"></span></div>
+          <div class="frme">Your friend code <b class="code" id="frMine"></b><button class="ghost sm" id="frCopy" type="button">Copy</button><span class="note">give it to a friend; they add you with it</span></div>
+          <div class="frlist" id="frList"></div>
+          <div class="orow"><input type="text" id="frAdd" maxlength="6" size="9" placeholder="their code" autocomplete="off" spellcheck="false" aria-label="A friend's code"><button class="ghost" id="frAddBtn" type="button">Add friend</button><span class="note" id="frMsg"></span></div>
+        </section>
         <section class="ocard">
           <div class="ochead"><h3>Rooms</h3><span class="note" id="roomsNote">Looking for rooms…</span><button class="ghost sm" id="roomsRefresh" type="button" title="Look again">↻</button></div>
           <div class="rooms" id="gameList"></div>
@@ -946,6 +995,7 @@
           <button class="ghost sm" id="leaveOnline" type="button">Leave room</button>
         </div>
         <p class="note onvite" id="onInvite" hidden></p>
+        <div class="frlobby" id="frLobby" hidden><b>Friends</b><div class="frlist" id="frList2"></div></div>
         <div class="rmain">
           <div class="rleft">
             <div class="lobby" id="lobby"></div>
@@ -1003,7 +1053,7 @@
       <p class="note dnote">Curl: hold up or down as you shoot; it still goes where you aim. Auto curl: your shots curl into the corner by themselves. Swap curl keys: up bends it down and down bends it up (a free kick's left and right swap too). Each player's own; online, P1 is you. The computer always curls a bit.</p>
     </section>
     <section class="dsec"><h3>Game</h3>
-      <div class="drow"><button class="ghost sm tog" id="soundBtn" type="button" aria-pressed="true" title="Sound on or off">Sound</button><button class="ghost sm tog" id="replayBtn" type="button" aria-pressed="true" title="Show each goal again before the kick-off">Goal replays</button><button class="ghost sm tog" id="introBtn" type="button" aria-pressed="true" title="Before each match the teams walk out, line up and shake hands, then go to their places (Skip, or any key, to go straight to the kick-off)">Walk-out</button><button class="ghost sm tog" id="refBtn" type="button" aria-pressed="true" title="A referee on the pitch: follows play, whistles and points at fouls, goals and kick-offs (only drawn: nothing touches him)">Referee</button><button class="ghost sm tog" id="aiBtn" type="button" aria-pressed="true" title="At the end of a match Claude writes a line about it (here in Claude: it asks you once, and uses a little of your Claude usage). Off, or in the downloaded file: the game's own commentator">Claude's comment</button></div>
+      <div class="drow"><button class="ghost sm tog" id="soundBtn" type="button" aria-pressed="true" title="Sound on or off">Sound</button><button class="ghost sm tog" id="replayBtn" type="button" aria-pressed="true" title="Show each goal again before the kick-off">Goal replays</button><button class="ghost sm tog" id="coachBtn" type="button" aria-pressed="true" title="Under the pitch: your keys, lit as you press them, and a tip for what to do right now (shoot, curl, slide, call for it, dive...); each tip goes once you've done it a few times">Help for beginners</button><button class="ghost sm" id="tutAgainBtn" type="button" title="The tutorial from the start: every control, step by step">Tutorial again</button><button class="ghost sm tog" id="introBtn" type="button" aria-pressed="true" title="Before each match the teams walk out, line up and shake hands, then go to their places (Skip, or any key, to go straight to the kick-off)">Walk-out</button><button class="ghost sm tog" id="refBtn" type="button" aria-pressed="true" title="A referee on the pitch: follows play, whistles and points at fouls, goals and kick-offs (only drawn: nothing touches him)">Referee</button><button class="ghost sm tog" id="aiBtn" type="button" aria-pressed="true" title="At the end of a match Claude writes a line about it (here in Claude: it asks you once, and uses a little of your Claude usage). Off, or in the downloaded file: the game's own commentator">Claude's comment</button></div>
     </section>
     <section class="dsec"><h3>Stadium</h3>
       <div class="drow"><button class="ghost sm" id="loadBtn" type="button">Load stadium (.hbs)</button><button class="ghost sm" id="defStBtn" type="button" hidden>Default stadium</button><input type="file" id="file" accept=".hbs,.json,application/json" hidden></div>
@@ -1049,6 +1099,7 @@
   </div>
   <div class="overlay" id="helpPanel" hidden>
     <div class="hhead"><h2>How to play</h2><button id="helpDone" type="button">Done</button></div>
+    <div class="hlearn"><button class="ghost sm tutb" type="button">▶ Tutorial: every control, step by step</button><button class="ghost sm curlb" type="button">▶ Curl lesson</button><button class="ghost sm powerb" type="button">▶ Power shot lesson</button></div>
     <div class="hgrid">
       <section class="hsec kb"><h3>Keys</h3>
         <div class="krow"><em>P1</em><span id="kb1"></span></div>
@@ -1074,8 +1125,13 @@
         <li>The dots show where it goes.</li>
         <li>The keeper reads where you aim: aim one way, curl it the other.</li>
       </ul></section>
-      <section class="hsec"><h3>Slide tackles</h3><ul>
+      <section class="hsec"><h3>Slide tackles and dives</h3><ul>
         <li>Get the ball first. Take the man in your own area: penalty.</li>
+        <li>In goal (in your area), the slide key dives: it reaches further than you can run, then you get up slowly. In 2v2, the go-in-goal key (or the 🧤/⚽ button on the pitch) swaps you with your computer keeper.</li>
+      </ul></section>
+      <section class="hsec"><h3>New here?</h3><ul>
+        <li>⚙ Settings → Help for beginners: your keys under the pitch, lit as you press them, and a tip for what to do right now.</li>
+        <li>Online → Friends: share your friend code, add theirs, see when they're online and join or invite them.</li>
       </ul></section>
       <section class="hsec"><h3>On a phone</h3><ul>
         <li>Stick moves, KICK kicks, SLIDE slides. Hold the stick across your shot to curl it.</li>
@@ -1149,13 +1205,14 @@
     <div class="tutwel" id="tutWelcome" hidden><div>
       <small>Welcome to Pitch Brawl</small>
       <h3>First time?</h3>
-      <p>A short tutorial shows you every control: moving, kicking, curling, calling for the ball, slide tackles, free kicks, emotes and the other keys, and what extrapolation means online. About four minutes, and you can skip any part.</p>
+      <p>A short tutorial: your settings first (how hard the computer is, help on screen, your keys), then every control, one at a time: moving, kicking, curling, calling for the ball, slide tackles, diving in goal, free kicks. About four minutes; skip any step, go back, or start over.</p>
       <div class="row"><button id="tutGo" type="button">Start the tutorial</button><button class="ghost" id="tutNo" type="button">Skip, I know how to play</button></div>
     </div></div>
   </div>
 </div>
 </div>
 
+<div class="frtoast" id="frToast" hidden role="alertdialog" aria-live="polite"><p id="frToastT"></p><div class="row"><button id="frToastYes" type="button">Join</button><button class="ghost" id="frToastNo" type="button">Not now</button></div></div>
 <div class="chat" id="chat" hidden>
   <div class="log" id="chatLog" aria-live="polite"></div>
   <form id="chatForm" autocomplete="off"><input type="text" id="chatIn" maxlength="100" placeholder="Press Enter to chat" spellcheck="false"><button class="ghost" type="submit">Send</button></form>
@@ -1885,6 +1942,21 @@ function PBCORE(){
     if (!predict) touch(G, p, true);
     if (ev){ ev.push({type:'kick', id: ++G.eventId, frame: G.frame, pid: p.id, speed: Math.hypot(b.vx, b.vy), fk: true, power: Math.round(fire * 100)}); if (G.state === 1) shotCheck(G, ST, p); }
   }
+  // v28.57 ("possibly dives for keeper"): a keeper in his own area dives instead of sliding (cfg.dive, on unless set off;
+  // also with slide tackles off): a quick lunge where he points (at the ball when he points near it), DIVE_T ticks; the
+  // ball within DIVE_REACH px of him on the way (his arms) is parried, away from his goal; then DIVE_DOWN ticks getting
+  // up, DIVE_CD from one to the next. Bumping a man on a dive is no foul
+  const DIVE_V = 4.4, DIVE_T = 18, DIVE_DAMP = 0.95, DIVE_DOWN = 32, DIVE_CD = 60, DIVE_REACH = 10;
+  const canDive = (G, ST, p, d) => p.role === 'keeper' && G.cfg.dive !== false && !ST.tri && inArea(ST, p.team, d.x, d.y);
+  function startDive(G, p, d, ev){
+    const b = p.input; let x = ((b & 8) > 0) - ((b & 4) > 0), y = ((b & 2) > 0) - ((b & 1) > 0);
+    const v = Math.sqrt(d.vx * d.vx + d.vy * d.vy), B = G.discs[0];
+    if (x || y){ const L = Math.sqrt(x * x + y * y); x /= L; y /= L; } else if (v > 0.3){ x = d.vx / v; y = d.vy / v; } else { const bx = B.x - d.x, by = B.y - d.y, L = Math.hypot(bx, by); if (!(L > 1)) return; x = bx / L; y = by / L; }
+    [x, y] = slideAim(G, d, x, y);
+    d.vx = x * DIVE_V; d.vy = y * DIVE_V;
+    p.slide = DIVE_T; p.slideCd = DIVE_CD; p.slideDx = x; p.slideDy = y; p.slideBall = false; p.kicking = false; p.slideBump = false; p.diving = true;
+    if (ev) ev.push({type:'slide', id: ++G.eventId, frame: G.frame, pid: p.id, dive: true});
+  }
   function startSlide(G, p, d, ev){
     const b = p.input; let x = ((b & 8) > 0) - ((b & 4) > 0), y = ((b & 2) > 0) - ((b & 1) > 0);
     const v = Math.sqrt(d.vx * d.vx + d.vy * d.vy);
@@ -1892,13 +1964,30 @@ function PBCORE(){
     [x, y] = slideAim(G, d, x, y);
     const along = d.vx * x + d.vy * y, s = SLIDE_V + 0.35 * Math.max(0, along);
     d.vx = x * s; d.vy = y * s;
-    p.slide = SLIDE_T; p.slideCd = SLIDE_CD; p.slideDx = x; p.slideDy = y; p.slideBall = false; p.kicking = false; p.slideBump = false;
+    p.slide = SLIDE_T; p.slideCd = SLIDE_CD; p.slideDx = x; p.slideDy = y; p.slideBall = false; p.kicking = false; p.slideBump = false; p.diving = false;
     if (ev) ev.push({type:'slide', id: ++G.eventId, frame: G.frame, pid: p.id});
   }
   function slideTick(G, ST, ev, predict){
     const D = G.discs, b = D[0];
     for (const p of G.players){
       if (p.slideCd > 0) p.slideCd--;
+      if (p.slide > 0 && p.diving){   // a keeper's dive: the ball in reach of his arms is parried, away from his goal
+        const d = D[p.di];
+        if (!p.slideBall && G.state === 1 && !G.sp){
+          const bx = b.x - d.x, by = b.y - d.y, dist = Math.sqrt(bx * bx + by * by), gap = dist - b.radius - d.radius;
+          if (dist > 0 && gap < DIVE_REACH){
+            const g = ST.goals.find(q => q.team === p.team) || ST.goals[0], gx = (g.x0 + g.x1) / 2, gy = (g.y0 + g.y1) / 2;
+            let ux = b.x - gx, uy = b.y - gy; const ul = Math.hypot(ux, uy) || 1; ux /= ul; uy /= ul;
+            const sp = Math.hypot(b.vx, b.vy), out = b.vx * ux + b.vy * uy, tx = b.vx - out * ux, ty = b.vy - out * uy;
+            const o = Math.max(2.4, sp * 0.55, out);
+            b.vx = ux * o + tx * 0.5 + p.slideDx * 0.6; b.vy = uy * o + ty * 0.5 + p.slideDy * 0.6; b.sp = 0; b.atT = 0;
+            p.slideBall = true;
+            if (!predict){ touch(G, p, true, true); if (ev){ ev.push({type:'kick', id: ++G.eventId, frame: G.frame, pid: p.id, speed: Math.hypot(b.vx, b.vy), slide: true, dive: true}); shotCheck(G, ST, p); } }
+          }
+        }
+        if (p.slide > 0 && --p.slide === 0){ p.down = DIVE_DOWN; p.diving = false; }
+        continue;
+      }
       if (p.slide > 0){
         const d = D[p.di];
         if (!p.slideBall && G.state === 1 && !G.sp){
@@ -2210,7 +2299,7 @@ function PBCORE(){
     for (const p of G.players){
       const d = G.discs[p.di], fresh = playerDisc(ST, p);
       if (p.ctrl === 'gone'){ d.cMask = 0; d.cGroup = 0; d.vx = d.vy = 0; d.x = 0; d.y = -9999; p.input = 0; continue; }   // (an empty place: off the pitch)
-      Object.assign(d, fresh); p.input = 0; p.slide = 0; p.slideCd = 0; p.down = 0; p.slideReq = false;
+      Object.assign(d, fresh); p.input = 0; p.slide = 0; p.slideCd = 0; p.down = 0; p.slideReq = false; p.diving = false;
       const q = count[p.team], sp = ST.spawns[p.team] || [];
       if (!sp.length){ let h = (q + 1) >> 1; if (!(q & 1)) h = -h; d.x = ST.spawnDistance * TEAMS[p.team].dir; d.y = 55 * h; }
       else { const s = sp[Math.min(q, sp.length - 1)]; d.x = s.x; d.y = s.y; }
@@ -2279,7 +2368,7 @@ function PBCORE(){
   const POWER_T = 60, POWER_MUL = 1.55, POWER_SLACK = 8;
   function movePlayer(ST, p, d, slow){
     const pp = ST.pp, m = PU[p.pu] || PU.none, b = p.input;
-    if (p.slide > 0){ d.damping = SLIDE_DAMP; return; }   // sliding: no steering
+    if (p.slide > 0){ d.damping = p.diving ? DIVE_DAMP : SLIDE_DAMP; return; }   // sliding (or diving): no steering
     let x = ((b & 8) > 0) - ((b & 4) > 0), y = ((b & 2) > 0) - ((b & 1) > 0);
     if (x && y){ x *= SQ; y *= SQ; }
     if (x || y){ const a = (p.kicking ? pp.kickingAcceleration : pp.acceleration) * (m.acc || 1) * (p.down > 0 ? 0.3 : 1) * (slow || 1); d.vx += x * a; d.vy += y * a; }
@@ -2332,7 +2421,7 @@ function PBCORE(){
       if (!(p.input & 16)) p.kicking = false;
       if (p.kickMin > 0) p.kickMin--;
       if (p.kickBurst < G.kickRate.burst) p.kickBurst++;
-      if (p.slideReq){ p.slideReq = false; if (G.cfg.slide && G.state === 1 && !p.slide && !p.slideCd && !G.sp && p.ctrl !== 'hold') startSlide(G, p, d, ev); }
+      if (p.slideReq){ p.slideReq = false; const dv = canDive(G, ST, p, d); if ((G.cfg.slide || dv) && G.state === 1 && !p.slide && !p.slideCd && !G.sp && p.ctrl !== 'hold'){ if (dv) startDive(G, p, d, ev); else startSlide(G, p, d, ev); } }
       const notMine = !!sp && sp.kind === 'fk' && sp.aim != null && sp.team === p.team && sp.tk !== p.id;   // (v25.7: a person's free kick is his)
       if (!bar && p.kicking && p.kickMin <= 0 && p.kickBurst >= 0 && !noKick && !notMine && !(p.slide > 0)){
         let kicked = false;
@@ -2352,7 +2441,7 @@ function PBCORE(){
     if (G.state === 1){ sx = []; for (let i = 0; i < D.length; i++) if (D[i].cGroup & 128) sx.push(i, D[i].x, D[i].y); }
     if (D[0].atT > 0) afterTouch(G, D[0]);
     physics(D, ST, dt);
-    if (G.cfg.slide) slideTick(G, ST, ev, predict);
+    if (G.cfg.slide || G.players.some(p => p.slide > 0 || p.down > 0 || p.slideCd > 0)) slideTick(G, ST, ev, predict);
     if (G.sp) setPieceTick(G);
     if (ev && G.state === 1 && G.frame % SHOT_RE === 0) shotRecheck(G, ST);
     switch (G.state){
@@ -2364,6 +2453,9 @@ function PBCORE(){
       }
       case 1: {
         if (!G.sp) G.time += 0.016666666666666666;   // the clock stops while a free kick or penalty is set up
+        // (v28.57, 2v2 "the ratings is very weird when u r gk and then striker": time in goal and out of it, so a rating
+        // judges each part of a match by the role played then; the stats go with the person on a swap, see seatSwap)
+        if ((G.frame & 7) === 0) for (const p of G.players){ if (p.ctrl === 'gone') continue; const ps = pstat(G, p); if (p.role === 'keeper') ps.kt = (ps.kt || 0) + 8; else ps.ot = (ps.ot || 0) + 8; }
         for (const p of G.players) D[p.di].cMask = ST.pmask || 39;
         let goal = -1, gi = -1;
         for (let k = 0; k < sx.length && goal < 0; k += 3){
@@ -2617,7 +2709,8 @@ function PBCORE(){
     }
     if (assist != null){ const a = G.players.find(q => q.id === assist); if (a) pstat(G, a).assists++; }
     const t = Math.floor(G.time);
-    st.goals.push({team: scorer, pid, assist, og, kmh, arr, t, slide});
+    const kpr = G.players.find(q => q.team !== scorer && q.role === 'keeper' && q.ctrl !== 'gone');   // (v28.57: who was in the goal it went in)
+    st.goals.push({team: scorer, pid, assist, og, kmh, arr, t, slide, kpid: kpr ? kpr.id : null});
     return {type:'goal', id: ++G.eventId, frame: G.frame, team: scorer, pid, assist, og, kmh, arr, slide, m, record: rec && st.goals.length > 1, t};
   }
   const KMH = 11.74;   // 1 px/tick in km/h on a 40 m futsal court
@@ -2656,7 +2749,7 @@ function PBCORE(){
 
   return {TAU, TICK, FL, IN, TEAMS, PU, KMH, limitHit, buildStadium, colliders, physics, crossesGoal, newGame, resetPositions, setInput, step, endGame, overtime, topTied,
           copyGame, extrapolate, ballPath, playerDisc, newStats, pstat, timeUp, inArea, areaOf, ballArea, setPiece,
-          CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, slideAim, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
+          CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, DIVE: {V: DIVE_V, T: DIVE_T, DAMP: DIVE_DAMP, DOWN: DIVE_DOWN, CD: DIVE_CD, REACH: DIVE_REACH}, canDive, slideAim, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
           fkPreview, FK_SHOW_PW, FK_AUTO, FK_HOLD, FK_HOLD_AIM, CURL, fkWallLine, fkWallSpot, autoCurl, manualCurl, curlTo, AC_BIT, INV_BIT, POWER_T, POWER_MUL, flightCross, curveMul, CURVE_LV,
           AUTO: {RANGE: AUTO_RANGE, WIDE: AUTO_WIDE, FK_WIDE, MID: AUTO_MID, IN: AUTO_IN, MAX: AUTO_MAX, K: AUTO_K, SAFE: AUTO_SAFE, FAR: AUTO_FAR, SMALL: AUTO_SMALL}, FK_CURVE};
 }
@@ -2791,7 +2884,7 @@ function PBAI(C){
   //  - KP_GSIDE: he presses only from this many px goal-side of the ball (null: from anywhere, as before)
   //  - KP_DEFLECT: ...and only where it doesn't come off him into the goal (a touch from behind, or from the side of a
   //    slow ball, only helps it on its way); with none of those he goes to his line in front of it
-  let KP_FRONT = null, KP_DEFLECT = 1, KP_AVOID = 1, KP_SAFEKICK = 1, KP_GSIDE = 4, KP_DIVE = 30, KP_DIVE_LINE = 12;
+  let KP_FRONT = null, KP_DEFLECT = 1, KP_AVOID = 1, KP_SAFEKICK = 1, KP_GSIDE = 4, KP_DIVE = 30, KP_DIVE_LINE = 12, KP_DIVE_AI = 1, KP_DIVE_P = 1;
   const clampBrain = b => { const o = {}; for (const [k, d, lo, hi] of SPEC){ const v = b && typeof b[k] === 'number' && isFinite(b[k]) ? b[k] : d; o[k] = Math.max(lo, Math.min(hi, v)); } return o; };
 
   const DIRS = [[0, 0, 0], [0, -1, 1], [0, 1, 2], [-1, 0, 4], [1, 0, 8], [-1, -1, 5], [1, -1, 9], [-1, 1, 6], [1, 1, 10]];
@@ -3300,6 +3393,26 @@ function PBAI(C){
       if (k) return k | 32;
     }
     // (v28.31) ...except out on a rush: then a slide that gets the ball first (out of his area, as anyone's) is his too
+    // v28.57 ("possibly dives for keeper"): a shot I can't get to running but can with a dive (its path within a dive's
+    // reach in the ticks it lasts): dive at it. From Normal up, a roll each shot: the chance of a slide tackle (L.sl x KP_DIVE_P)
+    if (KP_DIVE_AI && G.state === 1 && !G.sp && p.role === 'keeper' && !p.slide && !p.slideCd && !(p.down > 0) && (L.sl || 0) > 0 && C.canDive && C.canDive(G, ST, p, me)){
+      const g = goalOf(ST, team), shot = shotOnGoal(ST, P, g);
+      if (shot >= 1 && shot <= 40){
+        let run = false; for (let i = 1; i <= shot && i < P.length && !run; i++) if (slack(t, me, P[i], i, rr * KEEP_REACH) >= 0) run = true;
+        if (!run){
+          const V = C.DIVE.V, K = C.DIVE.DAMP, R = rr + C.DIVE.REACH;
+          let hit = null; for (let i = 1; i <= Math.min(shot, C.DIVE.T) && i < P.length; i++){ const q = P[i], dd = Math.hypot(q.x - me.x, q.y - me.y), reach = V * (1 - Math.pow(K, i)) / (1 - K); if (dd - R <= reach){ hit = q; break; } }
+          if (hit){
+            if (mem.dvAt == null || G.frame - mem.dvAt > 60){ mem.dvAt = G.frame; mem.dvRoll = rnd(mem); }
+            if (mem.dvRoll < Math.min(1, (L.sl || 0) * KP_DIVE_P)){
+              const dx = hit.x - me.x, dy = hit.y - me.y, l = Math.hypot(dx, dy) || 1; let b = 32;
+              if (dx > 0.38 * l) b |= 8; else if (dx < -0.38 * l) b |= 4; if (dy > 0.38 * l) b |= 2; else if (dy < -0.38 * l) b |= 1;
+              return b;
+            }
+          }
+        }
+      }
+    }
     if (SLIDE_AI && KP_RUSH_SLIDE && G.cfg.slide && G.state === 1 && !G.sp && p.role === 'keeper' && pl.rush && !p.slide && !p.slideCd && !(p.down > 0)){
       const k = slideTry(G, ST, t, p, me, Object.assign({}, L, {sl: Math.max(L.sl || 0, KP_RUSH_SLIDE)}), mem, P, rr);
       if (k) return k | 32;
@@ -4213,7 +4326,7 @@ function PBAI(C){
     if ('shotHr' in o) SHOT_HR = o.shotHr; if ('endGuard' in o) END_GUARD = o.endGuard; if ('cutback' in o) CUTBACK = o.cutback; if ('backpass' in o) BACKPASS = o.backpass; if ('leadRun' in o) LEAD_RUN = o.leadRun; if ('barge' in o) BARGE_R = o.barge; if ('slideAi' in o) SLIDE_AI = o.slideAi; if ('control' in o) KEEP_CONTROL = o.control; if ('slideGap' in o) SLIDE_GAP = o.slideGap; if ('postAim' in o) POST_AIM = o.postAim; if ('bargeGs' in o) BARGE_GS = o.bargeGs; if ('bargeSolo' in o) BARGE_SOLO = o.bargeSolo; if ('slideSolo' in o) SLIDE_SOLO = o.slideSolo;
     if ('pressFollow' in o) PRESS_FOLLOW = o.pressFollow; if ('pressSide' in o) PRESS_SIDE = o.pressSide; if ('rushWide' in o) RUSH_WIDE = o.rushWide; if ('backR' in o) KEEP_BACK_R = o.backR; if ('closeMinS' in o) CLOSE_MIN_S = o.closeMinS; if ('closeR' in o) CLOSE_R = o.closeR; if ('closeSlack' in o) CLOSE_SLACK = o.closeSlack; if ('rushR' in o) RUSH_R = o.rushR; if ('rushGap' in o) RUSH_GAP = o.rushGap; if ('rushMax' in o) RUSH_MAX = o.rushMax;
     if ('kpress' in o) KEEP_PRESS = o.kpress; if ('kpressLate' in o) KEEP_PRESS_LATE = o.kpressLate; if ('kpMargin' in o) KP_MARGIN = o.kpMargin; if ('kpRcap' in o) KP_RCAP = o.kpRcap; if ('kpRecheck' in o) KP_RECHECK = o.kpRecheck;
-    if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside; if ('kpDive' in o) KP_DIVE = o.kpDive; if ('kpDiveLine' in o) KP_DIVE_LINE = o.kpDiveLine;
+    if ('clearSmart' in o) CLEAR_SMART = o.clearSmart; if ('clearFwd' in o) CLEAR_FWD = o.clearFwd; if ('clearFar' in o) CLEAR_FAR = o.clearFar; if ('clearTurn' in o) CLEAR_TURN = o.clearTurn; if ('clearTurnFree' in o) CLEAR_TURN_FREE = o.clearTurnFree; if ('kpIntoFoe' in o) KP_INTOFOE = o.kpIntoFoe; if ('kpFoeR' in o) KP_FOE_R = o.kpFoeR; if ('kpFoeCos' in o) KP_FOE_COS = o.kpFoeCos; if ('kpCommit' in o) KP_COMMIT = o.kpCommit; if ('kpCommitZone' in o) KP_COMMIT_ZONE = o.kpCommitZone; if ('kpCommitLate' in o) KP_COMMIT_LATE = o.kpCommitLate; if ('kpFront' in o) KP_FRONT = o.kpFront; if ('kpDeflect' in o) KP_DEFLECT = o.kpDeflect; if ('kpAvoid' in o) KP_AVOID = o.kpAvoid; if ('kpSafeKick' in o) KP_SAFEKICK = o.kpSafeKick; if ('kpGside' in o) KP_GSIDE = o.kpGside; if ('kpDive' in o) KP_DIVE = o.kpDive; if ('kpDiveLine' in o) KP_DIVE_LINE = o.kpDiveLine; if ('kpDiveAi' in o) KP_DIVE_AI = o.kpDiveAi; if ('kpDiveP' in o) KP_DIVE_P = o.kpDiveP;
     if ('show' in o) SHOW = o.show; if ('showD' in o) SHOW_D = o.showD;
     if ('callT' in o) CALL_T = o.callT; if ('kpHoldT' in o) KP_HOLD_T = o.kpHoldT; if ('kpYield' in o) KP_YIELD = o.kpYield; if ('kpPassMin' in o) KP_PASS_MIN = o.kpPassMin; if ('kpClearT' in o) KP_CLEAR_T = o.kpClearT; if ('kpClearN' in o) KP_CLEAR_N = o.kpClearN; if ('kpRushCall' in o) KP_RUSH_CALL = o.kpRushCall; if ('kpWonT' in o) KP_WON_T = o.kpWonT; if ('kpWon' in o) KP_WON = o.kpWon; if ('kpRushThru' in o) KP_RUSH_THRU = o.kpRushThru; if ('kpWonBy' in o) KP_WON_BY = o.kpWonBy; if ('kpAtGap' in o) KP_AT_GAP = o.kpAtGap; if ('callHoldT' in o) CALL_HOLD_T = o.callHoldT; if ('autoRushR' in o) AUTO_RUSH_R = o.autoRushR; if ('callRushR' in o) CALL_RUSH_R = o.callRushR; if ('callRushT' in o) CALL_RUSH_T = o.callRushT; if ('rushCharge' in o) KP_RUSH_CHARGE = o.rushCharge; if ('rushSlide' in o) KP_RUSH_SLIDE = o.rushSlide; if ('kpRecv' in o) KP_RECV = o.kpRecv; if ('recvV' in o) RECV_V = o.recvV; if ('recvEarly' in o) RECV_EARLY = o.recvEarly; if ('recvFoe' in o) RECV_FOE = o.recvFoe; if ('recvAway' in o) RECV_AWAY = o.recvAway; if ('kpDance' in o) KP_DANCE = o.kpDance; if ('kpHurry' in o) KP_HURRY = o.kpHurry; if ('kpNowFoe' in o) KP_NOW_FOE = o.kpNowFoe; if ('kpNowFwd' in o) KP_NOW_FWD = o.kpNowFwd; if ('kpNowGain' in o) KP_NOW_GAIN = o.kpNowGain; if ('kpPath' in o) KP_PATH = o.kpPath; if ('kpPathV' in o) KP_PATH_V = o.kpPathV; if ('kpPathR' in o) KP_PATH_R = o.kpPathR; if ('kpPathEarly' in o) KP_PATH_EARLY = o.kpPathEarly; if ('stuckT' in o) STUCK_T = o.stuckT; if ('aiPower' in o) AI_POWER = o.aiPower; if ('shotFirst' in o) SHOT_FIRST = o.shotFirst; if ('koGuard' in o) KO_GUARD = o.koGuard; if ('powerFoe' in o) POWER_FOE = o.powerFoe; if ('powerRange' in o) POWER_RANGE = o.powerRange; if ('powerGain' in o) POWER_GAIN = o.powerGain; if ('autoRushLane' in o) AUTO_RUSH_LANE = o.autoRushLane; if ('autoRushLate' in o) AUTO_RUSH_LATE = o.autoRushLate; if ('knockWin' in o) KNOCK_WIN = o.knockWin; if ('knockContest' in o) KNOCK_CONTEST = o.knockContest; if ('openRush' in o) KP_OPEN_RUSH = o.openRush; if ('shotKreach' in o) SHOT_KREACH = o.shotKreach; if ('closeStraight' in o) CLOSE_STRAIGHT = o.closeStraight; if ('straightFloor' in o) STRAIGHT_FLOOR = o.straightFloor; if ('aggrMin' in o) AGGR_MIN = o.aggrMin; if ('gsReach' in o) GS_REACH = o.gsReach; if ('gsSpeed' in o) GS_SPEED = o.gsSpeed; if ('gsMargin' in o) GS_MARGIN = o.gsMargin; if ('gsPath' in o) GS_PATH = o.gsPath; if ('gsWall' in o) GS_WALL = o.gsWall; if ('gsRun' in o) GS_RUN = o.gsRun; if ('gsKeep' in o) GS_KEEP = o.gsKeep; if ('gsTol' in o) GS_TOL = o.gsTol; if ('gsWallRun' in o) GS_WALLRUN = o.gsWallRun; if ('gsFront' in o) GS_FRONT = o.gsFront; if ('slideWall' in o) SLIDE_WALL = o.slideWall; if ('bargeV' in o) BARGE_V = o.bargeV; if ('openR' in o) OPEN_R = o.openR; if ('openSlack' in o) OPEN_SLACK = o.openSlack; if ('openFoe' in o) OPEN_FOE = o.openFoe; if ('knockMargin' in o) KNOCK_MARGIN = o.knockMargin; if ('keepMaxD' in o) KEEP_MAXD = o.keepMaxD; if ('autoRushComing' in o) AUTO_RUSH_COMING = o.autoRushComing; if ('koSway' in o){ KO_SWAY_X = o.koSway[0]; KO_SWAY_Y = o.koSway[1]; KO_SWAY_K = o.koSway[2]; }
     if ('fkAiRead' in o) FK_AI_READ = o.fkAiRead; if ('fkAiMin' in o) FK_AI_MIN = o.fkAiMin; if ('fkAiStep' in o) FK_AI_STEP = o.fkAiStep;
@@ -4323,7 +4436,7 @@ const clean = (s, n) => Array.from(String(s == null ? '' : s).replace(UNSAFE, ''
 // animation effects off, many school laptops) got the calm celebration: no sweeping band, one firework, no confetti.
 // Settings → Celebrations: Full or Calm, the device's setting until one is picked (pb.fx)
 const deviceCalm = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
-let reduceMotion = (v => v === 'full' ? false : v === 'calm' ? true : deviceCalm)(store.get('pb.fx', ''));
+let reduceMotion = (v => v === 'calm')(store.get('pb.fx', ''));   // (v28.57, "make it start as ... full celebration": Full until Calm is picked; was the device's setting)
 
 // ---------- settings ----------
 const TIME_OPTS = [1, 2, 3, 5, 7, 10, 15, 20, 0], GOAL_OPTS = [1, 2, 3, 4, 5, 7, 10, 15, 0];   // 0 = no limit
@@ -4331,10 +4444,11 @@ const SET = {
   diff: [0, 1, 2, 3].includes(store.get('pb.diff', 1)) ? store.get('pb.diff', 1) : 1,
   time: TIME_OPTS.includes(store.get('pb.time', 3)) ? store.get('pb.time', 3) : 3, goals: GOAL_OPTS.includes(store.get('pb.goals', 3)) ? store.get('pb.goals', 3) : 3,
   extrapAuto: false,
-  extrap: Math.max(-200, Math.min(1000, Math.round(+store.get('pb.extrap', 0) || 0))), ghost: !!store.get('pb.ghost', 0), smooth: store.get('pb.smooth', 1) !== 0, zoom: +store.get('pb.zoom', 0) || 0,
+  extrap: Math.max(-200, Math.min(1000, Math.round(+store.get('pb.extrap', 30) || 0))),   // (v28.57: 30 ms to start with, "make it start as like 30ms extrap") ghost: !!store.get('pb.ghost', 0), smooth: store.get('pb.smooth', 1) !== 0, zoom: +store.get('pb.zoom', 0) || 0,
   ref: store.get('pb.ref', 1) !== 0, aiCom: store.get('pb.aicom', 1) !== 0, sound: store.get('pb.sound', 1) !== 0, replays: store.get('pb.replays', 1) !== 0, side: store.get('pb.side', 0) === 1 ? 1 : 0,
   legs: store.get('pb.legs', 1) === 2 ? 2 : 1, ac: [0, 1, 2].map(i => { const v = store.get('pb.ac', null); return Array.isArray(v) && v[i] === 1; }), inv: [0, 1, 2].map(i => { const v = store.get('pb.inv', null); return Array.isArray(v) && v[i] === 1; }), power: store.get('pb.power', 0) === 1, intro: store.get('pb.intro', 1) !== 0, curve: store.get('pb.curve', 1) === 1, slide: store.get('pb.slide', 1) !== 0, fk: store.get('pb.fk', 1) === 1, curveLv: [1, 2, 3, 4, 5].includes(store.get('pb.curveLv', 3)) ? store.get('pb.curveLv', 3) : 3, tie: [0, 1, 2].includes(store.get('pb.tie', 0)) ? store.get('pb.tie', 0) : 0,
-  nick: clean(store.get('pb.nick', ''), 16), avatar: clean(store.get('pb.avatar', ''), 2)
+  nick: clean(store.get('pb.nick', ''), 16), avatar: clean(store.get('pb.avatar', ''), 2),
+  coach: store.get('pb.coach', null) == null ? null : store.get('pb.coach', 1) !== 0   // (v28.57: null = on until 8 matches played)
 };
 // v25.1: the curve as the menus show it, a percentage: 0 (off) or 20-100 for levels 1-5 (60: level 3, normal). A free
 // kick's curl is set at the kick with left and right, whatever this says (v25.5.2)
@@ -4849,6 +4963,7 @@ function onEvent(s, e){
   if (e.type === 'kick'){
     sfx.kick(e.speed);
     const p = playerById(G, e.pid);
+    if (p && (s.locals || []).some(L => L.pid === p.id)){ if (e.fk) coachCount('fk'); else if (!e.slide){ coachCount('kick'); if (Math.abs(G.discs[0].sp || 0) > 0.01) coachCount('curl'); } }   // (v28.57: the beginner tips)
     if (p && p.ctrl === 'human' && s.kind === 'local' && !twoP(s.cfg) && s.cfg.mode !== 'keeper' && s.cfg.mode !== 'wall' && s.cfg.mode !== 'dribble' && s.cfg.mode !== 'tri' && s.cfg.mode !== 'fkdrill') learnShot(G);
     if (e.fk && e.power != null) say(`Free kick · ${e.power}% power`, 1);
   } else if (e.type === 'goal'){
@@ -4882,12 +4997,12 @@ function onEvent(s, e){
   } else if (e.type === 'post'){
     if (realMatch(s)){ if (!e.late) popFx('post', null, e.x, e.y, e.kmh, false); say(`Off the post! ${nameOf(s, playerById(G, e.pid)) || KIT[e.team].name}${e.kmh > 0 ? ' · ' + Math.round(e.kmh) + ' km/h' : ''}`); }
     else if ((s.mode.kind === 'practice' || s.mode.kind === 'pens' || s.mode.kind === 'fkdrill') && !e.late) popFx('post', null, e.x, e.y, e.kmh, false);
-  } else if (e.type === 'slide'){ const p = playerById(G, e.pid); sfx.slide(); if (p) dustFx(G.discs[p.di], p.slideDx, p.slideDy); }
+  } else if (e.type === 'slide'){ const p = playerById(G, e.pid); if (p && (s.locals || []).some(L => L.pid === p.id)) coachCount(e.dive ? 'dive' : 'slide'); sfx.slide(); if (p) dustFx(G.discs[p.di], p.slideDx, p.slideDy); }
   else if (e.type === 'foul') foulFx(s, e, nameOf(s, playerById(G, e.pid)), nameOf(s, playerById(G, e.vid)));
   else if (e.type === 'playon'){ if (realMatch(s)) refPlayOn(e.team); }
-  else if (e.type === 'call') callFx(e.pid);
+  else if (e.type === 'call'){ callFx(e.pid); if ((s.locals || []).some(L => L.pid === e.pid)) coachCount('call'); }
   else if (e.type === 'pcharge'){ const p = playerById(G, e.pid); if (p && (s.locals || []).some(L => L.pid === p.id)) sfx.chime(); }   // (v28.34: your power shot is ready)
-  else if (e.type === 'power'){ popFx('power', e.pid, 0, 0, e.speed * C.KMH, false); fx.powerUntil = performance.now() + 900; sfx.boom(0.7); }
+  else if (e.type === 'power'){ if ((s.locals || []).some(L => L.pid === e.pid)) coachCount('power'); popFx('power', e.pid, 0, 0, e.speed * C.KMH, false); fx.powerUntil = performance.now() + 900; sfx.boom(0.7); }
   else if (e.type === 'emote') emoteFx(e.pid, e.e);
   else if (e.type === 'kickoff'){ if (!s.mode && s.ticks < 30 && !s.introDone){ sfx.whistle(0.25); refWhistle(); refAct(null, ['Let\'s play!', 'Good luck!', 'Play!'][Math.floor(Math.random() * 3)], {sayMs: 1300}); } s.koAt = {frame: G.frame, team: G.koTeam}; fxEnd(); }
   else if (e.type === 'reset'){ fxEnd(); refGoalNow(); }   // (lined up for the kick-off: the celebration is over; the referee has his say about it)
@@ -6138,7 +6253,10 @@ function dribbleMode(){
 // v28.32 ("remember to include all controls in tutorial"): every control has a step or a line: moving, kicking (and
 // holding kick), shooting, curling (and auto curl), calling for the ball (and the keeper's rush), slide tackles, free
 // kicks, emotes, the other keys (menu, pause, restart, fullscreen, zoom, chat, two on one keyboard), extrapolation
-const TUT_STEPS = ['move', 'kick', 'score', 'curl', 'call', 'slide', 'fk', 'emote', 'keys', 'extrap', 'done'];
+// v28.57 ("the tutorial is kinda hard for begineers, maybe make tell the new ppl how to do settings first"): your settings first
+// (how hard the computer is, the help bar, your keys), shorter words, a keeper's dive, and the harder steps let you on
+// after a couple of goes
+const TUT_STEPS = ['setup', 'move', 'kick', 'score', 'curl', 'call', 'slide', 'dive', 'fk', 'emote', 'keys', 'extrap', 'done'];
 // v28.34 ("also have a tutorial on how to curl"): the curl lesson (Practice), the same panel: bend it up round a man,
 // down round him, in from out wide to the far post, auto curl, a free kick's curl; each done by scoring it that way
 const CURL_STEPS = ['cup', 'cdown', 'cfar', 'cauto', 'cfk', 'cdone'];
@@ -6146,6 +6264,9 @@ const CURL_STEPS = ['cup', 'cdown', 'cfar', 'cauto', 'cfk', 'cdone'];
 const POWER_STEPS = ['pcharge', 'pshot', 'plose', 'pkeeper', 'pdone'];
 const tutSteps = m => m && m.lesson === 'curl' ? CURL_STEPS : m && m.lesson === 'power' ? POWER_STEPS : TUT_STEPS;
 const tutLast = st => st === 'done' || st === 'cdone' || st === 'pdone';
+// (v28.57) each step's name, for the row of dots (click one to go to it)
+const TUT_TITLE = {setup: 'Your settings', move: 'Move', kick: 'Kick', score: 'Score', curl: 'Curl it', call: 'Call for the ball', slide: 'Slide tackle', dive: 'Keeper: dive', fk: 'Free kick', emote: 'Emotes', keys: 'Other keys', extrap: 'Extrapolation', done: 'You\'re ready',
+  cup: 'Over the top', cdown: 'Underneath', cfar: 'Far post', cauto: 'Auto curl', cfk: 'Free kick curl', cdone: 'That\'s curling', pcharge: 'Charge it', pshot: 'Shoot it', plose: 'Keep it or lose it', pkeeper: 'Past the keeper', pdone: 'That\'s the power shot'};
 const LESSON_NAME = {curl: 'Curl lesson', power: 'Power shot lesson'};
 const tutKeys = () => { const k = (p, a) => bind[p] && bind[p][a] ? kname(bind[p][a]) : '';
   if (coarseScreen() && !kbUsed) return {touch: true, move: 'the stick', up: 'stick up', down: 'stick down', left: 'stick left', right: 'stick right', kick: 'KICK', slide: 'SLIDE'};   // (a phone)
@@ -6163,13 +6284,16 @@ function tutorialMode(lesson){
   M.setup = s => {
     const G = s.G, P = me(s), Q = cp(s), d = G.discs[P.di], b = G.discs[0], gm = goalMid(1), dir = Math.sign(gm.x) || 1;
     G.state = 1; G.sp = null; G.lastTouch = null; G.ballHist.length = 0; s.msg = null;
-    Object.assign(tu, {ok: false, okAt: 0, n: 0, curled: false, kicked: false, note: '', targets: [], called: null, passed: false, pz: 0, kn: 0, zi0: zi, bend: 0, keys: 0, wait: 0, fkT: 0, powered: false, full: false, kickF: 0});
+    Object.assign(tu, {ok: false, okAt: 0, n: 0, curled: false, kicked: false, note: '', targets: [], dived: false, called: null, passed: false, pz: 0, kn: 0, zi0: zi, bend: 0, keys: 0, wait: 0, fkT: 0, powered: false, full: false, kickF: 0});
     P.pw = 0; P.pwOff = 0;
     const q = Q && G.discs[Q.di];
     if (Q){ if (tu.qTeam == null) tu.qTeam = Q.team; if (Q.team !== tu.qTeam){ Q.team = tu.qTeam; Object.assign(q, C.playerDisc(ST, Q)); } }   // (the call step had him on your side)
     const park = () => { if (Q){ Q.ctrl = 'hold'; C.setInput(Q, 0); q.x = 0; q.y = -(ST.height - 16); still(q); } };
     const st = step();
-    if (st === 'move'){ d.x = -dir * 150; d.y = 0; b.x = 0; b.y = ST.height * 0.75; park(); tu.targets = [[-dir * 40, -90], [dir * 100, -20], [-dir * 170, 10]]; /* (clear of the panel at the foot) */ }
+    P.role = st === 'dive' ? 'keeper' : 'striker';
+    if (st === 'setup'){ park(); d.x = -dir * 60; d.y = 0; b.x = 0; b.y = 0; tu.ok = true; tu.note = ''; }
+    else if (st === 'dive'){ park(); const g0 = goalMid(0), dn = Math.sign(-g0.x) || 1; d.x = g0.x + dn * 20; d.y = g0.y; tu.sy = (tu.tries % 2 ? -1 : 1); b.x = g0.x + dn * 200; b.y = g0.y - tu.sy * 40; tu.wait = 70; }
+    else if (st === 'move'){ d.x = -dir * 150; d.y = 0; b.x = 0; b.y = ST.height * 0.75; park(); tu.targets = [[-dir * 40, -90], [dir * 100, -20], [-dir * 170, 10]]; /* (clear of the panel at the foot) */ }
     else if (st === 'kick'){ d.x = -dir * 120; d.y = 0; b.x = -dir * 70; b.y = 0; park(); }
     else if (st === 'score'){ b.x = gm.x - dir * 170; b.y = -20; d.x = b.x - dir * 50; d.y = -20; park(); }
     else if (st === 'curl'){ b.x = gm.x - dir * 210; b.y = 0; d.x = b.x - dir * 45; d.y = 0; park(); if (Q){ q.x = gm.x - dir * 110; q.y = 0; still(q); Q.role = 'wall'; } }
@@ -6192,6 +6316,7 @@ function tutorialMode(lesson){
   M.init = s => { M.setup(s); };
   const pass = (s, note) => { if (tu.ok) return; tu.ok = true; tu.okAt = performance.now(); tu.note = note || 'Done!'; sfx.chime && sfx.chime(); tutPanel(s); };
   M.next = s => { if (tu.i < STEPS.length - 1){ tu.i++; tu.tries = 0; M.setup(s); } };
+  M.goto = (s, k) => { tu.i = Math.max(0, Math.min(STEPS.length - 1, k)); tu.tries = 0; M.setup(s); };   // (v28.57: back a step, start over, or any step)
   M.before = s => {
     const G = s.G;
     if (G.state === 2 && G.timer <= 1){ G.state = 1; if (tu.ok) M.next(s); else M.setup(s); return; }   // (after a goal: on, or this step again)
@@ -6201,16 +6326,19 @@ function tutorialMode(lesson){
     for (const e of G.events){
       if (e.type === 'kick' && e.pid === P.id){ tu.kicked = true; if (st === 'kick') pass(s, 'Nice kick! Running into the ball only pushes it: the kick key is what gives it power.');
         if (st === 'curl' || curlStep(st) || st === 'cfk'){ tu.curled = Math.abs(b.sp || 0) > 0.01; tu.bend = Math.sign(b.sp || 0); tu.keys = P.input; }
-        if (st === 'slide' && e.slide) pass(s, 'Clean tackle: you got the ball first.'); }
-      if (e.type === 'foul' && e.pid === P.id && st === 'slide'){ tu.tries++; tu.note = 'Foul! You took the man first. Slide at the ball, from the side it sticks out.'; setTimeout(() => { if (sess === s && step() === 'slide' && !tu.ok) M.setup(s); }, 1400); tutPanel(s); }
+        if (st === 'slide' && e.slide && !e.dive) pass(s, 'Clean tackle: you got the ball first.');
+        if (st === 'dive' && e.dive) tu.dived = true; }
+      if (e.type === 'foul' && e.pid === P.id && st === 'slide' && tu.tries >= 2){ tu.tries++; pass(s, 'Foul again, but that\'s the idea: go for the ball, not the man. You can go on.'); }
+      else if (e.type === 'foul' && e.pid === P.id && st === 'slide'){ tu.tries++; tu.note = 'Foul! You took the man first. Slide at the ball, from the side it sticks out.'; setTimeout(() => { if (sess === s && step() === 'slide' && !tu.ok) M.setup(s); }, 1400); tutPanel(s); }
       if (e.type === 'call' && e.pid === P.id && st === 'call' && !tu.ok && tu.called == null){ tu.called = G.frame; tu.note = 'Called! Here it comes…'; const Q = cp(s); if (Q){ Q.ctrl = 'ai'; aiMem(s, Q).plan = null; } tutPanel(s); }
       if (e.type === 'pcharge' && e.pid === P.id && st === 'pcharge') pass(s, 'Charged: the ball glows. Kick it now and it goes half as hard again; step off it and the charge is gone.');
       if (e.type === 'power' && e.pid === P.id){ tu.powered = true; if (st === 'plose' && !tu.ok){ tu.full = false; tu.note = 'That one went off: this time, once it glows, step away from it instead.'; tutPanel(s); } }
       if (e.type === 'kick' && e.pid === P.id && (st === 'pshot' || st === 'pkeeper')){ tu.kicked = true; tu.kickF = G.frame; }
       if (e.type === 'emote' && e.pid === P.id && st === 'emote') pass(s, 'Online everyone sees it. Two on one keyboard: P1 has 1–5, P2 6–0.');
       if (e.type === 'goal'){
-        if (st === 'score' && e.team === P.team) pass(s, 'Goal! After a goal everyone\'s keys are let go: press them again to move.');
-        else if (st === 'curl' && e.team === P.team){ tu.tries++; if (tu.curled) pass(s, 'Curled it in! Holding up or down as you kick bends the ball.'); else { tu.note = tu.tries >= 3 ? 'Scored. It went in straight, which is fine too; you can go on.' : 'Scored, but straight: hold up or down as you kick to bend it.'; if (tu.tries >= 3) pass(s, tu.note); else tutPanel(s); } }
+        if (st === 'dive'){ tu.tries++; M.setup(s); tu.note = tu.tries >= 3 ? '' : `In. Again: press ${tutKeys().slide} as it comes, pointing at it.`; if (tu.tries >= 3) pass(s, 'Have it as done: you can go on.'); else tutPanel(s); }
+        else if (st === 'score' && e.team === P.team) pass(s, 'Goal! After a goal everyone\'s keys are let go: press them again to move.');
+        else if (st === 'curl' && e.team === P.team){ tu.tries++; if (tu.curled) pass(s, 'Curled it in! Holding up or down as you kick bends the ball.'); else { tu.note = tu.tries >= 2 ? 'Scored. It went in straight, which is fine too; you can go on.' : 'Scored, but straight: hold up or down as you kick to bend it.'; if (tu.tries >= 2) pass(s, tu.note); else tutPanel(s); } }
         else if (st === 'fk' && e.team === P.team) pass(s, 'Free kick goal!');
         else if ((st === 'pshot' || st === 'pkeeper') && e.team === P.team){   // (the power shot lesson: in, and a power shot)
           tu.tries++;
@@ -6238,7 +6366,12 @@ function tutorialMode(lesson){
       const lt = G.lastTouch, Q = cp(s);
       if (lt && Q && lt.id === Q.id && lt.kick) tu.passed = true;
       if (tu.passed && lt && lt.id === P.id) pass(s, 'He passed it to you. When one of theirs is through on your goal, the same two taps send your keeper out at him.');
-      else if (G.frame - tu.called > 360){ tu.tries++; M.setup(s); tu.note = 'Again: two quick taps of kick, away from the ball.'; tutPanel(s); }
+      else if (G.frame - tu.called > 360){ tu.tries++; if (tu.tries >= 2){ pass(s, 'He\'ll pass when it\'s safe: two quick taps of kick is all it takes. You can go on.'); } else { M.setup(s); tu.note = 'Again: two quick taps of kick, away from the ball.'; tutPanel(s); } }
+    }
+    if (st === 'dive' && !tu.ok){
+      if (tu.wait > 0 && G.pause === 0 && --tu.wait === 0){ const g0 = goalMid(0), ty = g0.y + tu.sy * (g0.half - 14), dx = g0.x - b.x, dy = ty - b.y, l = Math.hypot(dx, dy) || 1; b.vx = dx / l * 4.6; b.vy = dy / l * 4.6; }
+      if (tu.dived && G.lastTouch && G.lastTouch.id === P.id && tu.wait === 0){ pass(s, 'Saved with a dive! In goal your slide key dives: it reaches further than you can run. You get up slowly, so dive only when you must.'); }
+      else if (tu.wait === 0 && Math.hypot(b.vx, b.vy) < 0.05){ tu.tries++; M.setup(s); tu.note = tu.tries >= 3 ? 'Have it as done: you can go on.' : `Again: press ${tutKeys().slide} as the ball comes, pointing at it.`; if (tu.tries >= 3) pass(s, tu.note); else tutPanel(s); }
     }
     if (st === 'move' && !tu.ok){ const t = tu.targets[tu.n]; if (t && Math.hypot(d.x - t[0], d.y - t[1]) < 24){ tu.n++; sfx.kick && sfx.kick(0.3); if (tu.n >= tu.targets.length) pass(s, 'You can move. Diagonals work too: hold two keys.'); else tutPanel(s); } }
     if (st === 'fk' && !tu.ok && !G.sp && tu.kicked){ tu.fkT = (tu.fkT || 0) + 1; if (tu.fkT > 150) pass(s, 'That\'s a free kick. The keeper reads your aim: aim one way, curl it the other.'); }
@@ -6249,7 +6382,7 @@ function tutorialMode(lesson){
     if (st === 'kick' || st === 'score' || st === 'curl' || curlStep(st)){   // (the ball gone off somewhere, or stopped short: put it back)
       const v = Math.hypot(b.vx, b.vy); if (tu.kicked && !tu.ok && v < 0.05){ tu.wait = (tu.wait || 0) + 1; if (tu.wait > 90){ tu.wait = 0; if (st !== 'kick'){ tu.tries++; const nt = (st === 'curl' || curlStep(st)) && tu.tries < 3 ? 'Not in. Again: hold the key as you kick.' : 'Not in. Have another go.'; M.setup(s); tu.note = nt; tutPanel(s); } } } else tu.wait = 0;
     }
-    if (tu.ok && performance.now() - tu.okAt > 2200 && st !== 'extrap' && !tutLast(st) && G.state === 1) M.next(s);
+    if (tu.ok && performance.now() - tu.okAt > 2200 && st !== 'extrap' && st !== 'setup' && !tutLast(st) && G.state === 1) M.next(s);
   };
   // the targets of the first step, and the curl's way round
   M.draw = V => {
@@ -6275,18 +6408,20 @@ function tutPanel(s){
   if (!m){ box.hidden = true; return; }
   const tu = m.tu, L = tutSteps(m), st = L[tu.i], K = tutKeys(), kb = t => `<kbd>${t}</kbd>`, inv = !!SET.inv[0], kUp = inv ? K.down : K.up, kDn = inv ? K.up : K.down, swapped = inv ? ' (your curl keys are swapped)' : '';
   const T = {
-    move: ['Move', `Move with ${kb(K.move)}. Run through the yellow circles, in order.`, `${tu.n} of ${tu.targets.length || 3}`],
-    kick: ['Kick', `Walk up to the ball and ${K.touch ? 'tap' : 'press'} ${kb(K.kick)} when you're right next to it. Running into it only nudges it. ${K.touch ? 'Hold it' : 'Holding it'} as you run in kicks the moment it's in reach (you run a little slower while you hold it).`, ''],
-    score: ['Score', `Shoot it into the goal on the right: get behind the ball, face the goal, ${kb(K.kick)}.`, ''],
-    curl: ['Curl it', `A man is in the way. Hold ${kb(K.up)} or ${kb(K.down)} as you kick: the ball bends that way and still goes where you aimed. Bend it round him. (More in Practice: the curl lesson.)`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    call: ['Call for the ball', `Your teammate has it. Tap ${kb(K.kick)} twice quickly (away from the ball) to call for it: your computer teammates pass to you, and your keeper holds it a moment for you.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    slide: ['Slide tackle', `${K.touch ? 'Tap' : 'Press'} ${kb(K.slide)} to slide. The computer has the ball: slide into the ball, not the man (taking the man first is a foul, and in your own area a penalty).`, ''],
-    fk: ['Free kick', `You were fouled: your free kick. ${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)} to power it up and let go to shoot. The dots show where it will go.`, ''],
+    setup: ['Your settings first', `Pick how hard the computer is (Easy is best to start), and whether you want the help bar under the pitch: your keys light up as you press them, with a tip for what to do. Change your keys in Controls. All of it is in ⚙ Settings later too (at the foot of the menu, or ☰ Menu in a match).`, ''],
+    move: ['Move', `Move with ${kb(K.move)}. Run through the yellow circles.`, `${tu.n} of ${tu.targets.length || 3}`],
+    kick: ['Kick', `Walk up to the ball and ${K.touch ? 'tap' : 'press'} ${kb(K.kick)}. (Running into it only nudges it.)`, ''],
+    score: ['Score', `Get behind the ball, facing the goal on the right, and press ${kb(K.kick)}.`, ''],
+    curl: ['Curl it', `A man is in the way. Hold ${kb(K.up)} or ${kb(K.down)} while you press ${kb(K.kick)}: the ball bends round him.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    call: ['Call for the ball', `Your teammate has the ball. Tap ${kb(K.kick)} twice, quickly: he passes it to you.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    slide: ['Slide tackle', `The computer has the ball. ${K.touch ? 'Tap' : 'Press'} ${kb(K.slide)} to slide in. Hit the ball, not the man (that's a foul).`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    dive: ['In goal: dive', `You're in goal. When the shot comes, ${K.touch ? 'tap' : 'press'} ${kb(K.slide)} to dive at it (point with ${K.touch ? 'the stick' : kb(K.up) + ' ' + kb(K.down)}). In a 2v2 match ${kb(bind.p1.gk ? kname(bind.p1.gk) : 'G')} puts you in goal.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    fk: ['Free kick', `Your free kick: ${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)} and let go to shoot. The dots show where it goes.`, ''],
     emote: ['Emotes', K.touch ? `Tap 😎 on the pitch and pick one: it shows over your player (EZ, Skill issue 💀 and more).` : `Press a number, ${kb('1')} to ${kb('8')}: an emote over your player (EZ, Skill issue 💀 and more).`, ''],
     keys: ['Other keys', K.touch ? `The buttons in the corner: Pause, ⚙ Settings (zoom, extrapolation, sound, controls), 😎 emotes, ☰ Menu (restart, leave), ⛶ fullscreen, and Chat online. Try Pause (then again to play on) and a different zoom in ⚙.`
       : `${kb('Esc')} or ${kb('M')} menu · ${kb('P')} pause · ${kb('R')} restart (here: this step) · ${kb('F')} fullscreen · ${kb('+')} ${kb('−')} zoom · ${kb(bind.p1.gk ? kname(bind.p1.gk) : '—')} go in goal (a computer plays your man; again to come back out) · online ${kb('Enter')} or ${kb('T')} to chat. Two on one keyboard: P1 ${kb(K.p1)} ${kb(K.k1)} kick ${kb(K.s1)} slide, P2 ${kb(K.p2)} ${kb(K.k2)} kick ${kb(K.s2)} slide. Try ${kb('P')} twice and ${kb('+')} or ${kb('−')}.`,
       `${tu.pz === 2 ? '✓' : '·'} pause  ${zi !== tu.zi0 ? '✓' : '·'} zoom`],
-    extrap: ['Extrapolation (online)', `Online, what you see of the others comes from the host a moment late (your ping). <b>Extrapolation</b> draws everyone a little ahead, where they'll be, so it feels like there's no delay. 0 shows exactly what arrived (smooth but late); higher feels quicker, but other players can jump a little when they change direction. Most players like about 90. You can change it any time in ⚙ Settings.`, ''],
+    extrap: ['Extrapolation (online only)', `Online, the others reach you a moment late. <b>Extrapolation</b> draws them a little ahead so it feels instant; too high and they jump about a bit. 30 to 90 suits most people. It's in ⚙ Settings.`, ''],
     cup: ['Round him: over the top', `A man is just below your line. Aim at the goal (not round him) and hold ${kb(kDn)}${swapped} as you kick: the ball sets off out above him and bends back down into where you aimed (the dotted line). A curled kick always ends where you aim; the key picks which side it swings out.`, tu.tries ? `try ${tu.tries + 1}` : ''],
     cdown: ['Round him: underneath', `Now he's just above your line: hold ${kb(kUp)}${swapped} as you kick and it swings out underneath him and bends back up in.`, tu.tries ? `try ${tu.tries + 1}` : ''],
     cfar: ['Far post from out wide', `From out by the side, aim just over the far post (the top one) and hold ${kb(kDn)}${swapped} as you kick: it bends back in under it, into the far corner. The further out you shoot, the more it curls.`, tu.tries ? `try ${tu.tries + 1}` : ''],
@@ -6298,30 +6433,105 @@ function tutPanel(s){
     plose: ['Keep it or lose it', `The charge only lasts while the ball stays at your feet. Charge it, then step away and watch the ring empty. (Anyone else touching it, a goal, a set piece or a slide end it too.)`, P_STATE(s)],
     pkeeper: ['Past the keeper', `Now there's a keeper. Charge it, then hit it at a corner: a power shot gives him half as long to get there.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
     pdone: ['That\'s the power shot', `Power shot is a match rule: ⚙ Settings → Match rules (online, the room's Match settings, set by the host). The computer's players charge too: when you see the ring round the ball at one of theirs, close him down before it fills. It's off in practice drills. Turn it on for your matches below if you like.`, ''],
-    done: ['You\'re ready', `That's every control. They're all in How to play (menu), and Controls changes any key. Have a match against the computer on Easy?`, ''],
+    done: ['You\'re ready', `That's every control. They're all in ☰ Menu → How to play, and ⌨ Controls changes any key. A match against the computer on Easy?`, ''],
   }[st];
   $('tutStep').textContent = `${tu.i + 1} / ${L.length}`; $('tutTitle').textContent = T[0];
   $('tutText').innerHTML = T[1];
-  $('tutState').textContent = tu.ok ? '✓ ' + tu.note : tu.note || T[2];
+  $('tutState').textContent = st === 'setup' ? '' : tu.ok ? '✓ ' + tu.note : tu.note || T[2];
   $('tutState').classList.toggle('ok', tu.ok);
   const ex = $('tutExtra'); ex.textContent = '';
-  if (st === 'extrap'){ for (const v of [0, 60, 93, 120]){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (Math.round(extrapMs()) === v ? ' on' : ''); b.textContent = v + ' ms'; b.onclick = e => { setExtrap(v); e.target.blur(); tutPanel(s); }; ex.append(b); } }
+  if (st === 'setup'){
+    const lv = document.createElement('span'); lv.className = 'tutlv'; lv.textContent = 'Computer: '; ex.append(lv);
+    ['Easy', 'Normal', 'Hard', 'Insane'].forEach((n, i) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (SET.diff === i ? ' on' : ''); b.textContent = n; b.onclick = e => { SET.diff = i; store.set('pb.diff', i); menuSync(); e.target.blur(); tutPanel(s); }; ex.append(b); });
+    const h = document.createElement('button'); h.type = 'button'; h.className = 'ghost sm' + (coachOn() ? ' on' : ''); h.textContent = 'Help bar: ' + (coachOn() ? 'on' : 'off'); h.onclick = e => { SET.coach = !coachOn(); store.set('pb.coach', SET.coach ? 1 : 0); soundTxt(); e.target.blur(); tutPanel(s); }; ex.append(h);
+    const k = document.createElement('button'); k.type = 'button'; k.className = 'ghost sm'; k.textContent = '⌨ Change my keys'; k.onclick = e => { e.target.blur(); rebind = null; renderKeys(); openPanel('keysPanel'); }; ex.append(k);
+  }
+  if (st === 'extrap'){ for (const v of [0, 30, 60, 93]){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (Math.round(extrapMs()) === v ? ' on' : ''); b.textContent = v + ' ms'; b.onclick = e => { setExtrap(v); e.target.blur(); tutPanel(s); }; ex.append(b); } }
   if (st === 'cauto'){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (SET.ac[0] ? ' on' : ''); b.textContent = 'Auto curl: ' + (SET.ac[0] ? 'on' : 'off'); b.onclick = e => { SET.ac[0] = !SET.ac[0]; store.set('pb.ac', SET.ac.map(v => v ? 1 : 0)); pushInputs(); renderCurlOpts(); e.target.blur(); tutPanel(s); }; ex.append(b); }
   if (st === 'pdone'){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (SET.power ? ' on' : ''); b.textContent = 'Power shot in my matches: ' + (SET.power ? 'on' : 'off'); b.onclick = e => { SET.power = !SET.power; store.set('pb.power', SET.power ? 1 : 0); menuSync(); e.target.blur(); tutPanel(s); }; ex.append(b); }
   if (st === 'done' || st === 'cdone' || st === 'pdone'){ const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Play the computer (Easy)'; b.onclick = () => { tutEnd(true, m.lesson); start(Object.assign(cfgFor('ai', 1), {diff: 0})); }; ex.append(b); }
   if (st === 'done') for (const [l, name] of [['curl', 'The curl lesson'], ['power', 'The power shot lesson']]){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = name; b.onclick = () => { tutEnd(true); tutStart(l); }; ex.append(b); }
+  { const dots = $('tutDots'); dots.textContent = ''; L.forEach((k, j) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tdot' + (j === tu.i ? ' on' : j < tu.i ? ' done' : ''); b.title = `${j + 1}. ${TUT_TITLE[k] || k}`; b.setAttribute('aria-label', b.title); b.onclick = e => { e.currentTarget.blur(); m.goto(s, j); }; dots.append(b); }); }
+  $('tutBack').hidden = tu.i === 0; $('tutAgain').hidden = tu.i === 0;
+  keyStrip($('tutKeys'), true);
   $('tutSkip').textContent = m.lesson ? 'Leave the lesson' : 'Skip tutorial';
-  $('tutNext').textContent = tutLast(st) ? 'Back to the menu' : tu.ok || st === 'extrap' ? 'Next ›' : 'Skip this step ›';
+  $('tutNext').textContent = tutLast(st) ? 'Back to the menu' : st === 'setup' ? 'Start ›' : tu.ok || st === 'extrap' ? 'Next ›' : 'Skip this step ›';
   box.hidden = false;
 }
 // (v28.35, "tutorial blocks my view") the panel lives under the pitch; while it shows, the pitch makes room for it
-{ const tb = $('tutBox'); $('stage').after(tb);
-  const sync = () => { const on = !tb.hidden; document.body.classList.toggle('tut', on); if (on) document.documentElement.style.setProperty('--tutH', Math.ceil(tb.offsetHeight) + 'px'); };
-  new MutationObserver(sync).observe(tb, {attributes: true, attributeFilter: ['hidden']}); new ResizeObserver(sync).observe(tb); }
+{ const tb = $('tutBox'), hb = $('helpBar'); $('stage').after(tb); tb.after(hb);
+  const sync = () => { const h = (tb.hidden ? 0 : tb.offsetHeight) + (hb.hidden ? 0 : hb.offsetHeight + 6), on = h > 0; document.body.classList.toggle('tut', on); if (on) document.documentElement.style.setProperty('--tutH', Math.ceil(h) + 'px'); };
+  for (const el of [tb, hb]){ new MutationObserver(sync).observe(el, {attributes: true, attributeFilter: ['hidden']}); new ResizeObserver(sync).observe(el); } }
 function tutStart(lesson){ $('tutWelcome').hidden = true; lesson = lesson === 'curl' || lesson === 'power' ? lesson : null; start(Object.assign(cfgFor('practice', 1), {mode: 'tutorial', lesson, power: lesson === 'power', slide: true, fk: true, curve: true, curveLv: lesson === 'curl' ? Math.max(3, SET.curveLv || 3) : SET.curveLv, diff: 0, timeLimit: 0, scoreLimit: 0})); }
 function tutEnd(finished, lesson){ if (lesson === 'curl' || lesson === 'power'){ if (finished) store.set(lesson === 'curl' ? 'pb.curlLesson' : 'pb.powerLesson', 'done'); } else store.set('pb.tut', finished ? 'done' : 'skipped'); $('tutBox').hidden = true; }
 $('tutNext').addEventListener('click', e => { e.target.blur(); const s = sess; if (!s || !s.mode || s.mode.kind !== 'tutorial') return; if (tutLast(tutSteps(s.mode)[s.mode.tu.i])){ tutEnd(true, s.mode.lesson); exitToMenu(); return; } s.mode.next(s); });
 $('tutSkip').addEventListener('click', e => { e.target.blur(); const s = sess; tutEnd(false, s && s.mode && s.mode.lesson); exitToMenu(); });
+$('tutBack').addEventListener('click', e => { e.target.blur(); const s = sess; if (s && s.mode && s.mode.kind === 'tutorial') s.mode.goto(s, s.mode.tu.i - 1); });
+$('tutAgain').addEventListener('click', e => { e.target.blur(); const s = sess; if (s && s.mode && s.mode.kind === 'tutorial') s.mode.goto(s, 0); });
+$('tutAgainBtn').addEventListener('click', e => { e.target.blur(); closePanel('setPanel'); if (sess && sess.kind !== 'local') return; tutStart(); });
+
+// ---------- help for beginners (v28.57) ----------
+// ("make a thing where its friendly to begineers", "like to easy understand all the controls"): under the pitch, your
+// keys (lit while you press them) and one tip for what's happening now: how to kick when you're at the ball, to shoot
+// and curl it near their goal, to slide when one of theirs has it by you, to call for the pass, your free kick, a
+// power shot charging, diving in goal, going in goal in 2v2. Each tip goes once you've done it a few times (COACH_N,
+// counted for good: pb.coachN). On until 8 matches are played, then off unless switched on (⚙ Settings → Game)
+const COACH_N = {kick: 4, curl: 3, slide: 2, call: 2, fk: 2, power: 2, dive: 3, swap: 1};
+let coachDone = (() => { const v = store.get('pb.coachN', null); return v && typeof v === 'object' ? v : {}; })();
+function coachCount(k){ if ((coachDone[k] || 0) >= 50) return; coachDone[k] = (coachDone[k] || 0) + 1; store.set('pb.coachN', coachDone); }
+const coachOn = () => SET.coach != null ? SET.coach : !(you && you.games >= 8);
+const coachLeft = k => (coachDone[k] || 0) < (COACH_N[k] || 1);
+// the keys as chips (move, kick, slide or dive, go in goal), lit from what your player is pressing
+function keyStrip(el, show){
+  if (!el) return;
+  const s = sess, G = s && s.G, L = s && s.locals && s.locals[0], P = G && L ? G.players.find(p => p.id === L.pid) : null;
+  const K = tutKeys(), kp = P && P.role === 'keeper', gk = bind.p1.gk ? kname(bind.p1.gk) : '';
+  const sig = [K.touch ? 't' : 'k', K.up, K.down, K.left, K.right, K.kick, K.slide, kp ? 1 : 0, gk, show ? 1 : 0, s && s.mode ? 1 : 0, G ? G.players.length : 0].join('|');
+  if (el.dataset.sig !== sig){
+    el.dataset.sig = sig; el.textContent = '';
+    if (K.touch || !show){ el.hidden = true; return; }
+    el.hidden = false;
+    const chip = (key, act, bit) => { const c = document.createElement('span'); c.className = 'kc'; if (bit) c.dataset.bit = bit; const k = document.createElement('kbd'); k.textContent = key; const a = document.createElement('small'); a.textContent = act; c.append(k, a); el.append(c); };
+    const one = t => String(t).split('/')[0];
+    chip(one(K.up), 'up', 1); chip(one(K.left), 'left', 4); chip(one(K.down), 'down', 2); chip(one(K.right), 'right', 8);
+    chip(K.kick, 'kick', 16); chip(K.slide, kp ? 'dive' : 'slide', 32);
+    if (gk && P && !s.mode && G.players.some(q => q.team === P.team && q !== P && q.ctrl === 'ai' && (kp || q.role === 'keeper'))) chip(gk, kp ? 'come out' : 'go in goal', 0);
+  }
+  if (el.hidden) return;
+  const bits = P ? P.input | 0 : 0;
+  for (const c of el.children){ const b = +c.dataset.bit || 0; c.classList.toggle('on', !!b && !!(bits & b)); }
+}
+// the tip for right now (or '' for none)
+function coachTip(s){
+  const G = s.G, L = s.locals && s.locals[0], P = L && G.players.find(p => p.id === L.pid); if (!P || G.state === 3) return '';
+  const K = tutKeys(), kb = t => `<kbd>${t}</kbd>`, D = G.discs, d = D[P.di], b = D[0], gap = Math.hypot(b.x - d.x, b.y - d.y) - b.radius - d.radius;
+  const tg = ST.goals.find(g => g.team !== P.team), tgd = tg ? Math.hypot((tg.x0 + tg.x1) / 2 - b.x, (tg.y0 + tg.y1) / 2 - b.y) : 1e9;
+  const own = ST.goals.find(g => g.team === P.team), ownd = own ? Math.hypot((own.x0 + own.x1) / 2 - b.x, (own.y0 + own.y1) / 2 - b.y) : 1e9;
+  const lt = G.lastTouch, holder = lt && G.frame - lt.frame < 90 ? G.players.find(q => q.id === lt.id) : null, hd = holder ? D[holder.di] : null;
+  const near = (q, r) => q && Math.hypot(D[q.di].x - b.x, D[q.di].y - b.y) - D[q.di].radius - b.radius < r;
+  if (G.sp && G.sp.kind === 'fk' && G.sp.team === P.team && G.sp.tk === P.id && coachLeft('fk')) return `Your free kick: ${kb(K.up)} ${kb(K.down)} aim · ${kb(K.left)} ${kb(K.right)} curl (the dots show it) · hold ${kb(K.kick)} for power, let go to shoot`;
+  if (G.sp) return '';
+  if (G.state === 0 && !(P.input & 15) && G.pause === 0 && G.koTeam != null && s.ticks > 60) return `Kick-off: press your keys again to move (they're let go after each goal)`;
+  if (P.role === 'keeper' && G.cfg.slide !== false && coachLeft('dive') && ownd < 330 && Math.hypot(b.vx, b.vy) > 2) return `You're in goal: ${kb(K.slide)} dives at the ball (it reaches further than you can run)`;
+  if (P.pw > 0 && P.pw < C.POWER_T && coachLeft('power')) return `Power shot charging: stay right on the ball until it glows, then ${kb(K.kick)}`;
+  if (gap < 26 && tgd < 330 && coachLeft('curl') && G.cfg.curve) return `Shoot! Hold ${kb(K.up)} or ${kb(K.down)} as you press ${kb(K.kick)} and it bends round the keeper (it still goes where you aim)`;
+  if (gap < 26 && coachLeft('kick')) return `${kb(K.kick)} kicks it when you're right next to it. Hold it as you run in and it kicks as soon as you touch`;
+  if (holder && holder.team !== P.team && near(holder, 14) && Math.hypot(hd.x - d.x, hd.y - d.y) < 95 && G.cfg.slide && coachLeft('slide') && P.role !== 'keeper') return `One of theirs has it: ${kb(K.slide)} slides in. Get the ball, not the man (in your own area that's a penalty)`;
+  if (holder && holder.team === P.team && holder !== P && holder.ctrl === 'ai' && P.role !== 'keeper' && near(holder, 14) && coachLeft('call')) return `Your teammate has it: tap ${kb(K.kick)} twice quickly to call for the pass`;
+  if (bind.p1.gk && P.role !== 'keeper' && G.players.some(q => q.team === P.team && q !== P && q.role === 'keeper' && q.ctrl === 'ai') && coachLeft('swap') && s.ticks > 900) return `${kb(kname(bind.p1.gk))} puts you in goal (the computer takes your man); again to come back out`;
+  return '';
+}
+// the bar under the pitch: shown in a match with the help on
+function helpTick(){
+  const bar = $('helpBar'), s = sess;
+  const on = coachOn() && !!(s && s.G && !s.done && !s.rp && !(s.mode && s.mode.kind === 'tutorial') && s.locals && s.locals.length && $('menu').hidden && !(coarseScreen() && !kbUsed));
+  if (bar.hidden !== !on) bar.hidden = !on;
+  if (!on) return;
+  keyStrip($('hbKeys'), true);
+  if (!s.replay && (s.ticks || 0) % 6 === 0){ const t = coachTip(s) || `<span class="hbdim">Move, kick ${'<kbd>' + tutKeys().kick + '</kbd>'}, slide ${'<kbd>' + tutKeys().slide + '</kbd>'}. All the keys: ☰ Menu → How to play</span>`; if (bar.dataset.tip !== t){ bar.dataset.tip = t; $('hbTip').innerHTML = t; } }
+}
+$('hbOff').addEventListener('click', e => { e.currentTarget.blur(); SET.coach = false; store.set('pb.coach', 0); soundTxt(); say('Help for beginners is off: ⚙ Settings → Game to turn it back on', 1); });
+$('coachBtn').addEventListener('click', e => { e.currentTarget.blur(); SET.coach = !coachOn(); store.set('pb.coach', SET.coach ? 1 : 0); soundTxt(); });
 document.querySelectorAll('.tutb').forEach(b => b.addEventListener('click', () => tutStart()));
 document.querySelectorAll('.curlb').forEach(b => b.addEventListener('click', () => tutStart('curl')));
 document.querySelectorAll('.powerb').forEach(b => b.addEventListener('click', () => tutStart('power')));
@@ -7360,7 +7570,11 @@ function render(dt, clip){
     for (const p of VP){   // sliding: a streak behind; just fouled or getting up: stars
       const d = V.discs[p.di];
       if (p.slide > 0){ const g = ctx.createLinearGradient(d.x, d.y, d.x - p.slideDx * 34, d.y - p.slideDy * 34); g.addColorStop(0, 'rgba(255,255,255,.35)'); g.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.strokeStyle = g; ctx.lineWidth = d.radius * 1.7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - p.slideDx * 34, d.y - p.slideDy * 34); ctx.stroke(); }
+        ctx.strokeStyle = g; ctx.lineWidth = d.radius * 1.7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - p.slideDx * 34, d.y - p.slideDy * 34); ctx.stroke();
+        if (p.diving){   // (v28.57) a keeper's dive: his gloves out in front, as far as they reach
+          const fx = p.slideDx, fy = p.slideDy, rch = d.radius + (C.DIVE ? C.DIVE.REACH : 10) * 0.7;
+          ctx.fillStyle = '#f4f6fa'; ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.5;
+          for (const sd of [-1, 1]){ const gx = d.x + fx * rch - fy * sd * 7, gy = d.y + fy * rch + fx * sd * 7; ctx.beginPath(); ctx.arc(gx, gy, 4.5, 0, C.TAU); ctx.fill(); ctx.stroke(); } } }
     }
     for (const p of VP){
       const d = V.discs[p.di], m = PU[p.pu];
@@ -7827,7 +8041,7 @@ function updateUI(){
   if (s.kind === 'guest' && s.lag) hud = (hud ? hud + '\n' : '') + s.lag;
   if ((s.kind === 'host' || s.kind === 'guest') && NET.on){ const pl = pingLine(); if (pl) hud = (hud ? hud + '\n' : '') + pl; }
   setHidden('hud', !hud); if (hud) setText('hud', hud);
-  setHidden('exitBtn', false); kpButton(s); setHidden('gmBtn', !!s.done); { const ok = !(s.done || s.rp || !s.locals || !s.locals.length || s.mode); setHidden('emoBtn', !ok); if (!ok) setHidden('emoBar', true); } setHidden('setCorner', true); setHidden('pauseBtn', !!(s.done || s.rp || s.intro || (s.kind === 'guest' && !isMgr())));   // (v25.6: settings live in ☰ Menu during a match. v28.6, "pause doesnt work when im manager": the Pause button's line had ended up inside this comment, so it never showed)
+  setHidden('exitBtn', false); kpButton(s); roleBtn(s); setHidden('gmBtn', !!s.done); { const ok = !(s.done || s.rp || !s.locals || !s.locals.length || s.mode); setHidden('emoBtn', !ok); if (!ok) setHidden('emoBar', true); } setHidden('setCorner', true); setHidden('pauseBtn', !!(s.done || s.rp || s.intro || (s.kind === 'guest' && !isMgr())));   // (v25.6: settings live in ☰ Menu during a match. v28.6, "pause doesnt work when im manager": the Pause button's line had ended up inside this comment, so it never showed)
   { const sg = !!lastGoalToSave(s); setHidden('saveGoalBtn', !sg); if (shown.sg !== sg){ shown.sg = sg; $('stage').classList.toggle('sg', sg); } }
   setHidden('chat', !NET.on);
   setHidden('slideBtn', !(G.cfg && G.cfg.slide && !s.done));
@@ -7836,6 +8050,16 @@ function updateUI(){
 const hardest = st => st && Array.isArray(st.hardSave) ? Math.max(+st.hardSave[0] || 0, +st.hardSave[1] || 0) : 0;
 const clockBox = $('clockBox');
 // wall control: the Keeper button at the top of the pitch
+// (v28.57, "a title showing which one u are"): in a match with keepers, which you are now, on the pitch (a button: it
+// swaps you, as G does); swapping says so big in the middle too
+function roleBtn(s){
+  const G = s && s.G, L = s && !s.mode && s.locals && s.locals[0], P = G && L ? G.players.find(p => p.id === L.pid) : null;
+  const can = !!(P && !s.done && !s.rp && G.players.some(q => q.role === 'keeper') && (P.role === 'keeper' || G.players.some(q => q.team === P.team && q !== P && q.role === 'keeper')));
+  const two = can && s.locals.length > 1, gk = bind.p1.gk ? kname(bind.p1.gk) : '';
+  const txt = !can ? '' : two ? s.locals.map((Lc, i) => { const q = G.players.find(x => x.id === Lc.pid); return q ? `P${i + 1} ${q.role === 'keeper' ? '🧤 keeper' : '⚽ out'}` : ''; }).filter(Boolean).join(' · ') : P.role === 'keeper' ? '🧤 You: keeper' : '⚽ You: striker';
+  if (shown.role !== txt){ shown.role = txt; setHidden('roleBtn', !can); if (can){ setText('roleBtn', txt); $('roleBtn').title = P.role === 'keeper' ? `You're in goal. ${gk ? gk + ' or click' : 'Click'}: back out, the computer goes in goal` : `You're playing out. ${gk ? gk + ' or click' : 'Click'}: go in goal, the computer plays your man`; } }
+}
+$('roleBtn').addEventListener('click', e => { e.currentTarget.blur(); mySwap('p1'); });
 function kpButton(s){
   const on = !!(s && s.mode && s.mode.kind === 'wall' && s.kind === 'local');
   setHidden('kpBtn', !on); if (on) setText('kpBtn', 'Keeper: ' + (s.cfg.keeper ? 'on' : 'off'));
@@ -8218,6 +8442,15 @@ function swapMate(s, p){
 }
 function seatSwap(s, p, q){   // the person on p now plays q, and the computer plays p
   const ip = s.info.get(p.id), iq = s.info.get(q.id);
+  // (v28.57, "the ratings is very weird when u r gk and then striker": the stats were the place's, so you took the
+  // computer keeper's saves in with you and left your goals with the computer up front. Now they go with whoever made
+  // them: the two players' stats, saves, goals, assists and who was in goal swap over too)
+  { const st = s.G.stats, P = st.players, a = P[p.id], b = P[q.id], sw = v => v === p.id ? q.id : v === q.id ? p.id : v;
+    if (a) P[q.id] = a; else delete P[q.id]; if (b) P[p.id] = b; else delete P[p.id];
+    for (const o of st.saveList || []) o.pid = sw(o.pid);
+    for (const g of st.goals || []){ g.pid = sw(g.pid); g.assist = sw(g.assist); g.kpid = sw(g.kpid); }
+    for (const o of st.postList || []) o.pid = sw(o.pid);
+    if (st.bestSave) st.bestSave.pid = sw(st.bestSave.pid); }
   q.ctrl = p.ctrl; q.peer = p.peer; q.seenK = null; q.seenI = -1; q.tapHold = 0; q.ackK = p.ackK; q.kSeen = q.kPress; q.taps = []; q.callAt = null; q.emSeen = p.emSeen;
   p.ctrl = 'ai'; p.peer = null; p.taps = []; p.callAt = null; C.setInput(p, 0); C.setInput(q, 0); q.kicking = false;
   s.info.set(q.id, ip || {name: 'Player', avatar: 'P1'}); s.info.set(p.id, {name: NET.on ? 'Computer' : p.role === 'keeper' ? 'Keeper' : 'Computer', avatar: p.role === 'keeper' ? 'GK' : 'CP'});
@@ -8237,6 +8470,7 @@ function keeperSwap(s, p, quiet){
   seatSwap(s, p, q);
   if (NET.on && s.kind === 'host') sysChat(`${(who && who.name) || 'Player'} ${gk ? 'went in goal' : 'came out of goal'}`);
   say((nm ? nm + (gk ? ' is in goal' : ' is back on the pitch') : gk ? 'You\'re in goal' : 'You\'re back on the pitch') + (gk ? ' · the computer plays up front' : ' · the computer\'s in goal'));
+  if (s.locals.some(Lc => Lc.pid === q.id)){ const k = bind.p1.gk ? kname(bind.p1.gk) : ''; s.msg = {text: nm ? `${nm.toUpperCase().slice(0, 14)} ${gk ? 'IN GOAL' : 'UP FRONT'}` : gk ? 'YOU\'RE IN GOAL' : 'YOU\'RE UP FRONT', sub: gk ? `${k ? k + ': back out · ' : ''}${tutKeys().slide} dives` : `${k ? k + ': back in goal · ' : ''}the computer keeps goal`, until: (s.ticks || 0) + 100, untilMs: performance.now() + 1800, team: -1}; coachCount('swap'); }   // (v28.57)
   if (!$('gameMenu').hidden) openGameMenu();
   return true;
 }
@@ -8296,22 +8530,25 @@ $('lobbyBtn').addEventListener('click', () => askSure('lobby'));
 // saves count up to 3.5 (was 2), so a keeper who stops everything can reach 9
 const RATE_TOP = 16, RATE_P = 4;
 function rateOf(p, st, G, won, lost){
-  const s = st.players[p.id] || {}, solo = G.players.filter(q => q.team === p.team && q.ctrl !== 'gone').length <= 1, kp = p.role === 'keeper';
+  const s = st.players[p.id] || {}, solo = G.players.filter(q => q.team === p.team && q.ctrl !== 'gone').length <= 1;
+  // (v28.57) the share of the match he was in goal (kf), and the goals let in while he was (by who was in goal then)
+  const kt = s.kt || 0, ot = s.ot || 0, kf = kt + ot > 0 ? kt / (kt + ot) : p.role === 'keeper' ? 1 : 0, kp = kf >= 0.5;
   const conc = G.score[1 - p.team] || 0, shots = s.shots || 0, sot = s.sot || 0;
   let r = 6 + (won ? 0.5 : lost ? -0.4 : 0);
   r += (solo ? 0.55 : 0.8) * (s.goals || 0) + 0.5 * (s.assists || 0) + 0.1 * sot - 0.03 * Math.max(0, shots - sot) + 0.05 * (s.posts || 0) + 0.15 * (s.slideGoals || 0);
   const mine = (st.saveList || []).filter(o => o.pid === p.id);
   const sv = mine.length >= (s.saves || 0) ? mine.reduce((a, o) => a + 0.1 + 0.25 * Math.max(0, Math.min(1, (o.kmh - 30) / 60)), 0) : 0.22 * (s.saves || 0);
-  r += Math.min(kp ? 3.5 : 1.2, (solo ? 0.85 : 1) * sv) + ((s.bestSave || 0) >= 90 ? 0.2 : 0) + 0.12 * (s.slideSaves || 0);
+  r += Math.min(1.2 + 2.3 * kf, (solo ? 0.85 : 1) * sv) + ((s.bestSave || 0) >= 90 ? 0.2 : 0) + 0.12 * (s.slideSaves || 0);
   r += Math.min(0.8, 0.06 * (s.passes || 0)) + Math.min(0.3, 0.004 * (s.touches || 0));
   // v27.3 ("are ratings rated from saves and tackles as well? ... just like how real life rating system works"): tackles
   // won, interceptions, key passes (one a teammate shot from) count up, and kicks the other side intercepted down
   r += Math.min(0.8, 0.15 * (s.tackles || 0)) + Math.min(0.6, 0.06 * (s.wins || 0)) + Math.min(0.6, 0.15 * (s.keyp || 0)) - Math.min(0.8, 0.05 * (s.lost || 0));
   r -= 1 * (s.og || 0) + 0.25 * (s.fouls || 0) + 0.3 * (s.yc || 0);   // (v28.21: booked)
-  const minder = kp || solo, against = (st.goals || []).filter(g => g.team !== p.team && g.team >= 0);
-  r -= (kp ? 0.4 : solo ? 0.35 : 0.1) * conc;
-  if (minder) r -= 0.25 * against.filter(g => (g.arr != null ? g.arr : g.kmh) < 40).length + (kp ? 0.4 : 0.3) * (s.spills || 0);   // soft goals and spills: mistakes
-  if (minder && !conc && G.time >= 60) r += kp ? 0.5 : 0.3;
+  const against = (st.goals || []).filter(g => g.team !== p.team && g.team >= 0), mineK = against.filter(g => 'kpid' in g ? g.kpid === p.id : kp), concK = mineK.length, concO = Math.max(0, conc - concK);
+  r -= 0.4 * concK + (solo ? 0.35 : 0.1) * concO;
+  const minded = solo ? against : mineK;   // (in goal: his; on his own: every one)
+  if (solo || kt > 0) r -= 0.25 * minded.filter(g => (g.arr != null ? g.arr : g.kmh) < 40).length + (kf > 0 ? 0.4 : 0.3) * (s.spills || 0);   // soft goals and spills: mistakes
+  if (kt >= 3600 && !concK) r += 0.5 * Math.min(1, kt / Math.max(3600, (kt + ot) * 0.5)); else if (solo && !conc && G.time >= 60) r += 0.3;   // a clean sheet (in goal a minute or more and nothing let in then)
   if (r > 6) r = 6 + 4 * (1 - Math.pow(Math.max(0, 1 - (r - 6) / RATE_TOP), RATE_P));   // (over 6: squeezed toward 10)
   return Math.max(3, Math.min(10, Math.round(r * 10) / 10));
 }
@@ -8325,6 +8562,13 @@ function wpLow(R, w){
   let lo = null; for (const r of h) if (!lo || +r[1 + w] < lo.v) lo = {v: +r[1 + w], t: +r[0]};
   return lo;
 }
+// (v28.57) what he played, for the ratings: 'GK', or 'GK 3′ · out 2′' when he was in goal and out of it a while each
+function roleTag(ps, p, G){
+  if (!G.players.some(q => q.role === 'keeper')) return '';
+  const kt = (ps && ps.kt) || 0, ot = (ps && ps.ot) || 0, m = t => Math.max(1, Math.round(t / 3600)) + '′';
+  if (kt >= 600 && ot >= 600) return `GK ${m(kt)} · out ${m(ot)}`;
+  return (kt >= ot ? kt > 0 : p.role === 'keeper') ? 'GK' : '';
+}
 function summary(s){   // everything the results card shows (also sent to online guests)
   const G = s.G, st = G.stats;
   const sp = s.pensRes, pm = s.mode && s.mode.kind === 'pens' ? s.mode.pe : null;
@@ -8337,7 +8581,7 @@ function summary(s){   // everything the results card shows (also sent to online
   return {score: G.score.slice(), names: [KIT[0].name, KIT[1].name], goals: st.goals.map(g => [g.team, g.t, g.pid != null ? nameOf(s, playerById(G, g.pid)) : '', g.og ? 1 : 0, Math.round(g.kmh), g.assist != null ? nameOf(s, playerById(G, g.assist)) : '']),
           shots: st.shots.slice(), sot: st.sot.slice(), saves: (st.saves || [0, 0]).slice(), poss: possession(st), passes: st.passes.slice(), best: st.best ? Math.round(st.best.v) : 0,
           motm: motm ? [motm.name, motm.team, motm.goals || 0, motm.assists || 0, motm.saves || 0, Math.round(motm.r * 10)] : null,
-          rt: rated.map(x => [nameOf(s, x.p), x.p.team, Math.round(x.r * 10)]), mi,
+          rt: rated.map(x => [nameOf(s, x.p), x.p.team, Math.round(x.r * 10), roleTag(st.players[x.p.id], x.p, G)]), mi,
           pens: sp ? sp.res : pm ? pm.res : null, pp: sp ? sp.posts : pm ? pm.posts.slice() : null, pa: sp ? 1 : 0, pw: sp ? sp.winner : -1, two: !!(s.cfg && s.cfg.two), du: pm && s.mode.duel ? 1 : 0,
           sl: [0, 1].map(t => G.players.filter(p => p.team === t).reduce((a, p) => { const ps = st.players[p.id] || {}; a[0] += ps.slideGoals || 0; a[1] += ps.slideSaves || 0; return a; }, [0, 0])),
           fo: (st.fouls || [0, 0]).slice(), tl: G.cfg.timeLimit || 0, dr: G.cfg.draws || G.cfg.tie === 2 ? 1 : 0,
@@ -8530,7 +8774,8 @@ function showResults(R, s, after){
         const col = el('div', 'rtc t' + tm);
         R.rt.filter(x => Array.isArray(x) && x[1] === tm).sort((a, b) => (+b[2] || 0) - (+a[2] || 0)).forEach(x => {
           const v = (+x[2] || 0) / 10, row = el('div', 'rtr' + (x === top ? ' top' : ''));
-          row.append(el('b', null, (x === top ? '★ ' : '') + (x[0] || R.names[tm])), el('span', 'rv r' + Math.max(4, Math.min(9, Math.floor(v))), v.toFixed(1)));
+          const nm = el('b', null, (x === top ? '★ ' : '') + (x[0] || R.names[tm])); if (typeof x[3] === 'string' && x[3]) nm.append(el('small', 'rrole', x[3].slice(0, 24)));
+          row.append(nm, el('span', 'rv r' + Math.max(4, Math.min(9, Math.floor(v))), v.toFixed(1)));
           col.append(row);
         });
         rl.append(col);
@@ -9322,7 +9567,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.56';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.57';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -9781,6 +10026,7 @@ let roomNameEdited = false;
 const defaultRoomName = () => `${clean($('nick').value, 16) || SET.nick || 'My'}'s room`;
 async function openOnline(){
   $('nick').value = SET.nick || ''; $('avatar').value = SET.avatar || '';
+  setTimeout(frStart, 0);   // (v28.57: friends)
   if (!roomNameEdited) $('roomName').value = defaultRoomName();
   onErr(''); showPageLink(false); $('hostBtn').disabled = $('joinBtn').disabled = false;
   $('onStart').hidden = NET.on; $('onLobby').hidden = !NET.on; $('onTitle').textContent = NET.on ? 'Room' : 'Online';
@@ -9962,7 +10208,7 @@ function publishLobby(){
   if (NET.me && !L.pl.some(e => e[0] === NET.me)) L.pl.unshift([NET.me, myNick(), myAvatar(), 0]);
   NET.T.set({pb: 2, r: 'h', v: NET_VER, n: myNick(), a: myAvatar(), L, c: NET.chat.slice(-6)});
   if (NET.T.kind === 'room') advertise();
-  renderLobby();
+  renderLobby(); renderFriends();
 }
 function teamCount(L, t){ return L.pl.filter(e => e[3] === t).length; }
 function onPeersHost(peers){
@@ -10221,7 +10467,7 @@ function hostNet(s){
     if (b0.atT > 0) o.ba = [b0.atT, b0.atBy, r5(b0.atAdd || 0), r5(b0.atK || 0), r5(b0.atMax || 0)];   // ...and its kicker still steering it
     { const ch = []; G.players.forEach((q, i) => { if (q.charge > 0) ch.push([i, Math.round(q.charge * 1000)]); }); if (ch.length) o.ch = ch; }   // a free kick's power bar
     if (s2.intro) o.in = 1 + Math.round((performance.now() - s2.intro.t0) / (1000 / 60));   // (v28.34: the walk-out running, how far in)
-    const sl = []; G.players.forEach((q, i) => { if (q.slide || q.slideCd || q.down) sl.push([i, q.slide | 0, q.slideCd | 0, q.down | 0, Math.round(q.slideDx * 1000), Math.round(q.slideDy * 1000), q.slideBall ? 1 : 0]); });
+    const sl = []; G.players.forEach((q, i) => { if (q.slide || q.slideCd || q.down) sl.push([i, q.slide | 0, q.slideCd | 0, q.down | 0, Math.round(q.slideDx * 1000), Math.round(q.slideDy * 1000), q.slideBall ? 1 : 0, q.diving ? 1 : 0]); });
     if (sl.length) o.sl = sl;   // slides, getting up, waiting for the next
     if (G.sp) o.fk = [G.sp.kind === 'pen' ? 1 : 0, G.sp.team, r4(G.sp.x), r4(G.sp.y), G.sp.t, G.sp.hold, G.sp.tk, G.sp.kp, r4(G.sp.gx), r4(G.sp.gy), r4(G.sp.half), G.sp.inward, G.sp.aim == null ? null : r4(G.sp.aim), G.sp.side || 0];   // a free kick or penalty being set up (v25.1: + the taker's aim; v25.5: + the curl he picked)
     const ty = typingIds(s2); if (ty.length) o.ty = ty;   // who is typing in the chat
@@ -10415,7 +10661,7 @@ function promoteSession(gs, L, oldMe, me){
   if ((gs.hostIntro || gs.intro) && G.pause >= 120) G.pause = 0;   // (v28.36: the old host's walk-out held it: not a pause of anyone's, the match starts)
   G.score = O.score.slice(); G.sp = O.sp ? Object.assign({}, O.sp) : null; G.eventId = Math.max(G.eventId, gs.lastEv + 1);
   G.discs = O.discs.map(d => Object.assign({}, d));
-  G.players.forEach((p, i) => { const q = O.players[i]; if (!q) return; for (const k of ['slide', 'slideCd', 'down', 'slideDx', 'slideDy', 'slideBall', 'kickMin', 'kickBurst', 'charge']) if (q[k] !== undefined) p[k] = q[k]; p.peer = roster[i].peer; if (p.ctrl === 'gone') parkSeat(G, p); });
+  G.players.forEach((p, i) => { const q = O.players[i]; if (!q) return; for (const k of ['slide', 'slideCd', 'down', 'slideDx', 'slideDy', 'slideBall', 'diving', 'kickMin', 'kickBurst', 'charge']) if (q[k] !== undefined) p[k] = q[k]; p.peer = roster[i].peer; if (p.ctrl === 'gone') parkSeat(G, p); });
   if (gs.stats) for (const k of ['shots', 'sot', 'poss', 'passes', 'saves', 'hardSave', 'posts', 'fouls']) if (gs.stats[k] !== undefined) G.stats[k] = Array.isArray(gs.stats[k]) ? gs.stats[k].slice() : gs.stats[k];
   if (gs.stats && gs.stats.contest != null) G.stats.contest = gs.stats.contest;
   s.net = hostNet(s); sess = s;
@@ -10501,8 +10747,8 @@ function guestApply(s, o){
     b0.atAdd = ba && isFinite(+ba[2]) ? +ba[2] : 0; b0.atK = ba && +ba[3] > 0 ? Math.min(0.05, +ba[3]) : 0; b0.atMax = ba && +ba[4] > 0 ? Math.min(0.6, +ba[4]) : 0; }
   for (const q of G.players) q.charge = 0;
   if (Array.isArray(o.ch)) for (const r of o.ch.slice(0, 16)){ const q = Array.isArray(r) && G.players[r[0] | 0]; if (q) q.charge = Math.max(0, Math.min(1, (+r[1] || 0) / 1000)); }
-  for (const q of G.players){ q.slide = q.slideCd = q.down = 0; q.slideBall = false; }
-  if (Array.isArray(o.sl)) for (const r of o.sl.slice(0, 16)){ const q = Array.isArray(r) && G.players[r[0] | 0]; if (!q) continue; q.slide = r[1] | 0; q.slideCd = r[2] | 0; q.down = r[3] | 0; q.slideDx = (+r[4] || 0) / 1000; q.slideDy = (+r[5] || 0) / 1000; q.slideBall = !!r[6]; }
+  for (const q of G.players){ q.slide = q.slideCd = q.down = 0; q.slideBall = false; q.diving = false; }
+  if (Array.isArray(o.sl)) for (const r of o.sl.slice(0, 16)){ const q = Array.isArray(r) && G.players[r[0] | 0]; if (!q) continue; q.slide = r[1] | 0; q.slideCd = r[2] | 0; q.down = r[3] | 0; q.slideDx = (+r[4] || 0) / 1000; q.slideDy = (+r[5] || 0) / 1000; q.slideBall = !!r[6]; q.diving = !!r[7]; }
   const fk = o.fk; G.sp = Array.isArray(fk) && fk.length >= 12 ? {kind: fk[0] ? 'pen' : 'fk', team: fk[1] ? 1 : 0, x: +fk[2] || 0, y: +fk[3] || 0, t: fk[4] | 0, hold: fk[5] | 0, tk: fk[6] | 0, kp: fk[7] | 0, gx: +fk[8] || 0, gy: +fk[9] || 0, half: +fk[10] || 0, inward: fk[11] < 0 ? -1 : 1, aim: fk.length > 12 && fk[12] != null && isFinite(+fk[12]) ? +fk[12] : null, turn: 0, side: Math.max(-5, Math.min(5, fk[13] | 0))} : null;
   if (Array.isArray(o.x) && o.x.length >= 9){ const x = o.x; Object.assign(s.stats, {shots: [x[0], x[1]], sot: [x[2], x[3]], poss: [x[4], x[5]], contest: x[6], passes: [x[7], x[8]]}); if (x.length >= 11) s.stats.saves = [+x[9] || 0, +x[10] || 0]; if (x.length >= 15){ s.stats.hardSave = [+x[11] || 0, +x[12] || 0]; s.stats.posts = [+x[13] || 0, +x[14] || 0]; } if (x.length >= 17) s.stats.fouls = [+x[15] || 0, +x[16] || 0]; }
   // clock: Haxball estimates the host's frame from the middle of recent arrival offsets
@@ -10680,8 +10926,133 @@ function leaveOnline(){
   Object.assign(NET, {on: false, host: false, T: null, code: '', lobby: null, guests: new Map(), hostSeen: false, hostGoneAt: 0, ackR: null}); resetPing();
   kitOverride = null; applyKits(); $('chatLog').textContent = ''; $('onTitle').textContent = 'Play online';
   menuSync();   // (your own rules again, v27.1)
+  setTimeout(() => { if ($('onlinePanel').hidden) frStop(); else { frPub(); renderFriends(); } }, 0);
 }
 function stopOnlineGameView(){ if (NET.on) leaveOnline(); }
+// ---------- friends (v28.57, "friends thing like to friend each other") ----------
+// Each copy of the game has a friend code (pb.fid, 6 letters and digits); a friend is added by their code (pb.friends:
+// [{f, n}], n the name they last went by). While Online is open (the panel or a room), you say where you are: on the
+// website on the relay (a retained message on <RELAY_P>/u/<code>, cleared when you go), inside Claude in the live room's
+// presence (fr). Friends see each other online, in a room (Join) or playing, and invite each other in (on the relay a
+// message to <RELAY_P>/i/<code>; in Claude in presence, finv); adding someone asks them to add you back (fadd). Inside
+// Claude and on the website can't see each other (see v28.43). Anyone who has your code can see where you are: no secrets
+const FR = {fid: (() => { let f = store.get('pb.fid', ''); if (!/^[a-z0-9]{6}$/.test(f)){ f = Array.from({length: 6}, () => 'abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random() * 31)]).join(''); store.set('pb.fid', f); } return f; })(),
+  list: (() => { const v = store.get('pb.friends', []); return Array.isArray(v) ? v.filter(x => x && /^[a-z0-9]{6}$/.test(x.f)).slice(0, 40) : []; })(),
+  st: new Map(), on: false, cls: null, lobby: null, unsub: null, beat: null, seen: new Set(), inv: [], add: []};
+const frSave = () => store.set('pb.friends', FR.list.map(x => ({f: x.f, n: clean(x.n || '', 16)})));
+const frTopic = f => `${RELAY_P}/u/${f}`, frInbox = f => `${RELAY_P}/i/${f}`;
+function frMe(){   // where I am, for my friends
+  const L = NET.on && NET.lobby, s = sess;
+  return {f: FR.fid, n: myNick(), a: myAvatar(), s: !L ? 'free' : L.on === 1 ? 'match' : 'room', c: L ? NET.code : '', r: L ? clean(L.nm || '', 24) : '', k: L ? L.pl.length : 0, z: L ? L.sz : 0, lk: L && L.lk ? 1 : 0,
+    sc: L && L.on === 1 && s && s.G ? s.G.score.slice(0, 2) : null, t: Date.now()};
+}
+function frPub(force){
+  if (!FR.on) return;
+  const me = frMe(), key = JSON.stringify(Object.assign({}, me, {t: 0})) + FR.inv.join() + FR.add.join();
+  if (!force && key === FR.lastKey && Date.now() - (FR.lastAt || 0) < 15000) return;   // (unchanged: every 20 s at most)
+  FR.lastKey = key; FR.lastAt = Date.now();
+  if (FR.cls) for (const c of FR.cls) try { c.publish(frTopic(FR.fid), JSON.stringify(me), {retain: true}); } catch (e) {}
+  if (FR.lobby) FR.lobby.presence({fr: me, finv: FR.inv.length ? {to: FR.inv.slice(-8), c: NET.code, n: myNick(), t: FR.invT} : null, fadd: FR.add.length ? {to: FR.add.slice(-8), n: myNick(), t: FR.addT} : null}).catch(() => {});
+}
+function frGot(o){   // a friend's notice
+  if (!o || typeof o !== 'object' || !/^[a-z0-9]{6}$/.test(o.f) || o.f === FR.fid) return;
+  const x = FR.list.find(q => q.f === o.f); if (!x) return;
+  if (o.gone){ FR.st.delete(o.f); renderFriends(); return; }
+  FR.st.set(o.f, {n: clean(o.n || '', 16), a: clean(o.a || '', 2), s: o.s === 'match' || o.s === 'room' ? o.s : 'free', c: /^[a-z0-9]{4,6}$/.test(o.c || '') ? o.c : '', r: clean(o.r || '', 24), k: +o.k | 0, z: +o.z | 0, lk: !!o.lk, sc: Array.isArray(o.sc) ? o.sc.slice(0, 2).map(v => +v | 0) : null, t: +o.t || Date.now()});
+  if (o.n && x.n !== clean(o.n, 16)){ x.n = clean(o.n, 16); frSave(); }
+  renderFriends();
+}
+function frMsg(m){   // an invite or a friend request, to me
+  if (!m || typeof m !== 'object' || !/^[a-z0-9]{6}$/.test(m.from) || m.from === FR.fid) return;
+  const key = m.k + m.from + (m.t || ''); if (FR.seen.has(key)) return; FR.seen.add(key);
+  if (Date.now() - (+m.t || 0) > 120000) return;
+  const nm = clean(m.n || '', 16) || 'A friend', known = FR.list.some(q => q.f === m.from);
+  if (m.k === 'inv' && /^[a-z0-9]{4,6}$/.test(m.c || '') && known && !(NET.on && NET.code === m.c)) frToast(`${nm} invites you to their room`, 'Join', () => frJoin(m.c));
+  else if (m.k === 'add' && !known) frToast(`${nm} added you as a friend (code ${m.from})`, 'Add back', () => frAdd(m.from, nm));
+}
+async function frStart(){
+  if (FR.on) { frPub(); return; }
+  FR.on = true; renderFriends();
+  FR.beat = setInterval(() => { frPub(true); let ch = false; for (const [f, x] of FR.st) if (Date.now() - x.t > 70000){ FR.st.delete(f); ch = true; } if (ch) renderFriends(); }, 20000);
+  if (inArtifact){
+    const lobby = await getRoom(); if (!FR.on || !lobby) { renderFriends(); return; }
+    FR.lobby = lobby;
+    try { FR.unsub = lobby.onPeers(ch => { const live = new Set();
+      for (const p of ch.peers || []){ const pr = p && p.presence; if (!pr || p.kind === 'agent') continue;
+        if (pr.fr && typeof pr.fr === 'object'){ frGot(pr.fr); live.add(pr.fr.f); }
+        const f = pr.fr && pr.fr.f;
+        if (pr.finv && Array.isArray(pr.finv.to) && pr.finv.to.includes(FR.fid)) frMsg({k: 'inv', from: f, n: pr.finv.n, c: pr.finv.c, t: pr.finv.t});
+        if (pr.fadd && Array.isArray(pr.fadd.to) && pr.fadd.to.includes(FR.fid)) frMsg({k: 'add', from: f, n: pr.fadd.n, t: pr.fadd.t}); }
+      let chg = false; for (const f of [...FR.st.keys()]) if (!live.has(f)){ FR.st.delete(f); chg = true; } if (chg) renderFriends(); }); } catch (e) {}
+    frPub(); return;
+  }
+  const cls = await relayAll({topic: frTopic(FR.fid), payload: '', retain: true, qos: 0});
+  if (!FR.on){ for (const c of cls) try { c.end(true); } catch (e) {} return; }
+  FR.cls = cls;
+  for (const c of cls){
+    c.subscribe([frInbox(FR.fid), ...FR.list.map(x => frTopic(x.f))]);
+    c.on('message', (topic, buf) => { const o = buf && buf.length ? relayJSON(buf) : null;
+      if (topic === frInbox(FR.fid)){ frMsg(o); return; }
+      const f = topic.slice(`${RELAY_P}/u/`.length); if (!/^[a-z0-9]{6}$/.test(f)) return;
+      if (!o){ frGot({f, gone: true}); return; }
+      if (o.f === f && Date.now() - (+o.t || 0) < 70000) frGot(o); else frGot({f, gone: true}); });
+  }
+  frPub(); renderFriends();
+}
+function frStop(){
+  if (!FR.on) return; FR.on = false; clearInterval(FR.beat);
+  if (FR.cls){ for (const c of FR.cls){ try { c.publish(frTopic(FR.fid), '', {retain: true}); } catch (e) {} setTimeout(() => { try { c.end(false); } catch (e) {} }, 300); } FR.cls = null; }
+  if (FR.lobby){ FR.lobby.presence({fr: null, finv: null, fadd: null}).catch(() => {}); if (FR.unsub) try { FR.unsub(); } catch (e) {} FR.lobby = null; FR.unsub = null; }
+  FR.st.clear(); FR.inv = []; FR.add = [];
+}
+function frSend(f, m){
+  m = Object.assign({from: FR.fid, n: myNick(), t: Date.now()}, m);
+  if (FR.cls) for (const c of FR.cls) try { c.publish(frInbox(f), JSON.stringify(m)); } catch (e) {}
+  if (FR.lobby){ if (m.k === 'inv'){ FR.inv = FR.inv.filter(x => x !== f).concat(f); FR.invT = m.t; } else { FR.add = FR.add.filter(x => x !== f).concat(f); FR.addT = m.t; } frPub(); }
+}
+function frAdd(code, name){
+  const c = String(code || '').trim().toLowerCase();
+  if (!/^[a-z0-9]{6}$/.test(c)){ $('frMsg').textContent = 'A friend code is 6 letters and numbers.'; return; }
+  if (c === FR.fid){ $('frMsg').textContent = 'That\'s your own code.'; return; }
+  if (FR.list.some(x => x.f === c)){ $('frMsg').textContent = 'Already a friend.'; return; }
+  if (FR.list.length >= 40){ $('frMsg').textContent = 'That\'s the most friends (40).'; return; }
+  FR.list.push({f: c, n: clean(name || '', 16)}); frSave(); $('frAdd').value = ''; $('frMsg').textContent = 'Added. They see you when you both have Online open.';
+  if (FR.cls) for (const cl of FR.cls) try { cl.subscribe(frTopic(c)); } catch (e) {}
+  frSend(c, {k: 'add'}); renderFriends(); frPub();
+}
+function frJoin(code){ if (NET.on) return; $('joinCode').value = code; $('joinBtn').click(); }
+let frToastDo = null;
+function frToast(text, yes, fn){ $('frToastT').textContent = text; $('frToastYes').textContent = yes; frToastDo = fn; $('frToast').hidden = false; sfx.chime && sfx.chime(); clearTimeout(frToast.t); frToast.t = setTimeout(() => { $('frToast').hidden = true; frToastDo = null; }, 30000); }
+$('frToastYes').addEventListener('click', () => { const f = frToastDo; frToastDo = null; $('frToast').hidden = true; if (f) f(); });
+$('frToastNo').addEventListener('click', () => { frToastDo = null; $('frToast').hidden = true; });
+function renderFriends(){
+  $('frMine').textContent = FR.fid.toUpperCase();
+  $('frNote').textContent = FR.on ? (inArtifact ? 'inside Claude: friends here in Claude' : 'on the website: friends on the website') : '';
+  const rows = FR.list.map(x => { const o = FR.st.get(x.f); return {x, o, rank: !o ? 3 : o.s === 'room' ? 0 : o.s === 'free' ? 1 : 2}; }).sort((a, b) => a.rank - b.rank || (a.x.n || '').localeCompare(b.x.n || ''));
+  for (const [id, lobbyView] of [['frList', false], ['frList2', true]]){
+    const box = $(id); box.textContent = '';
+    if (!FR.list.length && !lobbyView){ const e = document.createElement('p'); e.className = 'note'; e.textContent = 'No friends yet: add one with their code, or give them yours.'; box.append(e); continue; }
+    for (const {x, o} of rows){
+      if (lobbyView && !o) continue;
+      const r = document.createElement('div'); r.className = 'frrow' + (o ? ' on' : '');
+      const dot = document.createElement('i'); dot.className = 'frdot ' + (!o ? 'off' : o.s); r.append(dot);
+      const nm = document.createElement('b'); nm.textContent = (o && o.n) || x.n || x.f.toUpperCase(); r.append(nm);
+      const st = document.createElement('span'); st.className = 'frst';
+      st.textContent = !o ? 'offline' : o.s === 'free' ? 'online' : o.s === 'room' ? `in room ${o.r ? '“' + o.r + '” ' : ''}(${o.k}/${o.z ? o.z * 2 : '?'})${o.lk ? ' 🔒' : ''}` : `playing${o.r ? ' in “' + o.r + '”' : ''}${o.sc ? ' · ' + o.sc.join('–') : ''}`;
+      r.append(st);
+      const act = (t, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (cls ? ' ' + cls : ''); b.textContent = t; b.onclick = e => { e.currentTarget.blur(); fn(); }; r.append(b); };
+      if (o && o.c && !NET.on && (o.s === 'room' || o.s === 'match')) act('Join', () => frJoin(o.c));
+      if (o && NET.on && NET.code && o.s === 'free') act('Invite', () => { frSend(x.f, {k: 'inv', c: NET.code}); sysChat(`Invited ${(o && o.n) || x.n || 'your friend'}`); });
+      if (!lobbyView) act('✕', () => { FR.list = FR.list.filter(q => q.f !== x.f); FR.st.delete(x.f); frSave(); renderFriends(); }, 'frx');
+      box.append(r);
+    }
+  }
+  $('frLobby').hidden = !(NET.on && rows.some(r => r.o));
+}
+$('frCopy').addEventListener('click', e => { e.currentTarget.blur(); const t = FR.fid.toUpperCase(); (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { $('frMsg').textContent = 'Copied: ' + t; }, () => { $('frMsg').textContent = 'Your code: ' + t; }); });
+$('frAddBtn').addEventListener('click', e => { e.currentTarget.blur(); frAdd($('frAdd').value); });
+$('frAdd').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); frAdd($('frAdd').value); } });
+renderFriends();
 
 // ----- lobby view -----
 function showLobby(){
@@ -10699,6 +11070,7 @@ function showLobby(){
 const inviteBase = () => { try { return !inArtifact && /^https?:$/.test(location.protocol) ? location.href.split('#')[0] : ''; } catch (e) { return ''; } };
 const roomSummary = L => L.pm ? `${L.pm === 2 ? 'Shooting duel' : 'Penalties'} · ${L.sz}v${L.sz}` : `${L.sz}v${L.sz} · ${L.tl ? L.tl + ' min' : 'no time limit'} · ${L.sl ? 'first to ' + L.sl : 'no goal limit'}${L.lgs === 2 ? ' · two legs' : ''}${L.lk ? ' · 🔒' : ''}`;
 function renderLobby(){
+  if (FR.on){ frPub(); if ($('frLobby').hidden === FR.st.size > 0) renderFriends(); }
   if ($('onLobby').hidden){ if (!$('gameMenu').hidden) renderGmBoard(); return; }
   const L = NET.lobby, boss = NET.host || isMgr(), on = !!L && L.on === 1;
   $('roomTitle').textContent = L && L.nm ? L.nm : NET.host ? `${myNick()}'s room` : 'Room';
@@ -10799,7 +11171,7 @@ $('joinBtn').addEventListener('click', () => joinGame($('joinCode').value, $('pa
 $('joinCode').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame($('joinCode').value); });
 $('startOnline').addEventListener('click', () => { if (isMgr()) sendCmd('go'); else startOnline(); });
 $('leaveOnline').addEventListener('click', () => { leaveOnline(); openOnline(); });
-$('onClose').addEventListener('click', () => { if (NET.on){ leaveOnline(); openOnline(); return; } $('onlinePanel').hidden = true; stopProbe(); stopRelayList(); if (NET.listUnsub){ NET.listUnsub(); NET.listUnsub = null; } if (!sess) $('menu').hidden = false; });
+$('onClose').addEventListener('click', () => { if (NET.on){ leaveOnline(); openOnline(); return; } $('onlinePanel').hidden = true; frStop(); stopProbe(); stopRelayList(); if (NET.listUnsub){ NET.listUnsub(); NET.listUnsub = null; } if (!sess) $('menu').hidden = false; });
 $('copyCode').addEventListener('click', () => { const c = NET.code; try { navigator.clipboard.writeText(c).then(() => { $('copyCode').textContent = 'Copied'; setTimeout(() => $('copyCode').textContent = 'Copy', 1500); }, () => {}); } catch (e) {} });
 $('copyLink').addEventListener('click', () => { const u = inviteBase(); if (!u || !NET.code) return; const link = u + '#join=' + NET.code;
   try { navigator.clipboard.writeText(link).then(() => { $('copyLink').textContent = 'Link copied'; setTimeout(() => $('copyLink').textContent = 'Copy invite link', 1500); }, () => { onErr('Copy this link: ' + link); }); } catch (e) { onErr('Copy this link: ' + link); } });
@@ -11050,18 +11422,24 @@ function renderCurlOpts(){
 }
 renderCurlOpts();
 function keyMsg(t){ const m = $('keyMsg'); if (m) m.textContent = t || ''; }
+// v28.57 ("some controls are over the place not beginner friendly"): each key with what it does in plain words; your
+// own keys only, unless "Two or three on one keyboard" is open (pb.keysAll)
+const KEY_DO = {up: 'move · hold it as you kick to curl', down: 'move · hold it as you kick to curl', left: 'move', right: 'move', kick: 'kick (hold it as you run in) · tap twice: call for the ball', slide: 'slide tackle · in goal: dive', gk: 'go in goal / back out (2v2: the computer swaps with you)'};
+let keysAll = !!store.get('pb.keysAll', 0);
 function renderKeys(){
-  const g = $('keys'); g.textContent = ''; keyMsg('');
+  const g = $('keys'); g.textContent = ''; keyMsg(''); g.classList.toggle('all', keysAll);
   const add = (tag, text, cls) => { const e = document.createElement(tag); e.textContent = text; if (cls) e.className = cls; g.append(e); return e; };
-  add('span', ''); add('b', `P1 · ${KIT[0].name || 'Left'}`); add('b', `P2 · ${KIT[1].name || 'Right'}`); add('b', 'P3 · three players');
+  const cols = keysAll ? PL : ['p1'];
+  add('span', ''); add('b', keysAll ? `P1 · ${KIT[0].name || 'Left'}` : 'Your key'); if (keysAll){ add('b', `P2 · ${KIT[1].name || 'Right'}`); add('b', 'P3 · three players'); }
   for (const [a, name] of ACT){
-    add('span', name);
-    for (const p of PL){
+    const lab = add('span', null, 'kact'); const nb = document.createElement('b'); nb.textContent = name; const ds = document.createElement('small'); ds.textContent = KEY_DO[a] || ''; lab.append(nb, ds);
+    for (const p of cols){
       const wait = rebind && rebind.p === p && rebind.a === a, b = document.createElement('button');
       b.type = 'button'; b.className = 'ghost' + (wait ? ' wait' : ''); b.textContent = wait ? 'Press a key…' : bind[p][a] ? kname(bind[p][a]) : '—';
       b.onclick = () => { rebind = {p, a}; renderKeys(); }; g.append(b);
     }
   }
+  { const t = document.createElement('button'); t.type = 'button'; t.className = 'ghost sm kall'; t.textContent = keysAll ? '▴ Just my keys' : '▾ Two or three on one keyboard (P2, P3)'; t.onclick = () => { keysAll = !keysAll; store.set('pb.keysAll', keysAll ? 1 : 0); rebind = null; renderKeys(); }; t.style.gridColumn = '1 / -1'; g.append(t); }
   // (v28.44) the game's own keys: shown, locked
   { const h = add('b', 'Fixed · can\'t be changed', 'kfix'); h.style.gridColumn = '1 / -1'; }
   for (const [name, ks, txt] of FIXED_KEYS){
@@ -11236,7 +11614,7 @@ exNum.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefaul
 setExtrap(SET.extrap);
 $('ghost').checked = SET.ghost; $('ghost').addEventListener('change', () => { SET.ghost = $('ghost').checked; store.set('pb.ghost', SET.ghost ? 1 : 0); });
 $('smoothOn').checked = SET.smooth; $('smoothOn').addEventListener('change', () => { SET.smooth = $('smoothOn').checked; store.set('pb.smooth', SET.smooth ? 1 : 0); });
-const soundTxt = () => { $('introBtn').setAttribute('aria-pressed', String(SET.intro)); $('soundBtn').setAttribute('aria-pressed', String(SET.sound)); $('replayBtn').setAttribute('aria-pressed', String(SET.replays)); $('refBtn').setAttribute('aria-pressed', String(SET.ref)); $('aiBtn').setAttribute('aria-pressed', String(SET.aiCom));
+const soundTxt = () => { $('coachBtn').setAttribute('aria-pressed', String(coachOn())); $('introBtn').setAttribute('aria-pressed', String(SET.intro)); $('soundBtn').setAttribute('aria-pressed', String(SET.sound)); $('replayBtn').setAttribute('aria-pressed', String(SET.replays)); $('refBtn').setAttribute('aria-pressed', String(SET.ref)); $('aiBtn').setAttribute('aria-pressed', String(SET.aiCom));
   $('soundBtn').title = SET.sound ? 'Sound is on: tap to turn it off' : 'Sound is off: tap to turn it on'; $('replayBtn').title = SET.replays ? 'Each goal is shown again before the kick-off: tap to turn it off' : 'Goal replays are off: tap to turn them on'; };
 $('refBtn').addEventListener('click', () => { SET.ref = !SET.ref; store.set('pb.ref', SET.ref ? 1 : 0); soundTxt(); $('refBtn').blur(); });
 $('introBtn').addEventListener('click', () => { SET.intro = !SET.intro; store.set('pb.intro', SET.intro ? 1 : 0); soundTxt(); $('introBtn').blur(); });
@@ -11362,7 +11740,8 @@ function loop(t){
     if (sess){ if (sess.rp) rpUpdate(sess, dt); else sess.update(dt); }
     autoExtrapTick(dt);
     render(dt);
-    updateUI(); focusCheck(); keyHintCheck(); fitStage();
+    updateUI(); focusCheck(); keyHintCheck(); helpTick(); fitStage();
+    if (sess && sess.mode && sess.mode.kind === 'tutorial') keyStrip($('tutKeys'), true);
     // (v28.8: and as long as a hand-off may take, as the match's own check: this one said "the host left" at 3.5 s, every time)
     if (NET.on && !NET.host && NET.hostGoneAt && performance.now() - NET.hostGoneAt > (NET.handoff ? HANDOFF_MS : 3500)){ leaveOnline(); exitToMenu('The host left the game.'); }
   } catch (err) { reportErr('game', err); }
