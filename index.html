@@ -875,6 +875,31 @@
   #game.tabfill #menu > *{zoom:var(--mz,1)}
   @media (min-width:641px){ #game.tabfill #menu{overflow:hidden} }
   @media (min-width:641px){ #game.tabfill #menu{grid-template-rows:auto auto auto auto 1fr;padding-top:calc(22px + var(--mtop,0px));padding-bottom:16px} #game.tabfill #menu > .mright{grid-row:1 / 6} }   /* (the left column stays together when the right one is taller) */
+
+  /* v28.63: players online and 💡 Suggestions in the corner, with the menu up; friends in the With friends tab */
+  .corner #onlineN,.corner #sugBtn{display:none}
+  body.menuup .corner #onlineN:not([hidden]){display:inline-flex;align-items:center;font-size:12px;font-weight:600;color:#7ee2a0;padding:4px 10px;background:rgba(20,24,32,.55);border:1px solid var(--line)}
+  body.menuup .corner #sugBtn{display:inline-flex}
+  #sugPanel textarea,#sugPanel input{width:min(100%,560px);box-sizing:border-box;margin:4px 0;padding:8px 10px;font:inherit;font-size:14px;color:var(--text);background:#1d222c;border:1px solid var(--line)}
+  #sugPanel textarea{resize:vertical;min-height:110px}
+  #menu .frcard{display:flex;flex-direction:column;gap:6px;padding:12px 14px}
+  #menu .frcard .ochead{display:flex;align-items:baseline;gap:10px} #menu .frcard .ochead .note{margin-left:auto}
+  #menu .frcard .orow{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  #menu .frcard input{padding:6px 8px;font:inherit;color:var(--text);background:#1d222c;border:1px solid var(--line)}
+  #menu .frback .note{font-size:11px}
+
+  /* v28.63 ("maybe make a small seperate tab for that cuz rn it looks ugly"): the Friends tab */
+  #menu[data-tab="frs"] .mbar{display:none}
+  #menu .frtop{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  #menu .frbox{display:flex;flex-direction:column;gap:6px;padding:12px 14px;background:rgba(255,255,255,.04);border-left:3px solid var(--accent)}
+  #menu .frbox small{font-size:11.5px;color:var(--muted);min-height:1em}
+  #menu .frcode{display:flex;align-items:center;gap:10px} #menu .frcode b.code{font-size:26px;letter-spacing:.14em;color:#fff}
+  #menu .frcode input{flex:1;min-width:0;padding:7px 9px;font:inherit;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--text);background:#1d222c;border:1px solid var(--line)}
+  #menu .frhead{display:flex;align-items:baseline;gap:10px;margin-top:4px} #menu .frhead .note{margin-left:auto;font-size:11.5px}
+  #menu .mpane[data-pane="frs"] .frlist{max-height:260px;overflow:auto}
+  #menu .mpane[data-pane="frs"] .frrow{padding:8px 10px}
+  #menu .frback{font-size:12px} #menu .linkish{background:none;border:0;padding:0;font:inherit;color:#ffd166;text-decoration:underline;cursor:pointer;text-transform:none;letter-spacing:0}
+  @media (max-width:640px){ #menu .frtop{grid-template-columns:1fr} }
 </style>
 
 <header>
@@ -914,7 +939,7 @@
   </div>
   <canvas id="c"></canvas>
   <div class="hud" id="hud" hidden></div>
-  <div class="corner"><button class="ghost fsb rolebtn" id="roleBtn" type="button" hidden></button><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (P)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
+  <div class="corner"><span class="fsb onlinen" id="onlineN" hidden title="Players with the game open right now"></span><button class="ghost fsb" id="sugBtn" type="button" title="Got an idea or found a bug? Tell us">💡 Suggestions</button><button class="ghost fsb rolebtn" id="roleBtn" type="button" hidden></button><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (P)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
   <div class="rpbar" id="rpBar" hidden>
     <button class="ghost" id="rpBack" type="button" title="5 s back (←)">« 5 s</button>
     <button id="rpPlay" type="button" title="Pause or play (Space)">Pause</button>
@@ -1017,12 +1042,6 @@
         <section class="ocard you">
           <label class="avin" for="avatar" title="Up to two letters or an emoji, shown on your player"><input type="text" id="avatar" maxlength="2" autocomplete="off" spellcheck="false" placeholder="P1" aria-label="Avatar"></label>
           <label class="ofield grow" for="nick"><small>Your name</small><input type="text" id="nick" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Player"></label>
-        </section>
-        <section class="ocard" id="frCard">
-          <div class="ochead"><h3>Friends</h3><span class="note" id="frNote"></span></div>
-          <div class="frme">Your friend code <b class="code" id="frMine"></b><button class="ghost sm" id="frCopy" type="button">Copy</button><span class="note">give it to a friend; they add you with it</span></div>
-          <div class="frlist" id="frList"></div>
-          <div class="orow"><input type="text" id="frAdd" maxlength="6" size="9" placeholder="their code" autocomplete="off" spellcheck="false" aria-label="A friend's code"><button class="ghost" id="frAddBtn" type="button">Add friend</button><span class="note" id="frMsg"></span></div>
         </section>
         <section class="ocard">
           <div class="ochead"><h3>Rooms</h3><span class="note" id="roomsNote">Looking for rooms…</span><button class="ghost sm" id="roomsRefresh" type="button" title="Look again">↻</button></div>
@@ -1137,6 +1156,15 @@
       </div>
     </div>
   </div>
+  <div class="overlay" id="sugPanel" hidden>
+    <h2>Suggestions</h2>
+    <p>Got an idea for the game, or found a bug? Tell us: we read every one.</p>
+    <textarea id="sugText" rows="5" maxlength="600" placeholder="What should we add or fix?"></textarea>
+    <input type="text" id="sugName" maxlength="24" placeholder="Your name (optional)" autocomplete="off" spellcheck="false">
+    <p class="note" id="sugMsg" aria-live="polite"></p>
+    <div class="row"><button id="sugSend" type="button">Send</button><button class="ghost" id="sugClose" type="button">Close</button></div>
+  </div>
+  <form name="suggestions" data-netlify="true" netlify-honeypot="bot-field" hidden><input type="hidden" name="form-name" value="suggestions"><input name="bot-field"><input name="name"><textarea name="text"></textarea><input name="where"><input name="ver"></form>
   <div class="overlay" id="mapPanel" hidden>
     <h2>Shot map</h2>
     <p id="mapNote"></p>
@@ -1199,7 +1227,7 @@
   <div class="overlay" id="menu" data-tab="play">
     <div class="mhead"><h2 id="menuTitle">Pitch Brawl</h2><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p></div>
     <div class="mtabs" role="tablist" aria-label="Modes">
-      <button type="button" role="tab" data-tab="play" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" aria-selected="false">With friends</button><button type="button" role="tab" data-tab="me" aria-selected="false">My stuff</button><button type="button" role="tab" data-tab="learn" aria-selected="false">Tutorial</button>
+      <button type="button" role="tab" data-tab="play" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" aria-selected="false">Multiplayer</button><button type="button" role="tab" data-tab="frs" aria-selected="false">Friends</button><button type="button" role="tab" data-tab="me" aria-selected="false">My stuff</button><button type="button" role="tab" data-tab="learn" aria-selected="false">Tutorial</button>
     </div>
     <button class="mlearn tutb" type="button">New to the game? <b>Tutorial</b><small>every control in short parts, a minute or two each</small></button>
     <div class="mright">
@@ -1240,6 +1268,15 @@
       <p class="mnote lnote">Short parts, one at a time: settings first (the best ones starred), then the basics and up. Or pick any part.</p>
       <div class="lparts" id="learnList"></div>
       <div class="lgo"><button class="mgo lgob" id="learnGo" type="button"><i class="ic" data-ic="target"></i><span><b id="learnGoT">Start the tutorial</b><small id="learnGoS">part 1: settings</small></span><em class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></em></button></div>
+    </div>
+    <div class="mpane" data-pane="frs" role="tabpanel" hidden>
+      <div class="frtop">
+        <div class="frbox"><span class="lbl">Your friend code</span><div class="frcode"><b class="code" id="frMine"></b><button class="ghost sm" id="frCopy" type="button">Copy</button></div><small>give it to a friend; they add you with it</small></div>
+        <div class="frbox"><span class="lbl">Add a friend</span><div class="frcode"><input type="text" id="frAdd" maxlength="6" size="9" placeholder="their code" autocomplete="off" spellcheck="false" aria-label="A friend's code"><button id="frAddBtn" type="button">Add</button></div><small class="note" id="frMsg"></small></div>
+      </div>
+      <div class="frhead"><span class="lbl">Your friends</span><span class="note" id="frNote"></span></div>
+      <div class="frlist" id="frList"></div>
+      <p class="mnote frback">Your code and friends are kept in this browser. <button class="linkish" id="frBackup" type="button">Back up / move my profile</button> to take them to another browser or device.</p>
     </div>
     <div class="mpane" data-pane="me" role="tabpanel" hidden>
       <div class="tiles c2">
@@ -8199,9 +8236,31 @@ $('kpBtn').addEventListener('click', () => {
 // ---------- menus ----------
 let pausedForPanel = null;   // the match paused while panels are open over it
 const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one at a time
-const panels = ['teamPanel', 'puPanel', 'keysPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'mapPanel', 'scoresPanel', 'cupPanel', 'leaguePanel', 'onlinePanel', 'resPanel', 'gameMenu', 'cbPanel', 'setPanel', 'helpPanel'];
+const panels = ['sugPanel', 'teamPanel', 'puPanel', 'keysPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'mapPanel', 'scoresPanel', 'cupPanel', 'leaguePanel', 'onlinePanel', 'resPanel', 'gameMenu', 'cbPanel', 'setPanel', 'helpPanel'];
 const panelsClosed = () => panels.every(id => $(id).hidden);
 function showMenu(title, text){ $('menuTitle').textContent = title; $('menuText').textContent = text; $('menu').hidden = false; renderDash(); try { fitMenu(); } catch (e) {} }
+// v28.63 ("add a tiny thing in corner saying like recommendations, and ppl could write what they think we should do and
+// we check it"): 💡 Suggestions in the menu's corner. On the website it goes to the Netlify site's form ("suggestions":
+// Netlify Forms, read in the site's Forms tab, form detection switched on there); inside Claude the page can't send it
+// anywhere, so it says to use the website. One every 30 s, 600 characters
+const SUG_URL = 'https://pitchbrawl.netlify.app/';
+let sugAt = 0;
+$('sugBtn').addEventListener('click', e => { e.currentTarget.blur(); $('sugMsg').textContent = inArtifact ? 'Inside Claude suggestions can\'t be sent: open the website version (pitchbrawl.netlify.app) and send it from there.' : ''; if (!$('sugName').value) $('sugName').value = SET.nick || ''; openPanel('sugPanel'); setTimeout(() => $('sugText').focus(), 50); });
+$('sugClose').addEventListener('click', () => closePanel('sugPanel'));
+$('sugSend').addEventListener('click', async e => {
+  e.currentTarget.blur(); const text = clean($('sugText').value, 600), name = clean($('sugName').value, 24);
+  if (!text || text.length < 3){ $('sugMsg').textContent = 'Write your idea first.'; return; }
+  if (Date.now() - sugAt < 30000){ $('sugMsg').textContent = 'Thanks! One every 30 seconds, please.'; return; }
+  if (inArtifact){ $('sugMsg').textContent = 'Inside Claude it can\'t be sent: open pitchbrawl.netlify.app and send it there.'; return; }
+  const here = /\.netlify\.app$/.test(location.hostname), body = new URLSearchParams({'form-name': 'suggestions', 'bot-field': '', text, name, where: location.hostname || 'file', ver: typeof NET_VER === 'string' ? NET_VER : ''}).toString();
+  $('sugMsg').textContent = 'Sending…'; $('sugSend').disabled = true;
+  try {
+    const r = await fetch(here ? '/' : SUG_URL, {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body, mode: here ? 'same-origin' : 'no-cors'});
+    if (here && !r.ok) throw new Error('form ' + r.status);
+    sugAt = Date.now(); $('sugText').value = ''; $('sugMsg').textContent = 'Sent. Thank you! We read every one.';
+  } catch (err) { $('sugMsg').textContent = 'It couldn\'t be sent just now. Try again in a moment.'; }
+  $('sugSend').disabled = false;
+});
 // v28.60 ("some stuff are bit plain like too much spaces", the menu filling the tab): under the match settings, four
 // cards that open what they show: friends online, the tutorial's parts done, your matches, achievements
 function renderDash(){
@@ -8209,7 +8268,7 @@ function renderDash(){
   const box = $('mDash'); if (!box) return; box.textContent = '';
   const fr = (() => { try { return {n: FR.st.size, all: FR.list.length}; } catch (e) { return {n: 0, all: 0}; } })(), ld = PARTS.filter(k => learnDone()[k]).length, na = Object.keys((ach && ach.u) || {}).length;
   const card = (big, label, sub, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'dcard'; const v = document.createElement('b'); v.textContent = big; const l = document.createElement('span'); l.textContent = label; const m = document.createElement('small'); m.textContent = sub; b.append(v, l, m); b.onclick = fn; box.append(b); };
-  card(String(fr.n), fr.n === 1 ? 'friend online' : 'friends online', fr.all ? `of ${fr.all} · Online ›` : 'add friends in Online ›', () => $('onlineBtn').click());
+  card(String(fr.n), fr.n === 1 ? 'friend online' : 'friends online', fr.all ? `of ${fr.all} · Friends ›` : 'add friends ›', () => menuTab('frs'));
   card(`${ld}/${PARTS.length}`, 'tutorial parts', ld >= PARTS.length ? 'all done · again ›' : 'Tutorial ›', () => openLearn());
   card(String((you && you.games) || 0), 'matches played', 'My scores ›', () => $('scoresBtn').click());
   card(`${na}/${ACH.length}`, 'achievements', 'see them ›', () => $('achBtn').click());
@@ -8309,7 +8368,7 @@ function liveRules(){
   Object.assign(s.cfg, freshRules(s.cfg)); const r = rulesOf(s.cfg); for (const k of ['curve', 'curveLv', 'slide', 'fk', 'power']) s.G.cfg[k] = r[k];
 }
 // the menu's tabs (the last one used comes back)
-const TABS = ['play', 'train', 'friends', 'me', 'learn'];   // (v28.60: the Tutorial a tab like the others, "not in its own thing")
+const TABS = ['play', 'train', 'friends', 'frs', 'me', 'learn'];   // (v28.63: Friends a small tab of its own; "With friends" is Multiplayer)   // (v28.60: the Tutorial a tab like the others, "not in its own thing")
 function menuTab(t){
   if (!TABS.includes(t)) t = 'play';
   document.querySelectorAll('#menu .mtabs button').forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
@@ -9737,7 +9796,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.62';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.63';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -11108,7 +11167,7 @@ function stopOnlineGameView(){ if (NET.on) leaveOnline(); }
 // Claude and on the website can't see each other (see v28.43). Anyone who has your code can see where you are: no secrets
 const FR = {fid: (() => { let f = store.get('pb.fid', ''); if (!/^[a-z0-9]{6}$/.test(f)){ f = Array.from({length: 6}, () => 'abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random() * 31)]).join(''); store.set('pb.fid', f); } return f; })(),
   list: (() => { const v = store.get('pb.friends', []); return Array.isArray(v) ? v.filter(x => x && /^[a-z0-9]{6}$/.test(x.f)).slice(0, 40) : []; })(),
-  st: new Map(), on: false, cls: null, lobby: null, unsub: null, beat: null, seen: new Set(), inv: [], add: []};
+  st: new Map(), all: new Map(), on: false, cls: null, lobby: null, unsub: null, beat: null, seen: new Set(), inv: [], add: []};
 const frSave = () => store.set('pb.friends', FR.list.map(x => ({f: x.f, n: clean(x.n || '', 16)})));
 const frTopic = f => `${RELAY_P}/u/${f}`, frInbox = f => `${RELAY_P}/i/${f}`;
 function frMe(){   // where I am, for my friends
@@ -11144,11 +11203,12 @@ function frMsg(m){   // an invite or a friend request, to me
 async function frStart(){
   if (FR.on) { frPub(); return; }
   FR.on = true; renderFriends();
-  FR.beat = setInterval(() => { frPub(true); let ch = false; for (const [f, x] of FR.st) if (Date.now() - x.t > 70000){ FR.st.delete(f); ch = true; } if (ch) renderFriends(); }, 20000);
+  FR.beat = setInterval(() => { frPub(true); let ch = false; for (const [f, x] of FR.st) if (Date.now() - x.t > 70000){ FR.st.delete(f); ch = true; } if (ch) renderFriends(); if (!inArtifact){ for (const [f, t] of FR.all) if (Date.now() - t > 70000) FR.all.delete(f); onlineN(); } }, 20000);
   if (inArtifact){
     const lobby = await getRoom(); if (!FR.on || !lobby) { renderFriends(); return; }
     FR.lobby = lobby;
     try { FR.unsub = lobby.onPeers(ch => { const live = new Set();
+      FR.all = new Map((ch.peers || []).filter(p => p && p.kind !== 'agent' && p.presence && p.presence.fr && p.presence.fr.f).map(p => [p.presence.fr.f, Date.now()])); onlineN();
       for (const p of ch.peers || []){ const pr = p && p.presence; if (!pr || p.kind === 'agent') continue;
         if (pr.fr && typeof pr.fr === 'object'){ frGot(pr.fr); live.add(pr.fr.f); }
         const f = pr.fr && pr.fr.f;
@@ -11161,14 +11221,22 @@ async function frStart(){
   if (!FR.on){ for (const c of cls) try { c.end(true); } catch (e) {} return; }
   FR.cls = cls;
   for (const c of cls){
-    c.subscribe([frInbox(FR.fid), ...FR.list.map(x => frTopic(x.f))]);
+    c.subscribe([frInbox(FR.fid), `${RELAY_P}/u/+`]);   // (v28.63: everyone's, for players online; friends among them)
     c.on('message', (topic, buf) => { const o = buf && buf.length ? relayJSON(buf) : null;
       if (topic === frInbox(FR.fid)){ frMsg(o); return; }
       const f = topic.slice(`${RELAY_P}/u/`.length); if (!/^[a-z0-9]{6}$/.test(f)) return;
+      if (o && o.f === f && Date.now() - (+o.t || 0) < 70000) FR.all.set(f, +o.t || Date.now()); else FR.all.delete(f); onlineN();
+      if (!FR.list.some(x => x.f === f)) return;
       if (!o){ frGot({f, gone: true}); return; }
       if (o.f === f && Date.now() - (+o.t || 0) < 70000) frGot(o); else frGot({f, gone: true}); });
   }
   frPub(); renderFriends();
+}
+// (v28.63, "players online now"): everyone with the game open (who says so on the relay, or in Claude's live room), you too
+function onlineN(){
+  const el = $('onlineN'); if (!el) return;
+  const n = FR.on && (FR.cls || FR.lobby) ? new Set([...FR.all.keys(), FR.fid]).size : 0;
+  el.hidden = !n; if (n) el.textContent = `● ${n} online`;
 }
 function frStop(){
   if (!FR.on) return; FR.on = false; clearInterval(FR.beat);
@@ -11203,7 +11271,7 @@ $('frToastYes').addEventListener('click', () => { const f = frToastDo; frToastDo
 $('frToastNo').addEventListener('click', () => { frToastDo = null; $('frToast').hidden = true; });
 function renderFriends(){
   $('frMine').textContent = FR.fid.toUpperCase();
-  $('frNote').textContent = FR.on ? (inArtifact ? 'inside Claude: friends here in Claude' : 'on the website: friends on the website') : '';
+  $('frNote').textContent = FR.on ? (inArtifact ? 'friends playing in Claude' : 'friends on the website') : '';
   const rows = FR.list.map(x => { const o = FR.st.get(x.f); return {x, o, rank: !o ? 3 : o.s === 'room' ? 0 : o.s === 'free' ? 1 : 2}; }).sort((a, b) => a.rank - b.rank || (a.x.n || '').localeCompare(b.x.n || ''));
   for (const [id, lobbyView] of [['frList', false], ['frList2', true]]){
     const box = $(id); box.textContent = '';
@@ -11226,6 +11294,7 @@ function renderFriends(){
   $('frLobby').hidden = !(NET.on && rows.some(r => r.o));
   { const n = rows.filter(r => r.o).length, sm = $('onlineBtn') && $('onlineBtn').querySelector('small'); if (sm) sm.textContent = 'host a game or join one with a code' + (n ? ` · ${n} friend${n > 1 ? 's' : ''} online` : ''); }
 }
+$('frBackup').addEventListener('click', e => { e.currentTarget.blur(); openPanel('setPanel'); const sec = $('xferSave') && $('xferSave').closest('.dsec'); if (sec) setTimeout(() => sec.scrollIntoView({block: 'start'}), 50); });
 $('frCopy').addEventListener('click', e => { e.currentTarget.blur(); const t = FR.fid.toUpperCase(); (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { $('frMsg').textContent = 'Copied: ' + t; }, () => { $('frMsg').textContent = 'Your code: ' + t; }); });
 $('frAddBtn').addEventListener('click', e => { e.currentTarget.blur(); frAdd($('frAdd').value); });
 $('frAdd').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); frAdd($('frAdd').value); } });
@@ -11505,7 +11574,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Escape'){
     if (!$('plMenu').hidden){ plMenuClose(); return; }
     if (!$('gameMenu').hidden && fsBack && !inFs()) fsAgain = true;
-    const open = ['helpPanel', 'teamPanel', 'puPanel', 'keysPanel', 'setPanel', 'scoresPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'cupPanel', 'leaguePanel', 'gameMenu'].find(id => !$(id).hidden);
+    const open = ['sugPanel', 'helpPanel', 'teamPanel', 'puPanel', 'keysPanel', 'setPanel', 'scoresPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'cupPanel', 'leaguePanel', 'gameMenu'].find(id => !$(id).hidden);
     if (open){ if (open === 'trainPanel') closeTrain(); else if (open === 'goalsPanel') closeGoals(); else if (open === 'setPanel') closeSettings(); else closePanel(open); if (!sess && (open === 'cupPanel' || open === 'leaguePanel' || open === 'achPanel' || open === 'scoresPanel')) $('menu').hidden = false; }
     else if (!$('onlinePanel').hidden && !NET.on) $('onClose').click();
     else if (sess && $('menu').hidden && panelsClosed()){ fsBack = false; if (sess.rp || sess.replay || sess.done) togglePause(); else openGameMenu(); }   // (v25.9: Esc is the room menu, P pauses; v27.8: in fullscreen too)
