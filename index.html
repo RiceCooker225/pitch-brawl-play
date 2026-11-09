@@ -832,6 +832,38 @@
 
   /* v28.59 ("make the game like fullscreen taking up the whole tab"): in a match the game fills the tab (⚙ Settings → View) */
   body.tabfilled{overflow:hidden}
+
+  /* v28.60: the menu filling the tab: centred, bigger on big screens, and the cards under the match settings */
+  #game.tabfill #menu{align-content:center;justify-content:center;grid-template-columns:minmax(220px,340px) minmax(0,720px)}
+  @media (min-width:1500px) and (min-height:860px){ #game.tabfill #menu > *{zoom:1.18} }
+  @media (min-width:1850px) and (min-height:1000px){ #game.tabfill #menu > *{zoom:1.32} }
+  .mdash{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%}
+  .mdash:empty{display:none}
+  .dcard{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;padding:10px 12px;border:0;border-left:3px solid var(--accent);border-radius:0;background:rgba(255,255,255,.045);color:var(--text);cursor:pointer;min-width:0}
+  .dcard:hover{background:rgba(255,255,255,.08)} .dcard b{font-family:var(--cond,'Barlow Condensed',sans-serif);font-style:italic;font-weight:800;font-size:28px;line-height:1;color:#fff}
+  .dcard span{font-size:12px;font-weight:600;color:#e3e6ec} .dcard small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  @media (max-width:640px){ .mdash{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+  /* v28.60 ("the learn to play looks a bit squished unlike the other tabs"): the Tutorial button as roomy as the tabs */
+  #menu .mlearn{max-width:340px;gap:3px;padding:8px 16px 9px 14px;background:rgba(255,209,102,.07);font-size:12.5px}
+  #menu .mlearn b{font-size:clamp(24px,2.6vw,31px);line-height:1.02;letter-spacing:.01em}
+  #menu .mlearn small{font-size:12px;line-height:1.35;color:#aab2c4}
+  #menu .mlearn:hover{background:rgba(255,209,102,.13)}
+
+  /* v28.60: the Tutorial's parts roomier (they took the panel buttons' small capitals) */
+  #menu .lparts{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;width:min(100%,960px);margin:10px 0 16px}
+  #menu .lpart{padding:16px 18px;gap:16px;min-height:84px;text-transform:none;letter-spacing:0;font-family:Rubik,sans-serif;font-style:normal}
+  #menu .lpart i{width:38px;height:38px;font-size:18px}
+  #menu .lpart b{font-family:var(--cond,'Barlow Condensed',sans-serif);font-style:italic;font-weight:800;font-size:22px;letter-spacing:.01em;text-transform:uppercase;line-height:1}
+  #menu .lpart small{font-size:13px;line-height:1.35;text-transform:none;letter-spacing:0;font-weight:400;color:#aab2c4}
+
+  #menu[data-tab="learn"] .mbar{display:none}
+  #menu .mpane[data-pane="learn"] .lparts{grid-template-columns:repeat(2,minmax(0,1fr));width:100%;margin:4px 0 12px}
+  #menu .mpane[data-pane="learn"] .lpart{min-height:70px;padding:12px 14px}
+  #menu .lnote{margin:0 0 6px} #menu .lgo .mgo{width:100%}
+  @media (max-width:640px){ #menu .mpane[data-pane="learn"] .lparts{grid-template-columns:minmax(0,1fr)} }
+  #menu[data-tab="learn"] > .mlearn{display:none}
+  #menu > .mlearn[hidden]{display:none}
 </style>
 
 <header>
@@ -1094,12 +1126,6 @@
       </div>
     </div>
   </div>
-  <div class="overlay" id="learnPanel" hidden>
-    <h2>Learn to play</h2>
-    <p>Short parts, one at a time: settings first (with the best ones starred), then the basics and up. Or pick any part.</p>
-    <div class="lparts" id="learnList"></div>
-    <div class="row"><button id="learnGo" type="button">Start with part 1: Settings</button><button class="ghost" id="learnDone" type="button">Close</button></div>
-  </div>
   <div class="overlay" id="mapPanel" hidden>
     <h2>Shot map</h2>
     <p id="mapNote"></p>
@@ -1119,7 +1145,7 @@
   </div>
   <div class="overlay" id="helpPanel" hidden>
     <div class="hhead"><h2>How to play</h2><button id="helpDone" type="button">Done</button></div>
-    <div class="hlearn"><button class="ghost sm tutb" type="button">▶ Learn to play (the tutorial)</button><button class="ghost sm curlb" type="button">▶ Curl lesson</button><button class="ghost sm powerb" type="button">▶ Power shot lesson</button></div>
+    <div class="hlearn"><button class="ghost sm tutb" type="button">▶ Tutorial: every control, in short parts</button></div>
     <div class="hgrid">
       <section class="hsec kb"><h3>Keys</h3>
         <div class="krow"><em>P1</em><span id="kb1"></span></div>
@@ -1162,9 +1188,9 @@
   <div class="overlay" id="menu" data-tab="play">
     <div class="mhead"><h2 id="menuTitle">Pitch Brawl</h2><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p></div>
     <div class="mtabs" role="tablist" aria-label="Modes">
-      <button type="button" role="tab" data-tab="play" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" aria-selected="false">With friends</button><button type="button" role="tab" data-tab="me" aria-selected="false">My stuff</button>
+      <button type="button" role="tab" data-tab="play" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" aria-selected="false">With friends</button><button type="button" role="tab" data-tab="me" aria-selected="false">My stuff</button><button type="button" role="tab" data-tab="learn" aria-selected="false">Tutorial</button>
     </div>
-    <button class="mlearn tutb" type="button">New to the game? <b>Learn to play</b><small>short parts: settings, basics, attacking, defending…</small></button>
+    <button class="mlearn tutb" type="button">New to the game? <b>Tutorial</b><small>every control in short parts, a minute or two each</small></button>
     <div class="mright">
     <div class="mpane" data-pane="play" role="tabpanel">
       <div class="mcard" id="setPlay" data-people="1">
@@ -1178,9 +1204,7 @@
     </div>
     <div class="mpane" data-pane="train" role="tabpanel" hidden>
       <div class="tiles c3">
-        <button class="tile tutb" type="button"><i class="ic" data-ic="target"></i><span><b>Learn to play</b><small>the tutorial, in short parts</small></span></button>
-        <button class="tile curlb" type="button"><i class="ic" data-ic="target"></i><span><b>Curl lesson</b><small>bend it round a man, in at the far post, auto curl, free kicks</small></span></button>
-        <button class="tile powerb" type="button"><i class="ic" data-ic="target"></i><span><b>Power shot lesson</b><small>charge it, shoot it, keep it, past a keeper</small></span></button>
+        <button class="tile tutb" type="button"><i class="ic" data-ic="target"></i><span><b>Tutorial</b><small>every control in short parts, curling and power shots too</small></span></button>
         <button class="tile" data-mode="practice" data-size="1" type="button"><i class="ic" data-ic="target"></i><span><b>Shooting</b><small>beat the keeper</small></span></button>
         <button class="tile" data-mode="fkdrill" data-size="1" type="button" title="Free kicks from all over, a wall and a computer keeper: up and down aim, left and right curl it round the wall, hold kick to power it up"><i class="ic" data-ic="fk"></i><span><b>Free kicks</b><small>past the wall and keeper</small></span></button>
         <button class="tile" data-mode="dribble" data-size="1" type="button" title="You have the ball and a computer defender is in your way: get past him and score"><i class="ic" data-ic="cone"></i><span><b>Dribbling</b><small>past the defender</small></span></button>
@@ -1201,6 +1225,11 @@
         <button class="mgo" type="button" data-mode="2p" data-size="1"><i class="ic" data-ic="keys"></i><span><b>Play 1v1 · 2 players</b><small>P1 against P2</small></span><em class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></em></button>
       </div>
     </div>
+    <div class="mpane" data-pane="learn" role="tabpanel" hidden>
+      <p class="mnote lnote">Short parts, one at a time: settings first (the best ones starred), then the basics and up. Or pick any part.</p>
+      <div class="lparts" id="learnList"></div>
+      <div class="lgo"><button class="mgo lgob" id="learnGo" type="button"><i class="ic" data-ic="target"></i><span><b id="learnGoT">Start the tutorial</b><small id="learnGoS">part 1: settings</small></span><em class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></em></button></div>
+    </div>
     <div class="mpane" data-pane="me" role="tabpanel" hidden>
       <div class="tiles c2">
         <button class="tile" id="goalsBtn" type="button"><i class="ic" data-ic="film"></i><span><b>My goals</b><small>goals you saved, to watch</small></span></button>
@@ -1217,6 +1246,7 @@
       <label class="mo" for="setTie" title="A tie at full time: overtime (next goal wins), extra time played in full and then a penalty shootout if it's still level, or straight to penalties"><span>If level</span><select id="setTie"><option value="0">Overtime</option><option value="1">Extra time, pens</option><option value="2">Penalties</option></select></label>
       <label class="mo" for="optLegs" title="Two legs, like the Champions League: a first leg (a draw is fine), then a second leg; the total of both decides"><span>Legs</span><select id="optLegs"><option value="1">One match</option><option value="2">Two legs</option></select></label>
     </div>
+    <div class="mdash" id="mDash"></div>
     </div>
     <div class="mfoot">
       <button class="ghost sm setb" type="button" title="Settings: rules, curve, sound, view"><span aria-hidden="true">⚙</span> Settings</button><button class="ghost sm ctl" type="button" title="Change your keys"><span aria-hidden="true">⌨</span> Controls</button><button class="ghost sm tmb" type="button" title="Each side's kit"><span aria-hidden="true">◐</span> Kits</button><button class="ghost sm pub" type="button" title="A power-up for each side"><span aria-hidden="true">✦</span> Power-ups</button><button class="ghost sm hlpb" type="button" title="How to play, the controls and the modes"><span aria-hidden="true">?</span> How to play</button>
@@ -6283,7 +6313,9 @@ function dribbleMode(){
 // basics, Attacking, Defending, Free kicks, Extras; each ends with the next part. Words cut down to a line or two
 // ("move settings first bro", "and recommend settings, like extrap gives u better movements, zoom better follwo all":
 // Settings first, each step with its recommended choice starred (★) and why, and Use all recommended at the start)
-const PARTS = ['settings', 'basics', 'attack', 'defend', 'setp', 'extras'];
+// (v28.60, "remove like the curls and poer shots etc and add it into learn to play, maybe change name to tutorial": the
+// curl and power shot lessons are parts 7 and 8, Learn to play is the Tutorial; the first six are the ones that count as done)
+const PARTS = ['settings', 'basics', 'attack', 'defend', 'setp', 'extras', 'curl', 'power'], CORE = PARTS.slice(0, 6);
 const REC = {diff: 0, coach: true, zoom: 7, curve: 60, ac: false, inv: false, slide: true, fk: true, power: false, extrap: 60};
 function useRecommended(){
   SET.diff = REC.diff; store.set('pb.diff', REC.diff); SET.coach = REC.coach; store.set('pb.coach', 1); setZoom(REC.zoom); setCurvePct(REC.curve);
@@ -6298,8 +6330,8 @@ const LESSONS = {
   defend: {name: 'Defending', desc: 'slide tackles', steps: ['slide', 'dDone']},   // ("theres a bug in gk part of the tutorial, maybe we can remove that for now": the dive step is out)
   setp: {name: 'Free kicks', desc: 'aim, curl and power', steps: ['fk', 'fDone']},
   extras: {name: 'Extras', desc: 'emotes, pause and the other keys', steps: ['emote', 'keys', 'xDone']},
-  curl: {name: 'Curl lesson', desc: 'round a man, the far post, auto curl', steps: null},
-  power: {name: 'Power shot lesson', desc: 'charge it, shoot it, keep it', steps: null}};
+  curl: {name: 'Curling', desc: 'round a man, the far post, auto curl, free kicks', steps: null},
+  power: {name: 'Power shots', desc: 'charge it, shoot it, keep it, past a keeper', steps: null}};
 const TUT_STEPS = LESSONS.settings.steps;
 // v28.34 ("also have a tutorial on how to curl"): the curl lesson (Practice), the same panel: bend it up round a man,
 // down round him, in from out wide to the far post, auto curl, a free kick's curl; each done by scoring it that way
@@ -6480,17 +6512,17 @@ function tutPanel(s){
     fk: ['Free kick', `${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)} and let go. The dots show the path.`, ''],
     emote: ['Emotes', K.touch ? `Tap 😎 on the pitch and pick one.` : `Press ${kb('1')} to ${kb('8')}: an emote over your player.`, ''],
     keys: ['Other keys', K.touch ? `The corner buttons: Pause, ⚙ Settings, ☰ Menu, ⛶ fullscreen. Try Pause, then again to play on.` : `${kb('P')} pause · ${kb('Esc')} menu · ${kb('F')} fullscreen · ${kb('R')} restart · ${kb('Enter')} chat online. Try ${kb('P')} twice.`, tu.pz === 2 ? '✓ pause' : ''],
-    cup: ['Round him: over the top', `A man is just below your line. Aim at the goal (not round him) and hold ${kb(kDn)}${swapped} as you kick: the ball sets off out above him and bends back down into where you aimed (the dotted line). A curled kick always ends where you aim; the key picks which side it swings out.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cdown: ['Round him: underneath', `Now he's just above your line: hold ${kb(kUp)}${swapped} as you kick and it swings out underneath him and bends back up in.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cfar: ['Far post from out wide', `From out by the side, aim just over the far post (the top one) and hold ${kb(kDn)}${swapped} as you kick: it bends back in under it, into the far corner. The further out you shoot, the more it curls.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cauto: ['Auto curl', `Auto curl bends your shots by themselves, toward the corner and away from the keeper, when you hold no key across the kick. Switch it on below, then shoot at a corner without ${kb(K.up)} or ${kb(K.down)}. It's in ⚙ Settings too (each player's own); ⚙ Settings also has Swap curl keys, if you'd rather up bent it down.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cfk: ['Free kick curl', `On a free kick ${kb(K.left)} and ${kb(K.right)} set the curl (each press a little more that way; the dots show its path), ${kb(K.up)} ${kb(K.down)} aim, hold ${kb(K.kick)} for power and let go. The keeper reads your aim: aim one way, curl it the other.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cdone: ['That\'s curling', `Hold ↑ or ↓ as you kick: it swings out the other side and bends that way, back to where you aimed; out wide, aim outside the post and bend it in; auto curl does it for you; on a free kick, left and right. How much it curls: Curve in ⚙ Settings (60% is normal). The computer curls too, so watch for it.`, ''],
-    pcharge: ['Charge a power shot', `Walk up to the ball and stay right next to it, touching it, without kicking: a ring fills round it, and when it's full the ball glows. That's a power shot ready.`, P_STATE(s)],
-    pshot: ['Shoot it', `Charge it (stay on the ball till it glows), then ${kb(K.kick)}: a power shot goes about half as hard again. Score one.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
-    plose: ['Keep it or lose it', `The charge only lasts while the ball stays at your feet. Charge it, then step away and watch the ring empty. (Anyone else touching it, a goal, a set piece or a slide end it too.)`, P_STATE(s)],
-    pkeeper: ['Past the keeper', `Now there's a keeper. Charge it, then hit it at a corner: a power shot gives him half as long to get there.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
-    pdone: ['That\'s the power shot', `Power shot is a match rule: ⚙ Settings → Match rules (online, the room's Match settings, set by the host). The computer's players charge too: when you see the ring round the ball at one of theirs, close him down before it fills. It's off in practice drills. Turn it on for your matches below if you like.`, ''],
+    cup: ['Round him: over the top', `Aim at the goal and hold ${kb(kDn)}${swapped} as you kick: it swings out over him and bends back in.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cdown: ['Round him: underneath', `Now hold ${kb(kUp)}${swapped} as you kick: it swings out under him and back up.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cfar: ['Far post from out wide', `Aim just outside the far post and hold ${kb(kDn)}${swapped}: it bends back into the corner.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cauto: ['Auto curl', `Switch it on below, then shoot at a corner without ${kb(K.up)} or ${kb(K.down)}: it curls by itself.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cfk: ['Free kick curl', `${kb(K.left)} ${kb(K.right)} set the curl, ${kb(K.up)} ${kb(K.down)} aim, hold ${kb(K.kick)} and let go. Aim one way, curl it the other.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cdone: ['That\'s curling', `It swings out one side and bends back to where you aimed. How much: Curve in ⚙ Settings. Next: power shots.`, ''],
+    pcharge: ['Charge a power shot', `Stay right on the ball without kicking: a ring fills, and when it's full the ball glows.`, P_STATE(s)],
+    pshot: ['Shoot it', `Charge it till it glows, then ${kb(K.kick)}: it goes half as hard again. Score one.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
+    plose: ['Keep it or lose it', `Charge it, then step away: the ring empties. A touch by anyone else ends it too.`, P_STATE(s)],
+    pkeeper: ['Past the keeper', `Charge it, then hit it at a corner: he has half as long to get there.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
+    pdone: ['That\'s the power shot', `It's a match rule: switch it on below or in ⚙ Settings. Watch for the computer's ring too.`, ''],
   }[st];
   $('tutStep').textContent = `${tu.i + 1} / ${L.length}`; $('tutTitle').textContent = T[0];
   $('tutText').innerHTML = T[1];
@@ -6526,33 +6558,32 @@ function tutPanel(s){
 { const tb = $('tutBox'), hb = $('helpBar'); $('stage').after(tb); tb.after(hb);
   const sync = () => { const h = (tb.hidden ? 0 : tb.offsetHeight) + (hb.hidden ? 0 : hb.offsetHeight + 6), on = h > 0; document.body.classList.toggle('tut', on); if (on) document.documentElement.style.setProperty('--tutH', Math.ceil(h) + 'px'); };
   for (const el of [tb, hb]){ new MutationObserver(sync).observe(el, {attributes: true, attributeFilter: ['hidden']}); new ResizeObserver(sync).observe(el); } }
-function tutStart(lesson){ $('tutWelcome').hidden = true; closePanel('learnPanel'); lesson = LESSONS[lesson] ? lesson : PARTS[0]; start(Object.assign(cfgFor('practice', 1), {mode: 'tutorial', lesson, power: lesson === 'power', slide: true, fk: true, curve: true, curveLv: lesson === 'curl' ? Math.max(3, SET.curveLv || 3) : SET.curveLv, diff: 0, timeLimit: 0, scoreLimit: 0})); }
-const learnDone = () => { const v = store.get('pb.learn', null); return v && typeof v === 'object' ? v : {}; };
+function tutStart(lesson){ $('tutWelcome').hidden = true; lesson = LESSONS[lesson] ? lesson : PARTS[0]; start(Object.assign(cfgFor('practice', 1), {mode: 'tutorial', lesson, power: lesson === 'power', slide: true, fk: true, curve: true, curveLv: lesson === 'curl' ? Math.max(3, SET.curveLv || 3) : SET.curveLv, diff: 0, timeLimit: 0, scoreLimit: 0})); }
+const learnDone = () => { let v = store.get('pb.learnParts', null); if (!v || typeof v !== 'object'){ const o = store.get('pb.learn', null); v = {}; if (o && typeof o === 'object') for (const k of Object.keys(LESSONS)) if (o[k]) v[k] = 1; } return v; };   // (v28.60: was kept in pb.learn by mistake, the computer-learning switches' key)
 function tutEnd(finished, lesson){
-  if (finished && LESSONS[lesson]){ const d = learnDone(); d[lesson] = 1; store.set('pb.learn', d); if (lesson === 'curl' || lesson === 'power') store.set(lesson === 'curl' ? 'pb.curlLesson' : 'pb.powerLesson', 'done'); }
-  if (PARTS.every(k => learnDone()[k])) store.set('pb.tut', 'done'); else if (!store.get('pb.tut', null)) store.set('pb.tut', finished ? 'started' : 'skipped');
+  if (finished && LESSONS[lesson]){ const d = learnDone(); d[lesson] = 1; store.set('pb.learnParts', d); if (lesson === 'curl' || lesson === 'power') store.set(lesson === 'curl' ? 'pb.curlLesson' : 'pb.powerLesson', 'done'); }
+  if (CORE.every(k => learnDone()[k])) store.set('pb.tut', 'done'); else if (!store.get('pb.tut', null)) store.set('pb.tut', finished ? 'started' : 'skipped');
   $('tutBox').hidden = true;
 }
-// Learn to play: the parts, in order, ✓ the ones done (and the two extra lessons)
-function openLearn(){
+// the Tutorial tab: the parts, in order, ✓ the ones done
+function renderLearn(){
   const box = $('learnList'), d = learnDone(); box.textContent = '';
-  for (const k of PARTS.concat(['curl', 'power'])){
+  for (const k of PARTS){
     const L = LESSONS[k], i = PARTS.indexOf(k), b = document.createElement('button'); b.type = 'button'; b.className = 'lpart' + (d[k] ? ' done' : '');
     const n = document.createElement('i'); n.textContent = d[k] ? '✓' : i >= 0 ? String(i + 1) : '+';
     const t = document.createElement('span'); const h = document.createElement('b'); h.textContent = L.name; const sm = document.createElement('small'); sm.textContent = L.desc; t.append(h, sm);
     b.append(n, t); b.onclick = () => tutStart(k); box.append(b);
   }
   const first = PARTS.find(k => !d[k]) || PARTS[0];
-  $('learnGo').textContent = PARTS.every(k => d[k]) ? 'Start again from part 1' : first === PARTS[0] ? `Start with part 1: ${LESSONS[PARTS[0]].name}` : `Carry on: ${LESSONS[first].name}`;
+  const all = PARTS.every(k => d[k]); $('learnGoT').textContent = all ? 'Start again' : first === PARTS[0] ? 'Start the tutorial' : 'Carry on'; $('learnGoS').textContent = `part ${PARTS.indexOf(all ? PARTS[0] : first) + 1}: ${LESSONS[all ? PARTS[0] : first].name}`;
   $('learnGo').onclick = () => tutStart(PARTS.every(k => d[k]) ? PARTS[0] : first);
-  openPanel('learnPanel');
 }
+function openLearn(){ for (const id of ['helpPanel', 'setPanel']) if (!$(id).hidden) closePanel(id); if ($('menu').hidden && !sess) $('menu').hidden = false; menuTab('learn'); }
 $('tutNext').addEventListener('click', e => { e.target.blur(); const s = sess; if (!s || !s.mode || s.mode.kind !== 'tutorial') return; if (tutLast(tutSteps(s.mode)[s.mode.tu.i])){ tutEnd(true, s.mode.lesson); exitToMenu(); openLearn(); return; } s.mode.next(s); });
 $('tutSkip').addEventListener('click', e => { e.target.blur(); const s = sess; tutEnd(false, s && s.mode && s.mode.lesson); exitToMenu(); });
 $('tutBack').addEventListener('click', e => { e.target.blur(); const s = sess; if (s && s.mode && s.mode.kind === 'tutorial') s.mode.goto(s, s.mode.tu.i - 1); });
 $('tutAgain').addEventListener('click', e => { e.target.blur(); const s = sess; if (s && s.mode && s.mode.kind === 'tutorial') s.mode.goto(s, 0); });
 $('tutAgainBtn').addEventListener('click', e => { e.target.blur(); closePanel('setPanel'); if (sess && sess.kind !== 'local') return; if (sess) exitToMenu(); openLearn(); });
-$('learnDone').addEventListener('click', () => closePanel('learnPanel'));
 
 // ---------- help for beginners (v28.57) ----------
 // ("make a thing where its friendly to begineers", "like to easy understand all the controls"): under the pitch, your
@@ -6617,8 +6648,6 @@ function helpTick(){
 $('hbOff').addEventListener('click', e => { e.currentTarget.blur(); SET.coach = false; store.set('pb.coach', 0); soundTxt(); say('Help for beginners is off: ⚙ Settings → Game to turn it back on', 1); });
 $('coachBtn').addEventListener('click', e => { e.currentTarget.blur(); SET.coach = !coachOn(); store.set('pb.coach', SET.coach ? 1 : 0); soundTxt(); });
 document.querySelectorAll('.tutb').forEach(b => b.addEventListener('click', () => { closePanel('helpPanel'); openLearn(); }));
-document.querySelectorAll('.curlb').forEach(b => b.addEventListener('click', () => tutStart('curl')));
-document.querySelectorAll('.powerb').forEach(b => b.addEventListener('click', () => tutStart('power')));
 $('tutGo').addEventListener('click', () => tutStart(PARTS[0]));
 $('tutNo').addEventListener('click', () => { store.set('pb.tut', 'skipped'); $('tutWelcome').hidden = true; });
 // (first time here: no matches played and never asked)
@@ -8159,9 +8188,22 @@ $('kpBtn').addEventListener('click', () => {
 // ---------- menus ----------
 let pausedForPanel = null;   // the match paused while panels are open over it
 const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one at a time
-const panels = ['learnPanel', 'teamPanel', 'puPanel', 'keysPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'mapPanel', 'scoresPanel', 'cupPanel', 'leaguePanel', 'onlinePanel', 'resPanel', 'gameMenu', 'cbPanel', 'setPanel', 'helpPanel'];
+const panels = ['teamPanel', 'puPanel', 'keysPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'mapPanel', 'scoresPanel', 'cupPanel', 'leaguePanel', 'onlinePanel', 'resPanel', 'gameMenu', 'cbPanel', 'setPanel', 'helpPanel'];
 const panelsClosed = () => panels.every(id => $(id).hidden);
-function showMenu(title, text){ $('menuTitle').textContent = title; $('menuText').textContent = text; $('menu').hidden = false; }
+function showMenu(title, text){ $('menuTitle').textContent = title; $('menuText').textContent = text; $('menu').hidden = false; renderDash(); }
+// v28.60 ("some stuff are bit plain like too much spaces", the menu filling the tab): under the match settings, four
+// cards that open what they show: friends online, the tutorial's parts done, your matches, achievements
+function renderDash(){
+  { const ml = document.querySelector('#menu > .mlearn'); if (ml) ml.hidden = CORE.every(k => learnDone()[k]); }   // (the Tutorial tab has it all; the box only while it isn't done)
+  const box = $('mDash'); if (!box) return; box.textContent = '';
+  const fr = (() => { try { return {n: FR.st.size, all: FR.list.length}; } catch (e) { return {n: 0, all: 0}; } })(), ld = PARTS.filter(k => learnDone()[k]).length, na = Object.keys((ach && ach.u) || {}).length;
+  const card = (big, label, sub, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'dcard'; const v = document.createElement('b'); v.textContent = big; const l = document.createElement('span'); l.textContent = label; const m = document.createElement('small'); m.textContent = sub; b.append(v, l, m); b.onclick = fn; box.append(b); };
+  card(String(fr.n), fr.n === 1 ? 'friend online' : 'friends online', fr.all ? `of ${fr.all} · Online ›` : 'add friends in Online ›', () => $('onlineBtn').click());
+  card(`${ld}/${PARTS.length}`, 'tutorial parts', ld >= PARTS.length ? 'all done · again ›' : 'Tutorial ›', () => openLearn());
+  card(String((you && you.games) || 0), 'matches played', 'My scores ›', () => $('scoresBtn').click());
+  card(`${na}/${ACH.length}`, 'achievements', 'see them ›', () => $('achBtn').click());
+}
+setInterval(() => { if (!$('menu').hidden) renderDash(); }, 5000);
 function openPanel(id){
   if (TOOLP.includes(id)) for (const o of TOOLP) if (o !== id) $(o).hidden = true;
   const s = sess;
@@ -8255,12 +8297,13 @@ function liveRules(){
   Object.assign(s.cfg, freshRules(s.cfg)); const r = rulesOf(s.cfg); for (const k of ['curve', 'curveLv', 'slide', 'fk', 'power']) s.G.cfg[k] = r[k];
 }
 // the menu's tabs (the last one used comes back)
-const TABS = ['play', 'train', 'friends', 'me'];
+const TABS = ['play', 'train', 'friends', 'me', 'learn'];   // (v28.60: the Tutorial a tab like the others, "not in its own thing")
 function menuTab(t){
   if (!TABS.includes(t)) t = 'play';
   document.querySelectorAll('#menu .mtabs button').forEach(b => { const on = b.dataset.tab === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
   document.querySelectorAll('#menu .mpane').forEach(p => { p.hidden = p.dataset.pane !== t; });
   $('menu').dataset.tab = t;   // (the match settings show only what that tab uses)
+  if (t === 'learn') renderLearn();
   store.set('pb.mtab', t);
 }
 document.querySelectorAll('#menu .mtabs button').forEach(b => b.addEventListener('click', () => menuTab(b.dataset.tab)));
@@ -9681,7 +9724,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.59';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.60';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10174,7 +10217,7 @@ function directNote(){
 // can't be reached, and it said only "No room with that code". Say how to play together instead
 // (v28.43, "i was on claude and my friend on github, we couldnt play": it spoke only of the downloaded file; now the
 // website too, with a link to it)
-const SITE_URL = 'https://ricecooker225.github.io/pitch-brawl-play/';
+const SITE_URL = 'https://pitchbrawl.netlify.app/';   // (v28.60: the user's Netlify site, the same build as GitHub Pages)
 const NOTE_CLAUDE_ONLY = 'Claude keeps this page off the internet here, so it can\'t reach rooms on the website (or the downloaded file), and they can\'t join rooms made here. To play together, both play here in Claude (send your friend this page\'s link), or both play on the website:';
 function siteLink(el){ if (!el || el.querySelector('.sitelink')) return; const a = document.createElement('a'); a.className = 'sitelink'; a.href = SITE_URL; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Open the website version'; el.append(' ', a); }
 function noConnection(){ $('onNote').textContent = ''; onErr(cantConnect().message); showPageLink(true); siteLink($('onNote')); $('hostBtn').disabled = $('joinBtn').disabled = true; $('roomsNote').textContent = 'Not available here'; }
@@ -11449,7 +11492,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Escape'){
     if (!$('plMenu').hidden){ plMenuClose(); return; }
     if (!$('gameMenu').hidden && fsBack && !inFs()) fsAgain = true;
-    const open = ['learnPanel', 'helpPanel', 'teamPanel', 'puPanel', 'keysPanel', 'setPanel', 'scoresPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'cupPanel', 'leaguePanel', 'gameMenu'].find(id => !$(id).hidden);
+    const open = ['helpPanel', 'teamPanel', 'puPanel', 'keysPanel', 'setPanel', 'scoresPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'cupPanel', 'leaguePanel', 'gameMenu'].find(id => !$(id).hidden);
     if (open){ if (open === 'trainPanel') closeTrain(); else if (open === 'goalsPanel') closeGoals(); else if (open === 'setPanel') closeSettings(); else closePanel(open); if (!sess && (open === 'cupPanel' || open === 'leaguePanel' || open === 'achPanel' || open === 'scoresPanel')) $('menu').hidden = false; }
     else if (!$('onlinePanel').hidden && !NET.on) $('onClose').click();
     else if (sess && $('menu').hidden && panelsClosed()){ fsBack = false; if (sess.rp || sess.replay || sess.done) togglePause(); else openGameMenu(); }   // (v25.9: Esc is the room menu, P pauses; v27.8: in fullscreen too)
@@ -11755,7 +11798,7 @@ const game = $('game'), fsBtn = $('fsBtn');
 // game fills the whole tab, no page round it (SET.fill, ⚙ Settings → View); real fullscreen (⛶, F) as before on top
 let filled = false;
 function syncFill(){
-  const on = !!(SET.fill && sess && sess.G && $('menu').hidden && !fsEl() && !game.classList.contains('pfs'));
+  const on = !!(SET.fill && !fsEl() && !game.classList.contains('pfs'));   // (v28.60, "u didnt do the think where u open it its full screen like haxbakll": from the start, the menu too)
   if (on === filled) return; filled = on; game.classList.toggle('tabfill', on); document.body.classList.toggle('tabfilled', on); if (on) scrollTo(0, 0);
 }
 const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
