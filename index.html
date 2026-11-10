@@ -724,6 +724,8 @@
   /* the first-time question, over the menu */
   .tutwel{position:absolute;inset:0;z-index:3;display:grid;place-items:center;background:rgba(8,10,14,.78)}
   .tutwel[hidden]{display:none}
+  .tutwel > form{width:min(470px,92%);background:#262c3a;border-left:6px solid var(--accent);padding:22px 24px;display:flex;flex-direction:column;gap:10px;text-align:left;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .tutwel input[type=text]{font-size:17px;padding:9px 12px}
   .tutwel > div{width:min(470px,92%);background:#262c3a;border-left:6px solid var(--accent);padding:22px 24px;display:flex;flex-direction:column;gap:10px;text-align:left;box-shadow:0 18px 40px rgba(0,0,0,.45)}
   .tutwel small{font:700 11px/1 Rubik,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
   .tutwel h3{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:italic;font-weight:800;font-size:40px;line-height:.95;text-transform:uppercase;color:#fff}
@@ -1598,6 +1600,13 @@
       <button class="ghost sm setb" type="button" title="Settings: rules, curve, sound, view"><span class="mi" data-ic="gear" aria-hidden="true"></span> Settings</button><button class="ghost sm ctl" type="button" title="Change your keys"><span class="mi" data-ic="keys" aria-hidden="true"></span> Controls</button><button class="ghost sm tmb" type="button" title="Each side's kit"><span class="mi" data-ic="shirt" aria-hidden="true"></span> Kits</button><button class="ghost sm pub" type="button" title="A power-up for each side"><span class="mi" data-ic="bolt" aria-hidden="true"></span> Power-ups</button><button class="ghost sm hlpb" type="button" title="How to play, the controls and the modes"><span class="mi" data-ic="help" aria-hidden="true"></span> How to play</button><button class="ghost sm sitesb" type="button" title="The three sites Pitch Brawl is on, and taking your data from one to another"><span class="mi" data-ic="globe" aria-hidden="true"></span> Sites &amp; your data</button>
       <span class="mst" id="mStadium"></span>
     </div>
+    <div class="tutwel" id="nickAsk" hidden><form id="nickForm" autocomplete="off">
+      <small>Welcome to Pitch Brawl</small>
+      <h3>What's your name?</h3>
+      <p>Friends and other players see it online. You can change it later in Online.</p>
+      <input type="text" id="nickAskIn" maxlength="16" placeholder="Your nickname" spellcheck="false" aria-label="Your nickname">
+      <div class="row"><button type="submit" id="nickOk">Let's go</button><button class="ghost" id="nickSkip" type="button">Later</button></div>
+    </form></div>
     <div class="tutwel" id="tutWelcome" hidden><div>
       <small>Welcome to Pitch Brawl</small>
       <h3>First time?</h3>
@@ -7082,7 +7091,15 @@ document.querySelectorAll('.tutb').forEach(b => b.addEventListener('click', () =
 $('tutGo').addEventListener('click', () => tutStart('quick'));
 $('tutNo').addEventListener('click', () => { store.set('pb.tut', 'skipped'); $('tutWelcome').hidden = true; });
 // (first time here: no matches played and never asked)
-setTimeout(() => { if (!store.get('pb.tut', null) && !(you && you.games > 0) && !sess && !$('menu').hidden) $('tutWelcome').hidden = false; }, 400);
+// (v28.83, "add a thing where it asks for nickname"): the first time (no name yet, never asked), a box asks for one before
+// anything else; Later asks no more (the Online panel still has it). Then the first-time tutorial box, as before
+const tutWel = () => { if (!store.get('pb.tut', null) && !(you && you.games > 0) && !sess && !$('menu').hidden) $('tutWelcome').hidden = false; };
+const nickDone = () => { store.set('pb.nickAsk', 'done'); $('nickAsk').hidden = true; setTimeout(tutWel, 150); };
+$('nickForm').addEventListener('submit', e => { e.preventDefault(); const v = clean($('nickAskIn').value, 16); if (!v){ $('nickAskIn').focus(); $('nickAskIn').placeholder = 'Type a name, or press Later'; return; }
+  SET.nick = v; store.set('pb.nick', v); try { $('nick').value = v; } catch (e2) {} try { frPub(); } catch (e2) {} say(`Hi ${v}!`, 1); nickDone(); });
+$('nickSkip').addEventListener('click', nickDone);
+$('nickAskIn').addEventListener('keydown', e => e.stopPropagation()); $('nickAskIn').addEventListener('keyup', e => e.stopPropagation());
+setTimeout(() => { if (!SET.nick && !store.get('pb.nickAsk', null) && !sess && !$('menu').hidden){ $('nickAsk').hidden = false; setTimeout(() => { try { $('nickAskIn').focus(); } catch (e) {} }, 50); } else tutWel(); }, 400);
 // v28.73 ("make the menu more begineer friendly, like showing them around the whole game"): a tour of the menu. A
 // card walks through every part (the tabs one by one, the match settings, Settings and help, Suggestions), the part
 // it is about lit and the rest dimmed; Next / Back, the arrow keys, Esc ends it. Offered the first time (the welcome
@@ -10529,7 +10546,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.82';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.83';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
