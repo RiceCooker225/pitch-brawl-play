@@ -1048,6 +1048,10 @@
   .zhint{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:8px;max-width:calc(100% - 16px);box-sizing:border-box;
          background:#262c3a;border:2px solid #ffd166;padding:6px 8px 6px 12px;font-size:12px;color:#e3e7f0;box-shadow:0 8px 24px rgba(0,0,0,.5)}
   .zhint[hidden]{display:none} .zhint kbd{font:700 11px Rubik,sans-serif;background:#3a4256;border:1px solid #5a6378;padding:0 4px}
+  /* v28.82: friends: a note to yourself under the name, its box, ✎ */
+  .frrow .frwho{display:flex;flex-direction:column;min-width:0;max-width:45%} .frrow .frwho b{max-width:none}
+  .frrow .frnote{font-size:11px;color:#9aa3b6;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .frrow .frnin{flex:1;min-width:0;max-width:60%;font-size:12px;padding:3px 6px}
   /* v28.81 ("make sure others are like also fixed, but if zoom too big thenn"): a short window in a match (a browser zoomed
      in): the pitch first. Under 600 px high no shots/saves strip; under 470 no win chances and no help bar, a slimmer
      score; under 380 the score in one thin line. The zoom-out hint only over the menus, not the pitch */
@@ -1416,6 +1420,7 @@
     <div class="gmcard">
       <div class="gmhead"><div class="gmt"><h2>Menu</h2><p id="gmNote"></p></div><button id="gmResume" type="button">Resume <kbd>Esc</kbd></button></div>
       <div class="lobby gmboard" id="gmBoard" hidden></div>
+      <div class="frlobby" id="frGm" hidden><b>Friends online</b><div class="frlist" id="frList3"></div></div>
       <div class="gmbar">
         <button class="ghost" id="gmPause" type="button" title="Pause the match for everyone (P)" hidden>Pause the match</button><button class="ghost" id="lobbyBtn" type="button" title="Stop the match and take everyone back to the lobby">Back to lobby</button><button class="ghost" id="gmRestart" type="button">Restart</button><button class="ghost" id="gmKeeper" type="button" title="Swap with the computer keeper on your side: you go in goal and the computer plays your man (its key is in Controls)" hidden>Go in goal <kbd>G</kbd></button>
         <span class="gsp"></span>
@@ -10524,7 +10529,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.81';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.82';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -11090,7 +11095,7 @@ async function probeRooms(){
     for (const [c, t] of seen) if (Date.now() - t > 20000){ seen.delete(c); const r = rooms.get(c); if (r && r.src === 'peer') rooms.delete(c); }
     setTimeout(() => { if (probe && probe.P === P) renderRooms(); }, 2500);
   };
-  P.on('open', () => { clearTimeout(to); know(true); scan(); probe.timer = setInterval(scan, 8000); });
+  P.on('open', () => { clearTimeout(to); if (!probe || probe.P !== P) return; know(true); scan(); if (probe && probe.P === P) probe.timer = setInterval(scan, 8000); });   // (v28.82: stopped before it opened: a room made at once, Invite)
 }
 function stopProbe(){ if (!probe) return; clearInterval(probe.timer); try { probe.P.destroy(); } catch (e) {} probe = null; }
 document.querySelectorAll('#onSize button').forEach(b => b.addEventListener('click', () => { document.querySelectorAll('#onSize button').forEach(x => x.classList.toggle('on', x === b)); }));
@@ -11899,8 +11904,23 @@ function stopOnlineGameView(){ if (NET.on) leaveOnline(); }
 const FR = {fid: (() => { let f = store.get('pb.fid', ''); if (!/^[a-z0-9]{6}$/.test(f)){ f = Array.from({length: 6}, () => 'abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random() * 31)]).join(''); store.set('pb.fid', f); } return f; })(),
   list: (() => { const v = store.get('pb.friends', []); return Array.isArray(v) ? v.filter(x => x && /^[a-z0-9]{6}$/.test(x.f)).slice(0, 40) : []; })(),
   st: new Map(), all: new Map(), on: false, cls: null, lobby: null, unsub: null, beat: null, seen: new Set(), inv: [], add: []};
-const frSave = () => store.set('pb.friends', FR.list.map(x => ({f: x.f, n: clean(x.n || '', 16)})));
+const frSave = () => store.set('pb.friends', FR.list.map(x => Object.assign({f: x.f, n: clean(x.n || '', 16)}, x.note ? {note: clean(x.note, 60)} : {})));   // (v28.82: note, yours only)
 const frTopic = f => `${RELAY_P}/u/${f}`, frInbox = f => `${RELAY_P}/i/${f}`;
+// (v28.82, "option to send offline message so they see it next time they go on": on the websites a message to a friend
+// who's offline waits on the relay, retained on <RELAY_P>/o/<their code>/<my code> (my last ten unread); they get it the
+// next time they open Online or the Friends tab, then clear it; I stop keeping them once I've seen them online. Claude
+// has no such store: there, only to friends who are on)
+const frOff = (to, from) => `${RELAY_P}/o/${to}/${from}`;
+FR.off = (() => { const v = store.get('pb.dmOff', {}); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; })();
+FR.offSeen = (() => { const v = store.get('pb.dmSeen', {}); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; })();
+function offPub(f){ const l = FR.off[f] || []; if (FR.cls) for (const c of FR.cls) try { c.publish(frOff(f, FR.fid), l.length ? JSON.stringify({from: FR.fid, n: myNick(), l}) : '', {retain: true}); } catch (e) {} }
+function offGot(topic, o){
+  const from = topic.slice(frOff(FR.fid, '').length); if (!/^[a-z0-9]{6}$/.test(from) || !o || o.from !== from || !Array.isArray(o.l)) return;
+  if (FR.list.some(q => q.f === from)){ const seen = +FR.offSeen[from] || 0; let last = seen;
+    for (const d of o.l.slice(-10)) if (d && +d.t > seen && typeof d.x === 'string'){ dmGot({from, n: o.n, x: d.x, t: +d.t, away: 1}); last = Math.max(last, +d.t); }
+    if (last > seen){ FR.offSeen[from] = last; store.set('pb.dmSeen', FR.offSeen); } }
+  if (FR.cls) for (const c of FR.cls) try { c.publish(topic, '', {retain: true}); } catch (e) {}   // (read: off the relay)
+}
 function frMe(){   // where I am, for my friends
   const L = NET.on && NET.lobby, s = sess;
   const solo = !L && s && s.kind === 'local' && !s.done && s.G;   // (v28.58: playing on my own, the computer or practice)
@@ -11921,6 +11941,7 @@ function frGot(o){   // a friend's notice
   if (o.gone){ FR.st.delete(o.f); renderFriends(); return; }
   FR.st.set(o.f, {n: clean(o.n || '', 16), a: clean(o.a || '', 2), s: ['match', 'room', 'solo', 'prac'].includes(o.s) ? o.s : 'free', c: /^[a-z0-9]{4,6}$/.test(o.c || '') ? o.c : '', r: clean(o.r || '', 24), k: +o.k | 0, z: +o.z | 0, lk: !!o.lk, sc: Array.isArray(o.sc) ? o.sc.slice(0, 2).map(v => +v | 0) : null, t: +o.t || Date.now()});
   if (o.n && x.n !== clean(o.n, 16)){ x.n = clean(o.n, 16); frSave(); }
+  if (FR.off[o.f] && !FR.offT){ FR.offT = setTimeout(() => { FR.offT = null; let ch = false; for (const f of Object.keys(FR.off)) if (FR.st.has(f)){ delete FR.off[f]; ch = true; } if (ch) store.set('pb.dmOff', FR.off); }, 15000); }
   renderFriends();
 }
 function frMsg(m){   // an invite or a friend request, to me
@@ -11956,9 +11977,10 @@ async function frStart(){
   FR.cls = cls; DC.sub = '';
   setTimeout(() => { try { dcSub(); dailyPost(); } catch (e) {} }, 0);
   for (const c of cls){
-    c.subscribe([frInbox(FR.fid), `${RELAY_P}/u/+`]);   // (v28.63: everyone's, for players online; friends among them)
+    c.subscribe([frInbox(FR.fid), `${RELAY_P}/u/+`, frOff(FR.fid, '+')]);   // (v28.63: everyone's, for players online; friends among them; v28.82: messages left for me)
     c.on('message', (topic, buf) => { const o = buf && buf.length ? relayJSON(buf) : null;
       if (topic === frInbox(FR.fid)){ frMsg(o); return; }
+      if (topic.startsWith(frOff(FR.fid, ''))){ if (o) offGot(topic, o); return; }
       if (topic.startsWith(RELAY_P + '/dc/')){ dcGot(topic, o); return; }
       const f = topic.slice(`${RELAY_P}/u/`.length); if (!/^[a-z0-9]{6}$/.test(f)) return;
       if (o && o.f === f && Date.now() - (+o.t || 0) < 70000) FR.all.set(f, +o.t || Date.now()); else FR.all.delete(f); onlineN();
@@ -12026,6 +12048,16 @@ function dailyPost(){
   store.set('pb.dailyPosted', b.id);
 }
 function dcRefresh(){ clearTimeout(DC.rt); DC.rt = setTimeout(() => { if (DC.box && document.contains(DC.box) && !DC.box.closest('[hidden]')) dailyBoard(DC.box, DC.tab); }, 250); }
+// (v28.82, "option to invite friend directly ingame"): Invite by a friend who's on, from anywhere, even outside a room: a
+// room is made (the Online panel's settings) and the invite goes as soon as it's open
+async function frHostInvite(f){
+  if (NET.on){ if (NET.code) frSend(f, {k: 'inv', c: NET.code}); return; }
+  if (sess && sess.kind === 'local') exitToMenu();
+  if ($('onlinePanel').hidden) await openOnline();
+  if (!$('nick').value) $('nick').value = myNick() || 'Player';
+  const t0 = Date.now(); $('hostBtn').click();
+  const iv = setInterval(() => { if (NET.on && NET.host && NET.code){ clearInterval(iv); frSend(f, {k: 'inv', c: NET.code}); try { sysChat(`Invited ${dmName(f)}`); } catch (e) {} } else if (Date.now() - t0 > 25000) clearInterval(iv); }, 300);
+}
 async function frJoin(code, watch){   // (v28.58: from anywhere: a match against the computer ends, the Online panel opens)
   if (NET.on) return;
   if (sess && sess.kind === 'local') exitToMenu();
@@ -12045,11 +12077,12 @@ function dmName(f){ const x = FR.list.find(q => q.f === f), o = FR.st.get(f); re
 function dmRender(){
   const f = FR.dmWith; if (!f) return; const box = $('dmLog'); box.textContent = '';
   const a = (Array.isArray(FR.dm[f]) ? FR.dm[f] : []).filter(e => Array.isArray(e) && typeof e[2] === 'string');
-  if (!a.length){ const p = document.createElement('p'); p.className = 'note'; p.textContent = 'Say hi! They see it while they have the game open.'; box.append(p); }
+  if (!a.length){ const p = document.createElement('p'); p.className = 'note'; p.textContent = inArtifact ? 'Say hi! They see it while they have the game open.' : 'Say hi! If they\'re offline they get it next time they\'re on.'; box.append(p); }
   for (const [me, t, x] of a){ const d = document.createElement('div'); d.className = 'dmm' + (me ? ' me' : ''); const sp = document.createElement('span'); sp.textContent = x; const tm = document.createElement('small'); const dt = new Date(+t); tm.textContent = isFinite(dt) ? dt.toLocaleTimeString(undefined, {hour: '2-digit', minute: '2-digit'}) : ''; d.append(sp, tm); box.append(d); }
   box.scrollTop = box.scrollHeight;
-  const o = FR.st.get(f); $('dmWho').textContent = dmName(f); $('dmSt').textContent = o ? 'online' : 'offline: messages reach them when they\'re on';
-  $('dmIn').disabled = !o; $('dmForm').querySelector('button').disabled = !o;
+  const o = FR.st.get(f), can = !!o || !!FR.cls; $('dmWho').textContent = dmName(f);
+  $('dmSt').textContent = o ? 'online' : FR.cls ? 'offline: they get it next time they\'re on' : inArtifact ? 'offline (in Claude, messages only reach friends who are on)' : 'offline';
+  $('dmIn').disabled = !can; $('dmForm').querySelector('button').disabled = !can;
 }
 function dmOpen(f){ if (!FR.list.some(q => q.f === f)) return; FR.dmWith = f; FR.unread.delete(f); $('dmBox').hidden = false; dmRender(); renderFriends(); setTimeout(() => { try { $('dmIn').focus(); } catch (e) {} }, 30); }
 function dmClose(){ FR.dmWith = ''; $('dmBox').hidden = true; try { $('dmIn').blur(); } catch (e) {} }
@@ -12058,11 +12091,11 @@ function dmGot(m){
   dmAdd(f, false, x, +m.t || Date.now());
   if (FR.dmWith === f && !$('dmBox').hidden){ dmRender(); try { sfx.chime && sfx.chime(); } catch (e) {} return; }
   FR.unread.set(f, (FR.unread.get(f) || 0) + 1); renderFriends();
-  frToast(`${dmName(f)}: ${x}`, 'Reply', () => dmOpen(f));
+  frToast(`${dmName(f)}${m.away ? ' (while you were away)' : ''}: ${x}`, 'Reply', () => dmOpen(f));
 }
 $('dmForm').addEventListener('submit', e => { e.preventDefault(); const f = FR.dmWith, x = clean($('dmIn').value, 120); if (!f || !x) return;
   if (Date.now() - FR.dmAt < 600) return; FR.dmAt = Date.now();
-  if (!FR.st.get(f)){ dmRender(); return; }
+  if (!FR.st.get(f)){ if (!FR.cls){ dmRender(); return; } const t = Date.now(); FR.off[f] = (FR.off[f] || []).concat([{x, t}]).slice(-10); store.set('pb.dmOff', FR.off); offPub(f); dmAdd(f, true, x, t); $('dmIn').value = ''; dmRender(); return; }
   frSend(f, {k: 'msg', x}); dmAdd(f, true, x, Date.now()); $('dmIn').value = ''; dmRender(); });
 $('dmX').addEventListener('click', dmClose);
 $('dmIn').addEventListener('keydown', e => { if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); dmClose(); } });
@@ -12070,32 +12103,46 @@ let frToastDo = null;
 function frToast(text, yes, fn){ $('frToastT').textContent = text; $('frToastYes').textContent = yes; frToastDo = fn; $('frToast').hidden = false; sfx.chime && sfx.chime(); clearTimeout(frToast.t); frToast.t = setTimeout(() => { $('frToast').hidden = true; frToastDo = null; }, 30000); }
 $('frToastYes').addEventListener('click', () => { const f = frToastDo; frToastDo = null; $('frToast').hidden = true; if (f) f(); });
 $('frToastNo').addEventListener('click', () => { frToastDo = null; $('frToast').hidden = true; });
+// (v28.82, "a option to keep note to self on who they are"): ✎ on a friend's row: a line kept with them, only for you
+function frNoteEdit(x, r, who){
+  if (r.querySelector('.frnin')) return; const inp = document.createElement('input'); inp.type = 'text'; inp.className = 'frnin'; inp.maxLength = 60; inp.value = x.note || ''; inp.placeholder = 'Who is this? Only you see it'; inp.setAttribute('aria-label', 'Your note');
+  let done = false; const end = keep => { if (done) return; done = true; if (keep){ const v = clean(inp.value, 60); if (v) x.note = v; else delete x.note; frSave(); } renderFriends(); };
+  inp.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter'){ e.preventDefault(); end(true); } else if (e.key === 'Escape'){ e.preventDefault(); end(false); } });
+  inp.addEventListener('keyup', e => e.stopPropagation()); inp.addEventListener('blur', () => end(true));
+  who.replaceWith(inp); inp.focus();
+}
 function renderFriends(){
   $('frMine').textContent = FR.fid.toUpperCase();
   $('frNote').textContent = FR.on ? (inArtifact ? 'friends playing in Claude' : 'friends on the website') : '';
   const rows = FR.list.map(x => { const o = FR.st.get(x.f); return {x, o, rank: !o ? 3 : o.s === 'room' ? 0 : o.s === 'free' ? 1 : 2}; }).sort((a, b) => a.rank - b.rank || (a.x.n || '').localeCompare(b.x.n || ''));
-  for (const [id, lobbyView] of [['frList', false], ['frList2', true]]){
+  for (const [id, lobbyView] of [['frList', false], ['frList2', true], ['frList3', true]]){
     const box = $(id); box.textContent = '';
     if (!FR.list.length && !lobbyView){ const e = document.createElement('p'); e.className = 'note'; e.textContent = 'No friends yet: add one with their code, or give them yours.'; box.append(e); continue; }
     for (const {x, o} of rows){
       if (lobbyView && !o) continue;
       const r = document.createElement('div'); r.className = 'frrow' + (o ? ' on' : '');
       const dot = document.createElement('i'); dot.className = 'frdot ' + (!o ? 'off' : o.s); r.append(dot);
-      const nm = document.createElement('b'); nm.textContent = (o && o.n) || x.n || x.f.toUpperCase(); r.append(nm);
+      const who = document.createElement('span'); who.className = 'frwho'; const nm = document.createElement('b'); nm.textContent = (o && o.n) || x.n || x.f.toUpperCase(); who.append(nm);
+      if (x.note){ const nt = document.createElement('small'); nt.className = 'frnote'; nt.textContent = x.note; nt.title = 'Your note (only you see it)'; who.append(nt); }
+      r.append(who);
       const st = document.createElement('span'); st.className = 'frst';
       st.textContent = !o ? 'offline' : o.s === 'free' ? 'online' : o.s === 'solo' ? 'playing the computer' : o.s === 'prac' ? 'practising' : o.s === 'room' ? `in room ${o.r ? '“' + o.r + '” ' : ''}(${o.k}/${o.z ? o.z * 2 : '?'})${o.lk ? ' 🔒' : ''}` : `playing${o.r ? ' in “' + o.r + '”' : ''}${o.sc ? ' · ' + o.sc.join('–') : ''}`;
       r.append(st);
       const act = (t, fn, cls, ic) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (cls ? ' ' + cls : ''); b.textContent = t; if (ic) b.prepend(icEl(ic), t ? ' ' : ''); b.onclick = e => { e.currentTarget.blur(); fn(); }; r.append(b); };
       // (v28.65, spectate friends: 👁 Watch joins as a spectator; in a match that's what Join did anyway, so it says Watch)
-      if (o){ const u = FR.unread.get(x.f) || 0; act(u ? String(u) : '', () => dmOpen(x.f), u ? 'dmnew' : 'dmb', 'chat'); r.lastChild.title = `Chat with ${nm.textContent}`; }
+      if (o || (FR.cls && !lobbyView)){ const u = FR.unread.get(x.f) || 0; act(u ? String(u) : '', () => dmOpen(x.f), u ? 'dmnew' : 'dmb', 'chat'); r.lastChild.title = o ? `Chat with ${nm.textContent}` : `Leave ${nm.textContent} a message for next time they're on`; }
       if (o && o.c && !NET.on && o.s === 'room') act('Join', () => frJoin(o.c));
       if (o && o.c && !NET.on && (o.s === 'room' || o.s === 'match')) act('Watch', () => frJoin(o.c, true), '', 'eye');
       if (o && NET.on && NET.code && (o.s === 'free' || o.s === 'solo' || o.s === 'prac')) act('Invite', () => { frSend(x.f, {k: 'inv', c: NET.code}); sysChat(`Invited ${(o && o.n) || x.n || 'your friend'}`); });
-      if (!lobbyView) act('✕', () => { FR.list = FR.list.filter(q => q.f !== x.f); FR.st.delete(x.f); frSave(); renderFriends(); }, 'frx');
+      else if (o && !NET.on && !lobbyView && (o.s === 'free' || o.s === 'solo' || o.s === 'prac')){ act('Invite', () => frHostInvite(x.f)); r.lastChild.title = `Make a room and invite ${nm.textContent}`; }
+      if (!lobbyView){ act('✎', () => frNoteEdit(x, r, who), 'frx'); r.lastChild.title = 'A note to yourself about who this is (only you see it)'; }
+      // (v28.82, "when remove friend, add again": ✕, then Add again in the note that pops up)
+      if (!lobbyView) act('✕', () => { const i = FR.list.indexOf(x), name = nm.textContent, st0 = FR.st.get(x.f); FR.list = FR.list.filter(q => q.f !== x.f); FR.st.delete(x.f); frSave(); renderFriends();
+        frToast(`Removed ${name}`, 'Add again', () => { if (FR.list.some(q => q.f === x.f)) return; FR.list.splice(Math.max(0, Math.min(i, FR.list.length)), 0, x); if (st0 && Date.now() - st0.t < 70000) FR.st.set(x.f, st0); frSave(); if (FR.cls) for (const cl of FR.cls) try { cl.subscribe(frTopic(x.f)); } catch (e) {} renderFriends(); frPub(); }); }, 'frx');
       box.append(r);
     }
   }
-  $('frLobby').hidden = !(NET.on && rows.some(r => r.o));
+  $('frLobby').hidden = !(NET.on && rows.some(r => r.o)); if ($('frGm')) $('frGm').hidden = $('frLobby').hidden;   // (v28.82: in a match's menu too)
   if (FR.dmWith && !$('dmBox').hidden) dmRender();
   { const n = rows.filter(r => r.o).length, sm = $('onlineBtn') && $('onlineBtn').querySelector('small'); if (sm) sm.textContent = "make a room, or join a friend's with a code" + (n ? ` · ${n} friend${n > 1 ? 's' : ''} online` : ''); }
 }
