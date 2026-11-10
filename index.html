@@ -992,7 +992,8 @@
     html:not(.calm) #onLobby:not([hidden]) .rbar{animation:barIn .35s ease-out both!important}
     html:not(.calm) #menu .mpane:not([hidden]){animation:paneIn .28s ease-out both!important}
     html:not(.calm) #menu .mgo::after{animation:goShine 4.5s ease-in-out infinite!important}
-    html:not(.calm) #menu button.mgo{animation:goPulse 2.2s ease-in-out infinite!important} html:not(.calm) #menu .mgo .go{animation:goNudge 1.1s ease-in-out infinite!important}
+    html:not(.calm) #menu button.mgo{animation:goPulse 2.2s ease-in-out infinite!important} html:not(.calm) #menu .mgo .go{animation:goNudge 1s ease-in-out infinite!important} html:not(.calm) #menu .mgo .go::after{animation:goRing 1.4s ease-out infinite!important}
+    html:not(.calm) #menu #setFriends button.mgo,html:not(.calm) #menu #setFriends .mgo .go{animation:none!important}
     html.newb:not(.calm) #menu .mlearn{animation:learnPulse 1.7s ease-in-out infinite!important} html.newb:not(.calm) #menu .mlearn b::after{animation:learnPoint .9s ease-in-out infinite!important}
     html:not(.calm) .tourhole::after{animation:tourRing 1.5s ease-out infinite!important} html:not(.calm) .tourcard button:not(.ghost):not([hidden]),html:not(.calm) #tutGo{animation:goGlow 1.8s ease-in-out infinite!important}
     html:not(.calm) #menu .dcard{transition:transform .15s ease,background-color .15s!important}
@@ -1016,6 +1017,46 @@
   @keyframes tourRing{0%{opacity:.85;inset:-4px}100%{opacity:0;inset:-16px}}
   .tourcard button:not(.ghost):not([hidden]),#tutGo{animation:goGlow 1.8s ease-in-out infinite}
   html.calm #menu button.mgo,html.calm #menu .mgo .go,html.calm #menu .mlearn,html.calm #menu .mlearn b::after,html.calm .tourhole::after,html.calm .tourcard button,html.calm #tutGo{animation:none!important}
+  /* v28.75 ("format the online better, and the mini arrow thing is not obvious, like online is not obvious"):
+     - Multiplayer: Play online is the big orange button; the one-keyboard Play under it is the dark, second one
+     - the Play buttons' arrow: a dark disc with a ring going out from it, a longer nudge; someone new gets a START HERE tag
+     - Online: your name across the top, then joining (the rooms, a code) on the left and making a room on the right;
+       plainer headings, the main buttons full width; the room's note the full width, its settings in even columns */
+  #menu .mgo .go{width:46px;height:46px;border-radius:50%;background:#15100a;color:var(--accent);display:grid;place-items:center;position:relative;flex:none;animation:goNudge 1s ease-in-out infinite}
+  #menu .mgo .go svg{width:20px;height:20px;margin-left:3px}
+  #menu .mgo .go::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid #15100a;animation:goRing 1.4s ease-out infinite}
+  @keyframes goNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(10px)}}
+  @keyframes goRing{0%{opacity:.8;transform:scale(1)}100%{opacity:0;transform:scale(1.7)}}
+  #menu #setFriends button.mgo{background:#171b25;color:#fff;animation:none;border:2px solid var(--rule)}
+  #menu #setFriends button.mgo:hover{background:#1f2431}
+  #menu #setFriends .mgo .go{background:var(--accent);color:#15100a;animation:none} #menu #setFriends .mgo .go::after{display:none}
+  #menu #setFriends .mgo b{font-size:clamp(22px,2.6vw,28px)}
+  #menu .mpane[data-pane="friends"]{gap:14px}
+  html.newb #menu .mlearn b::after{content:'\25C0  START HERE';display:inline-block;margin-left:10px;padding:3px 8px 3px 6px;background:#ffd166;color:#1b1404;font:800 11px/1.2 Rubik,sans-serif;letter-spacing:.08em;font-style:normal;vertical-align:.35em;white-space:pre;animation:learnPoint .9s ease-in-out infinite}
+  @keyframes learnPoint{0%,100%{transform:translateX(0)}50%{transform:translateX(9px)}}
+  .onstart .ochead h3,.overlay .onstart .ochead h3{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:italic;font-weight:800;font-size:22px;letter-spacing:.01em;text-transform:uppercase;color:#fff}
+  .onstart .ocode .lbl{font-weight:700;color:#d5dae6}
+  .onstart #hostBtn{font-size:16px;padding:11px 22px}
+  .onstart .ojoin .rooms{min-height:74px}
+  .onnote{align-self:center}
+  #onlinePanel .onvite{max-width:none}
+  #menu .mpane[data-pane="friends"] > .onlbl{margin-bottom:-8px}
+  .sgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  @media (max-width:520px){ .sgrid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+  .rgo button#startOnline{font-size:19px;padding:13px 30px;white-space:nowrap;flex:none}
+  @media (max-width:520px){ .rgo button#startOnline{font-size:16px;padding:11px 18px} }
+  @media (min-width:860px){
+    .onstart{width:min(980px,100%);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-rows:auto auto 1fr;gap:12px;align-items:start}
+    .onstart > .ocard.you{grid-column:1 / -1}
+    .onstart > .ojoin{grid-column:1;grid-row:2}
+    .onstart > .omake{grid-column:2;grid-row:2 / span 2}
+    .onstart > .ocode{grid-column:1;grid-row:3}
+    .onstart > .omake .ogrid{grid-template-columns:1fr}
+    .onstart > .omake .orow{flex-direction:column;align-items:stretch}
+    .onstart > .omake .orow > button:last-child{margin-left:0}
+  }
+  html.calm #menu .mgo .go::after{animation:none!important;display:none}
+  @media (max-width:420px){ #menu .mgo .go{width:36px;height:36px} #menu .mgo .go svg{width:16px;height:16px} }
   /* v28.74 ("customise the cuomputer diffcultify like one for striker and one for goal keeper"): Computer: Custom opens a
      row under the match settings, a level for its strikers and one for its keepers */
   #menu .mbar.mcust,#menu[data-tab="train"] .mbar.mcust{grid-template-columns:repeat(2,minmax(0,200px));justify-content:start;border-top:0;padding-top:0;margin-top:-4px}
@@ -1185,12 +1226,12 @@
           <label class="avin" for="avatar" title="Up to two letters or an emoji, shown on your player"><input type="text" id="avatar" maxlength="2" autocomplete="off" spellcheck="false" placeholder="P1" aria-label="Avatar"></label>
           <label class="ofield grow" for="nick"><small>Your name</small><input type="text" id="nick" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Player"></label>
         </section>
-        <section class="ocard">
-          <div class="ochead"><h3>Rooms</h3><span class="note" id="roomsNote">Looking for rooms…</span><button class="ghost sm" id="roomsRefresh" type="button" title="Look again">↻</button></div>
+        <section class="ocard ojoin">
+          <div class="ochead"><h3>Join a room</h3><span class="note" id="roomsNote">Looking for rooms…</span><button class="ghost sm" id="roomsRefresh" type="button" title="Look again">↻</button></div>
           <div class="rooms" id="gameList"></div>
         </section>
-        <section class="ocard">
-          <div class="ochead"><h3>Create a room</h3></div>
+        <section class="ocard omake">
+          <div class="ochead"><h3>Or create your own</h3></div>
           <div class="ogrid">
             <label class="ofield" for="roomName"><small>Room name</small><input type="text" id="roomName" maxlength="24" autocomplete="off" spellcheck="false" placeholder="My room"></label>
             <div class="ofield"><small>Teams</small><span class="seg pill" id="onSize"><button type="button" data-s="1">1v1</button><button class="on" type="button" data-s="2">2v2</button><button type="button" data-s="3">3v3</button><button type="button" data-s="4">4v4</button></span></div>
@@ -1199,7 +1240,7 @@
           </div>
           <div class="orow"><label class="chk" for="roomHidden"><input type="checkbox" id="roomHidden">Not in the room list (friends join with the code)</label><button id="hostBtn" type="button">Create room</button></div>
         </section>
-        <section class="ocard slim"><div class="orow"><span class="lbl">Have a code?</span><input type="text" id="joinCode" maxlength="6" size="8" placeholder="code" autocomplete="off" spellcheck="false" aria-label="Room code"><button class="ghost" id="joinBtn" type="button">Join</button></div>
+        <section class="ocard slim ocode"><div class="orow"><span class="lbl">Got a code from a friend?</span><input type="text" id="joinCode" maxlength="6" size="8" placeholder="code" autocomplete="off" spellcheck="false" aria-label="Room code"><button class="ghost" id="joinBtn" type="button">Join</button></div>
           <div class="orow" id="passRow" hidden><span class="lbl">Password</span><input type="text" id="joinPass" maxlength="12" size="10" autocomplete="off" spellcheck="false" aria-label="Password"><button id="passBtn" type="button">Join</button></div></section>
       </div>
       <div id="onLobby" class="onroom" hidden>
@@ -1413,7 +1454,8 @@
       <button class="tile full" data-mode="mirror" data-size="1" type="button" title="1v1 against your copy: the computer at Insane with your favourite corner and your best kick-off move"><i class="ic" data-ic="copy"></i><span><b>Vs your copy</b><small>a 1v1 against the computer playing your own moves, at Insane</small></span></button>
     </div>
     <div class="mpane" data-pane="friends" role="tabpanel" hidden>
-      <button class="tile full big" id="onlineBtn" type="button"><i class="ic" data-ic="globe"></i><span><b>Online</b><small>host a game or join one with a code</small></span></button>
+      <span class="lbl onlbl">Over the internet</span>
+      <button class="mgo ongo" id="onlineBtn" type="button" title="Play over the internet: make a room and share its code, or join a friend's room"><i class="ic" data-ic="globe"></i><span><b>Play online</b><small>make a room, or join a friend's with a code</small></span><em class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></em></button>
       <div class="mcard" id="setFriends" data-people="2">
         <div class="mrow"><span class="lbl">On one keyboard</span><span class="seg big six" data-k="size"><button type="button" data-v="1"><i class="si" data-ic="one"></i>1v1</button><button type="button" data-v="2"><i class="si" data-ic="two"></i>2v2</button><button type="button" data-v="3"><i class="si" data-ic="three"></i>3v3</button><button type="button" data-v="tri" title="Three goals on a six-sided pitch: score in either of the others, keep your own"><i class="si" data-ic="tri"></i>1v1v1</button><button type="button" data-v="pens" title="A penalty shootout: take turns to shoot, one touch, and to keep goal"><i class="si" data-ic="spot"></i><span class="lw">Penalties</span><span class="sw2">Pens</span></button><button type="button" data-v="duel" title="A shooting duel: one of you shoots from a new spot, as in Shooting practice, the other keeps goal, then swap, as in penalties; five shots each"><i class="si" data-ic="target"></i><span class="lw">Shooting</span><span class="sw2">Shoot</span></button></span></div>
         <div class="mrow"><span class="lbl">Players</span><span class="seg pill" data-k="people"><button type="button" data-v="2">2 of you</button><button type="button" data-v="3">3 of you</button></span></div>
@@ -2213,7 +2255,8 @@ function PBCORE(){
   // also with slide tackles off): a quick lunge where he points (at the ball when he points near it), DIVE_T ticks; the
   // ball within DIVE_REACH px of him on the way (his arms) is parried, away from his goal; then DIVE_DOWN ticks getting
   // up, DIVE_CD from one to the next. Bumping a man on a dive is no foul
-  const DIVE_V = 4.4, DIVE_T = 18, DIVE_DAMP = 0.95, DIVE_DOWN = 32, DIVE_CD = 60, DIVE_REACH = 10;
+  // (v28.75, "nerf the dive speed a bit bro its kinda op": DIVE_V 3.8, was 4.4: about 46 px a dive, was 53; the slide as it was)
+  const DIVE_V = 3.8, DIVE_T = 18, DIVE_DAMP = 0.95, DIVE_DOWN = 32, DIVE_CD = 60, DIVE_REACH = 10;
   const canDive = (G, ST, p, d) => p.role === 'keeper' && G.cfg.dive !== false && !ST.tri && inArea(ST, p.team, d.x, d.y);
   function startDive(G, p, d, ev){
     const b = p.input; let x = ((b & 8) > 0) - ((b & 4) > 0), y = ((b & 2) > 0) - ((b & 1) > 0);
@@ -10345,7 +10388,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.74';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.75';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -11917,7 +11960,7 @@ function renderFriends(){
   }
   $('frLobby').hidden = !(NET.on && rows.some(r => r.o));
   if (FR.dmWith && !$('dmBox').hidden) dmRender();
-  { const n = rows.filter(r => r.o).length, sm = $('onlineBtn') && $('onlineBtn').querySelector('small'); if (sm) sm.textContent = 'host a game or join one with a code' + (n ? ` · ${n} friend${n > 1 ? 's' : ''} online` : ''); }
+  { const n = rows.filter(r => r.o).length, sm = $('onlineBtn') && $('onlineBtn').querySelector('small'); if (sm) sm.textContent = "make a room, or join a friend's with a code" + (n ? ` · ${n} friend${n > 1 ? 's' : ''} online` : ''); }
 }
 $('frBackup').addEventListener('click', e => { e.currentTarget.blur(); openPanel('setPanel'); const sec = $('xferSave') && $('xferSave').closest('.dsec'); if (sec) setTimeout(() => sec.scrollIntoView({block: 'start'}), 50); });
 $('frCopy').addEventListener('click', e => { e.currentTarget.blur(); const t = FR.fid.toUpperCase(); (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { $('frMsg').textContent = 'Copied: ' + t; }, () => { $('frMsg').textContent = 'Your code: ' + t; }); });
