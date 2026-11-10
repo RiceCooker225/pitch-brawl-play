@@ -992,12 +992,35 @@
     html:not(.calm) #onLobby:not([hidden]) .rbar{animation:barIn .35s ease-out both!important}
     html:not(.calm) #menu .mpane:not([hidden]){animation:paneIn .28s ease-out both!important}
     html:not(.calm) #menu .mgo::after{animation:goShine 4.5s ease-in-out infinite!important}
+    html:not(.calm) #menu button.mgo{animation:goPulse 2.2s ease-in-out infinite!important} html:not(.calm) #menu .mgo .go{animation:goNudge 1.1s ease-in-out infinite!important}
+    html.newb:not(.calm) #menu .mlearn{animation:learnPulse 1.7s ease-in-out infinite!important} html.newb:not(.calm) #menu .mlearn b::after{animation:learnPoint .9s ease-in-out infinite!important}
+    html:not(.calm) .tourhole::after{animation:tourRing 1.5s ease-out infinite!important} html:not(.calm) .tourcard button:not(.ghost):not([hidden]),html:not(.calm) #tutGo{animation:goGlow 1.8s ease-in-out infinite!important}
     html:not(.calm) #menu .dcard{transition:transform .15s ease,background-color .15s!important}
   }
   /* v28.69: the Quick start's other keys, one a line */
   .tutbox .qk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 18px;margin:2px 0 6px}
   @media (max-width:900px){ .tutbox .qk{grid-template-columns:repeat(2,minmax(0,1fr))} } @media (max-width:520px){ .tutbox .qk{grid-template-columns:1fr} }
   .tutbox .qk > span{display:flex;align-items:center;gap:8px;min-width:0} .tutbox .qk b{flex:none;font-weight:400} .tutbox .qk i{font-style:normal;color:#c9ced8;min-width:0}
+  /* v28.74 ("maybe still have like animation in menus so ppl know where to press"): the big Play button breathes and its
+     arrow nudges; for someone new (no match yet, the Quick start not done) the Tutorial box pulses with a pointer; the
+     tour's lit box has a ring going out from it; the first-time box's and the tour's main buttons glow. Off with Calm */
+  #menu button.mgo{animation:goPulse 2.2s ease-in-out infinite}
+  @keyframes goPulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.13)}}
+  #menu .mgo .go{animation:goNudge 1.1s ease-in-out infinite}
+  @keyframes goNudge{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
+  html.newb #menu .mlearn{animation:learnPulse 1.7s ease-in-out infinite}
+  @keyframes learnPulse{0%,100%{background-color:rgba(255,209,102,0)}50%{background-color:rgba(255,209,102,.13)}}
+  html.newb #menu .mlearn b::after{content:'\25C0';display:inline-block;margin-left:10px;font-size:.6em;font-style:normal;vertical-align:.15em;animation:learnPoint .9s ease-in-out infinite}
+  @keyframes learnPoint{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
+  .tourhole::after{content:'';position:absolute;inset:-7px;border:2px solid var(--accent);border-radius:13px;opacity:0;animation:tourRing 1.5s ease-out infinite}
+  @keyframes tourRing{0%{opacity:.85;inset:-4px}100%{opacity:0;inset:-16px}}
+  .tourcard button:not(.ghost):not([hidden]),#tutGo{animation:goGlow 1.8s ease-in-out infinite}
+  html.calm #menu button.mgo,html.calm #menu .mgo .go,html.calm #menu .mlearn,html.calm #menu .mlearn b::after,html.calm .tourhole::after,html.calm .tourcard button,html.calm #tutGo{animation:none!important}
+  /* v28.74 ("customise the cuomputer diffcultify like one for striker and one for goal keeper"): Computer: Custom opens a
+     row under the match settings, a level for its strikers and one for its keepers */
+  #menu .mbar.mcust,#menu[data-tab="train"] .mbar.mcust{grid-template-columns:repeat(2,minmax(0,200px));justify-content:start;border-top:0;padding-top:0;margin-top:-4px}
+  #menu .mbar.mcust[hidden]{display:none}
+  #menu .mbar.mcust .note{grid-column:1 / -1;font-size:11.5px;color:#9099ac;margin-top:-6px}
   /* v28.73 ("make the menu more begineer friendly, like showing them around the whole game"): the menu's tour: the
      part it is about in a lit box (its shadow dims the rest), a card next to it */
   .tour{position:fixed;inset:0;z-index:90;overscroll-behavior:contain;touch-action:none}
@@ -1201,6 +1224,7 @@
                 <label class="ofield" title="A tie at full time: overtime (next goal wins), extra time played in full and then a penalty shootout if it's still level, or straight to penalties"><small>If level</small><select id="hoTie"><option value="0">Overtime</option><option value="1">Extra time, pens</option><option value="2">Penalties</option></select></label>
                 <label class="ofield" title="Two legs, like the Champions League: the total of both decides"><small>Legs</small><select id="hoLegs"><option value="1">One match</option><option value="2">Two legs</option></select></label>
                 <label class="ofield"><small>Computer</small><select id="hoLevel"><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
+                <label class="ofield" title="The computer's keepers at a level of their own (2v2 and 3v3)"><small>Its keepers</small><select id="hoLevelK"><option value="-1">Same level</option><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
                 <label class="ofield" title="How much a kick curls when it's kicked with a direction held across it"><small>Curve</small><select id="hoCurve"><option value="0">0% · off</option><option value="20">20%</option><option value="40">40%</option><option value="60">60% · normal</option><option value="80">80%</option><option value="100">100% · max</option></select></label>
               </div>
               <div class="tgrid">
@@ -1423,11 +1447,16 @@
       </div>
     </div>
     <div class="mbar">
-      <label class="mo lv" for="setDiff"><span>Computer</span><select id="setDiff"><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
+      <label class="mo lv" for="setDiff"><span>Computer</span><select id="setDiff"><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option><option value="c">Custom…</option></select></label>
       <label class="mo" for="setTime"><span>Time</span><select id="setTime"></select></label>
       <label class="mo" for="setGoals"><span>Goals</span><select id="setGoals"></select></label>
       <label class="mo" for="setTie" title="A tie at full time: overtime (next goal wins), extra time played in full and then a penalty shootout if it's still level, or straight to penalties"><span>If level</span><select id="setTie"><option value="0">Overtime</option><option value="1">Extra time, pens</option><option value="2">Penalties</option></select></label>
       <label class="mo" for="optLegs" title="Two legs, like the Champions League: a first leg (a draw is fine), then a second leg; the total of both decides"><span>Legs</span><select id="optLegs"><option value="1">One match</option><option value="2">Two legs</option></select></label>
+    </div>
+    <div class="mbar mcust" id="diffCust" hidden>
+      <label class="mo lv" for="setDiffS" title="The computer's outfield players: how well they shoot, pass and tackle"><span>Computer strikers</span><select id="setDiffS"><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
+      <label class="mo lv" for="setDiffK" title="The computer's keepers: how fast they react, how well they read a shot, how often they dive"><span>Computer keepers</span><select id="setDiffK"><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
+      <small class="note">Your computer team-mates too. In 1v1 its one player counts as a striker.</small>
     </div>
     <div class="mdash" id="mDash"></div>
     </div>
@@ -4725,9 +4754,14 @@ try { if (!localStorage.getItem('pb.tut') && !localStorage.getItem('pb.you') && 
   for (const [k, v] of [['pb.curve', 0], ['pb.slide', 0], ['pb.fk', 0], ['pb.power', 0], ['pb.newRules', 1]]) localStorage.setItem(k, JSON.stringify(v)); } } catch (e) {}
 const SET = {
   diff: [0, 1, 2, 3].includes(store.get('pb.diff', 1)) ? store.get('pb.diff', 1) : 1,
+  dk: [0, 1, 2, 3].includes(store.get('pb.diffK', -1)) ? store.get('pb.diffK', -1) : -1,   // (v28.74: the computer's keepers at a level of their own; -1: the same as the rest, which diff is)
   time: TIME_OPTS.includes(store.get('pb.time', 3)) ? store.get('pb.time', 3) : 3, goals: GOAL_OPTS.includes(store.get('pb.goals', 3)) ? store.get('pb.goals', 3) : 3,
   extrapAuto: false,
-  extrap: Math.max(-200, Math.min(1000, Math.round(+store.get('pb.extrap', 30) || 0))),   // (v28.57: 30 ms to start with, "make it start as like 30ms extrap") ghost: !!store.get('pb.ghost', 0), smooth: store.get('pb.smooth', 1) !== 0, zoom: +store.get('pb.zoom', 0) || 0,
+  extrap: Math.max(-200, Math.min(1000, Math.round(+store.get('pb.extrap', 30) || 0))),   // (v28.57: 30 ms to start with, "make it start as like 30ms extrap")
+  // (v28.74: these three were behind that comment since v28.57, so each load began with Auto zoom whatever was kept, and
+  // with online smoothing and the ghost off. Zoom starts on Follow all now, 7: "have basic zoom level on follow all")
+  ghost: !!store.get('pb.ghost', 0), smooth: store.get('pb.smooth', 1) !== 0, zoom: (z => { const first = !store.get('pb.zoomV', 0); if (first) store.set('pb.zoomV', 1);   // (a kept Auto from before this version is that bug's, written at every load: Follow all once, then whatever is picked)
+    return Number.isInteger(z) && z >= 0 && z <= 7 && !(first && z === 0) ? z : 7; })(store.get('pb.zoom', 7)),
   ref: store.get('pb.ref', 1) !== 0, aiCom: store.get('pb.aicom', 1) !== 0, sound: store.get('pb.sound', 1) !== 0, replays: store.get('pb.replays', 1) !== 0, side: store.get('pb.side', 0) === 1 ? 1 : 0,
   legs: store.get('pb.legs', 1) === 2 ? 2 : 1, ac: [0, 1, 2].map(i => { const v = store.get('pb.ac', null); return Array.isArray(v) && v[i] === 1; }), inv: [0, 1, 2].map(i => { const v = store.get('pb.inv', null); return Array.isArray(v) && v[i] === 1; }), power: store.get('pb.power', 0) === 1, intro: store.get('pb.intro', 1) !== 0, curve: store.get('pb.curve', 1) === 1, slide: store.get('pb.slide', 1) !== 0, fk: store.get('pb.fk', 1) === 1, curveLv: [1, 2, 3, 4, 5].includes(store.get('pb.curveLv', 3)) ? store.get('pb.curveLv', 3) : 3, tie: [0, 1, 2].includes(store.get('pb.tie', 0)) ? store.get('pb.tie', 0) : 0,
   nick: clean(store.get('pb.nick', ''), 16), avatar: clean(store.get('pb.avatar', ''), 2),
@@ -5109,7 +5143,9 @@ function newSession(kind, cfg, roster){
   const s = {kind, cfg, G, acc: 0, ticks: 0, mems: new Map(), rec: [], replay: null, done: false, endShown: false,
              locals: roster.filter(r => r.ctrl === 'human' && r.slot).map(r => ({pid: r.id, slot: r.slot, sent: 0, kc: 0})),
              info: new Map(roster.map(r => [r.id, {name: r.name || '', avatar: r.avatar || ''}])), lastOt: false, best: null, last: null};
-  s.level = p => cfg.levels ? cfg.levels[p.team] : cfg.diff;
+  // (v28.74, "customise the cuomputer diffcultify like one for striker and one for goal keeper": cfg.kOff, how many levels
+  // a computer keeper is above or below the rest of its team; by his role this tick, so a swap in goal takes it along)
+  s.level = p => { const b = cfg.levels ? cfg.levels[p.team] : cfg.diff; return cfg.kOff && p.role === 'keeper' ? Math.max(0, Math.min(3, b + cfg.kOff)) : b; };
   s.input = (L, b) => { const p = playerById(s.G, L.pid); if (p) C.setInput(p, b); };
   s.update = dt => updateLocal(s, dt);
   s.view = () => viewLocal(s);
@@ -5124,10 +5160,10 @@ function newSession(kind, cfg, roster){
     const flv = cfg.levels ? cfg.levels[1] : cfg.diff;
     if (cfg.mode === 'ai' && flv >= 1 && learnSet.adapt){
       const size = String(Math.min(2, G.players.filter(p => p.team === 1).length)), key = flv + 'x' + size;
-      const tr = !adapt.check && adapt.trials[size] && adapt.base[key] && adapt.base[key][1] > 0 ? adapt.trials[size] : null, d = Object.assign({}, adapt.delta);
+      const tr = !cfg.kOff && !adapt.check && adapt.trials[size] && adapt.base[key] && adapt.base[key][1] > 0 ? adapt.trials[size] : null, d = Object.assign({}, adapt.delta);   // (v28.74: a keeper at his own level: the kept fixes, but nothing tried or learned from the match)
       if (tr) for (const k in tr.d) d[k] = bandClamp(k, (d[k] || 0) + tr.d[k]);
       s.foeBrains = s.brains.map((b, lv) => lv >= 1 ? adapted(b, d) : b);
-      s.ad = {lv: flv, size, key, trial: tr, gen: adaptGen, hk: null, long: 0, mid: 0, close: 0, done: false};
+      if (!cfg.kOff) s.ad = {lv: flv, size, key, trial: tr, gen: adaptGen, hk: null, long: 0, mid: 0, close: 0, done: false};
     }
     // 1v1 against the computer or your copy: your kick-offs are recorded (for your copy, and for the computer when it
     // copies your moves); against the computer it plays your best one at its own kick-offs
@@ -6546,7 +6582,7 @@ function dribbleMode(){
 const PARTS = ['settings', 'basics', 'attack', 'defend', 'setp', 'extras', 'curl', 'power'], CORE = PARTS.slice(0, 6);
 const REC = {diff: 0, coach: true, zoom: 7, curve: 0, ac: false, inv: false, slide: false, fk: false, power: false, extrap: 60};   // (v28.64: curling, slides, free kicks, power shots off till their parts)
 function useRecommended(){
-  SET.diff = REC.diff; store.set('pb.diff', REC.diff); SET.coach = REC.coach; store.set('pb.coach', 1); setZoom(REC.zoom); setCurvePct(REC.curve);
+  SET.diff = REC.diff; store.set('pb.diff', REC.diff); SET.dk = -1; store.set('pb.diffK', -1); SET.coach = REC.coach; store.set('pb.coach', 1); setZoom(REC.zoom); setCurvePct(REC.curve);
   SET.ac[0] = REC.ac; SET.inv[0] = REC.inv; store.set('pb.ac', SET.ac.map(v => v ? 1 : 0)); store.set('pb.inv', SET.inv.map(v => v ? 1 : 0)); pushInputs(); renderCurlOpts();
   SET.slide = REC.slide; SET.fk = REC.fk; SET.power = REC.power; store.set('pb.slide', REC.slide ? 1 : 0); store.set('pb.fk', REC.fk ? 1 : 0); store.set('pb.power', REC.power ? 1 : 0); setExtrap(REC.extrap);
   menuSync(); rulesSync(); soundTxt();
@@ -6780,7 +6816,7 @@ function tutPanel(s){
   const ex = $('tutExtra'); ex.textContent = '';
   const btn = (t, on, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = (cls || 'ghost sm') + (on ? ' on' : ''); b.textContent = t; b.onclick = e => { e.currentTarget.blur(); fn(); tutPanel(s); }; ex.append(b); return b; };
   const R = (t, rec) => rec ? '★ ' + t : t;
-  if (st === 'sLevel'){ btn('Use all recommended', false, () => { useRecommended(); tu.note = 'Done: the recommended settings are on.'; }, 'sm'); ['Easy', 'Normal', 'Hard', 'Insane'].forEach((n, i) => btn(R(n, i === REC.diff), SET.diff === i, () => { SET.diff = i; store.set('pb.diff', i); menuSync(); })); }
+  if (st === 'sLevel'){ btn('Use all recommended', false, () => { useRecommended(); tu.note = 'Done: the recommended settings are on.'; }, 'sm'); ['Easy', 'Normal', 'Hard', 'Insane'].forEach((n, i) => btn(R(n, i === REC.diff), SET.diff === i && SET.dk < 0, () => { SET.diff = i; store.set('pb.diff', i); SET.dk = -1; store.set('pb.diffK', -1); menuSync(); })); }
   if (st === 'sHelp') btn(R('Help bar: ' + (coachOn() ? 'on' : 'off'), coachOn() === REC.coach), coachOn(), () => { SET.coach = !coachOn(); store.set('pb.coach', SET.coach ? 1 : 0); soundTxt(); });
   if (st === 'sKeys') btn('⌨ Change my keys', false, () => { rebind = null; renderKeys(); openPanel('keysPanel'); });
   if (st === 'sZoom') [['Follow all', 7], ['Auto', 0], ['1.5×', 3], ['2×', 4]].forEach(([n, i]) => btn(R(n, i === REC.zoom), zi === i, () => { setZoom(i); if (!tu.ok){ tu.ok = true; tu.note = 'Zoomed. Pick the one you like.'; } }));
@@ -8667,7 +8703,8 @@ function renderTicker(){
 // v28.60 ("some stuff are bit plain like too much spaces", the menu filling the tab): under the match settings, four
 // cards that open what they show: friends online, the tutorial's parts done, your matches, achievements
 function renderDash(){
-  { const ml = document.querySelector('#menu > .mlearn'); if (ml) ml.hidden = CORE.every(k => learnDone()[k]) || !!learnDone().quick; }   // (the Tutorial tab has it all; the box only while it isn't done)
+  { const ml = document.querySelector('#menu > .mlearn'); if (ml) ml.hidden = CORE.every(k => learnDone()[k]) || !!learnDone().quick;
+    document.documentElement.classList.toggle('newb', !!ml && !ml.hidden && !(you && you.games > 0)); }   // (v28.74: someone new: the Tutorial box pulses)   // (the Tutorial tab has it all; the box only while it isn't done)
   const box = $('mDash'); if (!box) return; box.textContent = '';
   const fr = (() => { try { return {n: FR.st.size, all: FR.list.length}; } catch (e) { return {n: 0, all: 0}; } })(), ld = PARTS.filter(k => learnDone()[k]).length, na = Object.keys((ach && ach.u) || {}).length;
   const card = (big, label, sub, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'dcard'; const v = document.createElement('b'); v.textContent = big; const l = document.createElement('span'); l.textContent = label; const m = document.createElement('small'); m.textContent = sub; b.append(v, l, m); b.onclick = fn; box.append(b); };
@@ -8735,6 +8772,8 @@ const drill = mode => mode === 'practice' || mode === 'pens' || mode === 'duel' 
 function cfgFor(mode, size){
   const c = {mode, size, diff: SET.diff, timeLimit: drill(mode) ? 0 : SET.time, scoreLimit: drill(mode) ? 0 : SET.goals,
              curve: SET.curve && mode !== 'keeper', slide: SET.slide && !drill(mode), power: SET.power && !drill(mode) && mode !== 'tutorial', fk: mode === 'fkdrill' || (SET.fk && SET.slide && !drill(mode)), curveLv: SET.curveLv, tie: drill(mode) || mode === 'tri' ? 0 : SET.tie};   // the match rules from the settings
+  // (v28.74: the keepers' own level. The drills against a keeper are at it; matches and penalties carry the difference)
+  if (SET.dk >= 0 && SET.dk !== SET.diff){ if (mode === 'practice' || mode === 'fkdrill' || mode === 'wall') c.diff = SET.dk; else if (!drill(mode) || mode === 'pens') c.kOff = SET.dk - SET.diff; }
   if (mode === 'wall') c.keeper = !!store.get('pb.wallKeeper', false);
   if (SET.legs === 2 && !drill(mode) && mode !== 'tri'){ c.leg = 1; c.draws = true; }   // (v25.8: two legs: the first, a draw is fine)
   return c;
@@ -8752,7 +8791,20 @@ const pick = (sel, attr, cb) => document.querySelectorAll(sel).forEach(b => b.ad
   document.querySelectorAll(sel).forEach(x => x.classList.remove('on')); b.classList.add('on'); cb(+b.dataset[attr]); }));
 { const fill = (sel, opts, unit) => { sel.textContent = ''; for (const v of opts) sel.add(new Option(v ? v + unit : 'No limit', v)); };
   fill($('setTime'), TIME_OPTS, ' min'); fill($('hoTime'), TIME_OPTS, ' min'); fill($('setGoals'), GOAL_OPTS, ''); fill($('hoGoals'), GOAL_OPTS, ''); }
-$('setDiff').addEventListener('change', e => { if (roomRule('setDiff', +e.target.value)) return; SET.diff = +e.target.value; store.set('pb.diff', SET.diff); });
+$('setDiff').addEventListener('change', e => {
+  // (v28.74: Custom: a level for the computer's strikers and one for its keepers, in a row under the match settings)
+  if (e.target.value === 'c'){
+    if (roomL()){ rulesSync(); say("In a room, the keeper's level is in the room's Match settings", 1); return; }
+    if (SET.dk < 0){ SET.dk = SET.diff; store.set('pb.diffK', SET.dk); } diffSync(); return; }
+  if (roomRule('setDiff', +e.target.value)) return; SET.diff = +e.target.value; store.set('pb.diff', SET.diff); SET.dk = -1; store.set('pb.diffK', -1); diffSync(); });
+$('setDiffS').addEventListener('change', e => { SET.diff = +e.target.value; store.set('pb.diff', SET.diff); diffSync(); });
+$('setDiffK').addEventListener('change', e => { SET.dk = +e.target.value; store.set('pb.diffK', SET.dk); diffSync(); });
+function diffSync(){
+  const cus = SET.dk >= 0 && !roomL(); $('diffCust').hidden = !cus;
+  if (!roomL()) $('setDiff').value = SET.dk >= 0 ? 'c' : SET.diff;
+  $('setDiffS').value = SET.diff; $('setDiffK').value = SET.dk >= 0 ? SET.dk : SET.diff;
+  try { fitMenu(); } catch (e) {}
+}
 $('setTime').addEventListener('change', e => { if (roomRule('setTime', +e.target.value)) return; SET.time = +e.target.value; store.set('pb.time', SET.time); });
 $('setGoals').addEventListener('change', e => { if (roomRule('setGoals', +e.target.value)) return; SET.goals = +e.target.value; store.set('pb.goals', SET.goals); });
 $('setSide').addEventListener('change', e => { SET.side = +e.target.value === 1 ? 1 : 0; store.set('pb.side', SET.side); applySide(); });
@@ -9894,7 +9946,7 @@ function achMatchEnd(s){
   if (s.cfg.mode !== 'ai') return;
   achRun(won);
   if (!won) return;
-  const lv = s.cfg.levels ? s.cfg.levels[1 - t] : s.cfg.diff, tl = G.cfg.timeLimit, last = G.stats.goals[G.stats.goals.length - 1];
+  const lv0 = s.cfg.levels ? s.cfg.levels[1 - t] : s.cfg.diff, lv = Math.max(0, Math.min(lv0, lv0 + (s.cfg.kOff | 0))), tl = G.cfg.timeLimit, last = G.stats.goals[G.stats.goals.length - 1];   // (v28.74: the lower of the striker's and the keeper's level counts)
   achUnlock('win'); if (lv >= 2) achUnlock('win_hard'); if (lv >= 3) achUnlock('win_insane');
   if (G.score[1 - t] === 0) achUnlock('clean');
   if ((s.achDown || 0) >= 2) achUnlock('comeback');
@@ -10293,7 +10345,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.73';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.74';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10909,7 +10961,7 @@ async function hostGame1(opts, tk){
   $('hostBtn').disabled = false;
   if (!T){ onErr(slots ? 'All the public rooms are taken. Tick "Not in the room list" to make one with a code.' : 'Could not get a free room code. Try again.'); return; }
   Object.assign(NET, {on: true, host: true, T, code, me: T.myId || null, guests: new Map(), chat: [], chatSeen: new Set(), myChat: [], ver: 1, startedGid: -1, cmdSeen: new Map(), typing: false, pass, kicked: new Set()}); resetPing();
-  NET.lobby = {v: 2, ver: 1, nm: name, lk: pass ? 1 : 0, hid: hidden ? 1 : 0, pm: 0, sz: chosenSize(), tl: SET.time, sl: SET.goals, lv: SET.diff, fill: $('fillAi').checked ? 1 : 0, pu: puSel.slice(), ti: SET.tie, sd: SET.slide ? 1 : 0, cv: SET.curve ? 1 : 0, fk: SET.fk ? 1 : 0, pw: SET.power ? 1 : 0, cl: SET.curveLv,
+  NET.lobby = {v: 2, ver: 1, nm: name, lk: pass ? 1 : 0, hid: hidden ? 1 : 0, pm: 0, sz: chosenSize(), tl: SET.time, sl: SET.goals, lv: SET.diff, kl: SET.dk, fill: $('fillAi').checked ? 1 : 0, pu: puSel.slice(), ti: SET.tie, sd: SET.slide ? 1 : 0, cv: SET.curve ? 1 : 0, fk: SET.fk ? 1 : 0, pw: SET.power ? 1 : 0, cl: SET.curveLv,
                lgs: SET.legs, leg2: null, kit: [kitSel[0], kitSel[1], kitSel[0] === CUS ? custom[0] : null, kitSel[1] === CUS ? custom[1] : null], pl: [], on: 0, gid: 0, ro: null, res: null, adm: [], deny: []};
   T.info = openInfo;
   syncHostOpts();
@@ -11119,7 +11171,7 @@ function startOnline(){
   const L = NET.lobby; if (!NET.host) return;
   clearMatchPanels();
   $('fillAi').checked = !!L.fill; L.gid++; L.on = 1; L.res = null; L.kit = [kitSel[0], kitSel[1], kitSel[0] === CUS ? custom[0] : null, kitSel[1] === CUS ? custom[1] : null]; L.pu = puSel.slice();
-  L.tl = SET.time; L.sl = SET.goals; L.lv = SET.diff;
+  L.tl = SET.time; L.sl = SET.goals; L.lv = SET.diff; L.kl = SET.dk;
   const roster = []; let id = 1;
   for (let t = 0; t < 2; t++){
     const humans = L.pl.filter(e => e[3] === t).slice(0, L.sz);
@@ -11146,7 +11198,8 @@ function startOnline(){
 // decided on the total (L.lg: [leg, first leg's score])
 function onlineCfg(L){
   const pens = !!L.pm, lg = Array.isArray(L.lg) && (L.lg[0] === 1 || L.lg[0] === 2) ? L.lg : null;
-  return {mode: 'online', size: L.sz | 0, diff: L.lv | 0, timeLimit: pens ? 0 : +L.tl || 0, scoreLimit: pens ? 0 : +L.sl || 0, pens, curve: !!L.cv, slide: !pens && !!L.sd, fk: !pens && !!L.sd && !!L.fk, power: !pens && !!L.pw,
+  return {mode: 'online', size: L.sz | 0, diff: L.lv | 0, kOff: [0, 1, 2, 3].includes(L.kl) ? L.kl - (L.lv | 0) : 0,   // (v28.74: the computer keepers' own level)
+          timeLimit: pens ? 0 : +L.tl || 0, scoreLimit: pens ? 0 : +L.sl || 0, pens, curve: !!L.cv, slide: !pens && !!L.sd, fk: !pens && !!L.sd && !!L.fk, power: !pens && !!L.pw,
           curveLv: [1, 2, 3, 4, 5].includes(L.cl) ? L.cl : 3, tie: pens ? 0 : [0, 1, 2].includes(L.ti) ? L.ti : 0, leg: lg ? lg[0] : 0, agg: lg && lg[0] === 2 ? [lg[1] | 0, lg[2] | 0] : null, draws: !!(lg && lg[0] === 1)};
 }
 function dynIndexes(G){ const out = [0]; for (let i = 1; i < ST.discs.length; i++){ const d = ST.discs[i]; if (d.invMass !== 0 || d.vx || d.vy || d.gx || d.gy) out.push(i); } for (const p of G.players) out.push(p.di); return out; }
@@ -11892,6 +11945,7 @@ function showLobby(){
 const inviteBase = () => { try { return !inArtifact && /^https?:$/.test(location.protocol) ? location.href.split('#')[0] : ''; } catch (e) { return ''; } };
 const roomSummary = L => L.pm ? `${L.pm === 2 ? 'Shooting duel' : 'Penalties'} · ${L.sz}v${L.sz}` : `${L.sz}v${L.sz} · ${L.tl ? L.tl + ' min' : 'no time limit'} · ${L.sl ? 'first to ' + L.sl : 'no goal limit'}${L.lgs === 2 ? ' · two legs' : ''}${L.lk ? ' · 🔒' : ''}`;
 function renderLobby(){
+  try { if (!$('diffCust').hidden) diffSync(); } catch (e) {}   // (v28.74: in a room the menu's own custom-level row is away)
   if (FR.on){ frPub(); if ($('frLobby').hidden === FR.st.size > 0) renderFriends(); }
   if ($('onLobby').hidden){ if (!$('gameMenu').hidden) renderGmBoard(); return; }
   const L = NET.lobby, boss = NET.host || isMgr(), on = !!L && L.on === 1;
@@ -12012,9 +12066,9 @@ function joinFromLink(){   // opened from an invite link: show the online panel 
 }
 $('fillAi').addEventListener('change', () => { const v = $('fillAi').checked ? 1 : 0; if (isMgr()) sendCmd('set', 'fillAi', v); else if (NET.host) hostSet('fillAi', v); });
 // the host sets the match up in the lobby: team size, time, goals, computer level (the menu's settings follow)
-function syncHostOpts(){ const L = NET.lobby; if (!L) return; rulesSync(); $('hoGame').value = L.pm === 2 ? 2 : L.pm ? 1 : 0; $('hoTime').disabled = $('hoGoals').disabled = $('hoTie').disabled = $('hoSlide').disabled = !!L.pm; $('hoSize').value = L.sz; $('hoTime').value = L.tl; $('hoGoals').value = L.sl; $('hoLevel').value = L.lv; $('fillAi').checked = !!L.fill;
+function syncHostOpts(){ const L = NET.lobby; if (!L) return; rulesSync(); $('hoGame').value = L.pm === 2 ? 2 : L.pm ? 1 : 0; $('hoTime').disabled = $('hoGoals').disabled = $('hoTie').disabled = $('hoSlide').disabled = !!L.pm; $('hoSize').value = L.sz; $('hoTime').value = L.tl; $('hoGoals').value = L.sl; $('hoLevel').value = L.lv; $('hoLevelK').value = [0, 1, 2, 3].includes(L.kl) ? L.kl : -1; $('fillAi').checked = !!L.fill;
   $('hoTie').value = L.ti | 0; $('hoSlide').checked = !!L.sd; $('hoCurve').value = curvePct(L.cv, L.cl); $('hoFk').checked = !!L.fk; $('hoFk').disabled = !!L.pm; $('hoPower').checked = !!L.pw; $('hoPower').disabled = !!L.pm; $('hoLegs').value = String(L.lgs === 2 ? 2 : 1); }
-function menuSync(){ $('setDiff').value = SET.diff; $('setTime').value = SET.time; $('setGoals').value = SET.goals; $('setSide').value = SET.side; $('setTie').value = SET.tie; $('optSlide').checked = SET.slide; $('optCurve').value = curvePct(SET.curve, SET.curveLv); $('optFk').checked = SET.fk; $('optPower').checked = SET.power; $('optLegs').value = String(SET.legs); rulesSync(); }
+function menuSync(){ $('setDiff').value = SET.dk >= 0 ? 'c' : SET.diff; $('setTime').value = SET.time; $('setGoals').value = SET.goals; $('setSide').value = SET.side; $('setTie').value = SET.tie; $('optSlide').checked = SET.slide; $('optCurve').value = curvePct(SET.curve, SET.curveLv); $('optFk').checked = SET.fk; $('optPower').checked = SET.power; $('optLegs').value = String(SET.legs); rulesSync(); diffSync(); }
 // v27.1 ("the settings for personal and online dont match, fix it"): in a room, ⚙ Settings and the menu's rules show the
 // room's (the host's), not your own, and changing one there changes the room's, as its Match settings do: the host and
 // a manager, between matches; locked during a match and for everyone else. It changed only your own before (during a
@@ -12023,12 +12077,13 @@ const RULE_IDS = {setDiff: 'hoLevel', setTime: 'hoTime', setGoals: 'hoGoals', se
 const roomL = () => NET.on ? NET.lobby : null;
 function rulesSync(){
   const L = roomL();
-  if (!L){ for (const id in RULE_IDS) $(id).disabled = false; if ($('ruleNote').textContent.startsWith('Online:')) $('ruleNote').textContent = "For your next match. Online, the room's rules count."; return; }
+  if (!L){ for (const id in RULE_IDS) $(id).disabled = false; if ($('ruleNote').textContent.startsWith('Online:')) $('ruleNote').textContent = "For your next match. Online, the room's rules count.";diffSync(); return; }
   $('setDiff').value = L.lv | 0; $('setTime').value = L.tl; $('setGoals').value = L.sl; $('setTie').value = L.ti | 0; $('optLegs').value = String(L.lgs === 2 ? 2 : 1);
   $('optSlide').checked = !!L.sd; $('optFk').checked = !!L.fk; $('optPower').checked = !!L.pw; $('optCurve').value = curvePct(!!L.cv, L.cl);
   const edit = (NET.host || isMgr()) && L.on !== 1;
   for (const id in RULE_IDS) $(id).disabled = !edit || (!!L.pm && ['setTime', 'setGoals', 'setTie', 'optLegs', 'optSlide', 'optFk', 'optPower'].includes(id));
   $('ruleNote').textContent = !(NET.host || isMgr()) ? "Online: the room's rules, set by the host." : L.on === 1 ? "Online: the room's rules, locked during the match." : "Online: the room's rules, for everyone from the next match.";
+  diffSync();
 }
 // a rule changed in ⚙ Settings or the menu while in a room: the room's (the host at once, a manager asks the host),
 // then shown as the room has it; false out of a room (it's your own)
@@ -12048,6 +12103,7 @@ const HOST_SET = {
   hoTime: [v => TIME_OPTS.includes(v), v => { NET.lobby.tl = SET.time = v; store.set('pb.time', v); }],
   hoGoals: [v => GOAL_OPTS.includes(v), v => { NET.lobby.sl = SET.goals = v; store.set('pb.goals', v); }],
   hoLevel: [v => [0, 1, 2, 3].includes(v), v => { NET.lobby.lv = SET.diff = v; store.set('pb.diff', v); }],
+  hoLevelK: [v => [-1, 0, 1, 2, 3].includes(v), v => { NET.lobby.kl = SET.dk = v; store.set('pb.diffK', v); }],   // (v28.74: -1, the same level as the rest)
   fillAi: [v => v === 0 || v === 1, v => { NET.lobby.fill = v; }],
   hoTie: [v => v === 0 || v === 1 || v === 2, v => { NET.lobby.ti = SET.tie = v; store.set('pb.tie', v); }],
   hoSlide: [v => v === 0 || v === 1, v => { NET.lobby.sd = v; SET.slide = !!v; store.set('pb.slide', v); }],
@@ -12058,7 +12114,7 @@ const HOST_SET = {
 };
 function hostSet(id, v){ const h = HOST_SET[id]; if (!h || !NET.host || !NET.lobby || NET.lobby.on === 1 || !h[0](v)) return false; h[1](v); menuSync(); syncHostOpts(); publishLobby(); return true; }
 for (const id of ['hoSlide', 'hoFk', 'hoPower']) $(id).addEventListener('change', e => { const v = e.target.checked ? 1 : 0; if (isMgr()) sendCmd('set', id, v); else if (NET.host && !hostSet(id, v)) syncHostOpts(); });
-for (const id of ['hoGame', 'hoSize', 'hoTime', 'hoGoals', 'hoLevel', 'hoTie', 'hoCurve', 'hoLegs']) $(id).addEventListener('change', e => {
+for (const id of ['hoGame', 'hoSize', 'hoTime', 'hoGoals', 'hoLevel', 'hoLevelK', 'hoTie', 'hoCurve', 'hoLegs']) $(id).addEventListener('change', e => {
   const v = +e.target.value; e.target.blur();
   if (isMgr()){ if (isFinite(v) && NET.lobby.on !== 1) sendCmd('set', id, v); else syncHostOpts(); return; }
   if (!hostSet(id, v)) syncHostOpts();
