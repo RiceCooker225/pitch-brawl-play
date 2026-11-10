@@ -1018,6 +1018,31 @@
   @keyframes tourRing{0%{opacity:.85;inset:-4px}100%{opacity:0;inset:-16px}}
   .tourcard button:not(.ghost):not([hidden]),#tutGo{animation:goGlow 1.8s ease-in-out infinite}
   html.calm #menu button.mgo,html.calm #menu .mgo .go,html.calm #menu .mlearn,html.calm #menu .mlearn b::after,html.calm .tourhole::after,html.calm .tourcard button,html.calm #tutGo{animation:none!important}
+  /* v28.77 ("emojis look so ai bro, make ur own ones"): the game's own line icons where emojis were (.mi) */
+  .mi{display:inline-grid;place-items:center;width:1.25em;height:1.25em;vertical-align:-.28em;flex:none}
+  .mi svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  #menu .mfoot button > span.mi{color:var(--accent)} #menu .mfoot button > span.mi svg{width:18px;height:18px}
+  #menu .mfoot button:hover > span.mi{color:#fff}
+  .corner #sugBtn .mi{color:#ffd166}
+  .ticker .ti .mi{color:var(--accent);width:15px;height:15px}
+  .lobby .pl .tag .mi{width:13px;height:13px}
+  /* v28.77 ("the stuff on the left, like play etc, make them stand out a but more"): the tabs: each on its own plate, the
+     names near white and bigger; the open one orange as before. "add a home thing": Home, by Show me around */
+  #menu .mtabs{align-items:stretch;gap:5px}
+  #menu .mtabs button{color:#eef0f6;font-size:clamp(24px,2.8vw,33px);padding:6px 18px 6px 8px}
+  #menu .mtabs button::before{color:#aab2c6}
+  #menu .mtabs button::after{inset:0 2px 0 -8px;background:rgba(255,255,255,.075);transform:skewX(-14deg) scaleX(1);transition:background-color .14s}
+  #menu .mtabs button.on::after{background:var(--accent)}
+  #menu .mtabs button:not(.on):hover::after{background:rgba(240,138,43,.4)}
+  #menu .mhrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px} #menu .mhead .mhrow .mtour{margin-top:0}
+  #menu .mhead .mhome,html:not(.toured) #menu .mhead .mhome{animation:none!important;border-color:var(--accent);background:var(--accent);color:#15100a}
+  #menu .mhead .mhrow .mhome > span.mi{color:#15100a} #menu .mhead .mhome:hover{background:#ff9b40}
+  #menu[data-tab="play"] .mhead .mhome{display:none}
+  #menu h2{cursor:pointer}
+  @media (max-width:760px){
+    #menu .mtabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 14px;padding-left:8px}
+    #menu .mtabs button{font-size:22px;padding:6px 8px 6px 4px}
+  }
   /* v28.76 ("all of the icons on bottom left, give them emojis or smth so its easier to read, rn they r just bunched
      together"): the menu's foot: each line an emoji in a small box and its name, with room between; two columns on a phone */
   #menu .mfoot{gap:5px}
@@ -1147,7 +1172,7 @@
   </div>
   <canvas id="c"></canvas>
   <div class="hud" id="hud" hidden></div>
-  <div class="corner"><span class="fsb onlinen" id="onlineN" hidden title="Players with the game open right now"></span><button class="ghost fsb" id="sugBtn" type="button" title="Got an idea or found a bug? Tell us">💡 Suggestions</button><button class="ghost fsb rolebtn" id="roleBtn" type="button" hidden></button><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (P)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
+  <div class="corner"><span class="fsb onlinen" id="onlineN" hidden title="Players with the game open right now"></span><button class="ghost fsb" id="sugBtn" type="button" title="Got an idea or found a bug? Tell us"><span class="mi" data-ic="bulb" aria-hidden="true"></span> Suggestions</button><button class="ghost fsb rolebtn" id="roleBtn" type="button" hidden></button><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (P)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
   <div class="rpbar" id="rpBar" hidden>
     <button class="ghost" id="rpBack" type="button" title="5 s back (←)">« 5 s</button>
     <button id="rpPlay" type="button" title="Pause or play (Space)">Pause</button>
@@ -1448,7 +1473,7 @@
     </div>
   </div>
   <div class="overlay" id="menu" data-tab="play">
-    <div class="mhead"><h2 id="menuTitle">Pitch Brawl</h2><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p><button class="tourb mtour" type="button" title="A tour of the menu: what every part is for, in under a minute"><span aria-hidden="true">➤</span> Show me around</button></div>
+    <div class="mhead"><h2 id="menuTitle" title="Home: back to Play">Pitch Brawl</h2><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p><div class="mhrow"><button class="mtour mhome" id="homeBtn" type="button" title="Back to Play, the first page"><span class="mi" data-ic="home" aria-hidden="true"></span> Home</button><button class="tourb mtour" type="button" title="A tour of the menu: what every part is for, in under a minute"><span class="mi" data-ic="compass" aria-hidden="true"></span> Show me around</button></div></div>
     <div class="mtabs" role="tablist" aria-label="Modes">
       <button type="button" role="tab" data-tab="play" title="Matches against the computer, the World Cup, the League and the Daily challenge" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" title="Drills on your own: shooting, free kicks, dribbling, keeper, penalties" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" title="Play online with a room code, or two or three of you on one keyboard" aria-selected="false">Multiplayer</button><button type="button" role="tab" data-tab="frs" title="Your friend code and your friends: join, invite, watch or message them" aria-selected="false">Friends</button><button type="button" role="tab" data-tab="me" title="Your saved goals, scores, achievements and shot map" aria-selected="false">My stuff</button><button type="button" role="tab" data-tab="learn" title="Learn to play: a two-minute Quick start, then parts that go deeper" aria-selected="false">Tutorial</button>
     </div>
@@ -1528,7 +1553,7 @@
     <div class="mdash" id="mDash"></div>
     </div>
     <div class="mfoot">
-      <button class="ghost sm setb" type="button" title="Settings: rules, curve, sound, view"><span aria-hidden="true">⚙️</span> Settings</button><button class="ghost sm ctl" type="button" title="Change your keys"><span aria-hidden="true">⌨️</span> Controls</button><button class="ghost sm tmb" type="button" title="Each side's kit"><span aria-hidden="true">👕</span> Kits</button><button class="ghost sm pub" type="button" title="A power-up for each side"><span aria-hidden="true">⚡</span> Power-ups</button><button class="ghost sm hlpb" type="button" title="How to play, the controls and the modes"><span aria-hidden="true">❓</span> How to play</button><button class="ghost sm sitesb" type="button" title="The three sites Pitch Brawl is on, and taking your data from one to another"><span aria-hidden="true">🌐</span> Sites &amp; your data</button>
+      <button class="ghost sm setb" type="button" title="Settings: rules, curve, sound, view"><span class="mi" data-ic="gear" aria-hidden="true"></span> Settings</button><button class="ghost sm ctl" type="button" title="Change your keys"><span class="mi" data-ic="keys" aria-hidden="true"></span> Controls</button><button class="ghost sm tmb" type="button" title="Each side's kit"><span class="mi" data-ic="shirt" aria-hidden="true"></span> Kits</button><button class="ghost sm pub" type="button" title="A power-up for each side"><span class="mi" data-ic="bolt" aria-hidden="true"></span> Power-ups</button><button class="ghost sm hlpb" type="button" title="How to play, the controls and the modes"><span class="mi" data-ic="help" aria-hidden="true"></span> How to play</button><button class="ghost sm sitesb" type="button" title="The three sites Pitch Brawl is on, and taking your data from one to another"><span class="mi" data-ic="globe" aria-hidden="true"></span> Sites &amp; your data</button>
       <span class="mst" id="mStadium"></span>
     </div>
     <div class="tutwel" id="tutWelcome" hidden><div>
@@ -7042,7 +7067,8 @@ function tourBuild(){
   for (const b of [back, next, quick, end]) b.type = 'button';
   row.append(back, next, quick, end); card.append(n, h, p, row, hint); root.append(hole, card);
   // (v28.76, "make it pressing anywhere on screen allows u to do to the next one")
-  root.addEventListener('click', e => { if (e.target.closest('button')) return; if (tour.i >= TOUR.length - 1) tourEnd(); else tourShow(tour.i + 1); });
+  root.addEventListener('click', e => { if (e.target.closest('button')) return; const now = performance.now(); if (now - (tour.at || 0) < 280) return; tour.at = now;   // (not two cards for a double press)
+    if (tour.i >= TOUR.length - 1) tourEnd(); else tourShow(tour.i + 1); });
   back.addEventListener('click', () => tourShow(tour.i - 1));
   next.addEventListener('click', () => { if (tour.i >= TOUR.length - 1) tourEnd(); else tourShow(tour.i + 1); });
   quick.addEventListener('click', () => { tourEnd(); tutStart('quick'); });
@@ -7053,7 +7079,7 @@ function tourBuild(){
   Object.assign(tour, {el: root, hole, card, n, h, p, back, next, quick, end, hint});
   return root;
 }
-function tourShow(i){
+function tourShow(i, snap){
   i = Math.max(0, Math.min(TOUR.length - 1, i)); const st = TOUR[i]; tour.i = i;
   if (st.tab) menuTab(st.tab); else if (st.end) menuTab('play');
   const quickDone = CORE.every(k => learnDone()[k]) || !!learnDone().quick;
@@ -7062,8 +7088,13 @@ function tourShow(i){
   tour.hint.hidden = !!st.end; tour.back.hidden = i === 0; tour.quick.hidden = !(st.end && !quickDone); tour.end.hidden = !!st.end;
   tour.next.textContent = st.end ? 'Done' : 'Next ›'; tour.next.className = st.end && !quickDone ? 'ghost' : '';
   const el = st.sel ? document.querySelector(st.sel) : null; tour.target = el && el.getClientRects().length ? el : null;
-  if (tour.target) try { tour.target.scrollIntoView({block: 'center', inline: 'nearest'}); } catch (e) {}
-  tourPlace(); requestAnimationFrame(tourPlace);
+  // (v28.77, "a bug with show me around, it glitched": only the menu is scrolled to the part, not the page it is on (nor
+  // the page round the game in Claude); and the first card and box are put in place, not flown in from the corner)
+  if (tour.target) try { const m = $('menu'), r = tour.target.getBoundingClientRect(), mr = m.getBoundingClientRect();
+    if (r.top < mr.top + 8 || r.bottom > mr.bottom - 8) m.scrollTop += Math.round(r.top + r.height / 2 - (mr.top + mr.height / 2));
+    const q = tour.target.getBoundingClientRect(); if (q.bottom < 40 || q.top > innerHeight - 40) tour.target.scrollIntoView({block: 'nearest', inline: 'nearest'}); } catch (e) {}
+  if (snap){ tour.hole.style.transition = tour.card.style.transition = 'none'; tourPlace(); void tour.card.offsetWidth; requestAnimationFrame(() => { tourPlace(); void tour.card.offsetWidth; tour.hole.style.transition = tour.card.style.transition = ''; }); }
+  else { tourPlace(); requestAnimationFrame(tourPlace); }
   try { (st.end && !quickDone ? tour.quick : tour.next).focus({preventScroll: true}); } catch (e) {}
 }
 // the lit box round the part, and the card next to it: under it, over it, beside it, or (a part as tall as the
@@ -7091,7 +7122,7 @@ function tourPlace(){
 function tourStart(){
   if (sess) return; for (const id of ['helpPanel', 'setPanel', 'sitesPanel']) try { if ($(id) && !$(id).hidden) closePanel(id); } catch (e) {}
   $('tutWelcome').hidden = true; if ($('menu').hidden) $('menu').hidden = false;
-  tourBuild().hidden = false; tourShow(0);
+  tourBuild().hidden = false; tour.at = performance.now(); tourShow(0, true);
 }
 function tourEnd(quiet){
   if (!tour.el || tour.el.hidden) return; tour.el.hidden = true; tour.i = -1; tour.target = null; store.set('pb.tour', 'done'); document.documentElement.classList.add('toured');
@@ -7107,8 +7138,8 @@ addEventListener('keydown', e => { if (!tourOn()) return;
   else if (e.code === 'ArrowLeft'){ e.preventDefault(); if (tour.i > 0) tourShow(tour.i - 1); }
 }, true);
 addEventListener('keyup', e => { if (tourOn() && e.code !== 'Tab' && e.code !== 'Enter' && e.code !== 'Space') e.stopImmediatePropagation(); }, true);
-addEventListener('resize', () => { if (tourOn()) tourShow(tour.i); });
-document.addEventListener('fullscreenchange', () => { if (tourOn()) setTimeout(() => { if (tourOn()) tourShow(tour.i); }, 120); });
+addEventListener('resize', () => { if (tourOn()) tourShow(tour.i, true); });
+document.addEventListener('fullscreenchange', () => { if (tourOn()) setTimeout(() => { if (tourOn()) tourShow(tour.i, true); }, 120); });
 document.querySelectorAll('.tourb').forEach(b => b.addEventListener('click', e => { e.currentTarget.blur(); if (!store.get('pb.tut', null)) store.set('pb.tut', 'skipped'); tourStart(); }));
 function keeperMode(){
   const kp = {state:'ready', t:0, touchT:-1, away:0, wait:0, saves:0, goals:0, misses:0, attempts:0, streak:0, best:0, speed:0, fast:0};
@@ -8740,16 +8771,18 @@ $('sitesMove').addEventListener('click', () => { closePanel('sitesPanel'); openS
 // data is, today's daily challenge and the friends tab; it stops under the pointer, and a click opens Sites & your
 // data. It always scrolls ("its not moving": the device's reduced motion and Calm stopped it; the lobby's motion still
 // stops with Calm)
+// (v28.77: one of the game's own line icons, as an element)
+function icEl(name){ const i = document.createElement('i'); i.className = 'mi'; i.setAttribute('aria-hidden', 'true'); let p = ''; try { p = ICONS[name] || ''; } catch (e) {} i.innerHTML = `<svg viewBox="0 0 24 24">${p}</svg>`; return i; }
 function renderTicker(){
   const box = $('tickerT'); if (!box) return; const here = siteHere(), K = dailyKind(dailyId());
   // (v28.67, "mainly the website thing in there, maybe daily, we fitting too much"): the sites and today's daily only
   const items = [
-    ['🌐', 'Play Pitch Brawl on ', ['pitchbrawl.netlify.app', here === 'netlify'], ' · ', ['ricecooker225.github.io/pitch-brawl-play', here === 'github'], ' · ', ['in Claude', here === 'claude'], ' (Claude plays Claude only)'],
-    ['📅', `Daily challenge today: ${K.name}, the same ${DAILY_N} tries for everyone`],
+    ['globe', 'Play Pitch Brawl on ', ['pitchbrawl.netlify.app', here === 'netlify'], ' · ', ['ricecooker225.github.io/pitch-brawl-play', here === 'github'], ' · ', ['in Claude', here === 'claude'], ' (Claude plays Claude only)'],
+    ['cal', `Daily challenge today: ${K.name}, the same ${DAILY_N} tries for everyone`],
   ];
   const one = () => { const f = document.createDocumentFragment();
     for (const it of items){ const sp = document.createElement('span'); sp.className = 'ti';
-      const ic = document.createElement('i'); ic.textContent = it[0]; sp.append(ic);
+      sp.append(icEl(it[0]));
       for (const part of it.slice(1)){ if (Array.isArray(part)){ const b = document.createElement('b'); b.textContent = part[0]; if (part[1]){ b.className = 'here'; b.title = 'you are here'; } sp.append(b); } else sp.append(part); }
       f.append(sp); }
     return f; };
@@ -8907,6 +8940,9 @@ function menuTab(t){
   store.set('pb.mtab', t);
 }
 document.querySelectorAll('#menu .mtabs button').forEach(b => b.addEventListener('click', () => menuTab(b.dataset.tab)));
+// (v28.77, "add a home thing somewhere taht allows u to go back to play": Home, by Show me around while another tab
+// is open, and the title: the Play tab, from the top)
+for (const id of ['homeBtn', 'menuTitle']) $(id).addEventListener('click', e => { if (e.currentTarget.blur) e.currentTarget.blur(); if (sess) return; menuTab('play'); try { $('menu').scrollTop = 0; } catch (e2) {} });
 $('menu').querySelector('.mtabs').addEventListener('keydown', e => {   // arrow keys move between tabs
   if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
   const i = TABS.indexOf(store.get('pb.mtab', 'play')), n = (i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length;
@@ -8915,6 +8951,18 @@ $('menu').querySelector('.mtabs').addEventListener('keydown', e => {   // arrow 
 menuTab(store.get('pb.mtab', 'play'));
 // little line icons for the tiles
 const ICONS = {
+  // (v28.77, "emojis look so ai bro, make ur own ones": the menu's foot, Suggestions, Show me around, the banner, the
+  // public room, a friend's chat and watch, the host's tag: drawn like the rest, in lines)
+  home: '<path d="M3.5 11.5L12 4l8.5 7.5"/><path d="M6 9.8V20h12V9.8"/><path d="M10 20v-5.5h4V20"/>',
+  gear: '<circle cx="12" cy="12" r="6.2"/><circle cx="12" cy="12" r="2.4"/><path d="M12 2.8v3M12 18.2v3M2.8 12h3M18.2 12h3M5.5 5.5l2.1 2.1M16.4 16.4l2.1 2.1M5.5 18.5l2.1-2.1M16.4 7.6l2.1-2.1"/>',
+  shirt: '<path d="M8.6 4L3.5 6.6l2 4 2.3-1V20h8.4V9.6l2.3 1 2-4L15.4 4a3.4 3.4 0 0 1-6.8 0z"/>',
+  bolt: '<path d="M13.2 3L5.5 13.4h5.3L9.8 21l8.7-11.2h-5.6z"/>',
+  help: '<circle cx="12" cy="12" r="8.5"/><path d="M9.4 9.6a2.7 2.7 0 1 1 3.8 2.5c-.8.4-1.2 1-1.2 1.9"/><path d="M12 17h.01"/>',
+  bulb: '<path d="M8.6 14.6a6 6 0 1 1 6.8 0c-.6.5-.9 1.1-.9 1.9v.5h-5v-.5c0-.8-.3-1.4-.9-1.9z"/><path d="M10 20h4"/>',
+  compass: '<circle cx="12" cy="12" r="8.5"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>',
+  chat: '<path d="M4 5.5h16v10.5H10.5L6 19.5V16H4z"/>',
+  eye: '<path d="M2.5 12S6 6 12 6s9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"/><circle cx="12" cy="12" r="2.6"/>',
+  crown: '<path d="M4.5 17.5L3 8l5 4 4-6.5 4 6.5 5-4-1.5 9.5z"/>',
   one: '<circle cx="8" cy="9" r="3.2"/><circle cx="16" cy="15" r="3.2"/><path d="M11 12h2"/>',
   two: '<circle cx="6.5" cy="8" r="2.6"/><circle cx="6.5" cy="16" r="2.6"/><circle cx="17.5" cy="8" r="2.6"/><circle cx="17.5" cy="16" r="2.6"/>',
   three: '<circle cx="6" cy="6" r="2.3"/><circle cx="6" cy="12" r="2.3"/><circle cx="6" cy="18" r="2.3"/><circle cx="18" cy="6" r="2.3"/><circle cx="18" cy="12" r="2.3"/><circle cx="18" cy="18" r="2.3"/>',
@@ -8938,7 +8986,7 @@ const ICONS = {
   star: '<path d="M12 4l2.4 5 5.4.6-4 3.7 1.1 5.3L12 16l-4.9 2.6 1.1-5.3-4-3.7 5.4-.6z"/>',
   brain: '<path d="M9 5a3 3 0 0 0-3 3 3 3 0 0 0-1 5.5A3 3 0 0 0 9 19h1V5zM15 5a3 3 0 0 1 3 3 3 3 0 0 1 1 5.5A3 3 0 0 1 15 19h-1V5z"/>'
 };
-document.querySelectorAll('.ic[data-ic],.si[data-ic]').forEach(e => { const p = ICONS[e.dataset.ic]; if (p) e.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`; });
+document.querySelectorAll('.ic[data-ic],.si[data-ic],.mi[data-ic]').forEach(e => { const p = ICONS[e.dataset.ic]; if (p) e.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`; });
 // P3's side, for three players
 let p3t = store.get('pb.p3t', 0) === 1 ? 1 : 0;
 function p3Sync(){ document.querySelectorAll('#p3Side button').forEach(b => b.classList.toggle('on', +b.dataset.t === p3t)); }
@@ -10417,7 +10465,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.76';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.77';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10951,7 +10999,8 @@ function renderRooms(looking){
     if (!b){ b = document.createElement('button'); b.type = 'button'; b.className = 'room'; b.dataset.c = o.c; b.append(document.createElement('b'), document.createElement('span'), document.createElement('span'));
       b.children[1].className = 'rm'; b.children[2].className = 'rj'; b.children[2].textContent = 'Join';
       b.addEventListener('click', () => { const r = rooms.get(b.dataset.c); if (!r) return; joinVia = r.src === 'room' ? 'room' : r.src === 'peer' ? 'peer' : ''; if (r.lk){ $('joinCode').value = r.c; $('passRow').hidden = false; $('joinPass').focus(); onErr(''); } else joinGame(r.c, '', r.src); }); }
-    b.children[0].textContent = (o.c === PUBLIC ? '🌍 ' : '') + (clean(o.n, 24) || `${clean(o.h, 16) || 'Someone'}'s room`) + (o.lk ? ' 🔒' : '');
+    b.children[0].textContent = (clean(o.n, 24) || `${clean(o.h, 16) || 'Someone'}'s room`) + (o.lk ? ' 🔒' : '');
+    if (o.c === PUBLIC) b.children[0].prepend(icEl('globe'), ' ');   // (v28.77: the game's own icon, was an emoji)
     if (o.src === 'none'){ b.children[1].textContent = 'Always here · anyone can join · nobody in it yet: tap to open it'; b.children[2].textContent = 'Open'; box.append(b); continue; }
     b.children[2].textContent = 'Join';
     const n = o.sz | 0, sc = Array.isArray(o.sc) ? ` ${o.sc[0] | 0}–${o.sc[1] | 0}` : '';
@@ -11950,7 +11999,7 @@ function dmGot(m){
   dmAdd(f, false, x, +m.t || Date.now());
   if (FR.dmWith === f && !$('dmBox').hidden){ dmRender(); try { sfx.chime && sfx.chime(); } catch (e) {} return; }
   FR.unread.set(f, (FR.unread.get(f) || 0) + 1); renderFriends();
-  frToast(`💬 ${dmName(f)}: ${x}`, 'Reply', () => dmOpen(f));
+  frToast(`${dmName(f)}: ${x}`, 'Reply', () => dmOpen(f));
 }
 $('dmForm').addEventListener('submit', e => { e.preventDefault(); const f = FR.dmWith, x = clean($('dmIn').value, 120); if (!f || !x) return;
   if (Date.now() - FR.dmAt < 600) return; FR.dmAt = Date.now();
@@ -11977,11 +12026,11 @@ function renderFriends(){
       const st = document.createElement('span'); st.className = 'frst';
       st.textContent = !o ? 'offline' : o.s === 'free' ? 'online' : o.s === 'solo' ? 'playing the computer' : o.s === 'prac' ? 'practising' : o.s === 'room' ? `in room ${o.r ? '“' + o.r + '” ' : ''}(${o.k}/${o.z ? o.z * 2 : '?'})${o.lk ? ' 🔒' : ''}` : `playing${o.r ? ' in “' + o.r + '”' : ''}${o.sc ? ' · ' + o.sc.join('–') : ''}`;
       r.append(st);
-      const act = (t, fn, cls) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (cls ? ' ' + cls : ''); b.textContent = t; b.onclick = e => { e.currentTarget.blur(); fn(); }; r.append(b); };
+      const act = (t, fn, cls, ic) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (cls ? ' ' + cls : ''); b.textContent = t; if (ic) b.prepend(icEl(ic), t ? ' ' : ''); b.onclick = e => { e.currentTarget.blur(); fn(); }; r.append(b); };
       // (v28.65, spectate friends: 👁 Watch joins as a spectator; in a match that's what Join did anyway, so it says Watch)
-      if (o){ const u = FR.unread.get(x.f) || 0; act(u ? `💬 ${u}` : '💬', () => dmOpen(x.f), u ? 'dmnew' : 'dmb'); r.lastChild.title = `Chat with ${nm.textContent}`; }
+      if (o){ const u = FR.unread.get(x.f) || 0; act(u ? String(u) : '', () => dmOpen(x.f), u ? 'dmnew' : 'dmb', 'chat'); r.lastChild.title = `Chat with ${nm.textContent}`; }
       if (o && o.c && !NET.on && o.s === 'room') act('Join', () => frJoin(o.c));
-      if (o && o.c && !NET.on && (o.s === 'room' || o.s === 'match')) act('👁 Watch', () => frJoin(o.c, true));
+      if (o && o.c && !NET.on && (o.s === 'room' || o.s === 'match')) act('Watch', () => frJoin(o.c, true), '', 'eye');
       if (o && NET.on && NET.code && (o.s === 'free' || o.s === 'solo' || o.s === 'prac')) act('Invite', () => { frSend(x.f, {k: 'inv', c: NET.code}); sysChat(`Invited ${(o && o.n) || x.n || 'your friend'}`); });
       if (!lobbyView) act('✕', () => { FR.list = FR.list.filter(q => q.f !== x.f); FR.st.delete(x.f); frSave(); renderFriends(); }, 'frx');
       box.append(r);
@@ -12077,7 +12126,7 @@ function drawBoard(box, cols){
       now.add(r.id); if (!seen || !seen.has(r.id)){ b.classList.add('pin'); b.style.setProperty('--i', String(seen ? 0 : nth++)); }
       const av = el('span', 'av', r.av); if (!r.cpu){ av.style.setProperty('--tc', c.t < 0 ? '#5b6377' : c.color); av.style.setProperty('--tt', c.t < 0 ? '#ffffff' : c.text); }
       b.append(av, el('span', 'nm', r.name + (r.me && r.name !== 'You' ? ' (you)' : '')));
-      if (r.tag) b.append(el('span', 'tag' + (r.host ? ' h' : ''), r.tag === 'host' ? '👑 host' : r.tag));
+      if (r.tag){ const tg = el('span', 'tag' + (r.host ? ' h' : ''), r.tag); if (r.tag === 'host') tg.prepend(icEl('crown'), ' '); b.append(tg); }
       if (r.ping){ const pg = el('span', 'pg'); pg.dataset.pid = r.id; b.append(pg); }
       if (r.acts.length) b.addEventListener('click', ev => { ev.stopPropagation(); plMenu(b, r.name, r.acts); });
       else b.tabIndex = -1;
