@@ -994,6 +994,7 @@
     html:not(.calm) #menu .mgo::after{animation:goShine 4.5s ease-in-out infinite!important}
     html:not(.calm) #menu button.mgo{animation:goPulse 2.2s ease-in-out infinite!important} html:not(.calm) #menu .mgo .go{animation:goNudge 1s ease-in-out infinite!important} html:not(.calm) #menu .mgo .go::after{animation:goRing 1.4s ease-out infinite!important}
     html:not(.calm) #menu #setFriends button.mgo,html:not(.calm) #menu #setFriends .mgo .go{animation:none!important}
+    html:not(.calm):not(.toured) #menu .mhead .mtour{animation:goGlow 1.8s ease-in-out infinite!important}
     html.newb:not(.calm) #menu .mlearn{animation:learnPulse 1.7s ease-in-out infinite!important} html.newb:not(.calm) #menu .mlearn b::after{animation:learnPoint .9s ease-in-out infinite!important}
     html:not(.calm) .tourhole::after{animation:tourRing 1.5s ease-out infinite!important} html:not(.calm) .tourcard button:not(.ghost):not([hidden]),html:not(.calm) #tutGo{animation:goGlow 1.8s ease-in-out infinite!important}
     html:not(.calm) #menu .dcard{transition:transform .15s ease,background-color .15s!important}
@@ -1017,6 +1018,30 @@
   @keyframes tourRing{0%{opacity:.85;inset:-4px}100%{opacity:0;inset:-16px}}
   .tourcard button:not(.ghost):not([hidden]),#tutGo{animation:goGlow 1.8s ease-in-out infinite}
   html.calm #menu button.mgo,html.calm #menu .mgo .go,html.calm #menu .mlearn,html.calm #menu .mlearn b::after,html.calm .tourhole::after,html.calm .tourcard button,html.calm #tutGo{animation:none!important}
+  /* v28.76 ("all of the icons on bottom left, give them emojis or smth so its easier to read, rn they r just bunched
+     together"): the menu's foot: each line an emoji in a small box and its name, with room between; two columns on a phone */
+  #menu .mfoot{gap:5px}
+  #menu .mfoot button{display:flex;align-items:center;gap:10px;padding:2px 10px 2px 0;font-size:14px;text-align:left}
+  #menu .mfoot button > span{display:inline-grid;place-items:center;flex:none;width:30px;height:30px;background:rgba(255,255,255,.07);border:1px solid #4a5266;font-size:15px;font-weight:400;line-height:1;color:inherit}
+  #menu .mfoot button:hover > span{border-color:var(--accent);background:rgba(240,138,43,.2)}
+  #menu .mfoot .mst{margin-top:6px}
+  @media (max-width:760px){
+    #menu .mfoot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 12px;width:100%;justify-items:start}
+    #menu .mfoot .mst{grid-column:1 / -1}
+  }
+  /* v28.76 ("the show me around thing, its kinda complicated tho ... make the background less darker ... the position of the
+     thing, its kinda hidden on the bottom left"): the rest of the menu dimmed less (.46, was .76), a bigger card with an
+     orange edge, a click anywhere is Next; Show me around is a button under the title (was a small line at the foot) */
+  .tour{cursor:pointer}
+  .tourhole{border-width:3px}
+  .tourcard{width:min(410px,calc(100% - 16px));border:2px solid var(--accent);border-left-width:7px;padding:16px 18px 14px;cursor:default;box-shadow:0 18px 44px rgba(0,0,0,.6),0 0 0 4px rgba(240,138,43,.18)}
+  .tourcard h3{font-size:31px} .tourcard p{font-size:15px;color:#e3e7f0}
+  .tourcard .tourhint{font-size:11.5px;color:#9aa3b6;margin-top:1px} .tourcard .tourhint[hidden]{display:none}
+  #menu .mhead .mtour{align-self:flex-start;margin-top:4px;border:2px solid var(--accent);border-radius:0;background:rgba(240,138,43,.14);color:#fff;font:700 13px/1 Rubik,sans-serif;padding:8px 13px;display:inline-flex;gap:7px;align-items:center;box-shadow:none}
+  #menu .mhead .mtour > span{color:var(--accent)} #menu .mhead .mtour:hover{background:rgba(240,138,43,.3)}
+  html:not(.toured) #menu .mhead .mtour{animation:goGlow 1.8s ease-in-out infinite}
+  html.toured #menu .mhead .mtour{border-color:#5a6378;background:none;color:#c2c8d6}
+  html.calm #menu .mhead .mtour{animation:none!important}
   /* v28.75 ("format the online better, and the mini arrow thing is not obvious, like online is not obvious"):
      - Multiplayer: Play online is the big orange button; the one-keyboard Play under it is the dark, second one
      - the Play buttons' arrow: a dark disc with a ring going out from it, a longer nudge; someone new gets a START HERE tag
@@ -1066,8 +1091,8 @@
      part it is about in a lit box (its shadow dims the rest), a card next to it */
   .tour{position:fixed;inset:0;z-index:90;overscroll-behavior:contain;touch-action:none}
   .tour[hidden]{display:none}
-  .tour.nohole{background:rgba(8,10,14,.76)} .tour.nohole .tourhole{display:none}
-  .tourhole{position:absolute;border:2px solid var(--accent);border-radius:10px;box-shadow:0 0 0 9999px rgba(8,10,14,.76),0 0 0 6px rgba(240,138,43,.22);pointer-events:none;transition:left .26s ease,top .26s ease,width .26s ease,height .26s ease}
+  .tour.nohole{background:rgba(8,10,14,.46)} .tour.nohole .tourhole{display:none}
+  .tourhole{position:absolute;border:2px solid var(--accent);border-radius:10px;box-shadow:0 0 0 9999px rgba(8,10,14,.46),0 0 0 6px rgba(240,138,43,.3);pointer-events:none;transition:left .26s ease,top .26s ease,width .26s ease,height .26s ease}
   .tourcard{position:absolute;box-sizing:border-box;width:min(370px,calc(100% - 16px));background:#262c3a;border-left:6px solid var(--accent);padding:14px 16px 13px;display:flex;flex-direction:column;gap:7px;text-align:left;box-shadow:0 18px 40px rgba(0,0,0,.55);transition:left .26s ease,top .26s ease}
   .tourcard small{font:700 11px/1 Rubik,sans-serif;letter-spacing:.16em;color:var(--accent)}
   .tourcard h3{font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-style:italic;font-weight:800;font-size:27px;line-height:1;text-transform:uppercase;color:#fff;margin:0}
@@ -1423,7 +1448,7 @@
     </div>
   </div>
   <div class="overlay" id="menu" data-tab="play">
-    <div class="mhead"><h2 id="menuTitle">Pitch Brawl</h2><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p></div>
+    <div class="mhead"><h2 id="menuTitle">Pitch Brawl</h2><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p><button class="tourb mtour" type="button" title="A tour of the menu: what every part is for, in under a minute"><span aria-hidden="true">➤</span> Show me around</button></div>
     <div class="mtabs" role="tablist" aria-label="Modes">
       <button type="button" role="tab" data-tab="play" title="Matches against the computer, the World Cup, the League and the Daily challenge" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" title="Drills on your own: shooting, free kicks, dribbling, keeper, penalties" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" title="Play online with a room code, or two or three of you on one keyboard" aria-selected="false">Multiplayer</button><button type="button" role="tab" data-tab="frs" title="Your friend code and your friends: join, invite, watch or message them" aria-selected="false">Friends</button><button type="button" role="tab" data-tab="me" title="Your saved goals, scores, achievements and shot map" aria-selected="false">My stuff</button><button type="button" role="tab" data-tab="learn" title="Learn to play: a two-minute Quick start, then parts that go deeper" aria-selected="false">Tutorial</button>
     </div>
@@ -1503,7 +1528,7 @@
     <div class="mdash" id="mDash"></div>
     </div>
     <div class="mfoot">
-      <button class="ghost sm tourb" type="button" title="A tour of the menu: what every part is for, in under a minute"><span aria-hidden="true">➤</span> Show me around</button><button class="ghost sm setb" type="button" title="Settings: rules, curve, sound, view"><span aria-hidden="true">⚙</span> Settings</button><button class="ghost sm ctl" type="button" title="Change your keys"><span aria-hidden="true">⌨</span> Controls</button><button class="ghost sm tmb" type="button" title="Each side's kit"><span aria-hidden="true">◐</span> Kits</button><button class="ghost sm pub" type="button" title="A power-up for each side"><span aria-hidden="true">✦</span> Power-ups</button><button class="ghost sm hlpb" type="button" title="How to play, the controls and the modes"><span aria-hidden="true">?</span> How to play</button><button class="ghost sm sitesb" type="button" title="The three sites Pitch Brawl is on, and taking your data from one to another"><span aria-hidden="true">🌐</span> Sites &amp; your data</button>
+      <button class="ghost sm setb" type="button" title="Settings: rules, curve, sound, view"><span aria-hidden="true">⚙️</span> Settings</button><button class="ghost sm ctl" type="button" title="Change your keys"><span aria-hidden="true">⌨️</span> Controls</button><button class="ghost sm tmb" type="button" title="Each side's kit"><span aria-hidden="true">👕</span> Kits</button><button class="ghost sm pub" type="button" title="A power-up for each side"><span aria-hidden="true">⚡</span> Power-ups</button><button class="ghost sm hlpb" type="button" title="How to play, the controls and the modes"><span aria-hidden="true">❓</span> How to play</button><button class="ghost sm sitesb" type="button" title="The three sites Pitch Brawl is on, and taking your data from one to another"><span aria-hidden="true">🌐</span> Sites &amp; your data</button>
       <span class="mst" id="mStadium"></span>
     </div>
     <div class="tutwel" id="tutWelcome" hidden><div>
@@ -6994,31 +7019,30 @@ setTimeout(() => { if (!store.get('pb.tut', null) && !(you && you.games > 0) && 
 // card walks through every part (the tabs one by one, the match settings, Settings and help, Suggestions), the part
 // it is about lit and the rest dimmed; Next / Back, the arrow keys, Esc ends it. Offered the first time (the welcome
 // box), at the end of the Quick start, and always there in the menu as Show me around.
-const TOUR = [
-  {t: 'A quick look around', p: 'Under a minute: what each part of the menu is for. Next moves on, and you can end it whenever you like. It stays in the menu as Show me around.'},
-  {sel: '#menu .mtabs', t: 'The six parts', p: 'Everything starts from these. Play, Practice and Multiplayer are the ways to play. Friends, My stuff and Tutorial are the rest. Next opens them one at a time.'},
-  {tab: 'play', sel: '#setPlay', t: 'Play: you against the computer', p: 'Pick how many a side (1v1 is the simplest), then press the big button to kick off.'},
-  {tab: 'play', sel: '#menu .mbar', t: 'Match settings', p: 'How good the computer is (start on Easy or Normal), how long a match lasts, how many goals win it, and what happens when it ends level.'},
-  {tab: 'play', sel: '#menu .mpane[data-pane="play"] .tiles', t: 'A cup, a league and the daily', p: 'World Cup is three knockout matches and League is a whole season. The Daily challenge is the same 10 tries for everyone each day, with a table of you and your friends.'},
-  {tab: 'train', sel: '#menu .mpane[data-pane="train"]', t: 'Practice: drills on your own', p: 'Shooting, free kicks, dribbling, keeping goal, penalties and wall control. Nothing to lose here: each drill is scored out of 100 and your best is kept.'},
-  {tab: 'friends', sel: '#onlineBtn', t: 'Multiplayer: online', p: 'Play with friends over the internet: make a room and give them its code, or join theirs.'},
-  {tab: 'friends', sel: '#setFriends', t: 'Multiplayer: one keyboard', p: 'Two or three of you on the same computer, against each other or together against the computer.'},
-  {tab: 'frs', sel: '#menu .mpane[data-pane="frs"]', t: 'Friends', p: 'This is your friend code. Swap codes with a friend and you can see when they are on, then join, invite, watch or message them.'},
-  {tab: 'me', sel: '#menu .mpane[data-pane="me"]', t: 'My stuff', p: 'Goals you saved to watch again, your drill scores, achievements, your shot map, and what the computer has learned about how you play.'},
-  {tab: 'learn', sel: '#menu .mpane[data-pane="learn"]', t: 'Tutorial: learn to play', p: 'Quick start teaches moving, kicking and scoring in two minutes. The parts under it go deeper (curling, power shots, sliding) whenever you want them.'},
-  {tab: 'play', sel: '#menu .mfoot', t: 'Settings and help', p: 'Settings (rules, sound, view), Controls (change your keys), Kits, Power-ups, How to play, and Sites & your data: where else the game is and how to take your progress there.'},
-  {tab: 'play', sel: '#sugBtn', t: 'Tell us what you think', p: 'Got an idea or found a bug? Suggestions sends it to us. The button next to it makes the game fullscreen.'},
-  {end: 1, t: 'That is the whole menu', p: ''},
+const TOUR = [   // (v28.76, "its kinda complicated tho": eleven short cards, were fourteen; a click anywhere is Next)
+  {sel: '#menu .mtabs', t: 'Start here: the six parts', p: 'Everything in the game opens from these. Here is what each one is.'},
+  {tab: 'play', sel: '#setPlay', t: 'Play', p: 'A match against the computer. Pick how many a side, then press the big orange button.'},
+  {tab: 'play', sel: '#menu .mbar', t: 'Match settings', p: 'How good the computer is, how long a match lasts and how many goals win it.'},
+  {tab: 'play', sel: '#menu .mpane[data-pane="play"] .tiles', t: 'More to play', p: 'A World Cup, a League season, and a Daily challenge that is the same for everyone each day.'},
+  {tab: 'train', sel: '#menu .mpane[data-pane="train"]', t: 'Practice', p: 'Drills on your own: shooting, free kicks, dribbling, keeper, penalties. Nothing to lose here.'},
+  {tab: 'friends', sel: '#menu .mpane[data-pane="friends"]', t: 'Multiplayer', p: 'Play online: make a room and send a friend its code, or join theirs. Or share one keyboard.'},
+  {tab: 'frs', sel: '#menu .mpane[data-pane="frs"]', t: 'Friends', p: 'Swap friend codes to see when a friend is on, then join, invite, watch or message them.'},
+  {tab: 'me', sel: '#menu .mpane[data-pane="me"]', t: 'My stuff', p: 'Your saved goals, scores, achievements and shot map.'},
+  {tab: 'learn', sel: '#menu .mpane[data-pane="learn"]', t: 'Tutorial', p: 'Learn to play. The Quick start takes two minutes; the other parts go deeper.'},
+  {tab: 'play', sel: '#menu .mfoot', t: 'Settings and help', p: 'Settings, your keys, kits, power-ups and How to play. An idea or a bug? Suggestions, at the top right.'},
+  {end: 1, t: 'That is everything', p: ''},
 ];
 const tour = {i: -1, el: null, target: null};
 function tourBuild(){
   if (tour.el) return tour.el;
   const mk = (tag, cls, txt) => { const x = document.createElement(tag); if (cls) x.className = cls; if (txt) x.textContent = txt; return x; };
   const root = mk('div', 'tour'); root.hidden = true; root.setAttribute('role', 'dialog'); root.setAttribute('aria-label', 'A tour of the menu');
-  const hole = mk('div', 'tourhole'), card = mk('div', 'tourcard'), n = mk('small'), h = mk('h3'), p = mk('p'), row = mk('div', 'row');
+  const hole = mk('div', 'tourhole'), card = mk('div', 'tourcard'), n = mk('small'), h = mk('h3'), p = mk('p'), row = mk('div', 'row'), hint = mk('span', 'tourhint', 'Click anywhere for the next one');
   const back = mk('button', 'ghost sm', '‹ Back'), next = mk('button', '', 'Next ›'), quick = mk('button', '', 'Start the Quick start'), end = mk('button', 'ghost sm', 'End tour');
   for (const b of [back, next, quick, end]) b.type = 'button';
-  row.append(back, next, quick, end); card.append(n, h, p, row); root.append(hole, card);
+  row.append(back, next, quick, end); card.append(n, h, p, row, hint); root.append(hole, card);
+  // (v28.76, "make it pressing anywhere on screen allows u to do to the next one")
+  root.addEventListener('click', e => { if (e.target.closest('button')) return; if (tour.i >= TOUR.length - 1) tourEnd(); else tourShow(tour.i + 1); });
   back.addEventListener('click', () => tourShow(tour.i - 1));
   next.addEventListener('click', () => { if (tour.i >= TOUR.length - 1) tourEnd(); else tourShow(tour.i + 1); });
   quick.addEventListener('click', () => { tourEnd(); tutStart('quick'); });
@@ -7026,7 +7050,7 @@ function tourBuild(){
   // (the page under it stays where it is: the lit part was scrolled into view for this step)
   root.addEventListener('wheel', e => e.preventDefault(), {passive: false}); root.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
   ($('game') || document.body).append(root);
-  Object.assign(tour, {el: root, hole, card, n, h, p, back, next, quick, end});
+  Object.assign(tour, {el: root, hole, card, n, h, p, back, next, quick, end, hint});
   return root;
 }
 function tourShow(i){
@@ -7035,7 +7059,7 @@ function tourShow(i){
   const quickDone = CORE.every(k => learnDone()[k]) || !!learnDone().quick;
   tour.n.textContent = `${i + 1} / ${TOUR.length}`; tour.h.textContent = st.t;
   tour.p.textContent = st.end ? (quickDone ? 'Have a go: Play 1v1 against the computer is a good place to start.' : 'New to the game? The Quick start teaches moving, kicking and scoring in about two minutes.') : st.p;
-  tour.back.hidden = i === 0; tour.quick.hidden = !(st.end && !quickDone); tour.end.hidden = !!st.end;
+  tour.hint.hidden = !!st.end; tour.back.hidden = i === 0; tour.quick.hidden = !(st.end && !quickDone); tour.end.hidden = !!st.end;
   tour.next.textContent = st.end ? 'Done' : 'Next ›'; tour.next.className = st.end && !quickDone ? 'ghost' : '';
   const el = st.sel ? document.querySelector(st.sel) : null; tour.target = el && el.getClientRects().length ? el : null;
   if (tour.target) try { tour.target.scrollIntoView({block: 'center', inline: 'nearest'}); } catch (e) {}
@@ -7052,12 +7076,16 @@ function tourPlace(){
   if (!tour.target){ card.style.left = Math.round((W - cw) / 2) + 'px'; card.style.top = Math.round(Math.max(8, (H - ch) / 2)) + 'px'; return; }
   const r = tour.target.getBoundingClientRect(), x0 = Math.max(4, r.left - R.left - 6), y0 = Math.max(4, r.top - R.top - 6), x1 = Math.min(W - 4, r.right - R.left + 6), y1 = Math.min(H - 4, r.bottom - R.top + 6);
   Object.assign(tour.hole.style, {left: x0 + 'px', top: y0 + 'px', width: Math.max(0, x1 - x0) + 'px', height: Math.max(0, y1 - y0) + 'px'});
-  let left, top;
-  if (H - y1 >= ch + 18){ top = y1 + 10; left = clamp(x0, 8, W - cw - 8); }
-  else if (y0 >= ch + 18){ top = y0 - ch - 10; left = clamp(x0, 8, W - cw - 8); }
-  else if (W - x1 >= cw + 18){ left = x1 + 10; top = clamp(y0, 8, H - ch - 8); }
-  else if (x0 >= cw + 18){ left = x0 - cw - 10; top = clamp(y0, 8, H - ch - 8); }
-  else { left = Math.round((W - cw) / 2); top = (y0 + y1) / 2 > H / 2 ? 8 : H - ch - 8; }
+  // (v28.76, "the position of the thing, its kinda hidden on the bottom left": of the places the card fits, under, over
+  // or beside the part, the one nearest the middle of the screen; none fits: the end of the screen the part isn't in)
+  let left, top, best = 1e9;
+  const tryAt = (l, t) => { l = clamp(l, 8, W - cw - 8); t = clamp(t, 8, H - ch - 8); const d = Math.hypot(l + cw / 2 - W / 2, t + ch / 2 - H / 2); if (d < best){ best = d; left = l; top = t; } };
+  const cx = (x0 + x1) / 2 - cw / 2, cy = (y0 + y1) / 2 - ch / 2;
+  if (H - y1 >= ch + 18) for (const l of [x0, cx, x1 - cw, (W - cw) / 2]) tryAt(l, y1 + 12);
+  if (y0 >= ch + 18) for (const l of [x0, cx, x1 - cw, (W - cw) / 2]) tryAt(l, y0 - ch - 12);
+  if (W - x1 >= cw + 18) for (const t of [y0, cy, y1 - ch, (H - ch) / 2]) tryAt(x1 + 12, t);
+  if (x0 >= cw + 18) for (const t of [y0, cy, y1 - ch, (H - ch) / 2]) tryAt(x0 - cw - 12, t);
+  if (left == null){ left = Math.round((W - cw) / 2); top = (y0 + y1) / 2 > H / 2 ? 8 : H - ch - 8; }
   card.style.left = Math.round(Math.max(8, left)) + 'px'; card.style.top = Math.round(Math.max(8, top)) + 'px';
 }
 function tourStart(){
@@ -7066,10 +7094,11 @@ function tourStart(){
   tourBuild().hidden = false; tourShow(0);
 }
 function tourEnd(quiet){
-  if (!tour.el || tour.el.hidden) return; tour.el.hidden = true; tour.i = -1; tour.target = null; store.set('pb.tour', 'done');
+  if (!tour.el || tour.el.hidden) return; tour.el.hidden = true; tour.i = -1; tour.target = null; store.set('pb.tour', 'done'); document.documentElement.classList.add('toured');
   if (!quiet && !sess) menuTab('play');
 }
 const tourOn = () => !!(tour.el && !tour.el.hidden);
+document.documentElement.classList.toggle('toured', !!store.get('pb.tour', null));   // (v28.76: the menu's Show me around glows until it has been taken)
 // (its keys first, and none of them through to the game or the menu under it; Enter and Space press the card's button)
 addEventListener('keydown', e => { if (!tourOn()) return;
   if (e.code === 'Tab') return; e.stopImmediatePropagation();
@@ -10388,7 +10417,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.75';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.76';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
