@@ -995,6 +995,7 @@
     html:not(.calm) #menu button.mgo{animation:goPulse 2.2s ease-in-out infinite!important} html:not(.calm) #menu .mgo .go{animation:goNudge 1s ease-in-out infinite!important} html:not(.calm) #menu .mgo .go::after{animation:goRing 1.4s ease-out infinite!important}
     html:not(.calm) #menu #setFriends button.mgo,html:not(.calm) #menu #setFriends .mgo .go{animation:none!important}
     html:not(.calm):not(.toured) #menu .mhead .mtour{animation:goGlow 1.8s ease-in-out infinite!important}
+    html:not(.calm) #menu .mshare{animation:shareZoom .9s ease-in-out infinite alternate!important}
     html.newb:not(.calm) #menu .mlearn{animation:learnPulse 1.7s ease-in-out infinite!important} html.newb:not(.calm) #menu .mlearn b::after{animation:learnPoint .9s ease-in-out infinite!important}
     html:not(.calm) .tourhole::after{animation:tourRing 1.5s ease-out infinite!important} html:not(.calm) .tourcard button:not(.ghost):not([hidden]),html:not(.calm) #tutGo{animation:goGlow 1.8s ease-in-out infinite!important}
     html:not(.calm) #menu .dcard{transition:transform .15s ease,background-color .15s!important}
@@ -1018,6 +1019,42 @@
   @keyframes tourRing{0%{opacity:.85;inset:-4px}100%{opacity:0;inset:-16px}}
   .tourcard button:not(.ghost):not([hidden]),#tutGo{animation:goGlow 1.8s ease-in-out infinite}
   html.calm #menu button.mgo,html.calm #menu .mgo .go,html.calm #menu .mlearn,html.calm #menu .mlearn b::after,html.calm .tourhole::after,html.calm .tourcard button,html.calm #tutGo{animation:none!important}
+  /* v28.80 ("ppl might zoom in too much and cant see anyhting"): a pinch on the pitch (two thumbs on a phone) no longer
+     zooms the page in; the browser's own zoom elsewhere as before */
+  #c{touch-action:none}
+  /* v28.81 ("if i zoom to 110% in web, i dont see stuff"): the left column shorter (the menu's foot in two columns, smaller
+     plates and icon boxes) and, when even 0.8 doesn't fit, the menu scrolls (fitMenu: .mscroll) instead of cutting off */
+  @media (min-width:761px){
+    #menu .mfoot{display:grid;grid-template-columns:repeat(2,max-content);gap:5px 16px}
+    #menu .mfoot .mst{grid-column:1 / -1}
+    #menu .mfoot button{font-size:13px;gap:8px;padding:1px 4px 1px 0}
+    #menu .mfoot button > span{width:25px;height:25px}
+    #menu .mfoot button > span.mi svg{width:15px;height:15px}
+    #menu .mtabs{gap:3px}
+    #menu .mtabs button{padding:3px 18px 3px 8px;font-size:clamp(22px,2.5vw,30px)}
+  }
+  #game.tabfill #menu.mscroll{overflow-y:auto}
+  #game.tabfill #menu.mscroll{padding-top:22px;align-content:start}   /* (centred, what didn't fit went above the top, out of reach) */
+  #menu .frwhere{margin:2px 0 0;font-size:12px;color:#c9cfdc;border-left:3px solid var(--accent);padding:3px 0 3px 9px;max-width:none}
+  /* v28.81 ("add a thing on the side like zooming in and out saying: share it with ur friends!") */
+  #menu .mhead{position:relative}
+  #menu .mshare{position:absolute;z-index:2;left:84px;top:var(--ty,40px);transform:rotate(-3deg);transform-origin:left center;background:none;border:0;border-radius:0;box-shadow:none;padding:2px 4px;
+                font:800 13px/1.05 Rubik,sans-serif;color:#ffd166;text-align:center;text-shadow:0 2px 0 #1a1e28,0 0 12px rgba(255,209,102,.35);white-space:nowrap;cursor:pointer}
+  #menu .mshare:hover{color:#fff}
+  #menu .mshare.done{color:#7ee2a0}
+  #menu .mshare{animation:shareZoom .9s ease-in-out infinite alternate}
+  @keyframes shareZoom{from{transform:rotate(-3deg) scale(.92)}to{transform:rotate(-3deg) scale(1.12)}}
+  html.calm #menu .mshare{animation:none!important}
+  .zhint{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:8px;max-width:calc(100% - 16px);box-sizing:border-box;
+         background:#262c3a;border:2px solid #ffd166;padding:6px 8px 6px 12px;font-size:12px;color:#e3e7f0;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  .zhint[hidden]{display:none} .zhint kbd{font:700 11px Rubik,sans-serif;background:#3a4256;border:1px solid #5a6378;padding:0 4px}
+  /* v28.81 ("make sure others are like also fixed, but if zoom too big thenn"): a short window in a match (a browser zoomed
+     in): the pitch first. Under 600 px high no shots/saves strip; under 470 no win chances and no help bar, a slimmer
+     score; under 380 the score in one thin line. The zoom-out hint only over the menus, not the pitch */
+  @media (max-height:600px){ body.inmatch .stats{display:none} body.inmatch .board{padding:4px 12px} body.inmatch .team{font-size:30px} }
+  @media (max-height:470px){ body.inmatch .wprow,body.inmatch .helpbar{display:none!important} body.inmatch .board{padding:2px 10px;gap:8px} body.inmatch .team{font-size:22px} body.inmatch .clock{padding:2px 10px} body.inmatch .clock #clock{font-size:18px} }
+  @media (max-height:380px){ body.inmatch .board{border-radius:0} body.inmatch .team small,body.inmatch #clockLabel{display:none} body.inmatch .team{font-size:18px} body.inmatch .clock #clock{font-size:15px} }
+  body.inmatch .zhint{display:none}
   /* v28.77 ("emojis look so ai bro, make ur own ones"): the game's own line icons where emojis were (.mi) */
   .mi{display:inline-grid;place-items:center;width:1.25em;height:1.25em;vertical-align:-.28em;flex:none}
   .mi svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -1127,7 +1164,7 @@
   /* v28.71 ("add background move aswell, maybe opposite direction as the banner so the website looks more alive"): the
      menu's stripes drift to the right (the banner goes left), one stripe (57.4 px across at 115deg) every 1.8 s (v28.72, "moving kinda slow": was 4.5 s), so it
      loops without a jump; a layer behind the menu's content, tall enough for a phone's long menu as it scrolls */
-  #menu::before{content:'';position:absolute;top:-120px;left:-120px;right:-120px;height:max(300%,2400px);z-index:-1;pointer-events:none;
+  #menu::before{content:'';position:absolute;top:-120px;left:-120px;right:-120px;height:calc(max(100%, var(--mh, 100%)) + 120px);z-index:-1;pointer-events:none;
                 background:repeating-linear-gradient(115deg,rgba(255,255,255,.034) 0 26px,transparent 26px 52px);animation:bgDrift 1.8s linear infinite;will-change:transform}
   @keyframes bgDrift{from{transform:translateX(0)}to{transform:translateX(57.39px)}}
   html.calm #menu::before{animation:none}
@@ -1354,7 +1391,7 @@
       <p class="note dnote">Auto curl: your shots bend into the corner by themselves. Swap curl keys: up bends it down, down bends it up. Most people leave both off. Two or three on one keyboard: each player's own (⌨ Controls → Two or three on one keyboard).</p>
     </section>
     <section class="dsec"><h3>View</h3>
-      <label class="dline" for="zoom">Zoom <select id="zoom"><option>Auto</option><option>1×</option><option>1.25×</option><option>1.5×</option><option>2×</option><option>2.5×</option><option>3×</option><option>Follow all</option></select></label>
+      <label class="dline" for="zoom">Zoom <select id="zoom"><option>Auto</option><option>1×</option><option>1.25×</option><option>1.5×</option><option hidden>1.5×</option><option hidden>1.5×</option><option hidden>1.5×</option><option>Follow all</option></select></label>
       <label class="dline" for="setSide" title="Where your team plays on your screen, whichever side it really is (as on White online): Left, your side on the left going right; Right, on the right going left. The picture, the scoreboard and left/right keys turn with it">Your side <select id="setSide"><option value="0">Left</option><option value="1">Right</option></select></label>
       <label class="dline" for="fxSel" title="Goal celebrations: Full has the sweeping banner, fireworks and confetti; Calm keeps the motion down (what a device set to reduce motion gets until you pick)">Celebrations <select id="fxSel"><option value="full">Full</option><option value="calm">Calm</option></select></label>
       <div class="drow"><button class="ghost sm tog" id="fillBtn" type="button" aria-pressed="true" title="In a match the game takes up the whole tab, with nothing round it (⛶ or F for real fullscreen)">Fill the tab while playing</button></div>
@@ -1437,7 +1474,7 @@
         <div class="krow"><em>P1</em><span id="kb1"></span></div>
         <div class="krow"><em>P2</em><span id="kb2"></span></div>
         <div class="krow"><em>P3</em><span id="kb3"></span></div>
-        <div class="krow"><em>All</em><span><kbd>Esc</kbd> or <kbd>M</kbd> menu · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>+</kbd> <kbd>−</kbd> zoom (Follow all, Auto, 1×–3×) · <kbd id="kbGk">G</kbd> go in goal and back out, the computer taking your man (P2 <kbd id="kbGk2">.</kbd>; change it in Controls) · <kbd>1</kbd>–<kbd>8</kbd> emotes (two on one keyboard: P1 1–5, P2 6–0) · online <kbd>Enter</kbd> or <kbd>T</kbd> chat</span></div>
+        <div class="krow"><em>All</em><span><kbd>Esc</kbd> or <kbd>M</kbd> menu · <kbd>P</kbd> pause · <kbd>R</kbd> restart · <kbd>F</kbd> fullscreen · <kbd>+</kbd> <kbd>−</kbd> zoom (Follow all, Auto, 1×–1.5×) · <kbd id="kbGk">G</kbd> go in goal and back out, the computer taking your man (P2 <kbd id="kbGk2">.</kbd>; change it in Controls) · <kbd>1</kbd>–<kbd>8</kbd> emotes (two on one keyboard: P1 1–5, P2 6–0) · online <kbd>Enter</kbd> or <kbd>T</kbd> chat</span></div>
         <p>Change them in Controls. In fullscreen inside Claude the browser takes Esc to leave fullscreen: <kbd>M</kbd> opens the menu and stays fullscreen.</p>
       </section>
       <section class="hsec"><h3>Play</h3><ul>
@@ -1472,7 +1509,7 @@
     </div>
   </div>
   <div class="overlay" id="menu" data-tab="play">
-    <div class="mhead"><h2 id="menuTitle" title="Home: back to Play">Pitch Brawl</h2><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p><div class="mhrow"><button class="mtour mhome" id="homeBtn" type="button" title="Back to Play, the first page"><span class="mi" data-ic="home" aria-hidden="true"></span> Home</button><button class="tourb mtour" type="button" title="A tour of the menu: what every part is for, in under a minute"><span class="mi" data-ic="compass" aria-hidden="true"></span> Show me around</button></div></div>
+    <div class="mhead"><h2 id="menuTitle" title="Home: back to Play">Pitch Brawl</h2><button class="mshare" id="shareBtn" type="button" title="Copy the link to send to your friends">Share it with your friends!</button><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p><div class="mhrow"><button class="mtour mhome" id="homeBtn" type="button" title="Back to Play, the first page"><span class="mi" data-ic="home" aria-hidden="true"></span> Home</button><button class="tourb mtour" type="button" title="A tour of the menu: what every part is for, in under a minute"><span class="mi" data-ic="compass" aria-hidden="true"></span> Show me around</button></div></div>
     <div class="mtabs" role="tablist" aria-label="Modes">
       <button type="button" role="tab" data-tab="play" title="Matches against the computer, the World Cup, the League and the Daily challenge" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" title="Drills on your own: shooting, free kicks, dribbling, keeper, penalties" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" title="Play online with a room code, or two or three of you on one keyboard" aria-selected="false">Multiplayer</button><button type="button" role="tab" data-tab="frs" title="Your friend code and your friends: join, invite, watch or message them" aria-selected="false">Friends</button><button type="button" role="tab" data-tab="me" title="Your saved goals, scores, achievements and shot map" aria-selected="false">My stuff</button><button type="button" role="tab" data-tab="learn" title="Learn to play: a two-minute Quick start, then parts that go deeper" aria-selected="false">Tutorial</button>
     </div>
@@ -1526,6 +1563,7 @@
       </div>
       <div class="frhead"><span class="lbl">Your friends</span><span class="note" id="frNote"></span></div>
       <div class="frlist" id="frList"></div>
+      <p class="mnote frwhere" id="frWhere"></p>
       <p class="mnote frback">Your code and friends are kept in this browser. <button class="linkish" id="frBackup" type="button">Back up / move my profile</button> to take them to another browser or device.</p>
     </div>
     <div class="mpane" data-pane="me" role="tabpanel" hidden>
@@ -1565,6 +1603,7 @@
 </div>
 </div>
 
+<div class="zhint" id="zoomHint" hidden role="status"><span>Things too big? Your browser is zoomed in: press <kbd>Ctrl</kbd> and <kbd>−</kbd> (on a Mac <kbd>⌘</kbd> <kbd>−</kbd>), or <kbd>Ctrl</kbd> <kbd>0</kbd> to reset.</span><button class="ghost sm" id="zoomHintX" type="button" aria-label="Hide">✕</button></div>
 <div class="dmbox" id="dmBox" hidden role="dialog" aria-label="Chat with a friend">
   <div class="dmhead"><span><b id="dmWho"></b><small id="dmSt"></small></span><button class="ghost sm" id="dmX" type="button" title="Close (Esc)">✕</button></div>
   <div class="dmlog" id="dmLog" aria-live="polite"></div>
@@ -6911,7 +6950,7 @@ function tutPanel(s){
   if (st === 'sLevel'){ btn('Use all recommended', false, () => { useRecommended(); tu.note = 'Done: the recommended settings are on.'; }, 'sm'); ['Easy', 'Normal', 'Hard', 'Insane'].forEach((n, i) => btn(R(n, i === REC.diff), SET.diff === i && SET.dk < 0, () => { SET.diff = i; store.set('pb.diff', i); SET.dk = -1; store.set('pb.diffK', -1); menuSync(); })); }
   if (st === 'sHelp') btn(R('Help bar: ' + (coachOn() ? 'on' : 'off'), coachOn() === REC.coach), coachOn(), () => { SET.coach = !coachOn(); store.set('pb.coach', SET.coach ? 1 : 0); soundTxt(); });
   if (st === 'sKeys') btn('⌨ Change my keys', false, () => { rebind = null; renderKeys(); openPanel('keysPanel'); });
-  if (st === 'sZoom') [['Follow all', 7], ['Auto', 0], ['1.5×', 3], ['2×', 4]].forEach(([n, i]) => btn(R(n, i === REC.zoom), zi === i, () => { setZoom(i); if (!tu.ok){ tu.ok = true; tu.note = 'Zoomed. Pick the one you like.'; } }));
+  if (st === 'sZoom') [['Follow all', 7], ['Auto', 0], ['1.25×', 2], ['1.5×', 3]].forEach(([n, i]) => btn(R(n, i === REC.zoom), zi === i, () => { setZoom(i); if (!tu.ok){ tu.ok = true; tu.note = 'Zoomed. Pick the one you like.'; } }));
   if (st === 'sExtrap') [0, 30, 60, 93].forEach(v => btn(R(v + ' ms', v === REC.extrap), Math.round(extrapMs()) === v, () => setExtrap(v)));
   if (st === 'sCurve') [0, 40, 60, 80, 100].forEach(v => btn(R(v + '%', v === REC.curve), curvePct(SET.curve, SET.curveLv) === v, () => { setCurvePct(v); rulesSync(); }));
   if (st === 'sCurlHelp'){ btn(R('Auto curl: ' + (SET.ac[0] ? 'on' : 'off'), SET.ac[0] === REC.ac), SET.ac[0], () => curlOpt('ac', 0)); btn(R('Swap curl keys: ' + (SET.inv[0] ? 'on' : 'off'), SET.inv[0] === REC.inv), SET.inv[0], () => curlOpt('inv', 0)); }
@@ -7990,7 +8029,10 @@ function applyStadiumLayout(){
   $('stadiumName').textContent = ST.name; $('mStadium').textContent = 'Stadium · ' + ST.name;
   $('defStBtn').hidden = ST === DEFAULT_ST || ST === TRI_ST;
 }
-const ZL = [0, 1, 1.25, 1.5, 2, 2.5, 3, -1]; let zi = Math.max(0, Math.min(ZL.length - 1, SET.zoom | 0));
+// (v28.80, "ppl might zoom in too much and cant see anyhting": the closest is 1.5×, two thirds of the pitch at the
+// least (2× on a wide, short window showed little more than the middle); 2×, 2.5× and 3× are gone (a kept one is 1.5×),
+// kept in the list so the kept numbers still mean the same)
+const ZL = [0, 1, 1.25, 1.5, 2, 2.5, 3, -1], ZOOM_MAX = 1.5; let zi = (z => z >= 4 && z <= 6 ? 3 : z)(Math.max(0, Math.min(ZL.length - 1, SET.zoom | 0)));
 // the stadium's own orange/white lines take the team colours; kick-off arcs by their collision group
 const tint = c => { const l = String(c).toLowerCase(); if (l === '#5ee07a') return KIT[2].color || c; return l === '#f08a2b' || l === '#f5b070' || l === '#e56e56' ? KIT[0].color : l === '#e8e3e3' || l === '#d0d5e1' || l === '#5689e5' ? KIT[1].color : c; };
 // v28.12 ("i never see the freekick trail and the zone ... could it because i imported the file in the html reader"): an
@@ -8122,9 +8164,10 @@ function render(dt, clip){
   if (zl < 0 && V && !intro){   // follow-all: frame the ball and every player
     let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
     for (const d of [V.discs[0], ...V.players.map(p => V.discs[p.di])]){ x0 = Math.min(x0, d.x - d.radius); x1 = Math.max(x1, d.x + d.radius); y0 = Math.min(y0, d.y - d.radius); y1 = Math.max(y1, d.y + d.radius); }
-    const tz = Math.max(fit, Math.min(fit * 3, cssW / (x1 - x0 + 160), cssH / (y1 - y0 + 160)));
+    const tz = Math.max(fit, Math.min(fit * 1.4, cssW / (x1 - x0 + 220), cssH / (y1 - y0 + 220)));   // (v28.80: at most 1.4×, more room round them: was 3× with 160)
     cam.z = cam.z ? cam.z + (tz - cam.z) * (1 - Math.pow(0.92, dt * 0.06)) : tz; zoom = cam.z; fx0 = (x0 + x1) / 2; fy0 = (y0 + y1) / 2;
   }
+  zoom = Math.min(zoom, fit * ZOOM_MAX);   // (v28.80: never closer than 1.5×, whatever the window: Auto on a small one included)
   if (ST.maxViewWidth > 0 && cssW / zoom > ST.maxViewWidth) zoom = cssW / ST.maxViewWidth;
   // v25.7 ("auto zoom for freekick so we know where to kick"): lining up a free kick of mine, the camera eases out (never
   // in) to fit the ball and the goal it faces with FK_CAM_M px round them, and back in once it's taken
@@ -8945,6 +8988,19 @@ function menuTab(t){
 document.querySelectorAll('#menu .mtabs button').forEach(b => b.addEventListener('click', () => menuTab(b.dataset.tab)));
 // (v28.77, "add a home thing somewhere taht allows u to go back to play": Home, by Show me around while another tab
 // is open, and the title: the Play tab, from the top)
+// (v28.81, "i can only friend ppl on both websites if im on the website and if im in claude i can only friend them if im in
+// claude as well right, if so then put a mini note"): yes (the websites share one relay; Claude keeps its page off the
+// internet, so its friends are Claude players): a line in the Friends tab saying which
+setTimeout(() => { $('frWhere').textContent = inArtifact ? 'In Claude you can only add friends who also play in Claude. Website players are on their own list: open pitchbrawl.pages.dev to add them.'
+  : 'Friends work across both websites (pitchbrawl.pages.dev and the GitHub one). People playing inside Claude can\'t be added from here.'; }, 0);   // (after online.js has set inArtifact)
+// (v28.81, "add a thing on the side like zooming in and out saying: share it with ur friends!": a tag by the title that
+// grows and shrinks; a click shares the website's link (a phone's share sheet) or copies it)
+$('shareBtn').addEventListener('click', async e => {
+  const b = e.currentTarget; b.blur(); const url = 'https://pitchbrawl.pages.dev/', was = 'Share it with your friends!', done = t => { b.textContent = t; b.classList.add('done'); clearTimeout(b.tm); b.tm = setTimeout(() => { b.textContent = was; b.classList.remove('done'); }, 2600); };
+  try { if (navigator.share && matchMedia('(pointer: coarse)').matches){ await navigator.share({title: 'Pitch Brawl', text: 'Play Pitch Brawl with me', url}); return; } } catch (err) { if (err && err.name === 'AbortError') return; }
+  try { await navigator.clipboard.writeText(url); done('Link copied! Send it'); }
+  catch (err) { done('pitchbrawl.pages.dev'); }
+});
 for (const id of ['homeBtn', 'menuTitle']) $(id).addEventListener('click', e => { if (e.currentTarget.blur) e.currentTarget.blur(); if (sess) return; menuTab('play'); try { $('menu').scrollTop = 0; } catch (e2) {} });
 $('menu').querySelector('.mtabs').addEventListener('keydown', e => {   // arrow keys move between tabs
   if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
@@ -10468,7 +10524,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.79';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.81';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -12576,8 +12632,8 @@ $('trainDone').addEventListener('click', closeTrain);
 function setZoom(i){ zi = Math.max(0, Math.min(ZL.length - 1, i)); cam.z = 0; $('zoom').selectedIndex = zi; store.set('pb.zoom', zi); }
 // v28.37 ("the plus and minus to change zoom levels, add follow all option in there"): + and − go through Follow all,
 // Auto, 1× ... 3× in that order (Follow all, the widest, below Auto; it was only reachable past 3×), and say where they are
-const ZOOM_KEYS = [7, 0, 1, 2, 3, 4, 5, 6];
-function zoomStep(d){ const k = ZOOM_KEYS.indexOf(zi), n = ZOOM_KEYS[Math.max(0, Math.min(ZOOM_KEYS.length - 1, (k < 0 ? 1 : k) + d))]; setZoom(n); fx.zoomMsg = {text: 'Zoom · ' + $('zoom').options[n].textContent, until: performance.now() + 1300}; }
+const ZOOM_KEYS = [7, 0, 1, 2, 3];   // (v28.80: up to 1.5×)
+function zoomStep(d){ const k = ZOOM_KEYS.indexOf(zi), n = ZOOM_KEYS[Math.max(0, Math.min(ZOOM_KEYS.length - 1, (k < 0 ? 1 : k) + d))]; setZoom(n); fx.zoomMsg = {text: 'Zoom · ' + $('zoom').options[n].textContent + (d > 0 && n === zi && k === ZOOM_KEYS.length - 1 ? ' (the closest)' : ''), until: performance.now() + 1300}; }
 $('zoom').addEventListener('change', e => { setZoom(e.target.selectedIndex); e.target.blur(); });
 // celebrations (v26.7): full or calm; until one is picked, as the device asks (reduced motion: calm)
 $('fxSel').value = reduceMotion ? 'calm' : 'full';
@@ -12645,23 +12701,41 @@ function syncFill(){
 // v28.62 ("why can i scroll up and down, and the format is a bit weird, like too high"): filling the tab, the menu is
 // sized to fit the window it has (--mz: smaller on a short screen, down to 0.7; bigger on a big one, up to 1.32), so it
 // never needs scrolling and stays in the middle; again on a resize and on each tab
+// (v28.81: the share tag sits on the line of the title's orange bar, just after it, wherever the title ends)
+function placeShare(){ try { const h = $('menuTitle'), hd = h.parentNode; if (hd.offsetParent === null) return;
+  const z = parseFloat(getComputedStyle(hd).zoom) || 1, a = h.getBoundingClientRect(), b = hd.getBoundingClientRect(); hd.style.setProperty('--ty', Math.round((a.bottom - b.top) / z - 8) + 'px'); } catch (e) {} }   // (on the title's orange bar, after it: the title can wrap)
+// (v28.81: the menu's moving stripes as tall as what's in it, not 2400 px: the menu scrolled on into empty stripes)
+function stripeH(m){ try { const mr = m.getBoundingClientRect(); let b = 0; for (const e of m.children) if (!e.hidden && e.offsetParent && !e.classList.contains('tutwel')) b = Math.max(b, e.getBoundingClientRect().bottom - mr.top + m.scrollTop);
+  m.style.setProperty('--mh', Math.ceil(b + 24) + 'px'); } catch (e) {} }
 function fitMenu(){
   const m = $('menu'); if (!m) return;
-  if (!filled || m.hidden || innerWidth <= 640){ m.style.removeProperty('--mz'); m.style.removeProperty('--mtop'); return; }   // (a phone: one column, it scrolls)
-  m.style.setProperty('--mz', '1'); m.style.setProperty('--mtop', '0px');
+  requestAnimationFrame(placeShare);
+  if (!filled || m.hidden || innerWidth <= 640){ m.style.removeProperty('--mz'); m.style.removeProperty('--mtop'); m.classList.remove('mscroll'); stripeH(m); return; }   // (a phone: one column, it scrolls)
+  m.style.setProperty('--mz', '1'); m.style.setProperty('--mtop', '0px'); m.classList.remove('mscroll');
   const kids = [...m.children].filter(e => !e.hidden && e.offsetParent && !e.classList.contains('tutwel'));
   if (!kids.length) return;
   let top = Infinity, bot = -Infinity, right = -Infinity, left = Infinity;
   for (const e of kids){ const r = e.getBoundingClientRect(); top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); left = Math.min(left, r.left); right = Math.max(right, r.right); }
   const cs = getComputedStyle(m), H = m.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 6, W = m.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
   const big = innerWidth >= 1850 && innerHeight >= 1000 ? 1.32 : innerWidth >= 1500 && innerHeight >= 860 ? 1.18 : 1;
-  const z = Math.max(0.7, Math.min(big, H / Math.max(1, bot - top), W / Math.max(1, right - left)));
-  m.style.setProperty('--mz', z.toFixed(3));
+  // (v28.81, "if i zoom to 110% in web, i dont see stuff": below 0.72 it was cut off at 0.7 with no way to scroll; now it
+  // stays at 0.8 and scrolls, from the top)
+  const need = Math.min(big, H / Math.max(1, bot - top), W / Math.max(1, right - left));
+  if (need < 0.72){ m.style.setProperty('--mz', '0.8'); m.classList.add('mscroll'); m.scrollTop = 0; stripeH(m); return; }
+  const z = need;
+  m.style.setProperty('--mz', z.toFixed(3)); m.scrollTop = 0;
   // in the middle, top to bottom (the grid's last row takes what's left, so the left column stays together)
   let t2 = Infinity, b2 = -Infinity; for (const e of kids){ const r = e.getBoundingClientRect(); t2 = Math.min(t2, r.top); b2 = Math.max(b2, r.bottom); }
-  m.style.setProperty('--mtop', Math.max(0, Math.round((H + 6 - (b2 - t2)) / 2)) + 'px');
+  m.style.setProperty('--mtop', Math.max(0, Math.round((H + 6 - (b2 - t2)) / 2)) + 'px'); stripeH(m);
 }
 addEventListener('resize', () => fitMenu());
+// (v28.81, "if zoom too big thenn... idk": on a computer (a mouse, not a phone) a window this small is nearly always the
+// browser zoomed in: a line saying how to zoom out; ✕ hides it for this visit)
+const zoomHint = () => { const fine = matchMedia('(pointer: fine)').matches, small = innerHeight < 420 || innerWidth < 600;
+  $('zoomHint').hidden = !(fine && small && !zoomHint.off); };
+$('zoomHintX').addEventListener('click', () => { zoomHint.off = true; zoomHint(); });
+addEventListener('resize', zoomHint); setTimeout(zoomHint, 300);
+// (v28.81: the page's own zoom, Ctrl + and −, is a resize too; the share tag measured again with it)
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitMenu());
 addEventListener('load', () => setTimeout(fitMenu, 50));
 const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
