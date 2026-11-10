@@ -1398,7 +1398,6 @@
     <p class="note" id="sugMsg" aria-live="polite"></p>
     <div class="row"><button id="sugSend" type="button">Send</button><button class="ghost" id="sugClose" type="button">Close</button></div>
   </div>
-  <form name="suggestions" data-netlify="true" netlify-honeypot="bot-field" hidden><input type="hidden" name="form-name" value="suggestions"><input name="bot-field"><input name="name"><textarea name="text"></textarea><input name="where"><input name="ver"></form>
   <div class="overlay" id="dailyPanel" hidden>
     <h2>Daily challenge</h2>
     <p id="dailyWhat"></p>
@@ -8721,7 +8720,10 @@ function showMenu(title, text){ $('menuTitle').textContent = title; $('menuText'
 // we check it"): 💡 Suggestions in the menu's corner. On the website it goes to the Netlify site's form ("suggestions":
 // Netlify Forms, read in the site's Forms tab, form detection switched on there); inside Claude the page can't send it
 // anywhere, so it says to use the website. One every 30 s, 600 characters
-const SUG_URL = 'https://pitchbrawl.netlify.app/';
+// (v28.79, "figure how to get the suggestions working again": Netlify ran out of free credits, so they go to the user's
+// Google Form "Pitch Brawl Recommendations" (read in its Responses tab): Name and Suggestions, the site and the version
+// added to the suggestion. no-cors: the page can't see Google's answer, only that it went)
+const SUG_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSdhJFtIOmyp85RW3l1B2TWZZrcfCCV9nBsks9_Y0SI-UdgvOQ/formResponse', SUG_NAME = 'entry.1417982303', SUG_TEXT = 'entry.1040538319';
 let sugAt = 0;
 $('sugBtn').addEventListener('click', e => { e.currentTarget.blur(); $('sugMsg').textContent = inArtifact ? 'Inside Claude suggestions can\'t be sent: open the website version (pitchbrawl.pages.dev) and send it from there.' : ''; if (!$('sugName').value) $('sugName').value = SET.nick || ''; openPanel('sugPanel'); setTimeout(() => $('sugText').focus(), 50); });
 $('sugClose').addEventListener('click', () => closePanel('sugPanel'));
@@ -8730,11 +8732,10 @@ $('sugSend').addEventListener('click', async e => {
   if (!text || text.length < 3){ $('sugMsg').textContent = 'Write your idea first.'; return; }
   if (Date.now() - sugAt < 30000){ $('sugMsg').textContent = 'Thanks! One every 30 seconds, please.'; return; }
   if (inArtifact){ $('sugMsg').textContent = 'Inside Claude it can\'t be sent: open pitchbrawl.pages.dev and send it there.'; return; }
-  const here = /\.netlify\.app$/.test(location.hostname), body = new URLSearchParams({'form-name': 'suggestions', 'bot-field': '', text, name, where: location.hostname || 'file', ver: typeof NET_VER === 'string' ? NET_VER : ''}).toString();
+  const body = new URLSearchParams({[SUG_NAME]: name, [SUG_TEXT]: `${text}\n\n(${location.hostname || 'file'} · v${typeof NET_VER === 'string' ? NET_VER : '?'})`}).toString();
   $('sugMsg').textContent = 'Sending…'; $('sugSend').disabled = true;
   try {
-    const r = await fetch(here ? '/' : SUG_URL, {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body, mode: here ? 'same-origin' : 'no-cors'});
-    if (here && !r.ok) throw new Error('form ' + r.status);
+    await fetch(SUG_FORM, {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body, mode: 'no-cors'});
     sugAt = Date.now(); $('sugText').value = ''; $('sugMsg').textContent = 'Sent. Thank you! We read every one.';
   } catch (err) { $('sugMsg').textContent = 'It couldn\'t be sent just now. Try again in a moment.'; }
   $('sugSend').disabled = false;
@@ -10467,7 +10468,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.78';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.79';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
