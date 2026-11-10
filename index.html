@@ -999,13 +999,13 @@
   @media (max-width:900px){ .tutbox .qk{grid-template-columns:repeat(2,minmax(0,1fr))} } @media (max-width:520px){ .tutbox .qk{grid-template-columns:1fr} }
   .tutbox .qk > span{display:flex;align-items:center;gap:8px;min-width:0} .tutbox .qk b{flex:none;font-weight:400} .tutbox .qk i{font-style:normal;color:#c9ced8;min-width:0}
   /* v28.71 ("add background move aswell, maybe opposite direction as the banner so the website looks more alive"): the
-     menu's stripes drift to the right (the banner goes left), one stripe (57.4 px across at 115deg) every 4.5 s, so it
+     menu's stripes drift to the right (the banner goes left), one stripe (57.4 px across at 115deg) every 1.8 s (v28.72, "moving kinda slow": was 4.5 s), so it
      loops without a jump; a layer behind the menu's content, tall enough for a phone's long menu as it scrolls */
   #menu::before{content:'';position:absolute;top:-120px;left:-120px;right:-120px;height:max(300%,2400px);z-index:-1;pointer-events:none;
-                background:repeating-linear-gradient(115deg,rgba(255,255,255,.034) 0 26px,transparent 26px 52px);animation:bgDrift 4.5s linear infinite;will-change:transform}
+                background:repeating-linear-gradient(115deg,rgba(255,255,255,.034) 0 26px,transparent 26px 52px);animation:bgDrift 1.8s linear infinite;will-change:transform}
   @keyframes bgDrift{from{transform:translateX(0)}to{transform:translateX(57.39px)}}
   html.calm #menu::before{animation:none}
-  @media (prefers-reduced-motion:reduce){ html:not(.calm) #menu::before{animation:bgDrift 4.5s linear infinite!important} }
+  @media (prefers-reduced-motion:reduce){ html:not(.calm) #menu::before{animation:bgDrift 1.8s linear infinite!important} }
 </style>
 
 <header>
@@ -8542,12 +8542,12 @@ function renderTicker(){
       f.append(sp); }
     return f; };
   // each half holds the items as many times as it takes to be wider than the window (two halves, the strip moving one
-  // half's width: it loops with no gap), at the same speed whatever its length (about 60 px a second)
+  // half's width: it loops with no gap), at the same speed whatever its length (about 85 px a second; v28.72, "moving kinda slow": was 60)
   box.textContent = ''; const a = document.createElement('div'); a.className = 'tkr'; a.append(one()); box.append(a);
   const w1 = a.scrollWidth, need = Math.max(innerWidth, 320) + 40, n = w1 > 0 ? Math.max(1, Math.ceil(need / w1)) : 4;
   for (let k = 1; k < n; k++) a.append(one());
   const b = a.cloneNode(true); b.setAttribute('aria-hidden', 'true'); box.append(b);
-  box.style.setProperty('animation-duration', Math.max(12, Math.round((w1 > 0 ? w1 * n : 1400) / 60)) + 's', 'important');
+  box.style.setProperty('animation-duration', Math.max(8, Math.round((w1 > 0 ? w1 * n : 1400) / 85)) + 's', 'important');
   renderTicker.w = innerWidth;
 }
 { const t = $('ticker'), go = () => { renderSites(); openPanel('sitesPanel'); $('sitesPanel').scrollTop = 0; };
@@ -10189,7 +10189,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.71';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.72';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
