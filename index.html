@@ -1369,7 +1369,7 @@
       <div class="drow"><button class="ghost sm" id="loadBtn" type="button">Load stadium (.hbs)</button><button class="ghost sm" id="defStBtn" type="button" hidden>Default stadium</button><input type="file" id="file" accept=".hbs,.json,application/json" hidden></div>
     </section>
     <section class="dsec" id="xferSec"><h3>Move to another copy</h3>
-      <p class="dnote">Everything (controls, settings, saved goals, scores, achievements, cup and league, your trained copy) to another copy of the game, such as another site (pitchbrawl.netlify.app, the GitHub site, or Claude): Save it as a file here and open the file there, or Copy here and Load there.</p>
+      <p class="dnote">Everything (controls, settings, saved goals, scores, achievements, cup and league, your trained copy) to another copy of the game, such as another site (pitchbrawl.pages.dev, the GitHub site, or Claude): Save it as a file here and open the file there, or Copy here and Load there.</p>
       <div class="drow"><button class="ghost sm" id="xferSave" type="button">Save everything as a file</button><button class="ghost sm" id="xferCopy" type="button">Copy everything</button><span class="dnote" id="xferMsg"></span></div>
       <textarea id="xferBox" rows="3" spellcheck="false" placeholder="Load takes a copied code (or paste it here first)"></textarea>
       <div class="drow"><button class="ghost sm" id="xferLoad" type="button">Load</button><label class="ghost sm fbtn" for="xferFile" title="A code saved in a file (.txt)">Open a code file…</label><input type="file" id="xferFile" accept=".txt,text/plain" hidden></div>
@@ -8723,13 +8723,13 @@ function showMenu(title, text){ $('menuTitle').textContent = title; $('menuText'
 // anywhere, so it says to use the website. One every 30 s, 600 characters
 const SUG_URL = 'https://pitchbrawl.netlify.app/';
 let sugAt = 0;
-$('sugBtn').addEventListener('click', e => { e.currentTarget.blur(); $('sugMsg').textContent = inArtifact ? 'Inside Claude suggestions can\'t be sent: open the website version (pitchbrawl.netlify.app) and send it from there.' : ''; if (!$('sugName').value) $('sugName').value = SET.nick || ''; openPanel('sugPanel'); setTimeout(() => $('sugText').focus(), 50); });
+$('sugBtn').addEventListener('click', e => { e.currentTarget.blur(); $('sugMsg').textContent = inArtifact ? 'Inside Claude suggestions can\'t be sent: open the website version (pitchbrawl.pages.dev) and send it from there.' : ''; if (!$('sugName').value) $('sugName').value = SET.nick || ''; openPanel('sugPanel'); setTimeout(() => $('sugText').focus(), 50); });
 $('sugClose').addEventListener('click', () => closePanel('sugPanel'));
 $('sugSend').addEventListener('click', async e => {
   e.currentTarget.blur(); const text = clean($('sugText').value, 600), name = clean($('sugName').value, 24);
   if (!text || text.length < 3){ $('sugMsg').textContent = 'Write your idea first.'; return; }
   if (Date.now() - sugAt < 30000){ $('sugMsg').textContent = 'Thanks! One every 30 seconds, please.'; return; }
-  if (inArtifact){ $('sugMsg').textContent = 'Inside Claude it can\'t be sent: open pitchbrawl.netlify.app and send it there.'; return; }
+  if (inArtifact){ $('sugMsg').textContent = 'Inside Claude it can\'t be sent: open pitchbrawl.pages.dev and send it there.'; return; }
   const here = /\.netlify\.app$/.test(location.hostname), body = new URLSearchParams({'form-name': 'suggestions', 'bot-field': '', text, name, where: location.hostname || 'file', ver: typeof NET_VER === 'string' ? NET_VER : ''}).toString();
   $('sugMsg').textContent = 'Sending…'; $('sugSend').disabled = true;
   try {
@@ -8744,11 +8744,13 @@ $('sugSend').addEventListener('click', async e => {
 // share players (one relay: rooms, friends, players online); the Claude page is kept off the internet, so it only meets
 // people who are in Claude too. Each site keeps its own data: Settings → Move to another copy carries it across
 const SITES = [
-  {k: 'netlify', name: 'Website', url: 'https://pitchbrawl.netlify.app/', note: 'Play online with everyone on both websites.'},
+  // (v28.78: Netlify's free credits ran out (each deploy uses some), so the main site is on Cloudflare now, free with no
+  // traffic limit; the Netlify copy stays where it stopped, v28.76)
+  {k: 'cf', name: 'Website', url: 'https://pitchbrawl.pages.dev/', note: 'Play online with everyone on both websites.'},
   {k: 'github', name: 'Website (GitHub)', url: 'https://ricecooker225.github.io/pitch-brawl-play/', note: 'The same game and the same players as the website above: you can play each other.'},
   {k: 'claude', name: 'In Claude', url: 'https://claude.ai/artifact/XeWawgAGw48C1haMLyoHKj', note: 'Online you only play people who are also in Claude, not the website players (Claude keeps the page off the internet).'},
 ];
-const siteHere = () => inArtifact ? 'claude' : /\.netlify\.app$/.test(location.hostname) ? 'netlify' : /github\.io$/.test(location.hostname) ? 'github' : '';
+const siteHere = () => inArtifact ? 'claude' : /\.workers\.dev$|\.pages\.dev$/.test(location.hostname) ? 'cf' : /\.netlify\.app$/.test(location.hostname) ? 'netlify' : /github\.io$/.test(location.hostname) ? 'github' : '';
 function renderSites(){
   const box = $('sitesList'); box.textContent = ''; const here = siteHere();
   for (const st of SITES){
@@ -8777,7 +8779,7 @@ function renderTicker(){
   const box = $('tickerT'); if (!box) return; const here = siteHere(), K = dailyKind(dailyId());
   // (v28.67, "mainly the website thing in there, maybe daily, we fitting too much"): the sites and today's daily only
   const items = [
-    ['globe', 'Play Pitch Brawl on ', ['pitchbrawl.netlify.app', here === 'netlify'], ' · ', ['ricecooker225.github.io/pitch-brawl-play', here === 'github'], ' · ', ['in Claude', here === 'claude'], ' (Claude plays Claude only)'],
+    ['globe', 'Play Pitch Brawl on ', ['pitchbrawl.pages.dev', here === 'cf'], ' · ', ['ricecooker225.github.io/pitch-brawl-play', here === 'github'], ' · ', ['in Claude', here === 'claude'], ' (Claude plays Claude only)'],
     ['cal', `Daily challenge today: ${K.name}, the same ${DAILY_N} tries for everyone`],
   ];
   const one = () => { const f = document.createDocumentFragment();
@@ -10465,7 +10467,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.77';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.78';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -10958,7 +10960,7 @@ function directNote(){
 // can't be reached, and it said only "No room with that code". Say how to play together instead
 // (v28.43, "i was on claude and my friend on github, we couldnt play": it spoke only of the downloaded file; now the
 // website too, with a link to it)
-const SITE_URL = 'https://pitchbrawl.netlify.app/';   // (v28.60: the user's Netlify site, the same build as GitHub Pages)
+const SITE_URL = 'https://pitchbrawl.pages.dev/';   // (v28.60: the user's website, the same build as GitHub Pages; v28.78: Cloudflare, was Netlify)
 const NOTE_CLAUDE_ONLY = 'Claude keeps this page off the internet here, so it can\'t reach rooms on the website (or the downloaded file), and they can\'t join rooms made here. To play together, both play here in Claude (send your friend this page\'s link), or both play on the website:';
 function siteLink(el){ if (!el || el.querySelector('.sitelink')) return; const a = document.createElement('a'); a.className = 'sitelink'; a.href = SITE_URL; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Open the website version'; el.append(' ', a); }
 function noConnection(){ $('onNote').textContent = ''; onErr(cantConnect().message); showPageLink(true); siteLink($('onNote')); $('hostBtn').disabled = $('joinBtn').disabled = true; $('roomsNote').textContent = 'Not available here'; }
