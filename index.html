@@ -1,5 +1,17 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pitch Brawl</title>
+<title>Pitch Brawl: Free Online Football Game</title>
+<meta name="description" content="Pitch Brawl is a free football game in your browser: play 1v1, 2v2 or 3v3 against the computer or online with friends. Curl shots, slide tackle, dive in goal, win the Champions Cup. No download, no sign-up.">
+<link rel="canonical" href="https://pitchbrawl.pages.dev/">
+<meta name="theme-color" content="#2a3040">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Pitch Brawl">
+<meta property="og:title" content="Pitch Brawl: free online football game">
+<meta property="og:description" content="Fast top-down football in your browser. 1v1, 2v2 and 3v3, against the computer or online with friends. No download.">
+<meta property="og:url" content="https://pitchbrawl.pages.dev/">
+<meta property="og:image" content="https://pitchbrawl.pages.dev/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"Pitch Brawl","url":"https://pitchbrawl.pages.dev/","description":"A free top-down football game in your browser: 1v1, 2v2 and 3v3 against the computer or online with friends.","genre":["Sports","Football","Multiplayer"],"gamePlatform":"Web browser","applicationCategory":"Game","operatingSystem":"Any","playMode":["SinglePlayer","MultiPlayer"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
 <style>
   /* one deliberate look: a floodlit indoor futsal court at night. Pitch in the middle, scoreboard above, controls below */
   :root{
@@ -1061,7 +1073,6 @@
   .omore{border-top:1px solid var(--line);padding-top:8px} .omore > summary{cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);list-style:none}
   .omore > summary::before{content:'▸ ';color:var(--accent)} .omore[open] > summary::before{content:'▾ '} .omore[open] > summary{margin-bottom:8px} .omore > *:not(summary){margin-top:8px}
   /* v28.84 ("a thing showing whos online on the game and we can invite them"): Online now */
-  @media (min-width:860px){ .onstart > .owho{grid-column:1 / -1} }
   .owho2 > summary{cursor:pointer;list-style:none;font-size:12px;color:var(--muted)} .owho2 > summary b{font-size:11px;letter-spacing:.1em;text-transform:uppercase} .owho2[open] > summary{margin-bottom:6px}
   .whol{display:flex;flex-direction:column;gap:4px;max-height:230px;overflow:auto} .whol .frrow b{max-width:40%}
   /* v28.82: friends: a note to yourself under the name, its box, ✎ */
@@ -1153,12 +1164,11 @@
   .rgo button#startOnline{font-size:19px;padding:13px 30px;white-space:nowrap;flex:none}
   @media (max-width:520px){ .rgo button#startOnline{font-size:16px;padding:11px 18px} }
   @media (min-width:860px){
-    .onstart{width:min(980px,100%);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-rows:auto auto auto 1fr;gap:12px;align-items:start}
+    .onstart{width:min(980px,100%);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-rows:auto auto 1fr;gap:12px;align-items:start}
     .onstart > .ocard.you{grid-column:1 / -1}
-    .onstart > .owho{grid-column:1 / -1;grid-row:2}
-    .onstart > .ojoin{grid-column:1;grid-row:3}
-    .onstart > .omake{grid-column:2;grid-row:3 / span 2}
-    .onstart > .ocode{grid-column:1;grid-row:4}
+    .onstart > .ojoin{grid-column:1;grid-row:2}
+    .onstart > .omake{grid-column:2;grid-row:2 / span 2}
+    .onstart > .ocode{grid-column:1;grid-row:3}
     .onstart > .omake .ogrid{grid-template-columns:1fr}
     .onstart > .omake .orow{flex-direction:column;align-items:stretch}
     .onstart > .omake .orow > button:last-child{margin-left:0}
@@ -1342,7 +1352,6 @@
           <label class="avin" for="avatar" title="Up to two letters or an emoji, shown on your player"><input type="text" id="avatar" maxlength="2" autocomplete="off" spellcheck="false" placeholder="P1" aria-label="Avatar"></label>
           <label class="ofield grow" for="nick"><small>Your name</small><input type="text" id="nick" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Player"></label>
         </section>
-        <section class="ocard owho"><div class="ochead"><h3>Online now</h3><span class="note" id="whoNote"></span></div><div class="whol" id="whoList"></div></section>
         <section class="ocard ojoin">
           <div class="ochead"><h3>Join a room</h3><span class="note" id="roomsNote">Looking for rooms…</span><button class="ghost sm" id="roomsRefresh" type="button" title="Look again">↻</button></div>
           <div class="rooms" id="gameList"></div>
@@ -1367,7 +1376,7 @@
           <button class="ghost sm" id="leaveOnline" type="button">Leave room</button>
         </div>
         <p class="note onvite" id="onInvite" hidden></p>
-        <details class="frlobby owho2"><summary><b>Online now</b> · invite anyone</summary><div class="whol" id="whoList2"></div></details>
+        <details class="frlobby owho2"><summary><b>Others online now</b> · invite anyone</summary><div class="whol" id="whoList2"></div></details>
         <div class="frlobby" id="frLobby" hidden><b>Friends</b><div class="frlist" id="frList2"></div></div>
         <div class="rmain">
           <div class="rleft">
@@ -1609,6 +1618,8 @@
       <div class="frhead"><span class="lbl">Your friends</span><span class="note" id="frNote"></span></div>
       <div class="frlist" id="frList"></div>
       <p class="mnote frwhere" id="frWhere"></p>
+      <div class="frhead"><span class="lbl">Others online now</span><span class="note" id="whoNote"></span></div>
+      <div class="whol frlist" id="whoList"></div>
       <p class="mnote frback">Your code and friends are kept in this browser. <button class="linkish" id="frBackup" type="button">Back up / move my profile</button> to take them to another browser or device.</p>
     </div>
     <div class="mpane" data-pane="me" role="tabpanel" hidden>
@@ -10767,7 +10778,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.87';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.88';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -12243,9 +12254,9 @@ async function frStart(){
 FR.who = new Map();
 function renderWho(){ clearTimeout(renderWho.t); renderWho.t = setTimeout(renderWho1, 250); }
 function renderWho1(){
-  const rows = [...FR.who.entries()].filter(([f, o]) => f !== FR.fid && o && FR.all.has(f)).map(([f, o]) => ({f, o, fr: FR.list.some(x => x.f === f)})).sort((a, b) => (b.fr - a.fr) || String(a.o.n || '').localeCompare(String(b.o.n || ''))).slice(0, 40);
+  const rows = [...FR.who.entries()].filter(([f, o]) => f !== FR.fid && o && FR.all.has(f) && !FR.list.some(x => x.f === f)).map(([f, o]) => ({f, o, fr: false})).sort((a, b) => (b.fr - a.fr) || String(a.o.n || '').localeCompare(String(b.o.n || ''))).slice(0, 40);
   for (const id of ['whoList', 'whoList2']){ const box = $(id); if (!box) continue; box.textContent = '';
-    if (!rows.length){ const e = document.createElement('p'); e.className = 'note'; e.textContent = FR.on ? 'Nobody else right now. Share the game with your friends!' : 'Looking…'; box.append(e); continue; }
+    if (!rows.length){ const e = document.createElement('p'); e.className = 'note'; e.textContent = FR.on ? 'Nobody else on right now. Share the game with your friends!' : 'Looking…'; box.append(e); continue; }
     for (const {f, o, fr} of rows){
       const r = document.createElement('div'); r.className = 'frrow on'; const dot = document.createElement('i'); dot.className = 'frdot ' + (['match', 'room', 'solo', 'prac'].includes(o.s) ? o.s : 'free'); r.append(dot);
       const nm = document.createElement('b'); nm.textContent = (fr ? '★ ' : '') + (clean(o.n || '', 16) || f.toUpperCase()); r.append(nm);
