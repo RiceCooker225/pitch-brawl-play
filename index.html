@@ -1050,7 +1050,7 @@
   .zhint{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:8px;max-width:calc(100% - 16px);box-sizing:border-box;
          background:#262c3a;border:2px solid #ffd166;padding:6px 8px 6px 12px;font-size:12px;color:#e3e7f0;box-shadow:0 8px 24px rgba(0,0,0,.5)}
   .zhint[hidden]{display:none} .zhint kbd{font:700 11px Rubik,sans-serif;background:#3a4256;border:1px solid #5a6378;padding:0 4px}
-  .fpsbox{position:absolute;top:6px;left:8px;z-index:4;font:700 11px/1 Rubik,sans-serif;color:#7ee2a0;background:rgba(10,12,17,.6);padding:3px 6px;pointer-events:none;font-variant-numeric:tabular-nums} .fpsbox[hidden]{display:none} .fpsbox.low{color:#ffb3a7}
+  .corner .fpsbox{display:inline-flex;align-items:center;font:700 11px/1 Rubik,sans-serif;color:#7ee2a0;background:rgba(10,12,17,.6);border:1px solid var(--line);padding:4px 7px;pointer-events:none;font-variant-numeric:tabular-nums;opacity:1}   /* (v28.87: in the corner row, by Pause: top left it sat on the match's messages) */ .fpsbox[hidden]{display:none} .fpsbox.low{color:#ffb3a7}
   /* v28.84: the Champions Cup's four groups (yours first, wider) */
   .clgroups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(820px,100%)} @media (max-width:640px){ .clgroups{grid-template-columns:1fr} }
   .clgroups .clg h4{margin:0 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)} .clgroups .clg.mine h4{color:var(--accent)}
@@ -1230,8 +1230,7 @@
   </div>
   <canvas id="c"></canvas>
   <div class="hud" id="hud" hidden></div>
-  <div class="fpsbox" id="fpsBox" hidden></div>
-  <div class="corner"><span class="fsb onlinen" id="onlineN" hidden title="Players with the game open right now"></span><button class="ghost fsb" id="sugBtn" type="button" title="Got an idea or found a bug? Tell us"><span class="mi" data-ic="bulb" aria-hidden="true"></span> Suggestions</button><button class="ghost fsb rolebtn" id="roleBtn" type="button" hidden></button><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (P)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
+  <div class="corner"><span class="fsb fpsbox" id="fpsBox" hidden></span><span class="fsb onlinen" id="onlineN" hidden title="Players with the game open right now"></span><button class="ghost fsb" id="sugBtn" type="button" title="Got an idea or found a bug? Tell us"><span class="mi" data-ic="bulb" aria-hidden="true"></span> Suggestions</button><button class="ghost fsb rolebtn" id="roleBtn" type="button" hidden></button><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (P)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
   <div class="rpbar" id="rpBar" hidden>
     <button class="ghost" id="rpBack" type="button" title="5 s back (←)">« 5 s</button>
     <button id="rpPlay" type="button" title="Pause or play (Space)">Pause</button>
@@ -10768,7 +10767,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.86';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.87';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -12254,6 +12253,7 @@ function renderWho1(){
       const act = (t, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm'; b.textContent = t; b.onclick = e => { e.currentTarget.blur(); fn(); }; r.append(b); };
       const c = /^[a-z0-9]{4,6}$/.test(o.c || '') ? o.c : '';
       if (c && !NET.on && o.s === 'room' && !o.lk) act('Join', () => frJoin(c));
+      if (!NET.on && ['free', 'solo', 'prac', undefined].includes(o.s)) act('Invite', () => frHostInvite(f));   // (v28.87: not in a room yet: one is made, then the invite)
       if (NET.on && NET.code && ['free', 'solo', 'prac', undefined].includes(o.s) && !(c && c === NET.code)) act('Invite', () => { frSend(f, {k: 'inv', c: NET.code}); try { sysChat(`Invited ${clean(o.n || '', 16) || 'them'}`); } catch (e) {} });
       if (!fr) act('Add', () => frAdd(f, o.n));
       box.append(r); } }
