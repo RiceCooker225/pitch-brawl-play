@@ -199,6 +199,8 @@
   .seg.pill button.on{background:var(--accent);color:var(--accent-ink)}
   .p3row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:13px;text-align:left}
   .p3row .seg.pill{flex:1 1 220px}
+  .gseg button{padding:7px 4px;white-space:nowrap}
+  @media (max-width:560px){ .gseg{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr))} }
   .p3row .note{flex-basis:100%}
   /* Play: the one big orange button */
   button.mgo{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:12px 14px 12px 12px;border-radius:14px;
@@ -1385,7 +1387,7 @@
             <section class="ocard" id="hostOpts">
               <div class="ochead"><h3>Match settings</h3><span class="note" id="optsWho"></span></div>
               <div class="sgrid">
-                <label class="ofield"><small>Game</small><select id="hoGame"><option value="0">Match</option><option value="1">Penalties</option><option value="2">Shooting duel</option></select></label>
+                <label class="ofield"><small>Game</small><select id="hoGame"><option value="0">Match</option><option value="1">Penalties</option><option value="2">Shooting duel</option><option value="3">Volleyball</option><option value="4">Badminton</option><option value="5">Ping pong (1v1)</option><option value="6">Dodgeball</option></select></label>
                 <label class="ofield"><small>Teams</small><select id="hoSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option></select></label>
                 <label class="ofield"><small>Time</small><select id="hoTime"></select></label>
                 <label class="ofield"><small>Goals</small><select id="hoGoals"></select></label>
@@ -1558,7 +1560,7 @@
       <section class="hsec"><h3>On a phone</h3><ul>
         <li>Stick moves, KICK kicks, SLIDE slides. Hold the stick across your shot to curl it.</li>
       </ul></section>
-      <section class="hsec wide"><h3>Modes</h3><dl class="mlist"><div><dt>Match</dt><dd>you against the computer, 1v1 to 3v3</dd></div><div><dt>1v1v1</dt><dd>three goals: score in either other one</dd></div><div><dt>World Cup</dt><dd>three knockout rounds</dd></div><div><dt>League</dt><dd>a season, every team once</dd></div><div><dt>Practice</dt><dd>drills of 100 tries, kept in My scores</dd></div><div><dt>Vs your copy</dt><dd>the computer playing your moves</dd></div><div><dt>Friends</dt><dd>one keyboard (against each other, or together with one in goal), or online</dd></div></dl></section>
+      <section class="hsec wide"><h3>Modes</h3><dl class="mlist"><div><dt>Match</dt><dd>you against the computer, 1v1 to 3v3</dd></div><div><dt>1v1v1</dt><dd>three goals: score in either other one</dd></div><div><dt>Other games</dt><dd>volleyball, badminton, ping pong and dodgeball: pick the Game on Play or Friends, or in a room online</dd></div><div><dt>World Cup</dt><dd>three knockout rounds</dd></div><div><dt>League</dt><dd>a season, every team once</dd></div><div><dt>Practice</dt><dd>drills of 100 tries, kept in My scores</dd></div><div><dt>Vs your copy</dt><dd>the computer playing your moves</dd></div><div><dt>Friends</dt><dd>one keyboard (against each other, or together with one in goal), or online</dd></div></dl></section>
     </div>
   </div>
   <div class="overlay" id="menu" data-tab="play">
@@ -1570,6 +1572,7 @@
     <div class="mright">
     <div class="mpane" data-pane="play" role="tabpanel">
       <div class="mcard" id="setPlay" data-people="1">
+        <div class="mrow gamerow"><span class="lbl">Game</span><span class="seg pill gseg" data-k="game"><button type="button" data-v="foot">Futsal</button><button type="button" data-v="volley">Volleyball</button><button type="button" data-v="badminton">Badminton</button><button type="button" data-v="pong" title="Ping pong: one each">Ping pong</button><button type="button" data-v="dodge">Dodgeball</button></span></div>
         <div class="mrow"><span class="lbl">Match against the computer</span><span class="seg big" data-k="size"><button type="button" data-v="1"><i class="si" data-ic="one"></i>1v1</button><button type="button" data-v="2"><i class="si" data-ic="two"></i>2v2</button><button type="button" data-v="3"><i class="si" data-ic="three"></i>3v3</button><button type="button" data-v="tri" title="Three players, three goals on a six-sided pitch: score in either of the others, keep your own"><i class="si" data-ic="tri"></i>1v1v1</button></span></div>
         <button class="mgo" type="button" data-mode="ai" data-size="1"><i class="ic" data-ic="one"></i><span><b>Play 1v1</b><small>you against the computer</small></span><em class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></em></button>
       </div>
@@ -1597,6 +1600,7 @@
       <span class="lbl onlbl">Over the internet</span>
       <button class="mgo ongo" id="onlineBtn" type="button" title="Play over the internet: make a room and share its code, or join a friend's room"><i class="ic" data-ic="globe"></i><span><b>Play online</b><small>make a room, or join a friend's with a code</small></span><em class="go" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></em></button>
       <div class="mcard" id="setFriends" data-people="2">
+        <div class="mrow gamerow"><span class="lbl">Game</span><span class="seg pill gseg" data-k="game"><button type="button" data-v="foot">Futsal</button><button type="button" data-v="volley">Volleyball</button><button type="button" data-v="badminton">Badminton</button><button type="button" data-v="pong" title="Ping pong: one each">Ping pong</button><button type="button" data-v="dodge">Dodgeball</button></span></div>
         <div class="mrow"><span class="lbl">On one keyboard</span><span class="seg big six" data-k="size"><button type="button" data-v="1"><i class="si" data-ic="one"></i>1v1</button><button type="button" data-v="2"><i class="si" data-ic="two"></i>2v2</button><button type="button" data-v="3"><i class="si" data-ic="three"></i>3v3</button><button type="button" data-v="tri" title="Three goals on a six-sided pitch: score in either of the others, keep your own"><i class="si" data-ic="tri"></i>1v1v1</button><button type="button" data-v="pens" title="A penalty shootout: take turns to shoot, one touch, and to keep goal"><i class="si" data-ic="spot"></i><span class="lw">Penalties</span><span class="sw2">Pens</span></button><button type="button" data-v="duel" title="A shooting duel: one of you shoots from a new spot, as in Shooting practice, the other keeps goal, then swap, as in penalties; five shots each"><i class="si" data-ic="target"></i><span class="lw">Shooting</span><span class="sw2">Shoot</span></button></span></div>
         <div class="mrow"><span class="lbl">Players</span><span class="seg pill" data-k="people"><button type="button" data-v="2">2 of you</button><button type="button" data-v="3">3 of you</button></span></div>
         <div class="mrow" id="coopRow"><span class="lbl">Teams</span><span class="seg pill" data-k="coop"><button type="button" data-v="0">P1 against P2</button><button type="button" data-v="1">Together, P2 in goal</button></span></div>
@@ -2411,7 +2415,12 @@ function PBCORE(){
   // (v28.84, "the dives for gk is kinda liek teleporting" / "nerf the speed ot dives": he pushes off over two ticks, half then
   // three quarters then full (DIVE_RAMP), and the top speed is 3.0, was 3.8 from the first tick: about 44 px a dive, was 46,
   // over 22 ticks, was 18, so it reads as a dive, not a jump)
-  const DIVE_V = 3.0, DIVE_T = 22, DIVE_DAMP = 0.955, DIVE_DOWN = 32, DIVE_CD = 60, DIVE_REACH = 10, DIVE_RAMP = [0.5, 0.75, 1];
+  // (v28.91, "maybe nerf the dives dont remove it, cuz rn it jsut teleports and saves everything"): a slower push-off over
+  // four ticks (DIVE_RAMP) to a top speed of 2.4 (was 3.0 after two): about 31 px a dive, was 44; the arms reach 7 px (was
+  // 10), and only the inner part of that (DIVE_SOLID) parries it away: a ball met at the fingertips is only tipped
+  // (DIVE_TIP of its speed kept, a small push out), so a hard shot into the corner can still go in. Down 40 ticks after
+  // (was 32) and 90 between dives (was 60): a dive that misses costs him
+  const DIVE_V = 2.4, DIVE_T = 22, DIVE_DAMP = 0.955, DIVE_DOWN = 40, DIVE_CD = 90, DIVE_REACH = 7, DIVE_RAMP = [0.3, 0.5, 0.7, 0.85, 1], DIVE_SOLID = 3, DIVE_TIP = 0.8;
   const canDive = (G, ST, p, d) => p.role === 'keeper' && G.cfg.dive !== false && !ST.tri && inArea(ST, p.team, d.x, d.y);
   function startDive(G, p, d, ev){
     const b = p.input; let x = ((b & 8) > 0) - ((b & 4) > 0), y = ((b & 2) > 0) - ((b & 1) > 0);
@@ -2445,8 +2454,9 @@ function PBCORE(){
             const g = ST.goals.find(q => q.team === p.team) || ST.goals[0], gx = (g.x0 + g.x1) / 2, gy = (g.y0 + g.y1) / 2;
             let ux = b.x - gx, uy = b.y - gy; const ul = Math.hypot(ux, uy) || 1; ux /= ul; uy /= ul;
             const sp = Math.hypot(b.vx, b.vy), out = b.vx * ux + b.vy * uy, tx = b.vx - out * ux, ty = b.vy - out * uy;
-            const o = Math.max(2.4, sp * 0.55, out);
-            b.vx = ux * o + tx * 0.5 + p.slideDx * 0.6; b.vy = uy * o + ty * 0.5 + p.slideDy * 0.6; b.sp = 0; b.atT = 0;
+            if (gap > DIVE_SOLID && sp > 3){ b.vx = b.vx * DIVE_TIP + ux * 1.1; b.vy = b.vy * DIVE_TIP + uy * 1.1; }   // (v28.91: fingertips: only tipped)
+            else { const o = Math.max(2.4, sp * 0.55, out); b.vx = ux * o + tx * 0.5 + p.slideDx * 0.6; b.vy = uy * o + ty * 0.5 + p.slideDy * 0.6; }
+            b.sp = 0; b.atT = 0;
             p.slideBall = true;
             if (!predict){ touch(G, p, true, true); if (ev){ ev.push({type:'kick', id: ++G.eventId, frame: G.frame, pid: p.id, speed: Math.hypot(b.vx, b.vy), slide: true, dive: true}); shotCheck(G, ST, p); } }
           }
@@ -2708,7 +2718,7 @@ function PBCORE(){
     if (G.state !== 1){ G.sp = null; return; }
     sp.t++;
     const moved = b.x !== sp.x || b.y !== sp.y || b.vx !== 0 || b.vy !== 0;
-    if (moved && sp.t > sp.hold){ G.sp = null; return; }   // taken (only the kicking side can reach it): play on
+    if (moved && sp.t > sp.hold){ if (sp.kind === 'fk') G.fkDone = {f: G.frame, team: sp.team}; G.sp = null; return; }   // taken (only the kicking side can reach it): play on
     if (moved){ b.x = sp.x; b.y = sp.y; b.vx = b.vy = 0; b.sp = 0; }   // still being set up: the ball stays on its spot
     if (sp.t > (sp.kind === 'pen' ? PEN_TIMEOUT : sp.aim != null ? FK_AUTO + 30 : FK_TIMEOUT)){ G.sp = null; return; }   // nobody took it: play on
     keepOut(G, sp);
@@ -2737,6 +2747,214 @@ function PBCORE(){
   // ---------- match ----------
   // cfg: {timeLimit (min, 0 = none), scoreLimit (0 = none), mode, draws (level at full time ends it: no overtime)}
   // roster: [{id, team 0|1, ctrl 'human'|'ai'|'remote', name, avatar, pu, role}]
+  // ---------- other games (v28.91, "other modes (dodgeball, volleyball)", then "ping pong badmiton asw pls") ----------
+  // G.cfg.game: 'volley', 'badminton', 'pong' (the net games) or 'dodge'. They run in the same tick as football (so online
+  // guests predict them and replays play them back) on arenas of their own (ST.court: the court's or the table's half
+  // sizes; the net / the middle line is a wall only players meet). A point is a 'goal' event with game and why on it, so
+  // the clock, the score limit, overtime and the pause after a point work as in a match.
+  //
+  // The net games: the ball has a height (b.z, b.vz, gravity g). Players touch it only while it's low enough (reach):
+  // walking into it bumps it up, kick hits it the way from you to the ball, further when you run into it (run), a smash
+  // when you're by the net and it's up high (fast and low: it can hit the net). Touches a side (volleyball 3, the others
+  // 1), then it must be over; under the net's height as it crosses the middle it hits the net. Where it comes down decides
+  // the point: on a side's court, the other side's point; outside, a point against the side that touched it last. The side
+  // that won the point serves from the back (a kick or a bump; after NG_AUTO ticks it goes by itself).
+  // Ping pong: a table; the ball must bounce once on the other half (bounce, rest: how much it keeps), then be hit back
+  // before it lands again. Down on your own half after your hit, off the table without a bounce, or a second bounce: a
+  // point. A hit's length is worked out so it comes down on their half (aim): middle-deep standing, deep running into it,
+  // short backing off (aimed off the table it still goes off).
+  // Badminton: a shuttle (the air slows it fast: the arena's ball damping), one touch, a higher net.
+  //
+  // Dodgeball: three balls on the middle line; a kicked ball is live (d.lt: the thrower's side, d.lp: who) until it slows
+  // below DB_LIVE or bounces off a wall. A live ball touching someone of the other side: a hit, a life lost (lives by team
+  // size: 3 / 2 / 1), a moment you can't be hit again (DB_INV); out of lives, off to the bench at the side. Kicking a live
+  // ball of theirs: a catch, the thrower loses a life instead. A side with nobody left loses the round: a point to the other.
+  const NETG = {
+    volley:    {g: 0.08,  reach: 24, net: 12, hitH: 4.0, run: 1.25, back: 0.35, hitZ: 3.3, spikeD: 75, spikeZ: 10, spikeH: 5.6, spikeVZ: 0.6, bumpZ: 2.6, bumpH: 1.5, serveH: 4.4, serveZ: 3.4, z0: 0, touches: 3},
+    badminton: {g: 0.07,  reach: 26, net: 16, hitH: 5.0, run: 1.2,  back: 0.35, hitZ: 3.3, spikeD: 70, spikeZ: 12, spikeH: 6.6, spikeVZ: 0.3, bumpZ: 2.6, bumpH: 1.3, serveH: 4.8, serveZ: 3.2, z0: 0, touches: 1},
+    pong:      {g: 0.07,  reach: 18, net: 6,  hitH: 4.6, run: 1.25, back: 0.35, hitZ: 1.6, spikeD: 0,  spikeZ: 99, spikeH: 0,   spikeVZ: 0,   bumpZ: 1.2, bumpH: 1.6, serveH: 4.2, serveZ: 1.0, z0: 10, touches: 1, bounce: true, rest: 0.82, grip: 0.8, aim: true}
+  };
+  const NG_AUTO = 480, NG_SAME = 12, NG_POINT_T = 120;
+  const DB_LIVE = 2.0, DB_INV = 80, DB_POINT_T = 150, DB_BALL_Y = [0, -95, 95], DB_EDGE = 18, DB_SLOPE = 0.035;
+  const gameOf = G => G.cfg && G.cfg.game || null;
+  const netG = G => NETG[gameOf(G)] || null;
+  const courtOf = ST => ST.court || {W: 300, H: 150};
+  const ballIdx = G => { const out = []; for (let i = 0; i < G.discs.length; i++){ const d = G.discs[i]; if ((d.cGroup & 1) && !G.players.some(p => p.di === i)) out.push(i); } return out; };
+  const dbLives = n => n <= 1 ? 3 : n === 2 ? 2 : 1;
+  function ngFlight(z0, vz, g){ return (vz + Math.sqrt(vz * vz + 2 * g * Math.max(0, z0))) / g; }   // ticks until it's down from z0
+  function gameReset(G, ST){
+    const gm = gameOf(G); if (!gm) return;
+    const D = G.discs, c = courtOf(ST), N = NETG[gm];
+    if (N){
+      const t = G.koTeam === 1 ? 1 : 0, sx = t === 0 ? -1 : 1, b = D[0], back = N.bounce ? c.W + 18 : c.W - 70;
+      b.x = sx * back; b.y = 0; b.vx = b.vy = 0; b.z = N.z0; b.vz = 0;
+      G.vb = {side: t, n: 0, last: -1, lf: -99, wait: 0, serve: t, bn: 0};
+      // the first of the serving side behind the ball, the rest of each side spread over its court
+      const cnt = [0, 0];
+      for (const p of G.players){ if (p.ctrl === 'gone') continue; const d = D[p.di], k = cnt[p.team]++, s2 = p.team === 0 ? -1 : 1;
+        const m = G.players.filter(q => q.team === p.team && q.ctrl !== 'gone').length - (p.team === t ? 1 : 0);
+        if (p.team === t && k === 0){ d.x = s2 * (back + 28); d.y = 0; }
+        else { const j = p.team === t ? k - 1 : k; d.x = s2 * (N.bounce ? c.W + 60 : p.team === t ? c.W * 0.4 : c.W * 0.55); d.y = m <= 1 ? 0 : (j / (m - 1) - 0.5) * c.H * 1.1; }
+        d.vx = d.vy = 0; }
+    } else if (gm === 'dodge'){
+      const bi = ballIdx(G);
+      bi.forEach((i, k) => { const d = D[i], s0 = ST.discs[i]; if (s0) Object.assign(d, s0); d.x = 0; d.y = DB_BALL_Y[k % DB_BALL_Y.length] * (c.H / 150); d.vx = d.vy = 0; d.lt = -1; d.lp = -1; d.lf = 0; });
+      const n = [0, 0]; for (const p of G.players) if (p.ctrl !== 'gone') n[p.team]++;
+      for (const p of G.players){ p.lives = dbLives(Math.max(n[0], n[1])); p.out = false; p.inv = 0; }
+    }
+  }
+  function gameCanKick(G, i){
+    const N = netG(G); if (N && i === 0){ const b = G.discs[0]; return !(b.z > N.reach) && G.state < 2; }
+    return true;
+  }
+  function vbTouch(G, ST, p, ev){   // a touch of the ball in a net game: counted for p's side (true), or a fault ended the rally (false)
+    const V = G.vb, N = netG(G); if (!V || !N || G.state === 2 || G.state === 3) return true;
+    if (V.last === p.id && G.frame - V.lf < NG_SAME){ V.lf = G.frame; return true; }   // (still the same touch)
+    if (N.bounce && G.state === 1 && V.side !== p.team && V.bn === 0 && V.n > 0){   // ping pong: hit before it bounced on your half
+      const b = G.discs[0], c = courtOf(ST), overTable = Math.abs(b.x) <= c.W && Math.abs(b.y) <= c.H;
+      gamePoint(G, ST, overTable ? V.side : p.team, overTable ? V.last : p.id, overTable ? 'early' : 'out', ev); return false;
+    }
+    if (V.side !== p.team || G.state === 0){ V.side = p.team; V.n = 1; } else V.n++;
+    V.last = p.id; V.lf = G.frame; V.bn = 0; if (G.state === 1) pstat(G, p).touches++;
+    if (V.n > N.touches && G.state === 1){ gamePoint(G, ST, 1 - p.team, p.id, 'touches', ev); return false; }
+    return true;
+  }
+  function gameKick(G, ST, p, d, o, i, ev){   // after kickDisc: what a kick does in these games
+    const gm = gameOf(G), N = NETG[gm];
+    if (N && i === 0){
+      const c = courtOf(ST), serve = G.state === 0, z0 = o.z || 0;
+      let ux = o.x - d.x, uy = o.y - d.y; const L = Math.hypot(ux, uy) || 1; ux /= L; uy /= L;
+      const run = Math.max(-1, Math.min(1, (d.vx * ux + d.vy * uy) / 2.75));
+      const spike = !serve && N.spikeD > 0 && Math.abs(d.x) < N.spikeD && z0 >= N.spikeZ && ux * (d.x < 0 ? 1 : -1) > 0.3;
+      let h = serve ? N.serveH : spike ? N.spikeH : N.hitH * (1 + run * (run > 0 ? N.run - 1 : N.back));
+      const vz = serve ? N.serveZ : spike ? N.spikeVZ : N.hitZ;
+      if (N.aim && ux * (d.x < 0 ? 1 : -1) > 0.15){   // ping pong: long enough to come down on their half
+        const T = ngFlight(z0, vz, N.g), k = o.damping, dep = 0.55 + 0.35 * run, gx = (d.x < 0 ? 1 : -1) * c.W * Math.max(0.15, Math.min(0.92, dep));
+        const fall = (1 - Math.pow(k, T)) / (1 - k);
+        // and it comes down on the table across: aimed wider than its side, it's turned in to the side's edge
+        let dist = Math.max(20, (gx - o.x) / ux); const ly = o.y + uy * dist, edge = c.H - 6;
+        if (Math.abs(ly) > edge){ const ty = Math.sign(ly) * edge, dx = gx - o.x, dy = ty - o.y, l2 = Math.hypot(dx, dy) || 1; ux = dx / l2; uy = dy / l2; dist = l2; }
+        h = Math.min(8, dist / fall);
+      }
+      o.vx = ux * h; o.vy = uy * h; o.vz = vz; o.sp = 0; o.atT = 0;
+      if (spike){ pstat(G, p).spikes = (pstat(G, p).spikes || 0) + 1; if (ev) ev.push({type:'spike', id: ++G.eventId, frame: G.frame, pid: p.id}); }
+      vbTouch(G, ST, p, ev);
+    } else if (gm === 'dodge' && (o.cGroup & 1)){
+      if (o.lt >= 0 && o.lt !== p.team && G.state === 1){   // a catch: the thrower loses a life
+        const th = G.players.find(q => q.id === o.lp);
+        if (ev) ev.push({type:'catch', id: ++G.eventId, frame: G.frame, pid: p.id, vid: th ? th.id : -1});
+        pstat(G, p).catches = (pstat(G, p).catches || 0) + 1;
+        if (th && !th.out) dbHit(G, ST, th, p, ev, true);
+      }
+      o.lt = p.team; o.lp = p.id; o.lf = G.frame;
+      if (G.state === 1) pstat(G, p).throws = (pstat(G, p).throws || 0) + 1;
+    }
+  }
+  function dbHit(G, ST, v, by, ev, caught){
+    if (v.out || (v.inv > 0 && !caught)) return;
+    v.lives = Math.max(0, (v.lives | 0) - 1); v.inv = DB_INV;
+    if (by && !caught) pstat(G, by).hits = (pstat(G, by).hits || 0) + 1;
+    if (ev) ev.push({type:'hit', id: ++G.eventId, frame: G.frame, pid: by ? by.id : -1, vid: v.id, out: v.lives === 0, caught: !!caught, lives: v.lives});
+    if (v.lives === 0){
+      v.out = true; if (by) pstat(G, by).outs = (pstat(G, by).outs || 0) + 1;
+      const d = G.discs[v.di], c = courtOf(ST), k = G.players.filter(q => q.team === v.team && q.out).length;
+      d.cMask = 0; d.cGroup = 0; d.vx = d.vy = 0; d.x = (v.team === 0 ? -1 : 1) * (40 + 36 * k); d.y = c.H + 32;
+      v.input = 0; v.kicking = false;
+    }
+  }
+  function gamePoint(G, ST, team, pid, why, ev){
+    if (G.state !== 1) return;
+    const net = !!netG(G);
+    G.state = 2; G.timer = net ? NG_POINT_T : DB_POINT_T; G.koTeam = net ? team : 1 - team; G.score[team]++;
+    if (ev) ev.push({type:'goal', id: ++G.eventId, frame: G.frame, team, pid: pid == null || pid < 0 ? null : pid, game: gameOf(G), why, kmh: 0, t: G.time});
+  }
+  function gamePre(G, ST){   // before the physics
+    const N = netG(G), D = G.discs;
+    if (N){
+      const b = D[0], base = ST.discs[0] ? ST.discs[0].cMask : 63;
+      b.cMask = (b.z || 0) > N.reach || G.state >= 2 || (G.vb && G.state === 1 && G.frame - G.vb.lf < NG_SAME) ? base & ~(2 | 4) : base;   // (just played: it doesn't bounce off the one who played it)
+      if (G.vb) G.vb.px = b.x;
+    } else if (gameOf(G) === 'dodge'){
+      for (const i of ballIdx(G)){ const d = D[i]; d.pvx = d.vx; d.pvy = d.vy; }
+    }
+  }
+  function gamePost(G, ST, ev, predict){   // after the physics
+    const N = netG(G), D = G.discs, c = courtOf(ST);
+    if (N){
+      const b = D[0], V = G.vb || (G.vb = {side: 0, n: 0, last: -1, lf: -99, wait: 0, serve: 0, bn: 0});
+      if (b.z == null){ b.z = 0; b.vz = 0; }
+      if (G.state === 0){
+        // the serve: a bump off a person's body launches it too; nobody serving, it goes by itself
+        if (b.vz > 0) return;   // (served with a kick this tick)
+        b.z = N.z0; b.vz = 0;
+        let toucher = null;
+        for (const p of G.players){ if (p.ctrl === 'gone') continue; const d = D[p.di]; if (Math.hypot(b.x - d.x, b.y - d.y) <= b.radius + d.radius + 0.6){ toucher = p; break; } }
+        if (toucher || b.vx || b.vy){
+          if (!(b.vz > 0) && (b.vx || b.vy || toucher)){ const p = toucher, d = p ? D[p.di] : null; let ux = d ? b.x - d.x : (V.serve === 0 ? 1 : -1), uy = d ? b.y - d.y : 0; const L = Math.hypot(ux, uy) || 1; ux /= L; uy /= L; if (ux * (b.x < 0 ? 1 : -1) < 0.2){ ux = b.x < 0 ? 1 : -1; uy = 0; }
+            if (p && d){ gameKick(G, ST, p, {x: b.x - ux * 10, y: b.y - uy * 10, vx: 0, vy: 0}, b, 0, ev); } else { b.vx = ux * N.serveH; b.vy = uy * N.serveH; b.vz = N.serveZ; } }
+        } else if (++V.wait > NG_AUTO){ const p = G.players.find(q => q.team === V.serve && q.ctrl !== 'gone'); if (p) gameKick(G, ST, p, {x: b.x < 0 ? b.x - 10 : b.x + 10, y: b.y, vx: 0, vy: 0}, b, 0, ev); else { b.vx = (b.x < 0 ? 1 : -1) * N.serveH; b.vz = N.serveZ; } }
+        return;
+      }
+      if (G.state !== 1){ b.z = Math.max(0, (b.z || 0) + (b.vz || 0)); b.vz = b.z > 0 ? (b.vz || 0) - N.g : 0; if (b.z === 0){ b.vx *= 0.9; b.vy *= 0.9; } return; }
+      // bumps: walking into it while it's low
+      if (!(b.z > N.reach)) for (const p of G.players){
+        if (p.ctrl === 'gone') continue; const d = D[p.di], dx = b.x - d.x, dy = b.y - d.y, dist = Math.hypot(dx, dy);
+        if (dist <= b.radius + d.radius + 0.6 && !(V.last === p.id && G.frame - V.lf < NG_SAME)){
+          if (!vbTouch(G, ST, p, ev)) return;
+          const h = Math.hypot(b.vx, b.vy); if (h > N.bumpH){ b.vx *= N.bumpH / h; b.vy *= N.bumpH / h; }
+          if (h < 0.8 && dist > 0){ b.vx += dx / dist * 0.8; b.vy += dy / dist * 0.8; }
+          b.vz = Math.max(b.vz || 0, N.bumpZ);
+        } else if (dist <= b.radius + d.radius + 0.6 && V.last === p.id) V.lf = G.frame;
+      }
+      // the net
+      const px = V.px != null ? V.px : b.x;
+      if (px * b.x < 0 || (px !== 0 && b.x === 0)){
+        if ((b.z || 0) < N.net && (!N.bounce || Math.abs(b.y) <= c.H + 12)){ b.x = Math.sign(px || -b.vx) * (b.radius + 0.5); b.vx = -b.vx * 0.35; b.vy *= 0.6; if (ev) ev.push({type:'net', id: ++G.eventId, frame: G.frame}); }
+        else if (!N.bounce){ V.side = b.x > 0 ? 1 : 0; V.n = 0; V.last = -1; }   // over: the other side's touches start
+      }
+      // in the air
+      b.z += b.vz; b.vz -= N.g;
+      if (b.z <= 0){
+        const half = b.x < 0 ? 0 : 1, lastP = V.last >= 0 ? V.last : null;
+        if (N.bounce){
+          const onTable = Math.abs(b.x) <= c.W + b.radius * 0.5 && Math.abs(b.y) <= c.H + b.radius * 0.5;
+          if (onTable && half !== V.side && V.bn === 0 && V.n > 0){ b.z = 0; b.vz = -b.vz * N.rest; b.vx *= N.grip || 1; b.vy *= N.grip || 1; V.bn = 1; if (ev) ev.push({type:'bounce', id: ++G.eventId, frame: G.frame}); return; }
+          b.z = 0; b.vz = 0;
+          if (V.bn >= 1) gamePoint(G, ST, V.side, lastP, onTable ? 'twice' : 'missed', ev);
+          else gamePoint(G, ST, 1 - V.side, lastP, onTable ? 'own' : 'out', ev);
+        } else {
+          b.z = 0; b.vz = 0;
+          const inside = Math.abs(b.x) <= c.W + b.radius * 0.5 && Math.abs(b.y) <= c.H + b.radius * 0.5;
+          if (inside) gamePoint(G, ST, 1 - half, lastP, half === V.side && V.n > 0 ? 'drop' : 'kill', ev);
+          else gamePoint(G, ST, 1 - V.side, lastP, 'out', ev);
+        }
+        b.vx *= 0.3; b.vy *= 0.3;
+      }
+    } else if (gameOf(G) === 'dodge'){
+      for (const p of G.players){ if (p.inv > 0) p.inv--; }
+      // the floor rises a little by the walls: a ball left there rolls back out (none sits in a corner where nobody can get behind it)
+      for (const i of ballIdx(G)){ const d = D[i], ex = c.W - d.radius - DB_EDGE, ey = c.H - d.radius - DB_EDGE; if (Math.abs(d.x) > ex) d.vx -= Math.sign(d.x) * DB_SLOPE; if (Math.abs(d.y) > ey) d.vy -= Math.sign(d.y) * DB_SLOPE; }
+      if (G.state !== 1 && G.state !== 0) return;
+      for (const i of ballIdx(G)){
+        const d = D[i]; if (!(d.lt >= 0)) continue;
+        const sp = Math.hypot(d.vx, d.vy);
+        let hitWho = null;
+        for (const p of G.players){
+          if (p.team === d.lt || p.out || p.ctrl === 'gone') continue;
+          const q = D[p.di]; if (Math.hypot(q.x - d.x, q.y - d.y) <= q.radius + d.radius + 1.2){ hitWho = p; break; }
+        }
+        if (hitWho && G.state === 1){ const by = G.players.find(q => q.id === d.lp) || null; d.lt = -1; if (!(hitWho.inv > 0)) dbHit(G, ST, hitWho, by, ev, false); continue; }
+        const pv = Math.hypot(d.pvx || 0, d.pvy || 0), turn = pv > 0 && sp > 0 ? ((d.pvx || 0) * d.vx + (d.pvy || 0) * d.vy) / (pv * sp) : 1;
+        const byMate = G.players.some(p => p.team === d.lt && !p.out && Math.hypot(D[p.di].x - d.x, D[p.di].y - d.y) <= D[p.di].radius + d.radius + 1.2);
+        if (sp < DB_LIVE || (turn < 0.6 && !byMate) || (byMate && G.frame - d.lf > 3)) d.lt = -1;
+      }
+      if (G.state === 1) for (const t of [0, 1]){
+        const side = G.players.filter(p => p.team === t && p.ctrl !== 'gone');
+        if (side.length && side.every(p => p.out)){ const other = G.players.filter(p => p.team === 1 - t && !p.out); gamePoint(G, ST, 1 - t, other.length ? other[0].id : null, 'round', ev); break; }
+      }
+    }
+  }
+
   function newGame(ST, cfg, roster){
     const nt = ST.nt || 2;
     const G = {cfg: Object.assign({timeLimit:3, scoreLimit:3}, cfg), frame:0, state:0, timer:0, time:0, score: nt === 3 ? [0, 0, 0] : [0, 0], koTeam: cfg && cfg.leg === 2 ? 1 : 0, pause:0, nt,   // (koTeam, v28.16: the second leg, the other side kicks off. v28.25: this comment had swallowed pause and nt: no pause count (a penalty taker never went), no three teams)
@@ -2760,7 +2978,7 @@ function PBCORE(){
     G.state = 0;
     const n = ST.kickOffFull ? ST.discs.length : 1;
     for (let i = 0; i < n; i++) Object.assign(G.discs[i], ST.discs[i]);
-    G.discs[0].sp = 0; G.discs[0].atT = 0; G.sp = null;
+    G.discs[0].sp = 0; G.discs[0].atT = 0; G.sp = null; G.fkDone = null;
     const count = [0, 0, 0];
     for (const p of G.players){
       const d = G.discs[p.di], fresh = playerDisc(ST, p);
@@ -2775,6 +2993,7 @@ function PBCORE(){
       p.num = ++count[p.team];
     }
     G.ballHist.length = 0; G.lastTouch = null; G.prevTouch = null; G.teamTouch = G.nt === 3 ? [null, null, null] : [null, null];
+    if (G.cfg && G.cfg.game) gameReset(G, ST);   // (v28.91: volleyball's serve, dodgeball's balls and lives)
   }
   function setInput(p, bits){ if (!(p.input & 16) && (bits & 16)){ p.kicking = true; p.kPress = (p.kPress || 0) + 1; } if (!(p.input & 32) && (bits & 32)) p.slideReq = true; const lr = bits & ~p.input & 12; if (lr) p.lrTap = (p.lrTap || 0) | lr; p.input = bits; }   // (lrTap: left/right pressed since the last tick, for a free kick's curl)
 
@@ -2826,6 +3045,10 @@ function PBCORE(){
   // freekick taker"): until a free kick is taken the side defending it runs at FK_SLOW of its speed (slow)
   // (v28.36, "nerf movement speed to 50% for freekicks": 0.6 -> 0.5)
   const FK_SLOW = 0.5, CALL_TAP = 18, CALL_BALL = 45, CALL_QUIET = 24;
+  // v28.91 ("for freekicks i cant even score cuz their striker slide tackles instantly"): for FK_NO_SLIDE ticks after a
+  // free kick is taken the side defending it can't slide (their keeper can still dive)
+  const FK_NO_SLIDE = 75;
+  const fkNoSlide = (G, p) => !!G.fkDone && G.frame - G.fkDone.f < FK_NO_SLIDE && G.fkDone.f <= G.frame && p.team !== G.fkDone.team;
   // v28.34 ("powershot option somehow"), cfg.power: a person who keeps the ball at his feet (within kick reach) for
   // POWER_T ticks has it charged (p.pw; a few ticks off it, POWER_SLACK, are allowed; anyone else touching it, a goal, a
   // set piece or a slide end it): his next kick of it is POWER_MUL as strong. v28.35 ("ai should get power shots asw"):
@@ -2851,6 +3074,7 @@ function PBCORE(){
     const noKick = !!G.sp && G.sp.t < G.sp.hold;   // a free kick or penalty being set up: nobody kicks yet
     for (const p of G.players){
       const d = D[p.di];
+      if (p.out){ d.vx = d.vy = 0; p.kicking = false; continue; }   // (v28.91: out of a dodgeball round: on the bench)
       // a free kick for my side (free kicks on), and me a person: the power bar (before a key-up clears the press, so a
       // quick tap still kicks, softly). The man taking it (a person fouled) is kept at the ball and aims round it
       const sp = G.sp, lock = !!sp && sp.kind === 'fk' && sp.aim != null && sp.tk === p.id && sp.team === p.team && G.state === 1;
@@ -2887,16 +3111,16 @@ function PBCORE(){
       if (!(p.input & 16)) p.kicking = false;
       if (p.kickMin > 0) p.kickMin--;
       if (p.kickBurst < G.kickRate.burst) p.kickBurst++;
-      if (p.slideReq){ p.slideReq = false; const dv = canDive(G, ST, p, d); if ((G.cfg.slide || dv) && G.state === 1 && !p.slide && !p.slideCd && !G.sp && p.ctrl !== 'hold'){ if (dv) startDive(G, p, d, ev); else startSlide(G, p, d, ev); } }
+      if (p.slideReq){ p.slideReq = false; const dv = canDive(G, ST, p, d); if ((G.cfg.slide || dv) && G.state === 1 && !p.slide && !p.slideCd && !G.sp && p.ctrl !== 'hold' && (dv || !fkNoSlide(G, p))){ if (dv) startDive(G, p, d, ev); else startSlide(G, p, d, ev); } }
       const notMine = !!sp && sp.kind === 'fk' && sp.aim != null && sp.team === p.team && sp.tk !== p.id;   // (v25.7: a person's free kick is his)
       if (!bar && p.kicking && p.kickMin <= 0 && p.kickBurst >= 0 && !noKick && !notMine && !(p.slide > 0)){
         let kicked = false;
         const pwr = p.pw >= POWER_T && G.cfg.power; let powered = false;
-        for (let i = 0; i < D.length; i++){ const o = D[i]; if (o !== d && (o.cGroup & 64) && kickDisc(G, ST, p, d, o, i === 0 && pwr ? POWER_MUL : undefined)){ kicked = true; if (i === 0){ powered = pwr; if (!predict) touch(G, p, true); } } }
+        for (let i = 0; i < D.length; i++){ const o = D[i]; if (o !== d && (o.cGroup & 64) && (!G.cfg.game || gameCanKick(G, i)) && kickDisc(G, ST, p, d, o, i === 0 && pwr ? POWER_MUL : undefined)){ kicked = true; if (G.cfg.game) gameKick(G, ST, p, d, o, i, ev); if (i === 0){ powered = pwr; if (!predict) touch(G, p, true); } } }
         if (kicked){
           p.kicking = false; p.kickMin = G.kickRate.min; p.kickBurst -= G.kickRate.rate;
           if (powered){ p.pw = 0; p.pwOff = 0; }
-          if (ev){ const b = D[0]; ev.push({type:'kick', id: ++G.eventId, frame: G.frame, pid: p.id, speed: Math.hypot(b.vx, b.vy), power: powered || undefined}); if (powered) ev.push({type:'power', id: ++G.eventId, frame: G.frame, pid: p.id, speed: Math.hypot(b.vx, b.vy), x: b.x, y: b.y}); if (G.state === 1) shotCheck(G, ST, p); }
+          if (ev){ const b = D[0]; ev.push({type:'kick', id: ++G.eventId, frame: G.frame, pid: p.id, speed: Math.hypot(b.vx, b.vy), power: powered || undefined}); if (powered) ev.push({type:'power', id: ++G.eventId, frame: G.frame, pid: p.id, speed: Math.hypot(b.vx, b.vy), x: b.x, y: b.y}); if (G.state === 1 && !G.cfg.game) shotCheck(G, ST, p); }
         }
       }
       if (lock) d.damping = ST.pp.damping;   // (taking it: placed at the ball, he doesn't walk)
@@ -2906,10 +3130,12 @@ function PBCORE(){
     let sx = null;
     if (G.state === 1){ sx = []; for (let i = 0; i < D.length; i++) if (D[i].cGroup & 128) sx.push(i, D[i].x, D[i].y); }
     if (D[0].atT > 0) afterTouch(G, D[0]);
+    if (G.cfg.game) gamePre(G, ST);
     physics(D, ST, dt);
+    if (G.cfg.game) gamePost(G, ST, ev, predict);
     if (G.cfg.slide || G.players.some(p => p.slide > 0 || p.down > 0 || p.slideCd > 0)) slideTick(G, ST, ev, predict);
     if (G.sp) setPieceTick(G);
-    if (ev && G.state === 1 && G.frame % SHOT_RE === 0) shotRecheck(G, ST);
+    if (ev && G.state === 1 && G.frame % SHOT_RE === 0 && !G.cfg.game) shotRecheck(G, ST);
     switch (G.state){
       case 0: {
         const ko = TEAMS[G.koTeam].ko;
@@ -3062,7 +3288,7 @@ function PBCORE(){
     const D = G.discs, b = D[0];
     G.ballHist.push(b.x, b.y, b.vx, b.vy); if (G.ballHist.length > 4 * 40) G.ballHist.splice(0, 4);
     if (G.state !== 1) return;
-    postCheck(G, ST, b);
+    if (!G.cfg.game) postCheck(G, ST, b);
     let t0 = false, t1 = false, t2 = false;
     for (const p of G.players){
       const d = D[p.di], dx = b.x - d.x, dy = b.y - d.y, r = b.radius + d.radius + 4;
@@ -3201,6 +3427,7 @@ function PBCORE(){
     C.discs = G.discs.map(d => Object.assign({}, d));
     C.players = G.players.map(p => Object.assign({}, p));
     C.score = G.score.slice(); C.events = []; C.ballHist = []; C.sp = G.sp ? Object.assign({}, G.sp) : null;
+    if (G.vb) C.vb = Object.assign({}, G.vb);   // (v28.91: volleyball's touches)
     return C;
   }
   // Haxball's view: from the latest tick, run `frames` more (fractional) on a copy
@@ -3215,7 +3442,7 @@ function PBCORE(){
 
   return {TAU, TICK, FL, IN, TEAMS, PU, KMH, limitHit, buildStadium, colliders, physics, crossesGoal, newGame, resetPositions, setInput, step, endGame, overtime, topTied,
           copyGame, extrapolate, ballPath, playerDisc, newStats, pstat, timeUp, inArea, areaOf, ballArea, setPiece,
-          CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, DIVE: {V: DIVE_V, RAMP: DIVE_RAMP, T: DIVE_T, DAMP: DIVE_DAMP, DOWN: DIVE_DOWN, CD: DIVE_CD, REACH: DIVE_REACH}, canDive, slideAim, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
+          CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, DIVE: {V: DIVE_V, RAMP: DIVE_RAMP, T: DIVE_T, DAMP: DIVE_DAMP, DOWN: DIVE_DOWN, CD: DIVE_CD, REACH: DIVE_REACH, SOLID: DIVE_SOLID}, canDive, fkNoSlide, slideAim, ballIdx, courtOf, NETG, netG, ngFlight, DB: {LIVE: DB_LIVE, INV: DB_INV}, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
           fkPreview, FK_SHOW_PW, FK_AUTO, FK_HOLD, FK_HOLD_AIM, CURL, fkWallLine, fkWallSpot, autoCurl, manualCurl, curlTo, AC_BIT, INV_BIT, POWER_T, POWER_MUL, flightCross, curveMul, CURVE_LV,
           AUTO: {RANGE: AUTO_RANGE, WIDE: AUTO_WIDE, FK_WIDE, MID: AUTO_MID, IN: AUTO_IN, MAX: AUTO_MAX, K: AUTO_K, SAFE: AUTO_SAFE, FAR: AUTO_FAR, SMALL: AUTO_SMALL}, FK_CURVE};
 }
@@ -3880,7 +4107,7 @@ function PBAI(C){
         const margin = dv >= 1 ? KP_DIVE_TIGHT : 0;
         let run = false; for (let i = 1; i <= shot && i < P.length && !run; i++) if (slack(t, me, P[i], i, rr * KEEP_REACH) >= margin) run = true;
         if (!run){
-          const V = C.DIVE.V, K = C.DIVE.DAMP, R = rr + C.DIVE.REACH, T = Math.min(shot, C.DIVE.T);
+          const V = C.DIVE.V, K = C.DIVE.DAMP, R = rr + (C.DIVE.SOLID != null ? (C.DIVE.SOLID + C.DIVE.REACH) / 2 : C.DIVE.REACH), T = Math.min(shot, C.DIVE.T);   // (v28.91: where his dive parries it, not just tips it)
           let best = 0, bt = 99;
           for (let k = 1; k < 9; k++){
             let ux = DIRS[k][0], uy = DIRS[k][1]; if (ux && uy){ ux *= Math.SQRT1_2; uy *= Math.SQRT1_2; }
@@ -3947,6 +4174,7 @@ function PBAI(C){
   // SLIDE_GAP ticks. A level goes for it with chance L.sl (rolled every 3/4 s)
   function slideTry(G, ST, t, p, me, L, mem, P, rr){
     const D = G.discs, ball = D[0], bd = Math.hypot(ball.x - me.x, ball.y - me.y);
+    if (C.fkNoSlide && C.fkNoSlide(G, p)) return 0;   // (v28.91: just after their free kick)
     if (mem.slNext && G.frame < mem.slNext && G.frame > mem.slNext - SLIDE_GAP - 10) return 0;
     if (bd < 25 || bd > 85 || C.inArea(ST, p.team, me.x, me.y) || C.inArea(ST, p.team, ball.x, ball.y)) return 0;
     // on my own (no teammate to cover a miss) only this far from my goal (SLIDE_SOLO px; 9999 = never: alone, a slide that
@@ -4827,7 +5055,143 @@ function PBAI(C){
     for (let i = 1; i <= end && i < S.length; i++) for (const o of G.players){ if (o.team === team) continue; const v = slack(t, G.discs[o.di], S[i], i, rr * 0.92); if (v > worst) worst = v; }
     return worst;
   }
-  return {LEVELS, SPEC, DEFAULT, clampBrain, think, T, pathSlack, tune(o){ if (o.pre != null) KEEP_PRE = o.pre; if (o.reach != null) KEEP_REACH = o.reach; if (o.claim != null) KEEP_CLAIM = o.claim; if (o.sweep != null) KEEP_SWEEP = o.sweep; if (o.detour != null) KEEP_DETOUR = o.detour;
+  // ---------- other games (v28.91): volleyball and dodgeball. Keys like a person; the level sets how quick and how exact ----------
+  const GL = [{react: 18, err: 34, duty: 0.75, catchP: 0, dodge: 0.3}, {react: 10, err: 18, duty: 0.95, catchP: 0.1, dodge: 0.5}, {react: 5, err: 8, duty: 1, catchP: 0.25, dodge: 0.7}, {react: 1, err: 2, duty: 1, catchP: 0.45, dodge: 0.85}];
+  function keysTo(me, tx, ty, slowR){   // 8-way keys toward a spot, easing off as it gets there
+    const dx = tx - me.x, dy = ty - me.y, dist = Math.hypot(dx, dy); if (dist < 1.5 && Math.hypot(me.vx, me.vy) < 0.6) return 0;
+    const want = Math.min(2.7, dist * (slowR || 0.09)), wx = dist > 0 ? dx / dist * want : 0, wy = dist > 0 ? dy / dist * want : 0;
+    const ex = wx - me.vx, ey = wy - me.vy; let k = 0;
+    if (ex > 0.18) k |= 8; else if (ex < -0.18) k |= 4;
+    if (ey > 0.18) k |= 2; else if (ey < -0.18) k |= 1;
+    return k;
+  }
+  function gameThink(G, ST, p, level, mem){
+    const L = GL[Math.max(0, Math.min(3, level | 0))], gm = G.cfg.game;
+    if (p.out || G.state >= 2) return 0;
+    if (L.duty < 1 && rnd(mem) > L.duty) return mem.gk || 0;
+    let k = C.NETG[gm] ? volleyThink(G, ST, p, L, mem) : gm === 'dodge' ? dodgeThink(G, ST, p, L, mem) : 0;
+    if ((k & 16) && (p.input & 16) && !p.kicking) k &= ~16;   // (held kick already used: let go a tick, to press it again)
+    mem.gk = k; return k;
+  }
+  // the net games: where the ball will be, tick by tick (gravity, the air; ping pong: its bounce on the table), until it's down
+  function vbPath(G, ST, b, n){
+    const V = C.NETG[G.cfg.game], c = C.courtOf(ST), out = []; let x = b.x, y = b.y, z = b.z || 0, vx = b.vx, vy = b.vy, vz = b.vz || 0, bn = 0;
+    for (let i = 0; i < n; i++){ vx *= b.damping; vy *= b.damping; x += vx; y += vy; z += vz; vz -= V.g;
+      if (z <= 0){ if (V.bounce && !bn && Math.abs(x) <= c.W && Math.abs(y) <= c.H){ z = 0; vz = -vz * V.rest; vx *= V.grip || 1; vy *= V.grip || 1; bn = 1; } else { out.push({x, y, z: 0, vz, bn}); break; } }
+      out.push({x, y, z, vz, bn}); }
+    return out;
+  }
+  function volleyThink(G, ST, p, L, mem){
+    const D = G.discs, me = D[p.di], b = D[0], V = C.NETG[G.cfg.game], c = C.courtOf(ST), sx = p.team === 0 ? -1 : 1, rr = me.radius + b.radius;
+    const mates = G.players.filter(q => q.team === p.team && q.ctrl !== 'gone'), foes = G.players.filter(q => q.team !== p.team && q.ctrl !== 'gone');
+    const idx = mates.indexOf(p), nM = mates.length;
+    const home = V.bounce ? {x: sx * (c.W + 50 + (nM > 1 ? idx * 40 : 0)), y: nM <= 1 ? 0 : (idx / (nM - 1) - 0.5) * c.H * 1.2}
+      : {x: sx * c.W * (nM > 1 && idx === 0 ? 0.35 : 0.55), y: nM <= 1 ? 0 : (idx / (nM - 1) - 0.5) * c.H * (nM > 2 ? 1.1 : 0.8)};
+    if (mem.tgtF == null || G.frame - mem.tgtF > 90 || G.frame < mem.tgtF){   // a new target over the net now and then (with this level's error)
+      mem.tgtF = G.frame; let best = null, bs = -1;
+      for (let i = 0; i < 9; i++){ const tx = -sx * (c.W * (0.3 + 0.55 * rnd(mem))), ty = (rnd(mem) * 2 - 1) * c.H * 0.8; let s2 = 1e9; for (const f of foes){ const q = D[f.di]; s2 = Math.min(s2, Math.hypot(q.x - tx, q.y - ty)); } if (s2 > bs){ bs = s2; best = {x: tx, y: ty}; } }
+      const e = L.err * (V.bounce ? 0.8 : 2);
+      mem.tgt = {x: best.x + (rnd(mem) * 2 - 1) * e, y: best.y + (rnd(mem) * 2 - 1) * e};
+    }
+    const tgt = mem.tgt;
+    if (G.state === 0){   // the serve
+      const srv = G.vb ? G.vb.serve : 0; if (srv !== p.team) return keysTo(me, home.x, home.y);
+      const server = mates.slice().sort((a, q) => Math.hypot(D[a.di].x - b.x, D[a.di].y - b.y) - Math.hypot(D[q.di].x - b.x, D[q.di].y - b.y))[0];
+      if (server !== p) return keysTo(me, home.x, home.y);
+      let ux = tgt.x - b.x, uy = tgt.y - b.y; const l = Math.hypot(ux, uy) || 1; ux /= l; uy /= l;
+      const spot = {x: b.x - ux * (rr + 6), y: b.y - uy * (rr + 6)};
+      if (mem.srvAt == null || G.frame < mem.srvAt) mem.srvAt = G.frame;
+      if (Math.hypot(me.x - spot.x, me.y - spot.y) < 4 && G.frame - mem.srvAt > 40) return 16 | keysTo(me, b.x, b.y, 0.2);
+      return keysTo(me, spot.x, spot.y);
+    }
+    mem.srvAt = null;
+    // where it comes down to a good height to play it (ping pong: after its bounce on our half), and whose it is
+    const now = {x: b.x, y: b.y, z: b.z, vx: b.vx, vy: b.vy, vz: b.vz, damping: b.damping};
+    if (!mem.vbSeen || G.frame - mem.vbSeen.f >= Math.max(1, L.react) || G.frame < mem.vbSeen.f) mem.vbSeen = {f: G.frame, b: now};
+    const seen = L.react ? mem.vbSeen.b : now, lag = L.react ? G.frame - mem.vbSeen.f : 0;
+    const P = vbPath(G, ST, seen, 260).slice(lag);
+    const bnNow = G.vb ? G.vb.bn : 0, hitter = G.vb ? G.vb.side : -1;
+    let hit = null, hi = -1;
+    for (let i = 0; i < P.length; i++){ const q = P[i]; if (q.x * sx > 4 && q.z <= V.reach - 4 && (q.vz < 0 || q.z < 6 || V.bounce) && (!V.bounce || ((q.bn || bnNow) && hitter !== p.team && (Math.abs(q.x) > c.W + 8 || Math.abs(q.y) > c.H + 8)))){ hit = q; hi = i; break; } }
+    const mineNow = G.vb && G.vb.side === p.team ? G.vb.n : 0;
+    if (!hit) return keysTo(me, home.x, home.y);
+    // the one of us who gets there soonest plays it
+    const tOf = q => Math.hypot(D[q.di].x - hit.x, D[q.di].y - hit.y) / 2.4 + (G.vb && G.vb.last === q.id ? 30 : 0);
+    const mine = mates.slice().sort((a, q) => tOf(a) - tOf(q))[0] === p;
+    if (!mine) return keysTo(me, home.x * 0.8 + hit.x * 0.2, home.y);
+    // volleyball: pass it up to a mate by the net on the first touch (a bump: walk into it), else hit it over
+    const mate = mates.find(q => q !== p);
+    const setIt = V.touches > 1 && !!mate && mineNow === 0 && Math.abs(hit.x) > 110;
+    const aim = setIt ? {x: sx * 55, y: D[mate.di].y * 0.5} : (V.spikeD > 0 && Math.abs(hit.x) < V.spikeD + 10 && hit.z > V.spikeZ ? {x: tgt.x * 0.6, y: tgt.y} : tgt);
+    let ux = aim.x - hit.x, uy = aim.y - hit.y; const l = Math.hypot(ux, uy) || 1; ux /= l; uy /= l;
+    const spot = {x: hit.x - ux * (rr + (setIt ? 1 : 3)) + (rnd(mem) - 0.5) * L.err * 0.3, y: hit.y - uy * (rr + (setIt ? 1 : 3))};
+    const gap = Math.hypot(b.x - me.x, b.y - me.y) - rr;
+    const ready = !(b.z > V.reach) && (!V.bounce || (bnNow && hitter !== p.team));
+    if (!setIt && gap < 9 && ready) return (mem.kick = !mem.kick || p.kicking) ? 16 | keysTo(me, b.x, b.y, 0.2) : keysTo(me, b.x, b.y, 0.2);
+    if (setIt && hi < 6) return keysTo(me, b.x + ux * 6, b.y + uy * 6, 0.05);   // (walk into it, gently)
+    if (V.bounce && !ready && gap < rr + 10) return keysTo(me, me.x + sx * 20, me.y);   // (ping pong: out of its way until it has bounced)
+    return keysTo(me, spot.x, spot.y, hi < 20 ? 0.2 : 0.09);
+  }
+  // dodgeball
+  function dodgeThink(G, ST, p, L, mem){
+    const D = G.discs, me = D[p.di], c = C.courtOf(ST), sx = p.team === 0 ? -1 : 1, balls = C.ballIdx(G);
+    const foes = G.players.filter(q => q.team !== p.team && !q.out && q.ctrl !== 'gone'), mates = G.players.filter(q => q.team === p.team && !q.out && q.ctrl !== 'gone');
+    // 1. a live ball of theirs coming at me: out of its way (or a catch)
+    let threat = null, tBest = 99;
+    for (const i of balls){
+      const d = D[i]; if (!(d.lt >= 0) || d.lt === p.team || G.frame - (d.lf | 0) < L.react) continue;
+      let x = d.x, y = d.y, vx = d.vx, vy = d.vy;
+      for (let t = 1; t < 50; t++){ vx *= d.damping; vy *= d.damping; x += vx; y += vy; const mx = me.x + me.vx * t * 0.5, my = me.y + me.vy * t * 0.5;
+        if (Math.hypot(x - mx, y - my) < me.radius + d.radius + 7){ if (t < tBest){ tBest = t; threat = d; } break; } if (Math.hypot(vx, vy) < C.DB.LIVE) break; }
+    }
+    if (threat){
+      if (mem.thr !== threat.lf){ mem.thr = threat.lf; mem.thrRoll = rnd(mem); mem.dodgeRoll = rnd(mem); }
+      if (tBest <= 4 && mem.thrRoll < L.catchP) return 16;
+      if (mem.dodgeRoll < L.dodge){
+        const v = Math.hypot(threat.vx, threat.vy) || 1, nx = -threat.vy / v, ny = threat.vx / v, side = (me.x - threat.x) * nx + (me.y - threat.y) * ny >= 0 ? 1 : -1;
+        let tx = me.x + nx * side * 60, ty = me.y + ny * side * 60;
+        if (Math.abs(ty) > c.H - 20){ tx = me.x - nx * side * 60; ty = me.y - ny * side * 60; }
+        return keysTo(me, Math.max(-c.W + 20, Math.min(c.W - 20, tx)) * (tx * sx > 0 ? 1 : 0) + (tx * sx > 0 ? 0 : sx * 24), Math.max(-c.H + 18, Math.min(c.H - 18, ty)), 0.5);
+      }
+    }
+    // 2. a ball on our side (or on the line) nobody of ours is nearer to: go and throw it
+    let pickI = -1, pd = 1e9;
+    for (const i of balls){
+      const d = D[i]; if (d.lt >= 0 && d.lt !== p.team) continue; if (d.x * sx < -6) continue;
+      const myD = Math.hypot(d.x - me.x, d.y - me.y); if (mates.some(q => q !== p && Math.hypot(d.x - D[q.di].x, d.y - D[q.di].y) < myD - 8)) continue;
+      if (myD < pd){ pd = myD; pickI = i; }
+    }
+    if (pickI >= 0 && foes.length){
+      const d = D[pickI];
+      if (mem.tg == null || !foes.some(f => f.id === mem.tg) || G.frame - (mem.tgF | 0) > 120){ mem.tg = foes[Math.floor(rnd(mem) * foes.length)].id; mem.tgF = G.frame; mem.aimE = (rnd(mem) * 2 - 1) * L.err; }
+      const f = G.players.find(q => q.id === mem.tg), q = D[f.di], dist = Math.hypot(q.x - d.x, q.y - d.y), t = dist / 6.2;
+      const ax = q.x + q.vx * t * 0.9, ay = q.y + q.vy * t * 0.9 + mem.aimE;
+      let ux = ax - d.x, uy = ay - d.y; const l = Math.hypot(ux, uy) || 1; ux /= l; uy /= l;
+      const rr = me.radius + d.radius, spot = {x: d.x - ux * (rr + 2), y: d.y - uy * (rr + 2)};
+      let clamped = false;
+      if (spot.x * sx < me.radius + 1){ spot.x = sx * (me.radius + 1); const dy = Math.sqrt(Math.max(0, (rr + 2) ** 2 - (d.x - spot.x) ** 2)); spot.y = d.y - Math.sign(uy || 1) * dy; clamped = true; }   // (the ball on the line: from our side of it)
+      const lx = c.W - me.radius - 1, ly = c.H - me.radius - 1;   // (by a wall: as near as the wall lets me)
+      if (Math.abs(spot.x) > lx){ spot.x = Math.sign(spot.x) * lx; clamped = true; } if (Math.abs(spot.y) > ly){ spot.y = Math.sign(spot.y) * ly; clamped = true; }
+      if (mem.pickI !== pickI){ mem.pickI = pickI; mem.pickF = G.frame; }
+      const off = Math.hypot(me.x - spot.x, me.y - spot.y);
+      const gap = Math.hypot(d.x - me.x, d.y - me.y) - rr;
+      const bx = d.x - me.x, by = d.y - me.y, bl = Math.hypot(bx, by) || 1, al = (bx * ux + by * uy) / bl;
+      if (mem.backTo > G.frame) return keysTo(me, sx * c.W * 0.5, 0, 0.2);   // (after kicking one out of a corner: give it room)
+      if (gap < 5 && G.frame - mem.pickF > 150 && !(al > 0.94) && !(bx / bl * -sx > 0.35)){ mem.backTo = G.frame + 30; mem.pickF = G.frame; return 16 | keysTo(me, d.x, d.y, 0.3); }
+      if (gap < 5 && (al > 0.94 || (bx / bl * -sx > 0.35 && (clamped || G.frame - mem.pickF > 90)))) return 16 | keysTo(me, d.x + bx / bl * 10, d.y + by / bl * 10, 0.3);
+      if (clamped && off < 4) return keysTo(me, d.x, d.y, 0.3);   // (can't get round it: go at it)
+      // round the ball to get behind it, not through it
+      if (off > 6 && al < 0.5 && gap < 30 && !clamped){ const px = -uy, py = ux, s = (me.x - d.x) * px + (me.y - d.y) * py >= 0 ? 1 : -1;
+        const rx = d.x + px * s * (rr + 14) - ux * (rr + 8), ry = d.y + py * s * (rr + 14) - uy * (rr + 8);
+        return keysTo(me, sx * Math.max(me.radius + 1, Math.min(lx, rx * sx)), Math.max(-ly, Math.min(ly, ry)), 0.2); }
+      return keysTo(me, spot.x, spot.y, off < 30 ? 0.15 : 0.09);
+    }
+    // 3. hang back and move about
+    const idx = mates.indexOf(p), n = Math.max(1, mates.length), hy = n <= 1 ? 0 : (idx / (n - 1) - 0.5) * c.H * 1.1;
+    const wy = hy + Math.sin(G.frame / 70 + p.id * 1.7) * c.H * 0.35;
+    return keysTo(me, sx * c.W * 0.62, Math.max(-c.H + 20, Math.min(c.H - 20, wy)));
+  }
+  return {LEVELS, SPEC, DEFAULT, clampBrain, think, gameThink, T, pathSlack, tune(o){ if (o.pre != null) KEEP_PRE = o.pre; if (o.reach != null) KEEP_REACH = o.reach; if (o.claim != null) KEEP_CLAIM = o.claim; if (o.sweep != null) KEEP_SWEEP = o.sweep; if (o.detour != null) KEEP_DETOUR = o.detour;
     if ('far' in o) KEEP_FAR = o.far; if ('farClaim' in o) KEEP_FAR_CLAIM = o.farClaim; if ('press' in o) PRESS_SHOT = o.press; if ('pressRange' in o) PRESS_RANGE = o.pressRange; if ('floor' in o) SHOT_FLOOR = o.floor;
     if ('corner' in o) CORNER_W = o.corner; if ('lineup' in o) LINEUP_SHOT = o.lineup; if ('lineupN' in o) LINEUP_N = o.lineupN; if ('wall' in o) WALL_PASS = o.wall; if ('wallBonus' in o) WALL_BONUS = o.wallBonus; if ('shotTol' in o) SHOT_TOL = o.shotTol; if ('wallAhead' in o) WALL_AHEAD = o.wallAhead; if ('knockRange' in o) KNOCK_RANGE = o.knockRange;
     if ('thru' in o) THRU_PASS = o.thru; if ('thruAhead' in o) THRU_AHEAD = o.thruAhead; if ('recvReact' in o) RECV_REACT = o.recvReact; if ('passAdv' in o) PASS_ADV = o.passAdv;
@@ -4923,6 +5287,38 @@ const FACTORY_BRAIN = {"tol":0.3573299904380753,"pre":2.4877468886401743,"depth"
 // v28.90: the Small (1v1) and Big (3v3) arenas, from the maps the user sent: Winky's Futsal Small (HaxMods) and Futsal x3 by Bazinga (HaxMaps), renamed, the Big one recoloured to ours with our ball and players; the PB logo is put on in ui.js (arenaJSON)
 const SMALL_STADIUM = {"name":"Pitch Brawl Arena · Small","width":335,"height":160,"bg":{"type":"","width":0,"height":0,"color":"454C5E"},"vertexes":[{"x":275,"y":-130,"cMask":["ball"],"bias":30,"color":"a3acc2"},{"x":0,"y":160,"bCoef":0,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"a8b4bd"},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"a8b4bd"},{"x":0,"y":80,"bCoef":0,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-305,"y":-45,"bCoef":0.1,"cMask":["ball"],"bias":-2,"color":"f08a2b"},{"x":-305,"y":45,"bCoef":0.1,"cMask":["ball"],"bias":2,"color":"f08a2b"},{"x":305,"y":-45,"bCoef":0.1,"cMask":["ball"],"bias":2,"color":"e8e3e3"},{"x":305,"y":45,"bCoef":0.1,"cMask":["ball"],"bias":-2,"color":"e8e3e3"},{"x":-273.5,"y":-88,"cGroup":[],"color":"a3acc2","curve":180},{"x":-273.5,"y":88,"cGroup":[],"color":"a3acc2","curve":180},{"x":273.5,"y":-88,"cGroup":[],"curve":-180,"color":"a3acc2"},{"x":273.5,"y":88,"cGroup":[],"color":"a3acc2","curve":-180},{"x":275,"y":-45,"bCoef":0.1,"cMask":["ball"],"bias":2,"color":"e8e3e3"},{"x":275,"y":45,"bCoef":0.1,"cMask":["ball"],"bias":-2,"color":"e8e3e3"},{"x":-275,"y":130,"cMask":["ball"],"bias":0,"color":"a3acc2"},{"x":275,"y":130,"cMask":["ball"],"bias":30,"color":"a3acc2"},{"x":-275,"y":-130,"cMask":["ball"],"cGroup":["ball"],"bias":0,"color":"a3acc2"},{"x":-275,"y":45,"bCoef":0.1,"cMask":["ball"],"bias":2,"color":"f08a2b"},{"x":-275,"y":-45,"cMask":["ball"],"bias":-2,"color":"f08a2b"},{"x":0,"y":130,"bCoef":0,"cMask":[],"color":"a3acc2"},{"x":0,"y":80,"bCoef":0,"cMask":[],"color":"a3acc2"},{"x":0,"y":-80,"bCoef":0,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-160,"bCoef":0,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0,"cMask":[],"color":"a3acc2"},{"x":0,"y":-130,"bCoef":0,"cMask":[],"color":"a3acc2"},{"x":276.5,"y":-130,"cMask":["ball"],"bias":30,"color":"a3acc2"},{"x":-276.5,"y":-130,"cMask":["ball"],"cGroup":["ball"],"bias":0,"color":"a3acc2"},{"x":-276.5,"y":130,"cMask":["ball"],"bias":0,"color":"a3acc2"},{"x":276.5,"y":130,"cMask":["ball"],"bias":30,"color":"a3acc2"},{"x":-305,"y":-46.5,"bCoef":0.1,"cMask":["ball"],"bias":-2,"color":"f08a2b"},{"x":-305,"y":46.5,"bCoef":0.1,"cMask":["ball"],"bias":2,"color":"f08a2b"},{"x":305,"y":-46.5,"bCoef":0.1,"cMask":["ball"],"bias":2,"color":"e8e3e3"},{"x":305,"y":46.5,"bCoef":0.1,"cMask":["ball"],"bias":-2,"color":"e8e3e3"},{"x":26,"y":-13,"cGroup":["c1"],"trait":"none","color":"e8e3e3"},{"x":10,"y":15,"cGroup":["c1"],"trait":"none","color":"e8e3e3"},{"x":6,"y":-13,"cGroup":["c1"],"color":"e8e3e3"},{"x":-1,"y":1,"cGroup":["c1"],"color":"e8e3e3"},{"x":23,"y":-13,"cGroup":["c1"],"trait":"none","color":"e8e3e3"},{"x":7,"y":15,"cGroup":["c1"],"trait":"none","color":"e8e3e3"},{"x":9,"y":-13,"cGroup":["c1"],"color":"e8e3e3"},{"x":1,"y":2,"cGroup":["c1"],"color":"e8e3e3"},{"x":-27,"y":-13,"cGroup":["c1"],"color":"f08a2b"},{"x":-9,"y":15,"cGroup":["c1"],"color":"f08a2b"},{"x":-24,"y":-13,"cGroup":["c1"],"color":"f08a2b"},{"x":-6,"y":15,"cGroup":["c1"],"color":"f08a2b"},{"x":7,"y":3,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":17,"y":19,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":9,"y":3,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":19,"y":19,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":-10,"y":-13,"cGroup":["c1"],"color":"e8e3e3"},{"x":8,"y":15,"cGroup":["c1"],"color":"e8e3e3"},{"x":-7,"y":-13,"cGroup":["c1"],"color":"e8e3e3"},{"x":11,"y":15,"cGroup":["c1"],"color":"e8e3e3"},{"x":-36,"y":15.8,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":34,"y":15.8,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":-36,"y":-13.8,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":34,"y":-13.8,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":11,"y":3,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":21,"y":19,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":11,"y":1,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":21,"y":17,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":11,"y":-1,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":21,"y":15,"cGroup":["c1"],"trait":"none","color":"454C5E","curve":0},{"x":0,"y":78,"cGroup":["c1"],"color":"d0d5e1","curve":180},{"x":0,"y":-78,"cGroup":["c1"],"color":"d0d5e1","curve":180},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"a3acc2"},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"a3acc2"}],"segments":[{"v0":9,"v1":10,"curve":180,"color":"a3acc2","cGroup":[],"x":-215},{"v0":11,"v1":12,"curve":-180,"color":"a3acc2","cGroup":[],"x":215},{"v0":13,"v1":14,"color":"c4c9d4","bCoef":0.1,"cMask":[]},{"v0":19,"v1":18,"color":"c4c9d4","bCoef":0.1,"cMask":[]},{"v0":4,"v1":1,"vis":false,"color":"FFFFFF","bCoef":0,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":21,"v1":20,"color":"a3acc2","bCoef":0,"cMask":[]},{"v0":23,"v1":22,"vis":false,"color":"FFFFFF","bCoef":0,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":25,"v1":24,"color":"a3acc2","bCoef":0,"cMask":[]},{"v0":5,"v1":19,"color":"f08a2b","bCoef":0.1,"cMask":["ball"],"bias":-2},{"v0":17,"v1":19,"color":"a3acc2","cMask":["ball"],"bias":30},{"v0":6,"v1":18,"color":"f08a2b","bCoef":0.1,"cMask":["ball"],"bias":2},{"v0":18,"v1":15,"color":"a3acc2","cMask":["ball"],"bias":30},{"v0":7,"v1":13,"color":"e8e3e3","bCoef":0.1,"cMask":["ball"],"bias":2},{"v0":8,"v1":14,"color":"e8e3e3","bCoef":0.1,"cMask":["ball"],"bias":-2},{"v0":13,"v1":0,"color":"a3acc2","cMask":["ball"],"bias":30},{"v0":16,"v1":14,"color":"a3acc2","cMask":["ball"],"bias":30},{"v0":26,"v1":27,"color":"a3acc2","cMask":["ball"],"cGroup":["ball"],"bias":0,"y":-130},{"v0":28,"v1":29,"color":"a3acc2","cMask":["ball"],"cGroup":["ball"],"bias":0,"y":130},{"v0":30,"v1":31,"color":"f08a2b","bCoef":0.1,"cMask":["ball"],"bias":0},{"v0":32,"v1":33,"color":"e8e3e3","bCoef":0.1,"cMask":["ball"],"bias":0},{"v0":34,"v1":35,"vis":true,"color":"e8e3e3","cGroup":["c1"],"trait":"none"},{"v0":36,"v1":37,"vis":true,"color":"e8e3e3","cGroup":["c1"]},{"v0":38,"v1":39,"vis":true,"color":"e8e3e3","cGroup":["c1"],"trait":"none"},{"v0":40,"v1":41,"vis":true,"color":"e8e3e3","cGroup":["c1"]},{"v0":42,"v1":43,"vis":true,"color":"f08a2b","cGroup":["c1"]},{"v0":44,"v1":45,"vis":true,"color":"f08a2b","cGroup":["c1"]},{"v0":46,"v1":47,"curve":0,"vis":true,"color":"454C5E","cGroup":["c1"],"trait":"none","x":20,"y":29},{"v0":48,"v1":49,"curve":0,"vis":true,"color":"454C5E","cGroup":["c1"],"trait":"none","x":20,"y":29},{"v0":50,"v1":51,"vis":true,"color":"e8e3e3","cGroup":["c1"]},{"v0":52,"v1":53,"vis":true,"color":"e8e3e3","cGroup":["c1"]},{"v0":54,"v1":55,"curve":0,"vis":true,"color":"454C5E","cGroup":["c1"],"trait":"none","x":20,"y":28.8},{"v0":56,"v1":57,"curve":0,"vis":true,"color":"454C5E","cGroup":["c1"],"trait":"none","x":20,"y":-0.8},{"v0":58,"v1":59,"curve":0,"vis":true,"color":"454C5E","cGroup":["c1"],"trait":"none","x":20,"y":29},{"v0":60,"v1":61,"curve":0,"vis":true,"color":"454C5E","cGroup":["c1"],"trait":"none","x":20,"y":29},{"v0":62,"v1":63,"curve":0,"vis":true,"color":"454C5E","cGroup":["c1"],"trait":"none","x":20,"y":29},{"v0":64,"v1":65,"curve":180,"vis":true,"color":"d0d5e1","cGroup":["c1"]},{"v0":65,"v1":64,"curve":180,"vis":true,"color":"f5b070","cGroup":["c1"]},{"v0":66,"v1":67,"curve":180,"color":"a3acc2","bCoef":0.1,"cMask":["red","blue"],"cGroup":["blueKO"],"curveF":6.1232339957368e-17},{"v0":67,"v1":66,"curve":180,"color":"f08a2b","bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO"],"curveF":6.1232339957368e-17}],"planes":[{"normal":[0,1],"dist":-160,"bCoef":0.1,"_data":{"extremes":{"normal":[0,1],"dist":-160,"canvas_rect":[-966,-332,966,333],"a":[-966,-160],"b":[966,-160]}}},{"normal":[0,-1],"dist":-160,"bCoef":0.1,"_data":{"extremes":{"normal":[0,-1],"dist":-160,"canvas_rect":[-966,-332,966,333],"a":[-966,160],"b":[966,160]}}},{"normal":[1,0],"dist":-335,"bCoef":0.1,"_data":{"extremes":{"normal":[1,0],"dist":-335,"canvas_rect":[-966,-332,966,333],"a":[-335,-332],"b":[-335,333]}}},{"normal":[-1,0],"dist":-335,"bCoef":0.1,"_data":{"extremes":{"normal":[-1,0],"dist":-335,"canvas_rect":[-966,-332,966,333],"a":[335,-332],"b":[335,333]}}},{"normal":[0,1],"dist":-130,"bCoef":1.1,"cMask":["ball"],"_data":{"extremes":{"normal":[0,1],"dist":-130,"canvas_rect":[-966,-332,966,333],"a":[-966,-130],"b":[966,-130]}}},{"normal":[0,-1],"dist":-130,"bCoef":1.1,"cMask":["ball"],"_data":{"extremes":{"normal":[0,-1],"dist":-130,"canvas_rect":[-966,-332,966,333],"a":[-966,130],"b":[966,130]}}},{"normal":[1,0],"dist":-305,"bCoef":0.1,"cMask":["ball"],"_data":{"extremes":{"normal":[1,0],"dist":-305,"canvas_rect":[-966,-332,966,333],"a":[-305,-332],"b":[-305,333]}}},{"normal":[-1,0],"dist":-305,"bCoef":0.1,"cMask":["ball"],"_data":{"extremes":{"normal":[-1,0],"dist":-305,"canvas_rect":[-966,-332,966,333],"a":[305,-332],"b":[305,333]}}}],"goals":[{"p0":[-275,45],"p1":[-275,-45],"team":"red"},{"p0":[275,45],"p1":[275,-45],"team":"blue"}],"discs":[{"radius":4.5,"invMass":0,"pos":[-275,45],"color":"f08a2b"},{"radius":4.5,"invMass":0,"pos":[-275,-45],"color":"f08a2b"},{"radius":4.5,"invMass":0,"pos":[275,45],"color":"e8e3e3"},{"radius":4.5,"invMass":0,"pos":[275,-45],"color":"e8e3e3"}],"playerPhysics":{"acceleration":0.11,"kickingAcceleration":0.083,"kickStrength":4.65,"bCoef":0.35},"ballPhysics":{"radius":6.5,"color":"f0bb28","bCoef":0.465,"invMass":1.4},"spawnDistance":140,"traits":[],"joints":[],"redSpawnPoints":[],"blueSpawnPoints":[],"canBeStored":true};
 const BIG_STADIUM = {"name":"Pitch Brawl Arena · Big","width":620,"height":270,"bg":{"type":"","color":"454C5E","width":550,"height":240},"vertexes":[{"x":550,"y":240,"cMask":["ball"]},{"x":550,"y":-240,"cMask":["ball"]},{"x":0,"y":270,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.15,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.15,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-270,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-550,"y":-80,"bCoef":0.1,"cMask":["red","blue","ball"]},{"x":-590,"y":-80,"bCoef":0.1,"cMask":["red","blue","ball"]},{"x":-590,"y":80,"bCoef":0.1,"cMask":["red","blue","ball"]},{"x":-550,"y":80,"bCoef":0.1,"cMask":["red","blue","ball"]},{"x":550,"y":-80,"bCoef":0.1,"cMask":["red","blue","ball"]},{"x":590,"y":-80,"bCoef":0.1,"cMask":["red","blue","ball"]},{"x":590,"y":80,"bCoef":0.1,"cMask":["red","blue","ball"]},{"x":550,"y":80,"bCoef":0.1,"cMask":["red","blue","ball"]},{"x":-550,"y":80,"bCoef":1.15,"cMask":["ball"]},{"x":-550,"y":240,"bCoef":1.15,"cMask":["ball"]},{"x":-550,"y":-80,"bCoef":1.15,"cMask":["ball"]},{"x":-550,"y":-240,"bCoef":1.15,"cMask":["ball"]},{"x":-550,"y":240,"cMask":["ball"]},{"x":550,"y":240,"cMask":["ball"]},{"x":550,"y":80,"bCoef":1.15,"cMask":["ball"]},{"x":550,"y":240,"bCoef":1.15,"cMask":["ball"]},{"x":550,"y":-240,"bCoef":1.15,"cMask":["ball"]},{"x":550,"y":-80,"bCoef":1.15,"cMask":["ball"]},{"x":550,"y":-240,"bCoef":0,"cMask":["ball"]},{"x":550,"y":-240,"bCoef":0,"cMask":["ball"]},{"x":-550,"y":-240,"cMask":["ball"]},{"x":550,"y":-240,"cMask":["ball"]},{"x":0,"y":-240,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":240,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"x":-557.5,"y":80,"cMask":["ball"]},{"x":-557.5,"y":240,"cMask":["ball"]},{"x":-557.5,"y":-240,"cMask":["ball"]},{"x":-557.5,"y":-80,"cMask":["ball"]},{"x":557.5,"y":-240,"cMask":["ball"]},{"x":557.5,"y":-80,"cMask":["ball"]},{"x":557.5,"y":80,"cMask":["ball"]},{"x":557.5,"y":240,"cMask":["ball"]},{"x":0,"y":-80,"bCoef":0.1,"cMask":[]},{"x":0,"y":80,"bCoef":0.1,"cMask":[]},{"x":-550,"y":-80,"bCoef":0.1,"cMask":[]},{"x":-550,"y":80,"bCoef":0.1,"cMask":[]},{"x":550,"y":-80,"bCoef":0.1,"cMask":[]},{"x":550,"y":80,"bCoef":0.1,"cMask":[]},{"x":-240,"y":256,"bCoef":0.1,"cMask":[]},{"x":-120,"y":256,"bCoef":0.1,"cMask":[]},{"x":-240,"y":-256,"bCoef":0.1,"cMask":[]},{"x":-120,"y":-224,"bCoef":0.1,"cMask":[]},{"x":-120,"y":-256,"bCoef":0.1,"cMask":[]},{"x":240,"y":256,"bCoef":0.1,"cMask":[]},{"x":120,"y":224,"bCoef":0.1,"cMask":[]},{"x":120,"y":256,"bCoef":0.1,"cMask":[]},{"x":240,"y":-224,"bCoef":0.1,"cMask":[]},{"x":240,"y":-256,"bCoef":0.1,"cMask":[]},{"x":120,"y":-224,"bCoef":0.1,"cMask":[]},{"x":120,"y":-256,"bCoef":0.1,"cMask":[]},{"x":-381,"y":240,"bCoef":0.1,"cMask":[]},{"x":-381,"y":256,"bCoef":0.1,"cMask":[]},{"x":-550,"y":200,"bCoef":0.1,"cMask":[]},{"x":-390,"y":70,"bCoef":0.1,"cMask":[]},{"x":-550,"y":226,"bCoef":0.1,"cMask":[]},{"x":-536,"y":240,"bCoef":0.1,"cMask":[]},{"x":-550,"y":-200,"bCoef":0.1,"cMask":[]},{"x":-390,"y":-70,"bCoef":0.1,"cMask":[]},{"x":-550,"y":-226,"bCoef":0.1,"cMask":[]},{"x":-536,"y":-240,"bCoef":0.1,"cMask":[]},{"x":-556,"y":123,"bCoef":0.1,"cMask":[]},{"x":-575,"y":123,"bCoef":0.1,"cMask":[]},{"x":556,"y":123,"bCoef":0.1,"cMask":[]},{"x":575,"y":123,"bCoef":0.1,"cMask":[]},{"x":-556,"y":-123,"bCoef":0.1,"cMask":[]},{"x":-575,"y":-123,"bCoef":0.1,"cMask":[]},{"x":556,"y":-123,"bCoef":0.1,"cMask":[]},{"x":575,"y":-123,"bCoef":0.1,"cMask":[]},{"x":-381,"y":-240,"bCoef":0.1,"cMask":[]},{"x":-381,"y":-256,"bCoef":0.1,"cMask":[]},{"x":381,"y":240,"bCoef":0.1,"cMask":[]},{"x":381,"y":256,"bCoef":0.1,"cMask":[]},{"x":381,"y":-240,"bCoef":0.1,"cMask":[]},{"x":381,"y":-256,"bCoef":0.1,"cMask":[]},{"x":550,"y":-226,"bCoef":0.1,"cMask":[]},{"x":536,"y":-240,"bCoef":0.1,"cMask":[]},{"x":550,"y":226,"bCoef":0.1,"cMask":[]},{"x":536,"y":240,"bCoef":0.1,"cMask":[]},{"x":550,"y":200,"bCoef":0.1,"cMask":[]},{"x":390,"y":70,"bCoef":0.1,"cMask":[]},{"x":550,"y":-200,"bCoef":0.1,"cMask":[]},{"x":390,"y":-70,"bCoef":0.1,"cMask":[]},{"x":390,"y":70,"bCoef":0.1,"cMask":[]},{"x":390,"y":-70,"bCoef":0.1,"cMask":[]},{"x":-375,"y":1,"bCoef":0.1,"cMask":[]},{"x":-375,"y":-1,"bCoef":0.1,"cMask":[]},{"x":-375,"y":3,"bCoef":0.1,"cMask":[]},{"x":-375,"y":-3,"bCoef":0.1,"cMask":[]},{"x":-375,"y":-2,"bCoef":0.1,"cMask":[]},{"x":-375,"y":2,"bCoef":0.1,"cMask":[]},{"x":-375,"y":-3.5,"bCoef":0.1,"cMask":[]},{"x":-375,"y":3.5,"bCoef":0.1,"cMask":[]},{"x":375,"y":1,"bCoef":0.1,"cMask":[]},{"x":375,"y":-1,"bCoef":0.1,"cMask":[]},{"x":375,"y":3,"bCoef":0.1,"cMask":[]},{"x":375,"y":-3,"bCoef":0.1,"cMask":[]},{"x":375,"y":-2,"bCoef":0.1,"cMask":[]},{"x":375,"y":2,"bCoef":0.1,"cMask":[]},{"x":375,"y":-3.5,"bCoef":0.1,"cMask":[]},{"x":375,"y":3.5,"bCoef":0.1,"cMask":[]},{"x":-277.5,"y":1,"bCoef":0.1,"cMask":[]},{"x":-277.5,"y":-1,"bCoef":0.1,"cMask":[]},{"x":-277.5,"y":3,"bCoef":0.1,"cMask":[]},{"x":-277.5,"y":-3,"bCoef":0.1,"cMask":[]},{"x":-277.5,"y":-2,"bCoef":0.1,"cMask":[]},{"x":-277.5,"y":2,"bCoef":0.1,"cMask":[]},{"x":-277.5,"y":-3.5,"bCoef":0.1,"cMask":[]},{"x":-277.5,"y":3.5,"bCoef":0.1,"cMask":[]},{"x":277.5,"y":1,"bCoef":0.1,"cMask":[]},{"x":277.5,"y":-1,"bCoef":0.1,"cMask":[]},{"x":277.5,"y":3,"bCoef":0.1,"cMask":[]},{"x":277.5,"y":-3,"bCoef":0.1,"cMask":[]},{"x":277.5,"y":-2,"bCoef":0.1,"cMask":[]},{"x":277.5,"y":2,"bCoef":0.1,"cMask":[]},{"x":277.5,"y":-3.5,"bCoef":0.1,"cMask":[]},{"x":277.5,"y":3.5,"bCoef":0.1,"cMask":[]}],"segments":[{"v0":6,"v1":7,"bCoef":0.1,"cMask":["red","blue","ball"],"color":"f08a2b"},{"v0":7,"v1":8,"bCoef":0.1,"cMask":["red","blue","ball"],"color":"f08a2b"},{"v0":8,"v1":9,"bCoef":0.1,"cMask":["red","blue","ball"],"color":"f08a2b"},{"v0":10,"v1":11,"bCoef":0.1,"cMask":["red","blue","ball"],"color":"e8e3e3"},{"v0":11,"v1":12,"bCoef":0.1,"cMask":["red","blue","ball"],"color":"e8e3e3"},{"v0":12,"v1":13,"bCoef":0.1,"cMask":["red","blue","ball"],"color":"e8e3e3"},{"v0":2,"v1":3,"bCoef":0.1,"vis":false,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":3,"v1":4,"bCoef":0.15,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["blueKO"],"color":"e8e3e3"},{"v0":4,"v1":3,"bCoef":0.15,"curve":180,"curveF":6.123233995736766e-17,"cMask":["red","blue"],"cGroup":["redKO"],"color":"f08a2b"},{"v0":4,"v1":5,"bCoef":0.1,"vis":false,"cMask":["red","blue"],"cGroup":["redKO","blueKO"]},{"v0":14,"v1":15,"bCoef":1.15,"cMask":["ball"],"color":"f08a2b"},{"v0":16,"v1":17,"bCoef":1.15,"cMask":["ball"],"color":"f08a2b"},{"v0":18,"v1":19,"cMask":["ball"],"color":"a3acc2"},{"v0":20,"v1":21,"bCoef":1.15,"cMask":["ball"],"color":"e8e3e3"},{"v0":22,"v1":23,"bCoef":1.15,"cMask":["ball"],"color":"e8e3e3"},{"v0":24,"v1":25,"bCoef":0,"cMask":["ball"],"color":"e8e3e3"},{"v0":26,"v1":27,"cMask":["ball"],"color":"a3acc2"},{"v0":28,"v1":29,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"a3acc2"},{"v0":30,"v1":31,"bCoef":0.1,"cMask":["red","blue"],"cGroup":["redKO","blueKO"],"color":"a3acc2"},{"v0":38,"v1":39,"vis":false,"cMask":["ball"],"color":"f08a2b"},{"v0":40,"v1":41,"vis":false,"cMask":["ball"],"color":"f08a2b"},{"v0":42,"v1":43,"vis":false,"cMask":["ball"],"color":"e8e3e3"},{"v0":44,"v1":45,"vis":false,"cMask":["ball"],"color":"e8e3e3"},{"v0":46,"v1":47,"bCoef":0.1,"cMask":[],"color":"a3acc2"},{"v0":48,"v1":49,"bCoef":0.1,"cMask":[],"color":"f08a2b"},{"v0":50,"v1":51,"bCoef":0.1,"cMask":[],"color":"e8e3e3"},{"v0":64,"v1":65,"bCoef":0.1,"cMask":[],"color":"a3acc2"},{"v0":67,"v1":66,"bCoef":0.1,"curve":89.99999999999999,"curveF":1.0000000000000002,"cMask":[],"color":"a3acc2"},{"v0":68,"v1":69,"bCoef":0.1,"curve":89.99999999999999,"curveF":1.0000000000000002,"cMask":[],"color":"a3acc2"},{"v0":70,"v1":71,"bCoef":0.1,"curve":89.99999999999999,"curveF":1.0000000000000002,"cMask":[],"color":"a3acc2"},{"v0":67,"v1":71,"bCoef":0.1,"cMask":[],"color":"a3acc2"},{"v0":73,"v1":72,"bCoef":0.1,"curve":89.99999999999999,"curveF":1.0000000000000002,"cMask":[],"color":"a3acc2"},{"v0":74,"v1":75,"bCoef":0.1,"cMask":[],"color":"f08a2b"},{"v0":76,"v1":77,"bCoef":0.1,"cMask":[],"color":"e8e3e3"},{"v0":78,"v1":79,"bCoef":0.1,"cMask":[],"color":"f08a2b"},{"v0":80,"v1":81,"bCoef":0.1,"cMask":[],"color":"e8e3e3"},{"v0":82,"v1":83,"bCoef":0.1,"cMask":[],"color":"a3acc2"},{"v0":84,"v1":85,"bCoef":0.1,"cMask":[],"color":"a3acc2"},{"v0":86,"v1":87,"bCoef":0.1,"cMask":[],"color":"a3acc2"},{"v0":88,"v1":89,"bCoef":0.1,"curve":89.99999999999999,"curveF":1.0000000000000002,"cMask":[],"color":"a3acc2"},{"v0":91,"v1":90,"bCoef":0.1,"curve":89.99999999999999,"curveF":1.0000000000000002,"cMask":[],"color":"a3acc2"},{"v0":92,"v1":93,"bCoef":0.1,"curve":89.99999999999999,"curveF":1.0000000000000002,"cMask":[],"color":"a3acc2"},{"v0":95,"v1":94,"bCoef":0.1,"curve":89.99999999999999,"curveF":1.0000000000000002,"cMask":[],"color":"a3acc2"},{"v0":96,"v1":97,"bCoef":0.1,"cMask":[],"color":"a3acc2"},{"v0":99,"v1":98,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":98,"v1":99,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":101,"v1":100,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":100,"v1":101,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":103,"v1":102,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":102,"v1":103,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":105,"v1":104,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":104,"v1":105,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":107,"v1":106,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":106,"v1":107,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":109,"v1":108,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":108,"v1":109,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":111,"v1":110,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":110,"v1":111,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":113,"v1":112,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":112,"v1":113,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":115,"v1":114,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":114,"v1":115,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":117,"v1":116,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":116,"v1":117,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":119,"v1":118,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":118,"v1":119,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":121,"v1":120,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":120,"v1":121,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":123,"v1":122,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":122,"v1":123,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":125,"v1":124,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":124,"v1":125,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":127,"v1":126,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":126,"v1":127,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":129,"v1":128,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"},{"v0":128,"v1":129,"bCoef":0.1,"curve":180,"curveF":6.123233995736766e-17,"cMask":[],"color":"a3acc2"}],"planes":[{"normal":[0,1],"dist":-240,"cMask":["ball"]},{"normal":[0,-1],"dist":-240,"cMask":["ball"]},{"normal":[0,1],"dist":-270,"bCoef":0.1},{"normal":[0,-1],"dist":-270,"bCoef":0.1},{"normal":[1,0],"dist":-620,"bCoef":0.1},{"normal":[-1,0],"dist":-620,"bCoef":0.1},{"normal":[1,0],"dist":-620,"bCoef":0.1,"cMask":["ball"]},{"normal":[-1,0],"dist":-620,"bCoef":0.1,"cMask":["ball"]}],"goals":[{"p0":[-557.5,-80],"p1":[-557.5,80],"team":"red"},{"p0":[557.5,80],"p1":[557.5,-80],"team":"blue"}],"discs":[{"pos":[-550,80],"radius":5,"invMass":0,"color":"f08a2b"},{"pos":[-550,-80],"radius":5,"invMass":0,"color":"f08a2b"},{"pos":[550,80],"radius":5,"invMass":0,"color":"e8e3e3"},{"pos":[550,-80],"radius":5,"invMass":0,"color":"e8e3e3"},{"pos":[-550,240],"radius":3,"bCoef":0.1,"invMass":0,"color":"a3acc2","cMask":[]},{"pos":[-550,-240],"radius":3,"bCoef":0.1,"invMass":0,"color":"a3acc2","cMask":[]},{"pos":[550,-240],"radius":3,"bCoef":0.1,"invMass":0,"color":"a3acc2","cMask":[]},{"pos":[550,240],"radius":3,"bCoef":0.1,"invMass":0,"color":"a3acc2","cMask":[]}],"playerPhysics":{"bCoef":0.35,"acceleration":0.11,"kickingAcceleration":0.083,"kickStrength":4.65},"ballPhysics":{"radius":6.5,"bCoef":0.465,"invMass":1.4,"color":"f0bb28"},"spawnDistance":350};
+// v28.91: the arenas for the other games, by team size (0: 1v1, 1: 2v2, 2: 3v3). court: the half sizes of the court the
+// ball must land in (ping pong: the table). The net or middle line is a wall only players meet; no goals are reachable
+// (a stadium needs them: two far away)
+const GAME_SIZES = {volley: [[220, 110], [280, 140], [330, 165]], badminton: [[200, 90], [240, 115], [280, 140]], pong: [[150, 80], [170, 95], [190, 110]], dodge: [[260, 140], [320, 165], [370, 190]]};
+const GAME_NAMES = {volley: 'Volleyball', badminton: 'Badminton', pong: 'Ping pong', dodge: 'Dodgeball'};
+function gameArenaJSON(game, k){
+  const sz = GAME_SIZES[game][Math.max(0, Math.min(2, k | 0))], W = sz[0], H = sz[1], V = [], S = [], P = [];
+  const seg = (a, b, o) => { const g = Object.assign({cMask: [], vis: true, color: 'a3acc2'}, o || {}), vm = {cMask: g.cMask, bCoef: g.bCoef != null ? g.bCoef : 1}; V.push(Object.assign({x: a[0], y: a[1]}, vm), Object.assign({x: b[0], y: b[1]}, vm)); S.push(Object.assign({v0: V.length - 2, v1: V.length - 1}, g)); };   // (a vertex is a wall too: it meets what its segment meets)
+  const rect = (w, h, o) => { seg([-w, -h], [w, -h], o); seg([w, -h], [w, h], o); seg([w, h], [-w, h], o); seg([-w, h], [-w, -h], o); };
+  const plane = (nx, ny, d, o) => P.push(Object.assign({normal: [nx, ny], dist: -d}, o));
+  const pp = {bCoef: 0.35, acceleration: 0.11, kickingAcceleration: 0.083, kickStrength: 4.65};
+  const far = [{p0: [-5000, -1], p1: [-5000, 1], team: 'red'}, {p0: [5000, 1], p1: [5000, -1], team: 'blue'}];
+  const base = {name: `${GAME_NAMES[game]} · ${['Small', 'Medium', 'Big'][k | 0]}`, bg: {type: '', color: '454C5E'}, goals: far, playerPhysics: pp, spawnDistance: 150, traits: {}, joints: [], canBeStored: false};
+  if (game === 'dodge'){
+    rect(W, H, {color: 'c4c9d4'});
+    seg([0, -H], [0, H], {cMask: ['red', 'blue'], bCoef: 0.1, color: 'e8e3e3'});
+    V.push({x: 0, y: -60, cMask: []}, {x: 0, y: 60, cMask: []}); S.push({v0: V.length - 2, v1: V.length - 1, curve: 180, cMask: [], vis: true, color: '6b7385'}); V.push({x: 0, y: 60, cMask: []}, {x: 0, y: -60, cMask: []}); S.push({v0: V.length - 2, v1: V.length - 1, curve: 180, cMask: [], vis: true, color: '6b7385'});
+    seg([-W, H + 14], [W, H + 14], {color: '5a6274'});
+    for (const [nx, ny, d] of [[1, 0, W], [-1, 0, W], [0, 1, H], [0, -1, H]]) plane(nx, ny, d, {bCoef: 0.5});
+    const ball = {radius: 10, bCoef: 0.7, invMass: 1.5, damping: 0.988, color: 'e2453c'};
+    return Object.assign(base, {width: W + 30, height: H + 62, vertexes: V, segments: S, planes: P, ballPhysics: ball,
+      discs: [Object.assign({pos: [0, -95], cGroup: ['ball', 'kick'], cMask: ['all']}, ball), Object.assign({pos: [0, 95], cGroup: ['ball', 'kick'], cMask: ['all']}, ball)]});
+  }
+  const pong = game === 'pong', PX = pong ? W + 150 : W + 45, PY = pong ? H + 95 : H + 40, BX = PX + 20, BY = PY + 15;
+  seg([0, -PY - 5], [0, PY + 5], {cMask: ['red', 'blue'], bCoef: 0.1, vis: !pong, color: 'e8e3e3'});
+  if (pong){ rect(W, H, {cMask: ['red', 'blue'], bCoef: 0.2, color: 'e8e3e3'}); seg([0, -H - 8], [0, H + 8], {color: 'f4f6fa'}); seg([-W, 0], [W, 0], {color: '7c8aa6'}); }
+  else { rect(W, H, {color: 'c4c9d4'}); const a = game === 'volley' ? 75 : 70; seg([-a, -H], [-a, H], {color: '6b7385'}); seg([a, -H], [a, H], {color: '6b7385'}); }
+  for (const [nx, ny, d] of [[1, 0, PX], [-1, 0, PX], [0, 1, PY], [0, -1, PY]]) plane(nx, ny, d, {bCoef: 0.1, cMask: ['red', 'blue']});
+  for (const [nx, ny, d] of [[1, 0, BX], [-1, 0, BX], [0, 1, BY], [0, -1, BY]]) plane(nx, ny, d, {bCoef: 0.3, cMask: ['ball']});
+  const ball = game === 'volley' ? {radius: 8, bCoef: 0.5, invMass: 1, damping: 0.995, color: 'f4f1e8'} : game === 'badminton' ? {radius: 5.5, bCoef: 0.4, invMass: 1, damping: 0.982, color: 'ffffff'} : {radius: 4.5, bCoef: 0.5, invMass: 1, damping: 0.996, color: 'ff9f1c'};
+  return Object.assign(base, {width: BX + 8, height: BY + 8, vertexes: V, segments: S, planes: P, ballPhysics: ball, discs: []});
+}
 (() => {
 'use strict';
 const C = PBCORE(), A = PBAI(C), TICK = C.TICK;
@@ -5014,17 +5410,28 @@ const mapKeyFor = (pick, size) => { const k = MAP_KEYS[pick | 0]; return k && k 
 const mapKeyOf = st => Object.keys(MAPS).find(k => MAPS[k] === st) || null;
 function useMap(k, force){   // (v28.84) one of our arenas, unless you've loaded a stadium of your own (online: always ours)
   if (stadiumJSON && !force) return; const st = MAPS[k] || DEFAULT_ST;
-  if (ST !== st){ if (ST === TRI_ST) homeST = st; else { ST = st; applyStadiumLayout(); try { applySide(); } catch (e) {} cam.x = cam.y = 0; cam.z = 0; } }
+  if (ST !== st){ if (SPECIAL.has(ST)) homeST = st; else { ST = st; applyStadiumLayout(); try { applySide(); } catch (e) {} cam.x = cam.y = 0; cam.z = 0; } }
 }
 // 1v1v1 (v25): the 3-way arena, made by mktri.js: the same ball and players as Winky's futsal, six sides of 330 px,
 // a goal (120 px) in three of them, walls on the others; each player kicks off from his own third
 const TRI_STADIUM = {"name":"Three-way arena","width":372,"height":345,"bg":{"type":"hex","color":"454C5E","R":330},"vertexes":[{"x":330,"y":0,"cMask":[]},{"x":277.5,"y":90.93,"cMask":[]},{"x":217.5,"y":194.86,"cMask":[]},{"x":165,"y":285.79,"cMask":[]},{"x":277.5,"y":90.93,"cMask":[]},{"x":303.48,"y":105.93,"cMask":[]},{"x":303.48,"y":105.93,"cMask":[]},{"x":243.48,"y":209.86,"cMask":[]},{"x":243.48,"y":209.86,"cMask":[]},{"x":217.5,"y":194.86,"cMask":[]},{"x":277.5,"y":90.93,"cMask":[]},{"x":217.5,"y":194.86,"cMask":[]},{"x":165,"y":285.79,"cMask":[]},{"x":-165,"y":285.79,"cMask":[]},{"x":-165,"y":285.79,"cMask":[]},{"x":-217.5,"y":194.86,"cMask":[]},{"x":-277.5,"y":90.93,"cMask":[]},{"x":-330,"y":0,"cMask":[]},{"x":-217.5,"y":194.86,"cMask":[]},{"x":-243.48,"y":209.86,"cMask":[]},{"x":-243.48,"y":209.86,"cMask":[]},{"x":-303.48,"y":105.93,"cMask":[]},{"x":-303.48,"y":105.93,"cMask":[]},{"x":-277.5,"y":90.93,"cMask":[]},{"x":-217.5,"y":194.86,"cMask":[]},{"x":-277.5,"y":90.93,"cMask":[]},{"x":-330,"y":0,"cMask":[]},{"x":-165,"y":-285.79,"cMask":[]},{"x":-165,"y":-285.79,"cMask":[]},{"x":-60,"y":-285.79,"cMask":[]},{"x":60,"y":-285.79,"cMask":[]},{"x":165,"y":-285.79,"cMask":[]},{"x":-60,"y":-285.79,"cMask":[]},{"x":-60,"y":-315.79,"cMask":[]},{"x":-60,"y":-315.79,"cMask":[]},{"x":60,"y":-315.79,"cMask":[]},{"x":60,"y":-315.79,"cMask":[]},{"x":60,"y":-285.79,"cMask":[]},{"x":-60,"y":-285.79,"cMask":[]},{"x":60,"y":-285.79,"cMask":[]},{"x":165,"y":-285.79,"cMask":[]},{"x":330,"y":0,"cMask":[]},{"x":372,"y":0,"cMask":["red","blue","green"],"bCoef":0.1},{"x":186,"y":322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":186,"y":322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-186,"y":322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-186,"y":322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-372,"y":0,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-372,"y":0,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-186,"y":-322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-186,"y":-322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":186,"y":-322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":186,"y":-322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":372,"y":0,"cMask":["red","blue","green"],"bCoef":0.1},{"x":0,"y":75,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":0,"y":372,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":-64.95,"y":-37.5,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":-322.16,"y":-186,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":64.95,"y":-37.5,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":322.16,"y":-186,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":0,"y":75,"cMask":[]},{"x":-64.95,"y":-37.5,"cMask":[]},{"x":64.95,"y":-37.5,"cMask":[]},{"x":0,"y":75,"cMask":[]},{"x":-64.95,"y":-37.5,"cMask":[]},{"x":64.95,"y":-37.5,"cMask":[]},{"x":0,"y":75,"cMask":[]},{"x":0,"y":-75,"cMask":[]},{"x":0,"y":-75,"cMask":[]},{"x":0,"y":75,"cMask":[]}],"segments":[{"v0":0,"v1":1,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":2,"v1":3,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":4,"v1":5,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"e8e3e3"},{"v0":6,"v1":7,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"e8e3e3"},{"v0":8,"v1":9,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"e8e3e3"},{"v0":10,"v1":11,"cMask":[],"color":"c4c9d4"},{"v0":12,"v1":13,"cMask":[],"color":"a3acc2"},{"v0":14,"v1":15,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":16,"v1":17,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":18,"v1":19,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"f08a2b"},{"v0":20,"v1":21,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"f08a2b"},{"v0":22,"v1":23,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"f08a2b"},{"v0":24,"v1":25,"cMask":[],"color":"c4c9d4"},{"v0":26,"v1":27,"cMask":[],"color":"a3acc2"},{"v0":28,"v1":29,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":30,"v1":31,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":32,"v1":33,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"5ee07a"},{"v0":34,"v1":35,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"5ee07a"},{"v0":36,"v1":37,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"5ee07a"},{"v0":38,"v1":39,"cMask":[],"color":"c4c9d4"},{"v0":40,"v1":41,"cMask":[],"color":"a3acc2"},{"v0":42,"v1":43,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":44,"v1":45,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":46,"v1":47,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":48,"v1":49,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":50,"v1":51,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":52,"v1":53,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":54,"v1":55,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"]},{"v0":56,"v1":57,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"]},{"v0":58,"v1":59,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"]},{"v0":60,"v1":61,"vis":false,"curve":120,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["blueKO","greenKO"]},{"v0":62,"v1":63,"vis":false,"curve":120,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","greenKO"]},{"v0":64,"v1":65,"vis":false,"curve":120,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO"]},{"v0":66,"v1":67,"curve":180,"cMask":[],"color":"a3acc2"},{"v0":68,"v1":69,"curve":180,"cMask":[],"color":"a3acc2"}],"planes":[{"normal":[-0.87,-0.5],"dist":-315.79,"bCoef":0.1,"cMask":["ball"]},{"normal":[0,-1],"dist":-285.79,"bCoef":1.1,"cMask":["ball"]},{"normal":[0.87,-0.5],"dist":-315.79,"bCoef":0.1,"cMask":["ball"]},{"normal":[0.87,0.5],"dist":-285.79,"bCoef":1.1,"cMask":["ball"]},{"normal":[0,1],"dist":-315.79,"bCoef":0.1,"cMask":["ball"]},{"normal":[-0.87,0.5],"dist":-285.79,"bCoef":1.1,"cMask":["ball"]}],"goals":[{"p0":[277.5,90.93],"p1":[217.5,194.86],"team":"blue"},{"p0":[-217.5,194.86],"p1":[-277.5,90.93],"team":"red"},{"p0":[-60,-285.79],"p1":[60,-285.79],"team":"green"}],"discs":[{"radius":4.5,"invMass":0,"pos":[277.5,90.93],"color":"e8e3e3"},{"radius":4.5,"invMass":0,"pos":[217.5,194.86],"color":"e8e3e3"},{"radius":4.5,"invMass":0,"pos":[-217.5,194.86],"color":"f08a2b"},{"radius":4.5,"invMass":0,"pos":[-277.5,90.93],"color":"f08a2b"},{"radius":4.5,"invMass":0,"pos":[-60,-285.79],"color":"5ee07a"},{"radius":4.5,"invMass":0,"pos":[60,-285.79],"color":"5ee07a"}],"playerPhysics":{"bCoef":0.35,"acceleration":0.11,"kickingAcceleration":0.083,"kickStrength":4.65},"ballPhysics":{"radius":6.5,"bCoef":0.465,"invMass":1.4,"color":"f0bb28","cMask":["all","green"]},"spawnDistance":150,"traits":[],"joints":[],"redSpawnPoints":[[-129.9,75],[-199.19,115]],"blueSpawnPoints":[[129.9,75],[199.19,115]],"greenSpawnPoints":[[0,-150],[0,-230]],"canBeStored":false};
 const TRI_ST = C.buildStadium(TRI_STADIUM);
 let homeST = null;
-function useTri(on){   // the arena for a 1v1v1, the stadium you had for anything else
-  if (on){ if (ST !== TRI_ST){ homeST = ST; ST = TRI_ST; applyStadiumLayout(); applySide(); cam.x = cam.y = 0; cam.z = 0; } }
-  else if (ST === TRI_ST){ ST = homeST || DEFAULT_ST; homeST = null; applyStadiumLayout(); applySide(); cam.x = cam.y = 0; cam.z = 0; }
+// v28.91: the other games' arenas (gameArenaJSON in data.js), built when first wanted: GAME_ST[game][size 0..2]
+const GAME_ST = {}, SPECIAL = new Set([TRI_ST]);
+const GAMES = ['volley', 'badminton', 'pong', 'dodge'], isGame = g => GAMES.includes(g);
+function gameST(game, k){
+  const g = GAME_ST[game] || (GAME_ST[game] = []); k = Math.max(0, Math.min(2, k | 0));
+  if (!g[k]){ const j = gameArenaJSON(game, k); j.bg.color = ARENA_BG; const st = C.buildStadium(j), sz = GAME_SIZES[game][k];   // (our teal, as the futsal arenas)
+    st.court = {W: sz[0], H: sz[1]}; st.game = game; g[k] = st; SPECIAL.add(st); }
+  return g[k];
 }
+const gameSizeK = (pick, size) => ({s: 0, m: 1, l: 2})[mapKeyFor(pick, size)];   // (the Pitch setting: Auto by team size, or Small / Medium / Big)
+function useSpecial(st){   // one of the arenas of their own (1v1v1, the other games), or null: back to the stadium you had
+  if (st){ if (ST !== st){ if (!SPECIAL.has(ST)) homeST = ST; ST = st; applyStadiumLayout(); applySide(); cam.x = cam.y = 0; cam.z = 0; } }
+  else if (SPECIAL.has(ST)){ ST = homeST || DEFAULT_ST; homeST = null; applyStadiumLayout(); applySide(); cam.x = cam.y = 0; cam.z = 0; }
+}
+function useTri(on){ useSpecial(on ? TRI_ST : null); }   // the arena for a 1v1v1, the stadium you had for anything else
 
 // ---------- the computer's brain: factory (trained by self-play before shipping) or learned on this device ----------
 // Normal, Hard and Insane play the trained brain; Easy keeps the original hand-made one, which is gentler. A brain trained
@@ -5269,7 +5676,7 @@ function localRoster(cfg){
     if (t === 1 && i === 0 && twoP(cfg) && !cfg.coop){ ctrl = 'human'; slot = 'p2'; }
     if (cfg.coop && n > 1 && t === 0 && i === n - 1){ ctrl = 'human'; slot = 'p2'; }   // (v25.6, "a 2v2 w friends where one of us is a gk": P2 in goal with P1, against the computer)
     if (cfg.three && n > 1 && t === (cfg.p3t ? 1 : 0) && i === 1){ ctrl = 'human'; slot = 'p3'; }
-    const keeper = ((cfg.mode === 'practice' || cfg.mode === 'wall') && t === 1) || (cfg.mode === 'keeper' && t === 0) || (n > 1 && i === n - 1 && (ctrl === 'ai' || slot === 'p2' && !!cfg.coop));
+    const keeper = !isGame(cfg.mode) && (((cfg.mode === 'practice' || cfg.mode === 'wall') && t === 1) || (cfg.mode === 'keeper' && t === 0) || (n > 1 && i === n - 1 && (ctrl === 'ai' || slot === 'p2' && !!cfg.coop)));
     const copy = cfg.mode === 'mirror' && t === 1 && i === 0;
     const defender = cfg.mode === 'dribble' && ctrl === 'ai';
     const pn = slot === 'p3' ? 'P3' : slot === 'p2' ? 'P2' : 'P1';
@@ -5280,7 +5687,7 @@ function localRoster(cfg){
 }
 // the rules a match is played to, for the engine: time, goals, draws (league), curve, slides & fouls, if level
 const otLenFor = tl => 60 * Math.max(1, Math.min(5, Math.round((+tl || 0) / 3)));   // overtime before a shootout: a third of the match, 1-5 min
-const rulesOf = cfg => ({timeLimit: cfg.timeLimit, scoreLimit: cfg.scoreLimit, mode: cfg.mode, draws: !!cfg.draws, curve: !!cfg.curve, slide: !!cfg.slide, power: !!cfg.power, fk: (!!cfg.slide || cfg.mode === 'fkdrill') && !!cfg.fk, dive: cfg.dive !== false, curveLv: [1, 2, 3, 4, 5].includes(cfg.curveLv) ? cfg.curveLv : 3,
+const rulesOf = cfg => ({timeLimit: cfg.timeLimit, scoreLimit: cfg.scoreLimit, mode: cfg.mode, game: isGame(cfg.mode) ? cfg.mode : isGame(cfg.game) ? cfg.game : undefined, draws: !!cfg.draws, curve: !!cfg.curve, slide: !!cfg.slide, power: !!cfg.power, fk: (!!cfg.slide || cfg.mode === 'fkdrill') && !!cfg.fk, dive: cfg.dive !== false, curveLv: [1, 2, 3, 4, 5].includes(cfg.curveLv) ? cfg.curveLv : 3,
   tie: cfg.draws || cfg.mode === 'tri' ? 0 : cfg.tie | 0, otLen: otLenFor(cfg.timeLimit),
   leg: cfg.leg === 1 || cfg.leg === 2 ? cfg.leg : 0, agg: Array.isArray(cfg.agg) && cfg.agg.length === 2 ? cfg.agg.map(v => Math.max(0, v | 0)) : null});   // (1v1v1: level at the top, next goal wins)
 // v28.21 ("make leg 1 and leg 2 better"): each leg opens with its banner over the kick-off: which leg, the first leg's
@@ -5447,6 +5854,7 @@ function tick(s){
   if (s.mode && s.mode.before) s.mode.before(s);
   if (s.net) s.net.beforeTick(s);
   for (const p of G.players) if (p.ctrl === 'ai'){
+    if (G.cfg.game){ C.setInput(p, A.gameThink(G, ST, p, s.level(p), aiMem(s, p))); continue; }   // (v28.91: the other games)
     const c = s.custom && s.custom.get(p.id);   // the copy of you: its own brain, and your kick-off move at its kick-offs
     const K = c ? c.trick : s.koMove && p.team === 1 && p.num === 1 ? s.koMove : null, k = K ? trickPlay(s, p, K) : -1;
     if (k >= 0) C.setInput(p, k);
@@ -5530,6 +5938,7 @@ const LATE_WORDS = {golden: ['GOLDEN GOAL!', 'Golden goal'], buzzer: ['LAST-SECO
 const realMatch = s => !s.mode || s.mode.kind === 'tri';
 function onEvent(s, e){
   const G = s.G;
+  if (s.mode && s.mode.ev) s.mode.ev(s, e);   // (v28.91: the other games' hits, spikes, the net)
   if (e.type === 'kick'){
     sfx.kick(e.speed);
     const p = playerById(G, e.pid);
@@ -6001,7 +6410,7 @@ async function offerFile(name, blob){
 }
 // which goal the replay is on: in goal replays the one shown, in the full replay the nearest
 function rpClipGoal(s){
-  if (s && s.cfg && s.cfg.mode === 'tri') return null;   // (a 1v1v1 goal isn't kept: it plays back on your stadium)
+  if (s && s.cfg && (s.cfg.mode === 'tri' || (s.G && s.G.cfg.game))) return null;   // (a 1v1v1 goal isn't kept: it plays back on your stadium; v28.91: nor the other games' points)
   const P = s && s.rp, R = s && s.full; if (!P || !R || !R.goals.length) return null;
   if (P.mode === 'goals') return P.segs[P.seg][2] || null;
   return R.goals.reduce((b, g) => !b || Math.abs(g.frame - P.t) < Math.abs(b.frame - P.t) ? g : b, null);
@@ -6312,7 +6721,7 @@ $('gDel').addEventListener('click', async () => {
 // during a match: ★ Save goal at the top of the pitch for the last goal, from when its follow-through is recorded
 // until 15 s later (also while its replay shows)
 function lastGoalToSave(s){
-  const R = s && s.full; if (!R || !R.goals.length || s.done || s.rp || (s.cfg && s.cfg.mode === 'tri')) return null;
+  const R = s && s.full; if (!R || !R.goals.length || s.done || s.rp || (s.cfg && s.cfg.mode === 'tri') || (s.G && s.G.cfg.game)) return null;   // (v28.91: not the other games' points)
   const g = R.goals[R.goals.length - 1], age = s.G.frame - g.frame;
   if (s.mode && g.team !== 0) return null;
   return !g.savedId && age >= Math.min(90, g.tail || 90) && age <= 900 ? g : null;
@@ -6564,6 +6973,114 @@ function triResults(s){
   const again = $('resAgain'); again.textContent = 'Rematch'; again.hidden = false; $('resMenu').textContent = 'Menu';
   const rec = s.full; $('resFull').hidden = !(rec && rec.n > 60); $('resGoals').hidden = !(rec && rec.goals.length);
   $('resGoals').textContent = rec && rec.goals.length === 1 ? 'Goal replay' : 'Goal replays';
+  $('resPanel').hidden = false;
+}
+// ---------- v28.91: the other games (volleyball, badminton, ping pong, dodgeball): points, words, clock, results ----------
+// The rules run in the engine (gameReset / gamePost in engine.js); this says what happened and keeps the tally. online:
+// the host's or a guest's match (a guest hears of points and hits from the host's snapshots: netPoint, netHit)
+const GAME_HOW = {volley: 'Volleyball: kick hits it (run into it to hit it further, by the net when it\'s high: a spike), walking into it bumps it up. Three touches a side; where it lands wins the point · first to 15',
+  badminton: 'Badminton: one touch a side, the shuttle slows fast in the air; by the net when it\'s high: a smash · first to 11',
+  pong: 'Ping pong: it must bounce once on their half, then they hit it back before it lands again. Aim with where you stand; run into it to hit it deep · first to 11',
+  dodge: 'Dodgeball: kick a ball at them: a hit costs a life, out of lives you\'re out. Kick one of theirs as it comes at you: a catch, the thrower loses a life · first to 3 rounds'};
+const GAME_WHY = {
+  kill: ['POINT', (w, l) => `${w} put it down`], drop: ['POINT', (w, l) => `it dropped on ${l}'s side`], out: ['OUT', (w, l) => `point to ${w}`],
+  touches: ['FAULT', (w, l, g) => `${g === 'volley' ? 'four touches' : 'two touches'}: point to ${w}`], early: ['FAULT', (w, l) => `hit before the bounce: point to ${w}`],
+  own: ['FAULT', (w, l) => `down on ${l}'s own half: point to ${w}`], twice: ['POINT', (w, l) => `two bounces: point to ${w}`], missed: ['POINT', (w, l) => `${l} missed it`],
+  round: ['ROUND', (w, l) => `${w} win the round`]};
+function gameMode(game, online){
+  const M = {kind: 'game', game, online: !!online, pts: {}, err: {}, list: [], rounds: 0};
+  const nameT = (s, t) => { const ps = s.G.players.filter(q => q.team === t && q.ctrl !== 'gone'); return ps.length === 1 ? nameOf(s, ps[0]) : KIT[t].name; };
+  M.point = (s, team, pid, why) => {
+    const G = s.G, p = pid != null ? playerById(G, pid) : null, W = GAME_WHY[why] || GAME_WHY.kill, w = nameT(s, team), l = nameT(s, 1 - team);
+    if (p){ if (p.team === team) M.pts[p.id] = (M.pts[p.id] || 0) + 1; else M.err[p.id] = (M.err[p.id] || 0) + 1; }
+    M.list.push({t: Math.floor(G.time), team, why, who: p ? nameOf(s, p) : ''});
+    if (game === 'dodge') M.rounds++;
+    const sub = W[1](w, l, game) + ` · ${G.score[0]}–${G.score[1]}`;
+    s.msg = {text: W[0], sub, until: s.ticks + 100, untilMs: performance.now() + 1700, team};
+    sfx.whistle(game === 'dodge' ? 0.9 : 0.45);
+    const lead = Math.max(...G.score), sl = G.cfg.scoreLimit;
+    say(`${W[0] === 'POINT' || W[0] === 'ROUND' ? '' : W[0][0] + W[0].slice(1).toLowerCase() + ': '}${W[1](w, l, game)} · ${G.score[0]}–${G.score[1]}${sl > 0 && lead === sl - 1 && G.score[0] !== G.score[1] ? (game === 'dodge' ? ' · one round from winning' : ' · match point') : ''}`);
+    if (G.score[team] >= (sl || 99) || game === 'dodge') fireworks(team, game === 'dodge' ? 3 : 2);
+  };
+  M.goal = (s, e) => M.point(s, e.team, e.pid, e.why || 'kill');
+  M.hit = (s, e) => {
+    const G = s.G, by = playerById(G, e.pid), v = playerById(G, e.vid);
+    if (e.caught){ sfx.save(); say(`CAUGHT! ${by ? nameOf(s, by) : ''} catches it: ${v ? nameOf(s, v) : 'the thrower'} ${v && v.out ? 'is out' : 'loses a life'}`); popFx('save', e.pid, 0, 0, 0, false); }
+    else { sfx.post(1.6); say(`${v ? nameOf(s, v) : 'Someone'} ${e.out ? 'is OUT' : 'is hit'}${by ? ' by ' + nameOf(s, by) : ''}${e.out ? '' : ` · ${e.lives} ${e.lives === 1 ? 'life' : 'lives'} left`}`); fx.shake = Math.max(fx.shake, e.out ? 7 : 4); }
+    if (v){ const d = (s.view ? s.G : s.G).discs[v.di]; if (d) dustFx(d, 0, -1); }
+  };
+  M.ev = (s, e) => {
+    if (e.type === 'hit') M.hit(s, e);
+    else if (e.type === 'spike'){ sfx.kick(6); const p = playerById(s.G, e.pid); say(`${p ? nameOf(s, p) : 'Someone'}: ${game === 'badminton' ? 'SMASH' : 'SPIKE'}!`, 1); fx.shake = Math.max(fx.shake, 3); }
+    else if (e.type === 'net') sfx.post(0.8);
+    else if (e.type === 'bounce') sfx.kick(1.2);
+  };
+  M.end = (s, e) => { const G = s.G; if (e.winner >= 0){ fireworks(e.winner, 7); say(`${nameT(s, e.winner)} win${G.players.filter(q => q.team === e.winner).length === 1 && nameT(s, e.winner) === 'You' ? '' : 's'} ${G.score.join('–')}!`); } else say(`It ends level: ${G.score.join('–')}`); };
+  M.after = s => {
+    const G = s.G;
+    const ot = C.overtime(G) && G.score[0] === G.score[1]; if (ot && !s.lastOt){ say(game === 'dodge' ? 'Time! The next round wins it.' : 'Time! The next point wins it.'); sfx.whistle(0.5); } s.lastOt = ot;
+    if (G.state === 3 && G.timer <= 150 && !s.endShown){ s.endShown = true; s.done = true; const R = gameSummary(s); if (s.net && s.net.ended) s.net.ended(R); showResults(R, s); }
+  };
+  M.clock = s => {
+    const G = s.G, tl = G.cfg.timeLimit, t = G.time;
+    if (G.pause > 0) return [G.pause < 120 ? 'Get ready' : 'Paused', tl > 0 ? fmt(Math.max(0, Math.ceil(tl * 60 - t))) : fmt(t)];
+    const lab = game === 'dodge' ? `Round ${Math.min(G.score[0] + G.score[1] + 1, 99)}` : G.state === 0 ? 'Serve' : G.cfg.scoreLimit ? `To ${G.cfg.scoreLimit}` : GAME_NAMES[game];
+    if (tl > 0){ if (t >= tl * 60) return [G.state < 3 && G.score[0] === G.score[1] ? 'Next wins' : 'Full time', G.state < 3 ? '+' + fmt(t - tl * 60) : '0:00']; return [lab, fmt(Math.ceil(tl * 60 - t))]; }
+    return [lab, fmt(t)];
+  };
+  M.draw = V => drawGameCourt(V, game);
+  return M;
+}
+// the table, the net and the touches count, under the players
+function drawGameCourt(V, game){
+  const c = ST.court; if (!c) return;
+  if (game === 'pong'){
+    ctx.fillStyle = 'rgba(28,86,140,.55)'; ctx.fillRect(-c.W, -c.H, c.W * 2, c.H * 2);
+    ctx.strokeStyle = '#f4f6fa'; ctx.lineWidth = 3; ctx.strokeRect(-c.W, -c.H, c.W * 2, c.H * 2);
+  }
+  if (NETG_OF(game)){   // the net: a band with its posts
+    const H = game === 'pong' ? c.H + 8 : c.H + 18;
+    ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(3, -H); ctx.lineTo(3, H); ctx.stroke();
+    ctx.strokeStyle = '#f4f6fa'; ctx.lineWidth = game === 'pong' ? 3 : 4; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(0, -H); ctx.lineTo(0, H); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#c4c9d4'; for (const y of [-H, H]){ ctx.beginPath(); ctx.arc(0, y, 4, 0, C.TAU); ctx.fill(); }
+    const vb = V.vb, N = NETG_OF(game);
+    if (vb && N.touches > 1 && vb.n > 0 && V.state === 1){   // volleyball: touches used by the side playing it, dots by the net on its side
+      const sx = vb.side === 0 ? -1 : 1;
+      for (let i = 0; i < N.touches; i++){ ctx.beginPath(); ctx.arc(sx * 14, -c.H - 26 + i * 11, 4, 0, C.TAU); ctx.fillStyle = i < vb.n ? KIT[vb.side].color : 'rgba(255,255,255,.18)'; ctx.fill(); }
+    }
+  }
+}
+const NETG_OF = g => C.NETG && C.NETG[g] || null;
+// the results of one of these games: R from gameSummary (the host sends the same to its guests)
+function gameSummary(s){
+  const G = s.G, M = s.mode, st = G.stats.players;
+  return {gm: M.game, score: G.score.slice(0, 2), time: Math.round(G.time), tn: [0, 1].map(t => { const ps = G.players.filter(q => q.team === t && q.ctrl !== 'gone'); return ps.length === 1 ? nameOf(s, ps[0]) : KIT[t].name; }),
+          pl: G.players.filter(p => p.ctrl !== 'gone').map(p => { const x = st[p.id] || {}; return [nameOf(s, p), p.team, M.pts[p.id] || 0, M.err[p.id] || 0, x.touches || 0, x.spikes || 0, x.hits || 0, x.catches || 0, x.outs || 0, x.throws || 0]; }),
+          list: M.list.slice(-40)};
+}
+function gameResults(R, s){
+  const box = $('res'); box.textContent = ''; $('resScores').hidden = true;
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const g = R.gm, sc = Array.isArray(R.score) ? R.score : [0, 0], w = sc[0] > sc[1] ? 0 : sc[1] > sc[0] ? 1 : -1, tn = Array.isArray(R.tn) ? R.tn : [KIT[0].name, KIT[1].name];
+  const me = s && s.locals && s.locals.length === 1 && !twoP(s.cfg) ? playerById(s.G, s.locals[0].pid) : null;
+  const myTeam = me ? me.team : (sess && sess.locals && sess.locals.length === 1 && sess.G ? (playerById(sess.G, sess.locals[0].pid) || {}).team : null);
+  $('resTitle').textContent = w < 0 ? 'Level' : myTeam === 0 || myTeam === 1 ? (myTeam === w ? 'You win' : `${tn[w]} win${tn[w] === 'You' ? '' : 's'}`) : `${tn[w]} win${tn[w] === 'You' ? '' : 's'}`;
+  const top = el('div', 'tri3');
+  for (const t of [0, 1]){ const r = el('div', 'tr3' + (t === w ? ' win' : '')), d = el('i'); d.style.background = KIT[t].img; r.append(el('span', 'pl', GAME_NAMES[g] || ''), d, el('b', null, tn[t]), el('span', 'sc', String(sc[t]))); top.append(r); }
+  box.append(top);
+  const t = el('table', 'tri3t'), head = el('tr'), dodge = g === 'dodge';
+  const cols = dodge ? [['Hits', 6], ['Knocked out', 8], ['Catches', 7], ['Throws', 9]] : g === 'pong' ? [['Points won', 2], ['Errors', 3], ['Hits', 4]] : [['Points won', 2], ['Errors', 3], ['Touches', 4], [g === 'badminton' ? 'Smashes' : 'Spikes', 5]];
+  head.append(el('td', 'm', '')); for (const [h] of cols) head.append(el('td', 'h', h)); t.append(head);
+  const pl = Array.isArray(R.pl) ? R.pl.slice().sort((a, b) => (a[1] - b[1]) || (b[2] - a[2]) || (b[6] - a[6])) : [];
+  for (const p of pl){ const tr = el('tr'), nm = el('td', 'm'); const dot = el('i', 'sw'); dot.style.cssText = `display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:${KIT[p[1] ? 1 : 0].color}`; nm.append(dot, document.createTextNode(String(p[0] || '?'))); tr.append(nm); for (const [, i] of cols) tr.append(el('td', null, String(p[i] | 0))); t.append(tr); }
+  box.append(t);
+  if (Array.isArray(R.list) && R.list.length && !dodge){
+    const why = {}; for (const x of R.list) why[x.why] = (why[x.why] || 0) + 1;
+    const words = {kill: 'put down', drop: 'dropped', out: 'out', touches: 'too many touches', early: 'hit before the bounce', own: 'own half', twice: 'two bounces', missed: 'missed'};
+    box.append(el('div', 'motm', 'How the points went: ' + Object.keys(why).map(k => `${words[k] || k} ${why[k]}`).join(' · ')));
+  }
+  const again = $('resAgain'); again.textContent = NET.on ? 'Back to the room' : 'Rematch'; again.hidden = false; $('resMenu').textContent = 'Menu';
+  $('resFull').hidden = true; $('resGoals').hidden = true;
   $('resPanel').hidden = false;
 }
 function goingIn(G, g){ const P = C.ballPath(ST, G.discs[0], 150, G.discs); for (let i = 1; i < P.length; i++){ if (C.crossesGoal(g, P[i].x, P[i].y, P[i - 1].x, P[i - 1].y)) return true; if (Math.abs(P[i].vx) + Math.abs(P[i].vy) < 0.02) break; } return false; }
@@ -8159,6 +8676,30 @@ new ResizeObserver(resize).observe(stage); resize();
 const PITCH_COLS = {slate: null, classic: '#454C5E', grass: '#3c6e3f', night: '#22283a', ocean: '#2d5872', clay: '#8a5a44', purple: '#4a3d6b'};
 const pitchCol = () => (PITCH_COLS[store.get('pb.pitch', 'slate')] || null);
 let BALL_SKIN = store.get('pb.ball', 'classic');   // (read once: drawn every frame)
+// v28.91: a ball in one of the other games. The net games: its shadow on the floor where it is, the ball up the screen by
+// its height and a little bigger (a volleyball with its seams, a shuttle with its feathers pointing back, an orange ping
+// pong ball); dodgeball: a red rubber ball, ringed in the thrower's colour while it's live
+function drawGameBall(V, d, i, gm){
+  const z = Math.max(0, d.z || 0), r = d.radius;
+  if (gm === 'dodge'){
+    ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); const g = ctx.createRadialGradient(d.x - r * 0.35, d.y - r * 0.35, r * 0.15, d.x, d.y, r); g.addColorStop(0, '#ff8a7a'); g.addColorStop(1, tint(d.color) || '#c8302a'); ctx.fillStyle = g; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(d.x, d.y, r * 0.62, 0.4, 2.6); ctx.stroke();
+    if (d.lt === 0 || d.lt === 1){ ctx.strokeStyle = KIT[d.lt].color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(d.x, d.y, r + 3.5, 0, C.TAU); ctx.stroke(); }
+    return;
+  }
+  const sk = Math.max(0.35, 1 - z / 70);   // the shadow: smaller and fainter the higher it is
+  ctx.fillStyle = `rgba(0,0,0,${0.18 + 0.22 * sk})`; ctx.beginPath(); ctx.ellipse(d.x, d.y, r * sk + 1, r * sk * 0.6 + 0.6, 0, 0, C.TAU); ctx.fill();
+  const y = d.y - z * 0.9, R = r * (1 + Math.min(z, 70) / 110);
+  if (gm === 'badminton'){
+    const vx = d.vx, vy = d.vy - (d.vz || 0) * 0.9, v = Math.hypot(vx, vy) || 1, bx = -vx / v, by = -vy / v;   // (the feathers trail behind it)
+    ctx.fillStyle = '#f7f7f2'; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 1.2; ctx.beginPath();
+    ctx.moveTo(d.x - by * R * 0.6, y + bx * R * 0.6); ctx.lineTo(d.x + bx * R * 2 - by * R * 1.25, y + by * R * 2 + bx * R * 1.25); ctx.lineTo(d.x + bx * R * 2 + by * R * 1.25, y + by * R * 2 - bx * R * 1.25); ctx.lineTo(d.x + by * R * 0.6, y - bx * R * 0.6); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(d.x, y, R * 0.75, 0, C.TAU); ctx.fillStyle = '#e8e3e3'; ctx.fill(); ctx.stroke();
+    return;
+  }
+  ctx.beginPath(); ctx.arc(d.x, y, R, 0, C.TAU); ctx.fillStyle = tint(d.color) || '#fff'; ctx.fill(); ctx.lineWidth = gm === 'pong' ? 1.2 : 2; ctx.strokeStyle = '#000'; ctx.stroke();
+  if (gm === 'volley'){ ctx.strokeStyle = 'rgba(40,70,140,.75)'; ctx.lineWidth = 1.4; const a = (d.x + d.y) / r * 0.3; ctx.beginPath(); ctx.arc(d.x, y, R * 0.6, a, a + 2.2); ctx.stroke(); ctx.beginPath(); ctx.arc(d.x, y, R * 0.6, a + 3.1, a + 5.3); ctx.stroke(); }
+}
 function drawBall(ctx, d, base){
   const k = BALL_SKIN, r = d.radius;
   if (k === 'classic' || !k){ ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); ctx.fillStyle = base; ctx.fill(); return; }
@@ -8177,7 +8718,7 @@ function applyStadiumLayout(){
   stage.style.aspectRatio = `${ST.width * 2} / ${ST.height * 2}`; document.documentElement.style.setProperty('--ar', String(ST.width / ST.height));
   stage.style.background = ST.bg.type === 'hockey' ? '#1e1e1e' : ST.bg.type === 'hex' ? (pitchCol() || '#2a2f3b') : (pitchCol() || ST.bg.color);
   $('stadiumName').textContent = ST.name; $('mStadium').textContent = 'Stadium · ' + ST.name;
-  $('defStBtn').hidden = ST === DEFAULT_ST || ST === TRI_ST;
+  $('defStBtn').hidden = ST === DEFAULT_ST || SPECIAL.has(ST);
 }
 // (v28.80, "ppl might zoom in too much and cant see anyhting": the closest is 1.5×, two thirds of the pitch at the
 // least (2× on a wide, short window showed little more than the middle); 2×, 2.5× and 3× are gone (a kept one is 1.5×),
@@ -8405,6 +8946,7 @@ function render(dt, clip){
     }
     for (const p of VP){
       const d = V.discs[p.di], m = PU[p.pu];
+      ctx.globalAlpha = p.out ? 0.35 : p.inv > 0 && ((p.inv >> 3) & 1) ? 0.45 : 1;   // (v28.91, dodgeball: out on the bench, or just hit)
       if (m && m.color){ ctx.beginPath(); ctx.arc(d.x, d.y, d.radius + 3, 0, C.TAU); ctx.lineWidth = 1.5; ctx.strokeStyle = m.color; ctx.stroke(); }
       const white = !paused && p.kicking && p.kickMin <= 0 && p.kickBurst >= 0, q = fl < 0 ? {x: 0, y: 0, radius: d.radius} : d;
       if (fl < 0){ ctx.save(); ctx.translate(d.x, d.y); ctx.scale(-1, 1); }   // mirrored picture: the shirt and the letters the right way round
@@ -8413,6 +8955,10 @@ function render(dt, clip){
       if (av){ ctx.font = `900 ${Math.round(d.radius * 0.95)}px 'Arial Black', Rubik, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.strokeStyle = contrast(KIT[p.team].text) === '#111111' ? 'rgba(0,0,0,.65)' : 'rgba(255,255,255,.75)'; ctx.strokeText(av, q.x, q.y + 1); ctx.fillStyle = KIT[p.team].text; ctx.fillText(av, q.x, q.y + 1); }
       if (fl < 0) ctx.restore();
+      ctx.globalAlpha = 1;
+      if (V.cfg && V.cfg.game === 'dodge' && !p.out && p.lives > 0){   // lives: little hearts over him
+        const n = p.lives | 0, w = 7; for (let k = 0; k < n; k++){ const hx = d.x + (k - (n - 1) / 2) * w, hy = d.y - d.radius - 7; ctx.fillStyle = '#ff5a6e'; ctx.beginPath(); ctx.arc(hx - 1.4, hy, 1.9, 0, C.TAU); ctx.arc(hx + 1.4, hy, 1.9, 0, C.TAU); ctx.moveTo(hx - 3.2, hy + 0.6); ctx.lineTo(hx, hy + 3.8); ctx.lineTo(hx + 3.2, hy + 0.6); ctx.fill(); }
+      }
     }
     { const ty = typingSet(s); if (ty && ty.size) for (const p of VP) if (ty.has(p.id)) drawTyping(V.discs[p.di]); }
     for (const p of VP) if (p.down > 0 && !(p.slide > 0)){   // down after a slide: little stars going round
@@ -8429,13 +8975,15 @@ function render(dt, clip){
     if (last && Math.hypot(b.x - last.x, b.y - last.y) > 40) fx.trail.length = 0;
     { const now = performance.now(); fx.trail.push({x: b.x, y: b.y, t: now}); while (fx.trail.length > 2 && (now - fx.trail[0].t > 200 || fx.trail.length > 40)) fx.trail.shift(); }   // (v28.42: the last 200 ms, at any frame rate: 12 frames at 60 fps, 24 at 120)
     const sp = Math.hypot(b.vx, b.vy);
-    if (sp > 4.2 && fx.trail.length > 2 && !reduceMotion){
+    if (sp > 4.2 && fx.trail.length > 2 && !reduceMotion && !(V.cfg && V.cfg.game)){
       ctx.lineCap = 'round';
       for (let i = 1; i < fx.trail.length; i++){ const a = fx.trail[i - 1], c = fx.trail[i]; ctx.strokeStyle = performance.now() < (fx.powerUntil || 0) ? `rgba(255,140,40,${(i / fx.trail.length) * 0.6})` : `rgba(255,255,255,${(i / fx.trail.length) * 0.35})`; ctx.lineWidth = b.radius * 2 * (i / fx.trail.length); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(c.x, c.y); ctx.stroke(); }
     }
+    const gm = V.cfg && V.cfg.game;
     for (let i = 0; i < V.discs.length; i++){
       if (V.players.some(p => p.di === i)) continue;
       const d = V.discs[i]; if (!d.color) continue;
+      if (gm){ drawGameBall(V, d, i, gm); continue; }   // (v28.91: the other games' balls, in the air or live)
       if (i === 0) drawBall(ctx, d, d.color); else { ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fillStyle = tint(d.color); ctx.fill(); } ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
       if (i === 0 && V.cfg && V.cfg.power){   // (v28.34) a power shot charging: an arc filling round the ball; charged: it glows
         let pw = 0; { const RG = (sess && sess.G) || V; for (const p of RG.players) if ((p.pw | 0) > pw) pw = p.pw | 0; }   // (v28.49, "the moment its charged and we press shoot, its not powershot": the charge as it really is, not as the picture drawn a moment ahead has it: the ring went full a tick or more early)
@@ -9052,10 +9600,10 @@ function start(cfg){
   sfx.unlock();
   kitOverride = cfg.kits || null; applyKits();
   if (!cfg.online && cfg.mode !== 'online') useMap(['ai', '2p', 'mirror'].includes(cfg.mode) ? mapKeyFor(SET.map, cfg.size) : 'm');   // (v28.84: the pitch's size)
-  useTri(cfg.mode === 'tri');   // (1v1v1 on its own arena)
+  if (isGame(cfg.mode)) useSpecial(gameST(cfg.mode, gameSizeK(SET.map, cfg.size))); else useTri(cfg.mode === 'tri');   // (1v1v1 on its own arena; v28.91: the other games on theirs)
   const roster = cfg.roster || localRoster(cfg);
   const s = newSession('local', cfg, roster);
-  if (cfg.mode === 'tri') s.mode = triMode(); else if (cfg.mode === 'practice') s.mode = practiceMode(); else if (cfg.mode === 'pens') s.mode = pensMode(!!cfg.two); else if (cfg.mode === 'duel') s.mode = duelMode(!!cfg.two); else if (cfg.mode === 'keeper') s.mode = keeperMode(); else if (cfg.mode === 'wall') s.mode = wallMode(cfg); else if (cfg.mode === 'dribble') s.mode = dribbleMode(); else if (cfg.mode === 'fkdrill') s.mode = fkMode(); else if (cfg.mode === 'tutorial') s.mode = tutorialMode(cfg.lesson);
+  if (isGame(cfg.mode)) s.mode = gameMode(cfg.mode); else if (cfg.mode === 'tri') s.mode = triMode(); else if (cfg.mode === 'practice') s.mode = practiceMode(); else if (cfg.mode === 'pens') s.mode = pensMode(!!cfg.two); else if (cfg.mode === 'duel') s.mode = duelMode(!!cfg.two); else if (cfg.mode === 'keeper') s.mode = keeperMode(); else if (cfg.mode === 'wall') s.mode = wallMode(cfg); else if (cfg.mode === 'dribble') s.mode = dribbleMode(); else if (cfg.mode === 'fkdrill') s.mode = fkMode(); else if (cfg.mode === 'tutorial') s.mode = tutorialMode(cfg.lesson);
   if (cfg.daily && s.mode) dailyWrap(s);
   if (s.mode && s.mode.init) s.mode.init(s);
   if (introWanted(s)) introStart(s); else { legIntro(s); if (!s.mode) setTimeout(() => { if (sess === s && !s.done && s.G && s.G.state === 0) refStart(s); }, 250); }   // (v28.69: the coin toss while the kick-off waits)   // (v28.34: the walk-out first; a leg's banner after it)
@@ -9065,14 +9613,18 @@ function start(cfg){
   if (!s.mode && cfg.cl) say(`Champions Cup, ${CL_RN[cfg.clRound].toLowerCase()}: ${KIT[0].name} v ${KIT[1].name}`, 1);
   else if (!s.mode) say(cfg.league ? `League matchday ${cfg.lgRound + 1} of ${league.n - 1}: ${KIT[0].name} v ${KIT[1].name} · ${cfg.timeLimit} min${cfg.scoreLimit ? ', first to ' + cfg.scoreLimit : ''}, draws count`
     : `${KIT[0].name} v ${KIT[1].name} · ${cfg.timeLimit ? cfg.timeLimit + ' min' : 'no time limit'}${cfg.scoreLimit ? ', first to ' + cfg.scoreLimit : ''}`, 1);
+  if (isGame(cfg.mode)) say(GAME_HOW[cfg.mode], 1);
   if (cfg.mode === 'tri') say(`1v1v1: three goals, one each. Score in either of the others, keep your own · ${cfg.timeLimit ? cfg.timeLimit + ' min' : 'no time limit'}${cfg.scoreLimit ? ', first to ' + cfg.scoreLimit : ''}`, 1);
   if (!s.mode && cfg.mode === 'ai' && you.games && (learnSet.copy || learnSet.exploit)) say(`The computer has studied ${you.games} of your matches`, 1);
   if (s.ad && s.ad.trial) say(`Lesson from last match: ${s.ad.trial.short}`, 1);
   if (bot) say(`Your copy: Insane skill${bot.aim && bot.trick ? ' + your favourite corner and kick-off move' : bot.aim ? ' + your favourite corner' : bot.trick ? ' + your kick-off move' : ''}`, 1);
   pushInputs();
 }
+// v28.91: what the other games are played to (points; dodgeball: rounds, with a clock: level at the end, the next round wins)
+const GAME_RULES = {volley: {sl: 15, tl: 0}, badminton: {sl: 11, tl: 0}, pong: {sl: 11, tl: 0}, dodge: {sl: 3, tl: 4}};
 const drill = mode => mode === 'practice' || mode === 'pens' || mode === 'duel' || mode === 'keeper' || mode === 'wall' || mode === 'dribble' || mode === 'fkdrill' || mode === 'tutorial';
 function cfgFor(mode, size){
+  if (isGame(mode)) return {mode, size, diff: SET.diff, timeLimit: GAME_RULES[mode].tl, scoreLimit: GAME_RULES[mode].sl, curve: false, slide: false, dive: false, power: false, fk: false, curveLv: 3, tie: 0};   // (v28.91: the other games keep their own rules)
   const c = {mode, size, diff: SET.diff, timeLimit: drill(mode) ? 0 : SET.time, scoreLimit: drill(mode) ? 0 : SET.goals,
              curve: SET.curve && mode !== 'keeper', slide: SET.slide && !drill(mode), dive: SET.dive || mode === 'keeper' || mode === 'tutorial', power: SET.power && !drill(mode) && mode !== 'tutorial', fk: mode === 'fkdrill' || (SET.fk && SET.slide && !drill(mode)), curveLv: SET.curveLv, tie: drill(mode) || mode === 'tri' ? 0 : SET.tie};   // the match rules from the settings
   // (v28.74: the keepers' own level. The drills against a keeper are at it; matches and penalties carry the difference)
@@ -9177,6 +9729,10 @@ const ICONS = {
   eye: '<path d="M2.5 12S6 6 12 6s9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"/><circle cx="12" cy="12" r="2.6"/>',
   crown: '<path d="M4.5 17.5L3 8l5 4 4-6.5 4 6.5 5-4-1.5 9.5z"/>',
   one: '<circle cx="8" cy="9" r="3.2"/><circle cx="16" cy="15" r="3.2"/><path d="M11 12h2"/>',
+  volley: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5c-2 3-2 6 0 8.5s2 5.5 0 8.5"/><path d="M4 9.5c3.5 1 6 1.2 8 2.5s4.5 1.5 8 .5"/>',
+  shuttle: '<path d="M12 20.5a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4z"/><path d="M10.2 16.6L6 4.5M13.8 16.6L18 4.5M12 16V3.5M6 4.5c4-1.3 8-1.3 12 0"/>',
+  paddle: '<circle cx="10" cy="10" r="6.5"/><path d="M14.6 14.6l5 5"/><circle cx="19" cy="6" r="1.8"/>',
+  dodge: '<circle cx="7" cy="12" r="3.4"/><circle cx="17" cy="12" r="3.4"/><path d="M12 4v16" stroke-dasharray="2 2.4"/>',
   two: '<circle cx="6.5" cy="8" r="2.6"/><circle cx="6.5" cy="16" r="2.6"/><circle cx="17.5" cy="8" r="2.6"/><circle cx="17.5" cy="16" r="2.6"/>',
   three: '<circle cx="6" cy="6" r="2.3"/><circle cx="6" cy="12" r="2.3"/><circle cx="6" cy="18" r="2.3"/><circle cx="18" cy="6" r="2.3"/><circle cx="18" cy="12" r="2.3"/><circle cx="18" cy="18" r="2.3"/>',
   cup: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M9 20h6M10 17h4"/>',
@@ -9208,11 +9764,18 @@ p3Sync();
 // the match set-up on Play and on Friends (v25.4, "make the menu neater ... customise how many ai and players there should
 // be"): the size and the people on this keyboard, the computer the rest; one Start button (.mgo) that carries what the
 // tiles carried (data-mode, -size, -three, -people, -two), so it starts through the same handler as before
-const SETUP = {setPlay: {size: '1', people: 1}, setFriends: {size: '1', people: 2, coop: '0'}};
+const SETUP = {setPlay: {size: '1', people: 1, game: 'foot'}, setFriends: {size: '1', people: 2, coop: '0', game: 'foot'}};   // (v28.91: game, football or one of the other games)
 { const sv = store.get('pb.setup', null);
-  for (const id in SETUP){ const v = sv && sv[id]; if (v && ['1', '2', '3', 'tri', 'pens', 'duel'].includes(v.size) && (id === 'setFriends' || (v.size !== 'pens' && v.size !== 'duel'))) SETUP[id].size = v.size; if (v && id === 'setFriends' && (v.people === 2 || v.people === 3)) SETUP[id].people = v.people; if (v && id === 'setFriends' && (v.coop === '0' || v.coop === '1')) SETUP[id].coop = v.coop; } }
-function setupOf(size, people, coop){   // what that choice plays, or null if it can't be played (coop '1': P1 and P2 together, P2 in goal)
+  for (const id in SETUP){ const v = sv && sv[id]; if (v && ['1', '2', '3', 'tri', 'pens', 'duel'].includes(v.size) && (id === 'setFriends' || (v.size !== 'pens' && v.size !== 'duel'))) SETUP[id].size = v.size; if (v && id === 'setFriends' && (v.people === 2 || v.people === 3)) SETUP[id].people = v.people; if (v && id === 'setFriends' && (v.coop === '0' || v.coop === '1')) SETUP[id].coop = v.coop; if (v && (v.game === 'foot' || isGame(v.game))) SETUP[id].game = v.game; } }
+const GAME_IC = {volley: 'volley', badminton: 'shuttle', pong: 'paddle', dodge: 'dodge'};
+function setupOf(size, people, coop, game){   // what that choice plays, or null if it can't be played (coop '1': P1 and P2 together, P2 in goal)
   const n = +size;
+  if (isGame(game)){   // (v28.91) the other games: 1v1 to 3v3 (ping pong one each), the computer the rest
+    const nm = GAME_NAMES[game]; if (!(n >= 1 && n <= 3) || (game === 'pong' && n > 1)) return null;
+    if (people === 1) return {mode: game, size: n, title: `${nm} ${n}v${n}`, small: n === 1 ? 'you against the computer' : `you and ${n === 2 ? 'a computer' : 'two computers'} against the computer`, ic: GAME_IC[game]};
+    if (people === 3) return n >= 2 ? {mode: game, size: n, three: 1, title: `${nm} ${n}v${n} · 3 players`, small: 'P3 joins a side, the computer fills in', ic: 'keys3'} : null;
+    return {mode: game, size: n, two: 1, title: `${nm} ${n}v${n} · 2 players`, small: n === 1 ? 'P1 against P2' : 'P1 against P2, the computer fills in', ic: GAME_IC[game]};
+  }
   if (people === 1){
     if (size === 'tri') return {mode: 'tri', size: 1, title: 'Play 1v1v1', small: 'three goals, you against two computers', ic: 'tri'};
     if (!(n >= 1 && n <= 3)) return null;
@@ -9227,20 +9790,21 @@ function setupOf(size, people, coop){   // what that choice plays, or null if it
 }
 function setupSync(id){
   const box = $(id); if (!box) return;
-  const st = SETUP[id];
-  if (!setupOf(st.size, st.people, st.coop)) st.people = 2;   // (1v1 or penalties with three: two of you)
+  const st = SETUP[id], gm = isGame(st.game) ? st.game : null;
+  if (gm && !setupOf(st.size, st.people, st.coop, gm)) st.size = '1';   // (another game: no 1v1v1, penalties or duel; ping pong one each)
+  if (!setupOf(st.size, st.people, st.coop, gm)) st.people = 2;   // (1v1 or penalties with three: two of you)
   for (const seg of box.querySelectorAll('.seg[data-k]')) for (const b of seg.children){
     const k = seg.dataset.k, v = k === 'people' ? +b.dataset.v : b.dataset.v;
     b.classList.toggle('on', String(st[k]) === String(v));
-    b.disabled = k === 'people' && !setupOf(st.size, v);   // (a size that needs two of you switches to two: see above)
+    b.disabled = k === 'people' ? !setupOf(st.size, v, st.coop, gm) : k === 'size' && gm ? !setupOf(v, st.people === 3 ? 2 : st.people, st.coop, gm) : false;   // (a size that needs two of you switches to two: see above)
   }
-  const c = setupOf(st.size, st.people, st.coop), go = box.querySelector('.mgo');
+  const c = setupOf(st.size, st.people, st.coop, gm), go = box.querySelector('.mgo');
   go.dataset.mode = c.mode; go.dataset.size = c.size;
   for (const k of ['three', 'people', 'two', 'coop']) if (c[k]) go.dataset[k] = c[k]; else delete go.dataset[k];
   go.querySelector('b').textContent = c.title; go.querySelector('small').textContent = c.small;
   const ic = go.querySelector('.ic'); ic.dataset.ic = c.ic; ic.innerHTML = ICONS[c.ic] ? `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[c.ic]}</svg>` : '';
   const p3 = box.querySelector('#p3Row'); if (p3) p3.hidden = !c.three;
-  const co = box.querySelector('#coopRow'); if (co) co.hidden = !(st.people === 2 && (st.size === '2' || st.size === '3'));   // (together: 2v2 and 3v3, two of you)
+  const co = box.querySelector('#coopRow'); if (co) co.hidden = !!gm || !(st.people === 2 && (st.size === '2' || st.size === '3'));   // (together: 2v2 and 3v3, two of you)
 }
 for (const id in SETUP){
   const box = $(id); if (!box) continue;
@@ -9720,6 +10284,7 @@ function aiComment(R, s, w, title, line){
   });
 }
 function showResults(R, s, after){
+  if (R && R.gm) return gameResults(R, s);   // (v28.91: the other games)
   const cb = comebackOf(R);
   if (cb && !after && !R.cbSeen && cbFor(R, s, cb)){ R.cbSeen = true; showComeback(R, s, cb); return; }
   const box = $('res'); box.textContent = ''; $('resScores').hidden = true;
@@ -10784,7 +11349,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.90';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.91';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -11613,19 +12178,22 @@ function startOnline(){
   $('fillAi').checked = !!L.fill; L.gid++; L.on = 1; L.res = null; L.kit = [kitSel[0], kitSel[1], kitSel[0] === CUS ? custom[0] : null, kitSel[1] === CUS ? custom[1] : null]; L.pu = puSel.slice();
   L.tl = SET.time; L.sl = SET.goals; L.lv = SET.diff; L.kl = SET.dk;
   const roster = []; let id = 1;
+  const gm = isGame(L.gm) ? L.gm : null, sz = gm === 'pong' ? 1 : L.sz;   // (v28.91: the other games: nobody in goal; ping pong one each)
   for (let t = 0; t < 2; t++){
-    const humans = L.pl.filter(e => e[3] === t).slice(0, L.sz);
-    for (const e of humans){ const isMe = e[0] === NET.me; roster.push({id: id++, team: t, ctrl: isMe ? 'human' : 'remote', slot: isMe ? 'both' : null, peer: isMe ? null : e[0], role: 'striker', name: e[1], avatar: e[2], pu: L.pu[t]}); }
-    if (L.fill) for (let i = humans.length; i < L.sz; i++) roster.push({id: id++, team: t, ctrl: 'ai', role: L.sz > 1 && i === L.sz - 1 ? 'keeper' : 'striker', name: 'Computer', avatar: i === L.sz - 1 && L.sz > 1 ? 'GK' : 'CP', pu: L.pu[t]});
+    const humans = L.pl.filter(e => e[3] === t).slice(0, sz);
+    for (const e of humans){ const isMe = e[0] === NET.me; roster.push({id: id++, team: t, ctrl: isMe ? 'human' : 'remote', slot: isMe ? 'both' : null, peer: isMe ? null : e[0], role: 'striker', name: e[1], avatar: e[2], pu: gm ? 'none' : L.pu[t]}); }
+    if (L.fill) for (let i = humans.length; i < sz; i++){ const gk = !gm && sz > 1 && i === sz - 1; roster.push({id: id++, team: t, ctrl: 'ai', role: gk ? 'keeper' : 'striker', name: 'Computer', avatar: gk ? 'GK' : 'CP', pu: gm ? 'none' : L.pu[t]}); }
   }
   if (!roster.some(r => r.team === 0) || !roster.some(r => r.team === 1)){ onErr('Each team needs at least one player. Turn on "Computer fills empty places" or wait for friends.'); L.on = 0; L.gid--; return; }
   L.ro = roster.map(r => [r.id, r.team, r.ctrl === 'ai' ? 'a' : 'h', r.peer || '', r.name, r.avatar, r.role === 'keeper' ? 'k' : 's']);
   kitOverride = L.kit; applyKits();
   useTri(false); useMap(mapKeyFor(L.mp, L.sz | 0), true);   // (v28.84: the host's pitch)
-  L.lg = !L.pm && L.lgs === 2 ? (Array.isArray(L.leg2) ? [2, L.leg2[0] | 0, L.leg2[1] | 0] : [1, 0, 0]) : null;   // (v25.9: two legs online)
+  if (gm) useSpecial(gameST(gm, gameSizeK(L.mp, sz)));   // (v28.91: the game's own court)
+  L.lg = !L.pm && !gm && L.lgs === 2 ? (Array.isArray(L.leg2) ? [2, L.leg2[0] | 0, L.leg2[1] | 0] : [1, 0, 0]) : null;   // (v25.9: two legs online)
   const cfg = onlineCfg(L), pens = !!L.pm;
   const s = newSession('host', cfg, roster);
-  if (pens && L.pm === 2){ s.mode = duelMode(false, true); s.mode.init(s); sysChat(`Shooting duel: one shoots from a new spot, one of the others keeps goal, then the other side from the same spot, one each in turn as in penalties: ${DUEL_N} shots each; level after them, sudden death`); }
+  if (gm){ s.mode = gameMode(gm, true); sysChat(GAME_HOW[gm]); }
+  else if (pens && L.pm === 2){ s.mode = duelMode(false, true); s.mode.init(s); sysChat(`Shooting duel: one shoots from a new spot, one of the others keeps goal, then the other side from the same spot, one each in turn as in penalties: ${DUEL_N} shots each; level after them, sudden death`); }
   else if (pens){ s.mode = pensMode(false, true); s.mode.init(s); sysChat('Penalties: five each, one touch, the keeper stays on his line until the kick. Everyone takes a turn to shoot and to keep goal'); }
   s.G.players.forEach((p, i) => { p.peer = roster[i].peer || null; });
   if (introWanted(s)) introStart(s); else legIntro(s);   // (v28.21; v28.34: the walk-out first, everyone sees it)
@@ -11637,6 +12205,7 @@ function startOnline(){
 // the match's rules from the lobby (host and guests alike); a two-legged tie's first leg can end level, its second is
 // decided on the total (L.lg: [leg, first leg's score])
 function onlineCfg(L){
+  if (isGame(L.gm)){ const g = L.gm, r = GAME_RULES[g]; return {mode: 'online', game: g, size: g === 'pong' ? 1 : L.sz | 0, diff: L.lv | 0, timeLimit: r.tl, scoreLimit: r.sl, curve: false, slide: false, fk: false, dive: false, power: false, curveLv: 3, tie: 0, leg: 0, agg: null, draws: false}; }   // (v28.91: the other games, their own rules)
   const pens = !!L.pm, lg = Array.isArray(L.lg) && (L.lg[0] === 1 || L.lg[0] === 2) ? L.lg : null;
   return {mode: 'online', size: L.sz | 0, diff: L.lv | 0, kOff: [0, 1, 2, 3].includes(L.kl) ? L.kl - (L.lv | 0) : 0,   // (v28.74: the computer keepers' own level)
           timeLimit: pens ? 0 : +L.tl || 0, scoreLimit: pens ? 0 : +L.sl || 0, pens, curve: !!L.cv, slide: !pens && !!L.sd, fk: !pens && !!L.sd && !!L.fk, dive: L.dv !== 0, power: !pens && !!L.pw,
@@ -11653,7 +12222,7 @@ function hostNet(s){
   N.afterTick = s2 => {
     N.ht++;
     for (const e of s2.G.events){
-      if (e.type === 'goal') N.ring.push([e.id, 'g', e.team, e.pid == null ? -1 : e.pid, e.assist == null ? -1 : e.assist, e.og ? 1 : 0, r4(e.kmh), Math.floor(e.t), e.record ? 1 : 0, e.post ? 1 : 0, e.late || '', r4(timeLeft(s2.G)), e.slide ? 1 : 0, e.m | 0, s2.G.lastTouch ? r4(s2.G.lastTouch.bx) : 0, s2.G.lastTouch ? r4(s2.G.lastTouch.by) : 0, e.tag || '']);
+      if (e.type === 'goal') N.ring.push([e.id, 'g', e.team, e.pid == null ? -1 : e.pid, e.assist == null ? -1 : e.assist, e.og ? 1 : 0, r4(e.kmh), Math.floor(e.t), e.record ? 1 : 0, e.post ? 1 : 0, e.late || '', r4(timeLeft(s2.G)), e.slide ? 1 : 0, e.m | 0, s2.G.lastTouch ? r4(s2.G.lastTouch.bx) : 0, s2.G.lastTouch ? r4(s2.G.lastTouch.by) : 0, e.tag || '', e.game || '', e.why || '']);   // (v28.91: a point in one of the other games: game, why)
       else if (e.type === 'kick') N.ring.push([e.id, 'k', e.pid, r4(e.speed)]);
       else if (e.type === 'save') N.ring.push([e.id, 's', e.team, e.pid, r4(e.kmh), e.record ? 1 : 0, e.dive ? 2 : e.slide ? 1 : 0]);
       else if (e.type === 'tackle') N.ring.push([e.id, 'c', e.team, e.pid, e.vid]);
@@ -11666,6 +12235,10 @@ function hostNet(s){
       else if (e.type === 'playon') N.ring.push([e.id, 'o', e.team, e.had ? 1 : 0]);
       else if (e.type === 'call') N.ring.push([e.id, 'q', e.pid]);
       else if (e.type === 'emote') N.ring.push([e.id, 'm', e.pid, e.e]);
+      else if (e.type === 'hit') N.ring.push([e.id, 'h', e.pid, e.vid, e.out ? 1 : 0, e.caught ? 1 : 0, e.lives | 0]);   // (v28.91: dodgeball)
+      else if (e.type === 'spike') N.ring.push([e.id, 'S', e.pid]);
+      else if (e.type === 'net') N.ring.push([e.id, 'n']);
+      else if (e.type === 'bounce') N.ring.push([e.id, 'b']);
     }
     while (N.rh.length < N.ring.length) N.rh.push(N.ht);   // (when each went in)
     if (N.ring.length > 10){ N.ring.splice(0, N.ring.length - 10); N.rh.splice(0, N.rh.length - 10); }
@@ -11689,9 +12262,15 @@ function hostNet(s){
     if (s2.intro) o.in = 1 + Math.round((performance.now() - s2.intro.t0) / (1000 / 60));   // (v28.34: the walk-out running, how far in)
     const sl = []; G.players.forEach((q, i) => { if (q.slide || q.slideCd || q.down) sl.push([i, q.slide | 0, q.slideCd | 0, q.down | 0, Math.round(q.slideDx * 1000), Math.round(q.slideDy * 1000), q.slideBall ? 1 : 0, q.diving ? 1 : 0]); });
     if (sl.length) o.sl = sl;   // slides, getting up, waiting for the next
+    if (G.fkDone && G.frame - G.fkDone.f < 90) o.fd = [G.fkDone.f, G.fkDone.team];   // (v28.91: a free kick just taken: their side can't slide yet)
     if (G.sp) o.fk = [G.sp.kind === 'pen' ? 1 : 0, G.sp.team, r4(G.sp.x), r4(G.sp.y), G.sp.t, G.sp.hold, G.sp.tk, G.sp.kp, r4(G.sp.gx), r4(G.sp.gy), r4(G.sp.half), G.sp.inward, G.sp.aim == null ? null : r4(G.sp.aim), G.sp.side || 0];   // a free kick or penalty being set up (v25.1: + the taker's aim; v25.5: + the curl he picked)
     const ty = typingIds(s2); if (ty.length) o.ty = ty;   // who is typing in the chat
     if (s2.mode && s2.mode.wire) o.pk = s2.mode.wire(s2);   // a penalty shootout: its state
+    if (G.cfg.game){   // (v28.91) the other games: the ball's height and the touches; dodgeball's live balls and lives
+      const b0 = G.discs[0], V = G.vb;
+      if (V) o.gv = [r3(b0.z || 0), r4(b0.vz || 0), V.side, V.n, V.last, V.lf, V.wait, V.serve, V.bn | 0];
+      if (G.cfg.game === 'dodge') o.db = [C.ballIdx(G).map(i => { const d = G.discs[i]; return [d.lt >= 0 ? d.lt : -1, d.lp >= 0 ? d.lp : -1, d.lf | 0]; }), G.players.map(q => [q.lives | 0, q.out ? 1 : 0, q.inv | 0])];
+    }
     return o;
   };
   N.ended = R => { const L = NET.lobby; L.res = R; L.on = 2; if (L.lg) L.leg2 = L.lg[0] === 1 ? s.G.score.slice(0, 2) : null; publishLobby(); };
@@ -11912,7 +12491,8 @@ function startGuest(L){
   guestKits(L); clearMatchPanels();
   const roster = L.ro.map(r => ({id: r[0] | 0, team: r[1] ? 1 : 0, ctrl: r[2] === 'a' ? 'ai' : r[2] === 'x' ? 'gone' : 'remote', name: clean(r[4], 16), avatar: clean(r[5], 2), role: r[6] === 'k' ? 'keeper' : 'striker', pu: Array.isArray(L.pu) && PU[L.pu[r[1] ? 1 : 0]] ? L.pu[r[1] ? 1 : 0] : 'none'}));
   useTri(false); useMap(mapKeyFor(L.mp, L.sz | 0), true);   // (v28.84: the host's pitch)
-  const cfg = onlineCfg(L), pens = !!L.pm;
+  const gm = isGame(L.gm) ? L.gm : null; if (gm) useSpecial(gameST(gm, gameSizeK(L.mp, gm === 'pong' ? 1 : L.sz | 0)));   // (v28.91: the game's own court)
+  const cfg = onlineCfg(L), pens = !!L.pm && !gm;
   const G = C.newGame(ST, rulesOf(cfg), roster);
   const mine = L.ro.find(r => r[3] === NET.me);
   const s = {kind: 'guest', cfg, G, info: new Map(roster.map(r => [r.id, {name: r.name, avatar: r.avatar}])), locals: mine ? [{pid: mine[0], slot: 'both', sent: 0, kc: NET.kc || 0, hold: null}] : [],
@@ -11922,7 +12502,7 @@ function startGuest(L){
   s.update = dt => { if (s.replay){ s.replay.pos += (dt || 16.7) * 0.06 * s.replay.speed; if (s.replay.pos > s.replay.span + 360) s.replay = null; }   // (v28.11: a goal's replay; the host ends it)
     const t = performance.now(); s.lag = s.replay ? '' : NET.verBad ? 'Not the same version as the host: both refresh the page' : s.snapH < 0 ? (s.bad > 20 ? 'Out of step with the host: leave and join again' : 'Connecting…') : t - s.recvAt > 1200 ? 'Waiting for the host…' : ''; if (NET.hostGoneAt && t - NET.hostGoneAt > (NET.handoff ? HANDOFF_MS : 3500)){ leaveOnline(); exitToMenu('The host left the game.'); } };
   s.view = () => s.replay ? guestReplayView(s) : smoothView(s, guestView(s, false)); s.realView = () => s.replay ? null : guestView(s, true);
-  if (pens) s.mode = L.pm === 2 ? duelMode(false, true) : pensMode(false, true);   // to show the host's shootout or duel (its state comes with each snapshot)
+  if (gm) s.mode = gameMode(gm, true); else if (pens) s.mode = L.pm === 2 ? duelMode(false, true) : pensMode(false, true);   // to show the host's shootout or duel (its state comes with each snapshot)
   legIntro(s);   // (v28.21: a leg's banner, as the host's)
   fullStart(s); rpHide();
   sess = s; cam.x = cam.y = 0; fx.goal = null; fx.pops.length = 0; lines.length = 0;
@@ -11971,6 +12551,15 @@ function guestApply(s, o){
   if (Array.isArray(o.ch)) for (const r of o.ch.slice(0, 16)){ const q = Array.isArray(r) && G.players[r[0] | 0]; if (q) q.charge = Math.max(0, Math.min(1, (+r[1] || 0) / 1000)); }
   for (const q of G.players){ q.slide = q.slideCd = q.down = 0; q.slideBall = false; q.diving = false; }
   if (Array.isArray(o.sl)) for (const r of o.sl.slice(0, 16)){ const q = Array.isArray(r) && G.players[r[0] | 0]; if (!q) continue; q.slide = r[1] | 0; q.slideCd = r[2] | 0; q.down = r[3] | 0; q.slideDx = (+r[4] || 0) / 1000; q.slideDy = (+r[5] || 0) / 1000; q.slideBall = !!r[6]; q.diving = !!r[7]; }
+  G.fkDone = Array.isArray(o.fd) ? {f: o.fd[0] | 0, team: o.fd[1] ? 1 : 0} : null;
+  if (G.cfg.game){   // (v28.91) the other games' state, as the host has it
+    const b0 = G.discs[0], v = o.gv;
+    if (Array.isArray(v) && v.length >= 9){ b0.z = Math.max(0, +v[0] || 0); b0.vz = +v[1] || 0; G.vb = {side: v[2] ? 1 : 0, n: v[3] | 0, last: v[4] | 0, lf: v[5] | 0, wait: v[6] | 0, serve: v[7] ? 1 : 0, bn: v[8] | 0}; }
+    if (Array.isArray(o.db) && Array.isArray(o.db[0]) && Array.isArray(o.db[1])){
+      C.ballIdx(G).forEach((i, k) => { const r = o.db[0][k], d = G.discs[i]; if (Array.isArray(r)){ d.lt = r[0] === 0 || r[0] === 1 ? r[0] : -1; d.lp = r[1] | 0; d.lf = r[2] | 0; } });
+      G.players.forEach((q, j) => { const r = o.db[1][j]; if (Array.isArray(r)){ q.lives = r[0] | 0; q.out = !!r[1]; q.inv = r[2] | 0; } });
+    }
+  }
   const fk = o.fk; G.sp = Array.isArray(fk) && fk.length >= 12 ? {kind: fk[0] ? 'pen' : 'fk', team: fk[1] ? 1 : 0, x: +fk[2] || 0, y: +fk[3] || 0, t: fk[4] | 0, hold: fk[5] | 0, tk: fk[6] | 0, kp: fk[7] | 0, gx: +fk[8] || 0, gy: +fk[9] || 0, half: +fk[10] || 0, inward: fk[11] < 0 ? -1 : 1, aim: fk.length > 12 && fk[12] != null && isFinite(+fk[12]) ? +fk[12] : null, turn: 0, side: Math.max(-5, Math.min(5, fk[13] | 0))} : null;
   if (Array.isArray(o.x) && o.x.length >= 9){ const x = o.x; Object.assign(s.stats, {shots: [x[0], x[1]], sot: [x[2], x[3]], poss: [x[4], x[5]], contest: x[6], passes: [x[7], x[8]]}); if (x.length >= 11) s.stats.saves = [+x[9] || 0, +x[10] || 0]; if (x.length >= 15){ s.stats.hardSave = [+x[11] || 0, +x[12] || 0]; s.stats.posts = [+x[13] || 0, +x[14] || 0]; } if (x.length >= 17) s.stats.fouls = [+x[15] || 0, +x[16] || 0]; }
   // clock: Haxball estimates the host's frame from the middle of recent arrival offsets
@@ -11989,6 +12578,9 @@ function guestApply(s, o){
     s.lastEv = ev[0];
     const t = ev[1];
     if (t === 'k') sfx.kick(+ev[3] || 0);
+    else if (t === 'g' && ev[17] && s.mode && s.mode.point) s.mode.point(s, ev[2] ? 1 : 0, ev[3] >= 0 ? ev[3] : null, String(ev[18] || 'kill'));   // (v28.91: a point in one of the other games)
+    else if (t === 'h' && s.mode && s.mode.hit) s.mode.hit(s, {pid: ev[2], vid: ev[3], out: !!ev[4], caught: !!ev[5], lives: ev[6] | 0});
+    else if ((t === 'S' || t === 'n' || t === 'b') && s.mode && s.mode.ev) s.mode.ev(s, {type: t === 'S' ? 'spike' : t === 'n' ? 'net' : 'bounce', pid: ev[2]});
     else if (t === 'g'){
       const team = ev[2] ? 1 : 0, p = G.players.find(q => q.id === ev[3]), kmh = +ev[6] || 0;
       s.last = kmh; if (!s.best || kmh > s.best.v) s.best = {v: kmh, team};
@@ -12468,7 +13060,7 @@ function showLobby(){
 }
 // the file hosted on a website: an invite link opens the page with the code filled in (not inside Claude, where the page has no address of its own)
 const inviteBase = () => { try { return !inArtifact && /^https?:$/.test(location.protocol) ? location.href.split('#')[0] : ''; } catch (e) { return ''; } };
-const roomSummary = L => L.pm ? `${L.pm === 2 ? 'Shooting duel' : 'Penalties'} · ${L.sz}v${L.sz}` : `${L.sz}v${L.sz} · ${L.tl ? L.tl + ' min' : 'no time limit'} · ${L.sl ? 'first to ' + L.sl : 'no goal limit'}${L.lgs === 2 ? ' · two legs' : ''}${L.lk ? ' · 🔒' : ''}`;
+const roomSummary = L => isGame(L.gm) ? `${GAME_NAMES[L.gm]} · ${L.gm === 'pong' ? 1 : L.sz}v${L.gm === 'pong' ? 1 : L.sz}` : L.pm ? `${L.pm === 2 ? 'Shooting duel' : 'Penalties'} · ${L.sz}v${L.sz}` : `${L.sz}v${L.sz} · ${L.tl ? L.tl + ' min' : 'no time limit'} · ${L.sl ? 'first to ' + L.sl : 'no goal limit'}${L.lgs === 2 ? ' · two legs' : ''}${L.lk ? ' · 🔒' : ''}`;
 function renderLobby(){
   try { if (!$('diffCust').hidden) diffSync(); } catch (e) {}   // (v28.74: in a room the menu's own custom-level row is away)
   if (FR.on){ frPub(); if ($('frLobby').hidden === FR.st.size > 0) renderFriends(); }
@@ -12479,7 +13071,7 @@ function renderLobby(){
   $('onWho').textContent = NET.host ? 'You host' : isMgr() ? 'Manager' : '';
   $('rcode').hidden = !NET.code;
   $('startOnline').hidden = !boss || !L || on;
-  $('startOnline').textContent = !L ? 'Start match' : L.pm === 2 ? 'Start the duel' : L.pm ? 'Start the shootout' : L.lgs === 2 && Array.isArray(L.leg2) ? `Start leg 2 · ${L.leg2[0]}–${L.leg2[1]}` : L.lgs === 2 ? 'Start leg 1' : 'Start match';
+  $('startOnline').textContent = !L ? 'Start match' : isGame(L.gm) ? 'Start ' + GAME_NAMES[L.gm].toLowerCase() : L.pm === 2 ? 'Start the duel' : L.pm ? 'Start the shootout' : L.lgs === 2 && Array.isArray(L.leg2) ? `Start leg 2 · ${L.leg2[0]}–${L.leg2[1]}` : L.lgs === 2 ? 'Start leg 1' : 'Start match';
   $('rWait').textContent = !L ? '' : on ? (boss ? 'Match on: ☰ or Esc in the match moves people' : 'Match on…') : boss ? (L.pl.length < 2 ? 'The computer fills empty places, or wait for friends.' : '') : 'Waiting for the host to start'; $('rWait').classList.toggle('wt', !!L && !on && !boss);
   const lock = !boss || on, ho = $('hostOpts');
   ho.classList.toggle('ro', lock);
@@ -12591,8 +13183,8 @@ function joinFromLink(){   // opened from an invite link: show the online panel 
 }
 $('fillAi').addEventListener('change', () => { const v = $('fillAi').checked ? 1 : 0; if (isMgr()) sendCmd('set', 'fillAi', v); else if (NET.host) hostSet('fillAi', v); });
 // the host sets the match up in the lobby: team size, time, goals, computer level (the menu's settings follow)
-function syncHostOpts(){ const L = NET.lobby; if (!L) return; rulesSync(); $('hoGame').value = L.pm === 2 ? 2 : L.pm ? 1 : 0; $('hoTime').disabled = $('hoGoals').disabled = $('hoTie').disabled = $('hoSlide').disabled = !!L.pm; $('hoSize').value = L.sz; $('hoTime').value = L.tl; $('hoGoals').value = L.sl; $('hoLevel').value = L.lv; $('hoLevelK').value = [0, 1, 2, 3].includes(L.kl) ? L.kl : -1; $('fillAi').checked = !!L.fill;
-  $('hoTie').value = L.ti | 0; $('hoSlide').checked = !!L.sd; $('hoDive').checked = L.dv !== 0; $('hoDive').disabled = !!L.pm; $('hoMap').value = L.mp | 0; $('hoCurve').value = curvePct(L.cv, L.cl); $('hoFk').checked = !!L.fk; $('hoFk').disabled = !!L.pm; $('hoPower').checked = !!L.pw; $('hoPower').disabled = !!L.pm; $('hoLegs').value = String(L.lgs === 2 ? 2 : 1); }
+function syncHostOpts(){ const L = NET.lobby; if (!L) return; rulesSync(); const gm = isGame(L.gm) ? L.gm : null; $('hoGame').value = gm ? 3 + GAMES.indexOf(gm) : L.pm === 2 ? 2 : L.pm ? 1 : 0; $('hoTime').disabled = $('hoGoals').disabled = $('hoTie').disabled = $('hoSlide').disabled = !!L.pm || !!gm; $('hoSize').value = L.sz; $('hoTime').value = L.tl; $('hoGoals').value = L.sl; $('hoLevel').value = L.lv; $('hoLevelK').value = [0, 1, 2, 3].includes(L.kl) ? L.kl : -1; $('fillAi').checked = !!L.fill;
+  $('hoTie').value = L.ti | 0; $('hoSlide').checked = !!L.sd; $('hoDive').checked = L.dv !== 0; $('hoDive').disabled = !!L.pm || !!gm; $('hoMap').value = L.mp | 0; $('hoCurve').value = curvePct(L.cv, L.cl); $('hoFk').checked = !!L.fk; $('hoFk').disabled = !!L.pm || !!gm; $('hoPower').checked = !!L.pw; $('hoPower').disabled = !!L.pm || !!gm; $('hoLegs').value = String(L.lgs === 2 ? 2 : 1); }
 function menuSync(){ $('setDiff').value = SET.dk >= 0 ? 'c' : SET.diff; $('setTime').value = SET.time; $('setGoals').value = SET.goals; $('setSide').value = SET.side; $('setTie').value = SET.tie; $('optSlide').checked = SET.slide; $('optDive').checked = SET.dive; $('setMap').value = SET.map | 0; $('optCurve').value = curvePct(SET.curve, SET.curveLv); $('optFk').checked = SET.fk; $('optPower').checked = SET.power; $('optLegs').value = String(SET.legs); rulesSync(); diffSync(); }
 // v27.1 ("the settings for personal and online dont match, fix it"): in a room, ⚙ Settings and the menu's rules show the
 // room's (the host's), not your own, and changing one there changes the room's, as its Match settings do: the host and
@@ -12623,7 +13215,7 @@ function syncSide(){ if (sideFlip() !== shownFlip) applySide(); }   // (v28.6: A
 applySide();
 // [allowed?, apply] per setting: the host's own changes and a manager's commands go through the same checks
 const HOST_SET = {
-  hoGame: [v => v === 0 || v === 1 || v === 2, v => { NET.lobby.pm = v; }],   // 1: a penalty shootout, 2: a shooting duel
+  hoGame: [v => [0, 1, 2, 3, 4, 5, 6].includes(v), v => { NET.lobby.pm = v <= 2 ? v : 0; NET.lobby.gm = v >= 3 ? GAMES[v - 3] : null; }],   // 1: a penalty shootout, 2: a shooting duel; v28.91: 3-6 the other games (L.gm)
   hoSize: [v => [1, 2, 3, 4].includes(v), v => { const L = NET.lobby; L.sz = v; for (const t of [0, 1]) L.pl.filter(e => e[3] === t).slice(v).forEach(e => { e[3] = -1; }); }],
   hoTime: [v => TIME_OPTS.includes(v), v => { NET.lobby.tl = SET.time = v; store.set('pb.time', v); }],
   hoGoals: [v => GOAL_OPTS.includes(v), v => { NET.lobby.sl = SET.goals = v; store.set('pb.goals', v); }],
