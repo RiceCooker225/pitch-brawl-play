@@ -1056,6 +1056,14 @@
   .clgroups .clg h4{margin:0 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)} .clgroups .clg.mine h4{color:var(--accent)}
   .clgroups .ltab{width:100%;font-size:12px} .clgroups tr.thru td:first-child{color:#7ee2a0;font-weight:700}
   #clPanel{overflow:auto;justify-content:flex-start;gap:12px;padding:18px 14px}
+  /* v28.84 ("theres kinda too much going on in online, like too much stuff settings, make it more tidier"): the room's
+     settings: the main five showing, the rest under More settings */
+  .omore{border-top:1px solid var(--line);padding-top:8px} .omore > summary{cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);list-style:none}
+  .omore > summary::before{content:'▸ ';color:var(--accent)} .omore[open] > summary::before{content:'▾ '} .omore[open] > summary{margin-bottom:8px} .omore > *:not(summary){margin-top:8px}
+  /* v28.84 ("a thing showing whos online on the game and we can invite them"): Online now */
+  @media (min-width:860px){ .onstart > .owho{grid-column:1 / -1} }
+  .owho2 > summary{cursor:pointer;list-style:none;font-size:12px;color:var(--muted)} .owho2 > summary b{font-size:11px;letter-spacing:.1em;text-transform:uppercase} .owho2[open] > summary{margin-bottom:6px}
+  .whol{display:flex;flex-direction:column;gap:4px;max-height:230px;overflow:auto} .whol .frrow b{max-width:40%}
   /* v28.82: friends: a note to yourself under the name, its box, ✎ */
   .frrow .frwho{display:flex;flex-direction:column;min-width:0;max-width:45%} .frrow .frwho b{max-width:none}
   .frrow .frnote{font-size:11px;color:#9aa3b6;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1145,11 +1153,12 @@
   .rgo button#startOnline{font-size:19px;padding:13px 30px;white-space:nowrap;flex:none}
   @media (max-width:520px){ .rgo button#startOnline{font-size:16px;padding:11px 18px} }
   @media (min-width:860px){
-    .onstart{width:min(980px,100%);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-rows:auto auto 1fr;gap:12px;align-items:start}
+    .onstart{width:min(980px,100%);display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);grid-template-rows:auto auto auto 1fr;gap:12px;align-items:start}
     .onstart > .ocard.you{grid-column:1 / -1}
-    .onstart > .ojoin{grid-column:1;grid-row:2}
-    .onstart > .omake{grid-column:2;grid-row:2 / span 2}
-    .onstart > .ocode{grid-column:1;grid-row:3}
+    .onstart > .owho{grid-column:1 / -1;grid-row:2}
+    .onstart > .ojoin{grid-column:1;grid-row:3}
+    .onstart > .omake{grid-column:2;grid-row:3 / span 2}
+    .onstart > .ocode{grid-column:1;grid-row:4}
     .onstart > .omake .ogrid{grid-template-columns:1fr}
     .onstart > .omake .orow{flex-direction:column;align-items:stretch}
     .onstart > .omake .orow > button:last-child{margin-left:0}
@@ -1334,6 +1343,7 @@
           <label class="avin" for="avatar" title="Up to two letters or an emoji, shown on your player"><input type="text" id="avatar" maxlength="2" autocomplete="off" spellcheck="false" placeholder="P1" aria-label="Avatar"></label>
           <label class="ofield grow" for="nick"><small>Your name</small><input type="text" id="nick" maxlength="16" autocomplete="off" spellcheck="false" placeholder="Player"></label>
         </section>
+        <section class="ocard owho"><div class="ochead"><h3>Online now</h3><span class="note" id="whoNote"></span></div><div class="whol" id="whoList"></div></section>
         <section class="ocard ojoin">
           <div class="ochead"><h3>Join a room</h3><span class="note" id="roomsNote">Looking for rooms…</span><button class="ghost sm" id="roomsRefresh" type="button" title="Look again">↻</button></div>
           <div class="rooms" id="gameList"></div>
@@ -1358,6 +1368,7 @@
           <button class="ghost sm" id="leaveOnline" type="button">Leave room</button>
         </div>
         <p class="note onvite" id="onInvite" hidden></p>
+        <details class="frlobby owho2"><summary><b>Online now</b> · invite anyone</summary><div class="whol" id="whoList2"></div></details>
         <div class="frlobby" id="frLobby" hidden><b>Friends</b><div class="frlist" id="frList2"></div></div>
         <div class="rmain">
           <div class="rleft">
@@ -1370,21 +1381,27 @@
                 <label class="ofield"><small>Teams</small><select id="hoSize"><option value="1">1v1</option><option value="2">2v2</option><option value="3">3v3</option><option value="4">4v4</option></select></label>
                 <label class="ofield"><small>Time</small><select id="hoTime"></select></label>
                 <label class="ofield"><small>Goals</small><select id="hoGoals"></select></label>
-                <label class="ofield" title="A tie at full time: overtime (next goal wins), extra time played in full and then a penalty shootout if it's still level, or straight to penalties"><small>If level</small><select id="hoTie"><option value="0">Overtime</option><option value="1">Extra time, pens</option><option value="2">Penalties</option></select></label>
-                <label class="ofield" title="Two legs, like the Champions League: the total of both decides"><small>Legs</small><select id="hoLegs"><option value="1">One match</option><option value="2">Two legs</option></select></label>
                 <label class="ofield" title="Auto: Small for 1v1, Medium for 2v2, Big for 3v3 and 4v4"><small>Pitch</small><select id="hoMap"><option value="0">Auto</option><option value="1">Small</option><option value="2">Medium</option><option value="3">Big</option></select></label>
-                <label class="ofield"><small>Computer</small><select id="hoLevel"><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
-                <label class="ofield" title="The computer's keepers at a level of their own (2v2 and 3v3)"><small>Its keepers</small><select id="hoLevelK"><option value="-1">Same level</option><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
-                <label class="ofield" title="How much a kick curls when it's kicked with a direction held across it"><small>Curve</small><select id="hoCurve"><option value="0">0% · off</option><option value="20">20%</option><option value="40">40%</option><option value="60">60% · normal</option><option value="80">80%</option><option value="100">100% · max</option></select></label>
               </div>
               <div class="tgrid">
                 <label class="chk" for="fillAi"><input type="checkbox" id="fillAi" checked>Computer fills empty places</label>
-                <label class="chk" for="hoSlide"><input type="checkbox" id="hoSlide">Slide tackles</label>
-                <label class="chk" for="hoDive"><input type="checkbox" id="hoDive" checked>Keeper dives</label>
-                <label class="chk" for="hoFk" title="Taking the man instead of the ball anywhere gives a free kick (a power bar to take it); off: only penalties"><input type="checkbox" id="hoFk">Free kicks</label>
-                <label class="chk" for="hoPower" title="Keep the ball at your feet for a moment and it glows: your next kick is a power shot"><input type="checkbox" id="hoPower">Power shot</label>
               </div>
-              <div class="orow" id="lobbyTools"><button class="ghost sm tmb" type="button">Kits</button><button class="ghost sm pub" type="button">Power-ups</button><button class="ghost sm ctl" type="button">Controls</button></div>
+              <details class="omore" id="hoMore"><summary>More settings</summary>
+                <div class="sgrid">
+                  <label class="ofield" title="A tie at full time: overtime (next goal wins), extra time played in full and then a penalty shootout if it's still level, or straight to penalties"><small>If level</small><select id="hoTie"><option value="0">Overtime</option><option value="1">Extra time, pens</option><option value="2">Penalties</option></select></label>
+                  <label class="ofield" title="Two legs, like the Champions League: the total of both decides"><small>Legs</small><select id="hoLegs"><option value="1">One match</option><option value="2">Two legs</option></select></label>
+                  <label class="ofield"><small>Computer</small><select id="hoLevel"><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
+                  <label class="ofield" title="The computer's keepers at a level of their own (2v2 and 3v3)"><small>Its keepers</small><select id="hoLevelK"><option value="-1">Same level</option><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
+                  <label class="ofield" title="How much a kick curls when it's kicked with a direction held across it"><small>Curve</small><select id="hoCurve"><option value="0">0% · off</option><option value="20">20%</option><option value="40">40%</option><option value="60">60% · normal</option><option value="80">80%</option><option value="100">100% · max</option></select></label>
+                </div>
+                <div class="tgrid">
+                  <label class="chk" for="hoSlide"><input type="checkbox" id="hoSlide">Slide tackles</label>
+                  <label class="chk" for="hoDive"><input type="checkbox" id="hoDive" checked>Keeper dives</label>
+                  <label class="chk" for="hoFk" title="Taking the man instead of the ball anywhere gives a free kick (a power bar to take it); off: only penalties"><input type="checkbox" id="hoFk">Free kicks</label>
+                  <label class="chk" for="hoPower" title="Keep the ball at your feet for a moment and it glows: your next kick is a power shot"><input type="checkbox" id="hoPower">Power shot</label>
+                </div>
+                <div class="orow" id="lobbyTools"><button class="ghost sm tmb" type="button">Kits</button><button class="ghost sm pub" type="button">Power-ups</button><button class="ghost sm ctl" type="button">Controls</button></div>
+              </details>
             </section>
           </div>
           <div class="rright" id="chatDock"></div>
@@ -10751,7 +10768,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.85';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.86';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -12179,6 +12196,7 @@ function frMsg(m){   // an invite or a friend request, to me
   if (Date.now() - (+m.t || 0) > 120000) return;
   const nm = clean(m.n || '', 16) || 'A friend', known = FR.list.some(q => q.f === m.from);
   if (m.k === 'inv' && /^[a-z0-9]{4,6}$/.test(m.c || '') && known && !(NET.on && NET.code === m.c)) frToast(`${nm} invites you to their room`, 'Join', () => frJoin(m.c));
+  else if (m.k === 'inv' && /^[a-z0-9]{4,6}$/.test(m.c || '') && !known && !(NET.on && NET.code === m.c) && Date.now() - (FR.strangerAt || 0) > 60000){ FR.strangerAt = Date.now(); frToast(`${nm} (not on your friends list) invites you to their room`, 'Join', () => frJoin(m.c)); }   // (v28.84)
   else if (m.k === 'add' && !known) frToast(`${nm} added you as a friend (code ${m.from})`, 'Add back', () => frAdd(m.from, nm));
   else if (m.k === 'msg' && known) dmGot(m);
 }
@@ -12190,7 +12208,7 @@ async function frStart(){
     const lobby = await getRoom(); if (!FR.on || !lobby) { renderFriends(); return; }
     FR.lobby = lobby;
     try { FR.unsub = lobby.onPeers(ch => { const live = new Set();
-      FR.all = new Map((ch.peers || []).filter(p => p && p.kind !== 'agent' && p.presence && p.presence.fr && p.presence.fr.f).map(p => [p.presence.fr.f, Date.now()])); onlineN();
+      { const ps = (ch.peers || []).filter(p => p && p.kind !== 'agent' && p.presence && p.presence.fr && p.presence.fr.f); FR.all = new Map(ps.map(p => [p.presence.fr.f, Date.now()])); FR.who = new Map(ps.map(p => [p.presence.fr.f, p.presence.fr])); } onlineN();
       for (const p of ch.peers || []){ const pr = p && p.presence; if (!pr || p.kind === 'agent') continue;
         if (pr.fr && typeof pr.fr === 'object'){ frGot(pr.fr); live.add(pr.fr.f); }
         const f = pr.fr && pr.fr.f;
@@ -12212,7 +12230,7 @@ async function frStart(){
       if (topic.startsWith(frOff(FR.fid, ''))){ if (o) offGot(topic, o); return; }
       if (topic.startsWith(RELAY_P + '/dc/')){ dcGot(topic, o); return; }
       const f = topic.slice(`${RELAY_P}/u/`.length); if (!/^[a-z0-9]{6}$/.test(f)) return;
-      if (o && o.f === f && Date.now() - (+o.t || 0) < 70000) FR.all.set(f, +o.t || Date.now()); else FR.all.delete(f); onlineN();
+      if (o && o.f === f && Date.now() - (+o.t || 0) < 70000){ FR.all.set(f, +o.t || Date.now()); FR.who.set(f, o); } else { FR.all.delete(f); FR.who.delete(f); } onlineN();
       if (!FR.list.some(x => x.f === f)) return;
       if (!o){ frGot({f, gone: true}); return; }
       if (o.f === f && Date.now() - (+o.t || 0) < 70000) frGot(o); else frGot({f, gone: true}); });
@@ -12220,7 +12238,29 @@ async function frStart(){
   frPub(); renderFriends();
 }
 // (v28.63, "players online now"): everyone with the game open (who says so on the relay, or in Claude's live room), you too
+// (v28.84, "a thing showing whos online on the game and we can invite them"): Online now, in the Online panel and a room:
+// everyone with the game open who says so (the same notice friends see), with Join (their open room), Invite (into
+// yours) and Add (as a friend). An invite from someone not on your friends list shows too, one a minute at most
+FR.who = new Map();
+function renderWho(){ clearTimeout(renderWho.t); renderWho.t = setTimeout(renderWho1, 250); }
+function renderWho1(){
+  const rows = [...FR.who.entries()].filter(([f, o]) => f !== FR.fid && o && FR.all.has(f)).map(([f, o]) => ({f, o, fr: FR.list.some(x => x.f === f)})).sort((a, b) => (b.fr - a.fr) || String(a.o.n || '').localeCompare(String(b.o.n || ''))).slice(0, 40);
+  for (const id of ['whoList', 'whoList2']){ const box = $(id); if (!box) continue; box.textContent = '';
+    if (!rows.length){ const e = document.createElement('p'); e.className = 'note'; e.textContent = FR.on ? 'Nobody else right now. Share the game with your friends!' : 'Looking…'; box.append(e); continue; }
+    for (const {f, o, fr} of rows){
+      const r = document.createElement('div'); r.className = 'frrow on'; const dot = document.createElement('i'); dot.className = 'frdot ' + (['match', 'room', 'solo', 'prac'].includes(o.s) ? o.s : 'free'); r.append(dot);
+      const nm = document.createElement('b'); nm.textContent = (fr ? '★ ' : '') + (clean(o.n || '', 16) || f.toUpperCase()); r.append(nm);
+      const st = document.createElement('span'); st.className = 'frst'; st.textContent = o.s === 'room' ? `in a room${o.lk ? ' 🔒' : ''}` : o.s === 'match' ? 'playing online' : o.s === 'solo' ? 'playing the computer' : o.s === 'prac' ? 'practising' : 'online'; r.append(st);
+      const act = (t, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm'; b.textContent = t; b.onclick = e => { e.currentTarget.blur(); fn(); }; r.append(b); };
+      const c = /^[a-z0-9]{4,6}$/.test(o.c || '') ? o.c : '';
+      if (c && !NET.on && o.s === 'room' && !o.lk) act('Join', () => frJoin(c));
+      if (NET.on && NET.code && ['free', 'solo', 'prac', undefined].includes(o.s) && !(c && c === NET.code)) act('Invite', () => { frSend(f, {k: 'inv', c: NET.code}); try { sysChat(`Invited ${clean(o.n || '', 16) || 'them'}`); } catch (e) {} });
+      if (!fr) act('Add', () => frAdd(f, o.n));
+      box.append(r); } }
+  if ($('whoNote')) $('whoNote').textContent = rows.length ? rows.length + ' on' : '';
+}
 function onlineN(){
+  renderWho();
   const el = $('onlineN'); if (!el) return;
   const n = FR.on && (FR.cls || FR.lobby) ? new Set([...FR.all.keys(), FR.fid]).size : 0;
   el.hidden = !n; if (n) el.textContent = `● ${n} online`;
