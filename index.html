@@ -218,7 +218,7 @@
   .ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .mnote{margin:0;font-size:12px;color:var(--muted);text-align:center}
   /* the match settings: a labelled box each */
-  .mbar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;width:min(760px,100%)}
+  .mbar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;width:min(820px,100%)}
   @media (max-width:600px){ .mbar{grid-template-columns:repeat(3,minmax(0,1fr))} }
   @media (max-width:480px){ #menu:not([data-tab="train"]) .mbar .mo:nth-child(5){grid-column:1 / -1} }
   .mbar .mo{display:flex;flex-direction:column;align-items:stretch;gap:1px;min-width:0;text-align:left;background:rgba(12,14,19,.5);border:1px solid var(--line);border-radius:12px;padding:6px 10px 5px;cursor:pointer}
@@ -1372,6 +1372,7 @@
                 <label class="ofield"><small>Goals</small><select id="hoGoals"></select></label>
                 <label class="ofield" title="A tie at full time: overtime (next goal wins), extra time played in full and then a penalty shootout if it's still level, or straight to penalties"><small>If level</small><select id="hoTie"><option value="0">Overtime</option><option value="1">Extra time, pens</option><option value="2">Penalties</option></select></label>
                 <label class="ofield" title="Two legs, like the Champions League: the total of both decides"><small>Legs</small><select id="hoLegs"><option value="1">One match</option><option value="2">Two legs</option></select></label>
+                <label class="ofield" title="Auto: Small for 1v1, Medium for 2v2, Big for 3v3 and 4v4"><small>Pitch</small><select id="hoMap"><option value="0">Auto</option><option value="1">Small</option><option value="2">Medium</option><option value="3">Big</option></select></label>
                 <label class="ofield"><small>Computer</small><select id="hoLevel"><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
                 <label class="ofield" title="The computer's keepers at a level of their own (2v2 and 3v3)"><small>Its keepers</small><select id="hoLevelK"><option value="-1">Same level</option><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option></select></label>
                 <label class="ofield" title="How much a kick curls when it's kicked with a direction held across it"><small>Curve</small><select id="hoCurve"><option value="0">0% · off</option><option value="20">20%</option><option value="40">40%</option><option value="60">60% · normal</option><option value="80">80%</option><option value="100">100% · max</option></select></label>
@@ -1415,6 +1416,8 @@
     </section>
     <section class="dsec"><h3>View</h3>
       <label class="dline" for="zoom">Zoom <select id="zoom"><option>Auto</option><option>1×</option><option>1.25×</option><option>1.5×</option><option hidden>1.5×</option><option hidden>1.5×</option><option hidden>1.5×</option><option>Follow all</option></select></label>
+      <label class="dline" for="pitchSel">Pitch colour <select id="pitchSel"><option value="slate">Slate (standard)</option><option value="grass">Grass</option><option value="night">Night</option><option value="ocean">Ocean</option><option value="clay">Clay</option><option value="purple">Purple</option></select></label>
+      <label class="dline" for="ballSel">Ball <select id="ballSel"><option value="classic">Classic yellow</option><option value="football">Football</option><option value="beach">Beach ball</option><option value="fire">Fireball</option><option value="neon">Neon</option><option value="eight">8-ball</option></select></label>
       <label class="dline" for="fpsOn">Show FPS <input type="checkbox" id="fpsOn"></label>
       <label class="dline" for="setSide" title="Where your team plays on your screen, whichever side it really is (as on White online): Left, your side on the left going right; Right, on the right going left. The picture, the scoreboard and left/right keys turn with it. Two of you on one keyboard against each other: P1's side">Your side <select id="setSide"><option value="0">Left (P1 left)</option><option value="1">Right (P1 right)</option></select></label>
       <label class="dline" for="fxSel" title="Goal celebrations: Full has the sweeping banner, fireworks and confetti; Calm keeps the motion down (what a device set to reduce motion gets until you pick)">Celebrations <select id="fxSel"><option value="full">Full</option><option value="calm">Calm</option></select></label>
@@ -1603,6 +1606,7 @@
     </div>
     <div class="mbar">
       <label class="mo lv" for="setDiff"><span>Computer</span><select id="setDiff"><option value="0">Easy</option><option value="1">Normal</option><option value="2">Hard</option><option value="3">Insane</option><option value="c">Custom…</option></select></label>
+      <label class="mo" for="setMap" title="The pitch: Auto is Small for 1v1, Medium for 2v2, Big for 3v3"><span>Pitch</span><select id="setMap"><option value="0">Auto</option><option value="1">Small</option><option value="2">Medium</option><option value="3">Big</option></select></label>
       <label class="mo" for="setTime"><span>Time</span><select id="setTime"></select></label>
       <label class="mo" for="setGoals"><span>Goals</span><select id="setGoals"></select></label>
       <label class="mo" for="setTie" title="A tie at full time: overtime (next goal wins), extra time played in full and then a penalty shootout if it's still level, or straight to penalties"><span>If level</span><select id="setTie"><option value="0">Overtime</option><option value="1">Extra time, pens</option><option value="2">Penalties</option></select></label>
@@ -4934,7 +4938,7 @@ const SET = {
   ghost: !!store.get('pb.ghost', 0), smooth: store.get('pb.smooth', 1) !== 0, zoom: (z => { const first = !store.get('pb.zoomV', 0); if (first) store.set('pb.zoomV', 1);   // (a kept Auto from before this version is that bug's, written at every load: Follow all once, then whatever is picked)
     return Number.isInteger(z) && z >= 0 && z <= 7 && !(first && z === 0) ? z : 7; })(store.get('pb.zoom', 7)),
   ref: store.get('pb.ref', 1) !== 0, aiCom: store.get('pb.aicom', 1) !== 0, sound: store.get('pb.sound', 1) !== 0, replays: store.get('pb.replays', 1) !== 0, side: store.get('pb.side', 0) === 1 ? 1 : 0,
-  legs: store.get('pb.legs', 1) === 2 ? 2 : 1, ac: [0, 1, 2].map(i => { const v = store.get('pb.ac', null); return Array.isArray(v) && v[i] === 1; }), inv: [0, 1, 2].map(i => { const v = store.get('pb.inv', null); return Array.isArray(v) && v[i] === 1; }), power: store.get('pb.power', 0) === 1, intro: store.get('pb.intro', 1) !== 0, curve: store.get('pb.curve', 1) === 1, slide: store.get('pb.slide', 1) !== 0, dive: store.get('pb.dive', 1) !== 0, fk: store.get('pb.fk', 1) === 1, curveLv: [1, 2, 3, 4, 5].includes(store.get('pb.curveLv', 3)) ? store.get('pb.curveLv', 3) : 3, tie: [0, 1, 2].includes(store.get('pb.tie', 0)) ? store.get('pb.tie', 0) : 0,
+  legs: store.get('pb.legs', 1) === 2 ? 2 : 1, ac: [0, 1, 2].map(i => { const v = store.get('pb.ac', null); return Array.isArray(v) && v[i] === 1; }), inv: [0, 1, 2].map(i => { const v = store.get('pb.inv', null); return Array.isArray(v) && v[i] === 1; }), power: store.get('pb.power', 0) === 1, intro: store.get('pb.intro', 1) !== 0, curve: store.get('pb.curve', 1) === 1, slide: store.get('pb.slide', 1) !== 0, dive: store.get('pb.dive', 1) !== 0, map: [0, 1, 2, 3].includes(store.get('pb.map', 0)) ? store.get('pb.map', 0) : 0, fk: store.get('pb.fk', 1) === 1, curveLv: [1, 2, 3, 4, 5].includes(store.get('pb.curveLv', 3)) ? store.get('pb.curveLv', 3) : 3, tie: [0, 1, 2].includes(store.get('pb.tie', 0)) ? store.get('pb.tie', 0) : 0,
   nick: clean(store.get('pb.nick', ''), 16), avatar: clean(store.get('pb.avatar', ''), 2),
   coach: store.get('pb.coach', null) == null ? null : store.get('pb.coach', 1) !== 0,   // (v28.57: null = on until 8 matches played)
   fill: store.get('pb.fill', 1) !== 0   // (v28.59: the game fills the tab in a match)
@@ -4944,8 +4948,41 @@ const SET = {
 const lvOk = lv => [1, 2, 3, 4, 5].includes(lv) ? lv : 3;
 const curvePct = (on, lv) => on ? 20 * lvOk(lv) : 0;
 function setCurvePct(v){ v = +v; if (![0, 20, 40, 60, 80, 100].includes(v)) return false; SET.curve = v > 0; if (v) SET.curveLv = v / 20; store.set('pb.curve', SET.curve ? 1 : 0); store.set('pb.curveLv', SET.curveLv); return true; }
-let ST = C.buildStadium(DEFAULT_STADIUM), stadiumJSON = null;
+// v28.84 ("add more maps, like winky big and small for 1v1", "make the maps your own, like instead of w make it PB"): our
+// own arena in three sizes, from the futsal court the game started on: its centre logo is a PB of our own (orange P,
+// white B, leaning forward), and Small and Big are it scaled (ARENA_SIZES: across, up and down; the goals with it). Pitch
+// in the match settings: Auto (1v1 Small, 2v2 Medium, 3v3 Big), or one for every match; the drills, the daily and the
+// tutorial stay on Medium. Online, the host's choice (L.mp)
+const ARENA_SIZES = {s: [0.8, 0.85, 'Small'], m: [1, 1, 'Medium'], l: [1.2, 1.12, 'Big']};
+function arenaJSON(k){
+  const [sx, sy, nm] = ARENA_SIZES[k], S = JSON.parse(JSON.stringify(DEFAULT_STADIUM)), V = S.vertexes;
+  S.name = 'Pitch Brawl Arena · ' + nm;
+  const logo = new Set(S.segments.filter(g => { const a = V[g.v0], b = V[g.v1]; return Math.abs(a.x) < 45 && Math.abs(b.x) < 45 && Math.abs(a.y) < 30 && Math.abs(b.y) < 30; }));
+  S.segments = S.segments.filter(g => !logo.has(g));
+  for (const v of V){ v.x *= sx; v.y *= sy; }
+  for (const pl of S.planes){ pl.dist *= Math.abs(pl.normal[0]) * sx + Math.abs(pl.normal[1]) * sy; }
+  for (const g of S.goals){ g.p0 = [g.p0[0] * sx, g.p0[1] * sy]; g.p1 = [g.p1[0] * sx, g.p1[1] * sy]; }
+  for (const d of S.discs) if (d.pos) d.pos = [d.pos[0] * sx, d.pos[1] * sy];
+  S.width = Math.round(S.width * sx); S.height = Math.round(S.height * sy); S.spawnDistance = Math.round(S.spawnDistance * sx);
+  // the PB: lines, leaning forward, about 46 × 30 px in the middle
+  const lean = (x, y) => ({x: Math.round((x * 1.15 + 3 - y * 0.25) * 10) / 10, y: Math.round(y * 1.05 * 10) / 10, cGroup: ['c1'], trait: 'none'});
+  const letter = (pts, color) => { for (let i = 1; i < pts.length; i++){ const a = V.length; V.push(Object.assign(lean(...pts[i - 1]), {color})); V.push(Object.assign(lean(...pts[i]), {color})); S.segments.push({v0: a, v1: a + 1, vis: true, color, cGroup: ['c1'], trait: 'none'}); } };
+  letter([[-22, 14], [-22, -14], [-10, -14], [-7, -10], [-7, -4], [-10, 0], [-22, 0]], 'f08a2b');
+  letter([[2, 14], [2, -14], [13, -14], [16, -11], [16, -4], [13, -1], [2, -1]], 'e8e3e3');
+  letter([[13, -1], [17, 2], [17, 10], [14, 14], [2, 14]], 'e8e3e3');
+  return S;
+}
+const ARENA = {s: arenaJSON('s'), m: arenaJSON('m'), l: arenaJSON('l')};
+let ST = C.buildStadium(ARENA.m), stadiumJSON = null;
 const DEFAULT_ST = ST;
+const MAPS = {s: C.buildStadium(ARENA.s), m: DEFAULT_ST, l: C.buildStadium(ARENA.l)};
+const MAP_KEYS = ['auto', 's', 'm', 'l'];
+const mapKeyFor = (pick, size) => { const k = MAP_KEYS[pick | 0]; return k && k !== 'auto' ? k : size === 1 ? 's' : size >= 3 ? 'l' : 'm'; };
+const mapKeyOf = st => Object.keys(MAPS).find(k => MAPS[k] === st) || null;
+function useMap(k, force){   // (v28.84) one of our arenas, unless you've loaded a stadium of your own (online: always ours)
+  if (stadiumJSON && !force) return; const st = MAPS[k] || DEFAULT_ST;
+  if (ST !== st){ if (ST === TRI_ST) homeST = st; else { ST = st; applyStadiumLayout(); try { applySide(); } catch (e) {} cam.x = cam.y = 0; cam.z = 0; } }
+}
 // 1v1v1 (v25): the 3-way arena, made by mktri.js: the same ball and players as Winky's futsal, six sides of 330 px,
 // a goal (120 px) in three of them, walls on the others; each player kicks off from his own third
 const TRI_STADIUM = {"name":"Three-way arena","width":372,"height":345,"bg":{"type":"hex","color":"454C5E","R":330},"vertexes":[{"x":330,"y":0,"cMask":[]},{"x":277.5,"y":90.93,"cMask":[]},{"x":217.5,"y":194.86,"cMask":[]},{"x":165,"y":285.79,"cMask":[]},{"x":277.5,"y":90.93,"cMask":[]},{"x":303.48,"y":105.93,"cMask":[]},{"x":303.48,"y":105.93,"cMask":[]},{"x":243.48,"y":209.86,"cMask":[]},{"x":243.48,"y":209.86,"cMask":[]},{"x":217.5,"y":194.86,"cMask":[]},{"x":277.5,"y":90.93,"cMask":[]},{"x":217.5,"y":194.86,"cMask":[]},{"x":165,"y":285.79,"cMask":[]},{"x":-165,"y":285.79,"cMask":[]},{"x":-165,"y":285.79,"cMask":[]},{"x":-217.5,"y":194.86,"cMask":[]},{"x":-277.5,"y":90.93,"cMask":[]},{"x":-330,"y":0,"cMask":[]},{"x":-217.5,"y":194.86,"cMask":[]},{"x":-243.48,"y":209.86,"cMask":[]},{"x":-243.48,"y":209.86,"cMask":[]},{"x":-303.48,"y":105.93,"cMask":[]},{"x":-303.48,"y":105.93,"cMask":[]},{"x":-277.5,"y":90.93,"cMask":[]},{"x":-217.5,"y":194.86,"cMask":[]},{"x":-277.5,"y":90.93,"cMask":[]},{"x":-330,"y":0,"cMask":[]},{"x":-165,"y":-285.79,"cMask":[]},{"x":-165,"y":-285.79,"cMask":[]},{"x":-60,"y":-285.79,"cMask":[]},{"x":60,"y":-285.79,"cMask":[]},{"x":165,"y":-285.79,"cMask":[]},{"x":-60,"y":-285.79,"cMask":[]},{"x":-60,"y":-315.79,"cMask":[]},{"x":-60,"y":-315.79,"cMask":[]},{"x":60,"y":-315.79,"cMask":[]},{"x":60,"y":-315.79,"cMask":[]},{"x":60,"y":-285.79,"cMask":[]},{"x":-60,"y":-285.79,"cMask":[]},{"x":60,"y":-285.79,"cMask":[]},{"x":165,"y":-285.79,"cMask":[]},{"x":330,"y":0,"cMask":[]},{"x":372,"y":0,"cMask":["red","blue","green"],"bCoef":0.1},{"x":186,"y":322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":186,"y":322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-186,"y":322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-186,"y":322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-372,"y":0,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-372,"y":0,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-186,"y":-322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":-186,"y":-322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":186,"y":-322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":186,"y":-322.16,"cMask":["red","blue","green"],"bCoef":0.1},{"x":372,"y":0,"cMask":["red","blue","green"],"bCoef":0.1},{"x":0,"y":75,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":0,"y":372,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":-64.95,"y":-37.5,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":-322.16,"y":-186,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":64.95,"y":-37.5,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":322.16,"y":-186,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"],"bCoef":0.1},{"x":0,"y":75,"cMask":[]},{"x":-64.95,"y":-37.5,"cMask":[]},{"x":64.95,"y":-37.5,"cMask":[]},{"x":0,"y":75,"cMask":[]},{"x":-64.95,"y":-37.5,"cMask":[]},{"x":64.95,"y":-37.5,"cMask":[]},{"x":0,"y":75,"cMask":[]},{"x":0,"y":-75,"cMask":[]},{"x":0,"y":-75,"cMask":[]},{"x":0,"y":75,"cMask":[]}],"segments":[{"v0":0,"v1":1,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":2,"v1":3,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":4,"v1":5,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"e8e3e3"},{"v0":6,"v1":7,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"e8e3e3"},{"v0":8,"v1":9,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"e8e3e3"},{"v0":10,"v1":11,"cMask":[],"color":"c4c9d4"},{"v0":12,"v1":13,"cMask":[],"color":"a3acc2"},{"v0":14,"v1":15,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":16,"v1":17,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":18,"v1":19,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"f08a2b"},{"v0":20,"v1":21,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"f08a2b"},{"v0":22,"v1":23,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"f08a2b"},{"v0":24,"v1":25,"cMask":[],"color":"c4c9d4"},{"v0":26,"v1":27,"cMask":[],"color":"a3acc2"},{"v0":28,"v1":29,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":30,"v1":31,"bCoef":1.1,"cMask":["ball"],"bias":-32,"color":"a3acc2"},{"v0":32,"v1":33,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"5ee07a"},{"v0":34,"v1":35,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"5ee07a"},{"v0":36,"v1":37,"bCoef":0.1,"cMask":["ball"],"bias":-32,"color":"5ee07a"},{"v0":38,"v1":39,"cMask":[],"color":"c4c9d4"},{"v0":40,"v1":41,"cMask":[],"color":"a3acc2"},{"v0":42,"v1":43,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":44,"v1":45,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":46,"v1":47,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":48,"v1":49,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":50,"v1":51,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":52,"v1":53,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"bias":-32},{"v0":54,"v1":55,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"]},{"v0":56,"v1":57,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"]},{"v0":58,"v1":59,"vis":false,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO","greenKO"]},{"v0":60,"v1":61,"vis":false,"curve":120,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["blueKO","greenKO"]},{"v0":62,"v1":63,"vis":false,"curve":120,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","greenKO"]},{"v0":64,"v1":65,"vis":false,"curve":120,"bCoef":0.1,"cMask":["red","blue","green"],"cGroup":["redKO","blueKO"]},{"v0":66,"v1":67,"curve":180,"cMask":[],"color":"a3acc2"},{"v0":68,"v1":69,"curve":180,"cMask":[],"color":"a3acc2"}],"planes":[{"normal":[-0.87,-0.5],"dist":-315.79,"bCoef":0.1,"cMask":["ball"]},{"normal":[0,-1],"dist":-285.79,"bCoef":1.1,"cMask":["ball"]},{"normal":[0.87,-0.5],"dist":-315.79,"bCoef":0.1,"cMask":["ball"]},{"normal":[0.87,0.5],"dist":-285.79,"bCoef":1.1,"cMask":["ball"]},{"normal":[0,1],"dist":-315.79,"bCoef":0.1,"cMask":["ball"]},{"normal":[-0.87,0.5],"dist":-285.79,"bCoef":1.1,"cMask":["ball"]}],"goals":[{"p0":[277.5,90.93],"p1":[217.5,194.86],"team":"blue"},{"p0":[-217.5,194.86],"p1":[-277.5,90.93],"team":"red"},{"p0":[-60,-285.79],"p1":[60,-285.79],"team":"green"}],"discs":[{"radius":4.5,"invMass":0,"pos":[277.5,90.93],"color":"e8e3e3"},{"radius":4.5,"invMass":0,"pos":[217.5,194.86],"color":"e8e3e3"},{"radius":4.5,"invMass":0,"pos":[-217.5,194.86],"color":"f08a2b"},{"radius":4.5,"invMass":0,"pos":[-277.5,90.93],"color":"f08a2b"},{"radius":4.5,"invMass":0,"pos":[-60,-285.79],"color":"5ee07a"},{"radius":4.5,"invMass":0,"pos":[60,-285.79],"color":"5ee07a"}],"playerPhysics":{"bCoef":0.35,"acceleration":0.11,"kickingAcceleration":0.083,"kickStrength":4.65},"ballPhysics":{"radius":6.5,"bCoef":0.465,"invMass":1.4,"color":"f0bb28","cMask":["all","green"]},"spawnDistance":150,"traits":[],"joints":[],"redSpawnPoints":[[-129.9,75],[-199.19,115]],"blueSpawnPoints":[[129.9,75],[199.19,115]],"greenSpawnPoints":[[0,-150],[0,-230]],"canBeStored":false};
@@ -6079,7 +6116,7 @@ function goalRecord(s, g){
     score: [R.sc[i1 * 2], R.sc[i1 * 2 + 1]], time: Math.round(R.tim[gi] * 10) / 10, mode: s.kind === 'local' ? (s.cfg.cup ? 'cup' : s.cfg.league ? 'league' : (s.cfg.mode === 'pens' || s.cfg.mode === 'duel') && s.cfg.two ? s.cfg.mode + '2' : s.cfg.mode) : 'online',
     online: s.kind !== 'local', mine: (s.locals || []).map(L => L.pid),
     kits: [0, 1].map(i => ({name: KIT[i].name, color: KIT[i].color, trim: KIT[i].trim, text: KIT[i].text, flag: KIT[i].flag || null, alt: !!KIT[i].alt})),
-    stadium: ST === DEFAULT_ST ? null : {name: ST.name, json: sj && sj.length < 150000 ? stadiumJSON : null},
+    stadium: ST === DEFAULT_ST ? null : mapKeyOf(ST) ? {name: ST.name, map: mapKeyOf(ST)} : {name: ST.name, json: sj && sj.length < 150000 ? stadiumJSON : null},
     players: s.G.players.map(p => ({id: p.id, team: p.team, name: String(info(p.id).name || '').slice(0, 30), avatar: String(info(p.id).avatar || '').slice(0, 8), pu: p.pu || 'none'})),
     dyn: R.dyn.length, n, pos: pack(R.pos.slice(i0 * w, (i1 + 1) * w)), frm: pack(frm), tim: pack(R.tim.slice(i0, i1 + 1)), sc: pack(R.sc.slice(i0 * 2, (i1 + 1) * 2)), km: pack(R.km.slice(i0, i1 + 1))};
 }
@@ -6091,7 +6128,8 @@ function goalReplayOf(rec){
     if (!rec || rec.v !== 1 || !Array.isArray(rec.players) || !rec.players.length || rec.players.length > 32 || !Array.isArray(rec.kits) || rec.kits.length !== 2) return null;
     let st = DEFAULT_ST;
     if (rec.stadium){
-      if (rec.stadium.json){ const k = JSON.stringify(rec.stadium.json); st = stadiumCache.get(k); if (!st){ st = C.buildStadium(rec.stadium.json); stadiumCache.set(k, st); } }
+      if (rec.stadium.map && MAPS[rec.stadium.map]) st = MAPS[rec.stadium.map];
+      else if (rec.stadium.json){ const k = JSON.stringify(rec.stadium.json); st = stadiumCache.get(k); if (!st){ st = C.buildStadium(rec.stadium.json); stadiumCache.set(k, st); } }
       else if (ST.name === rec.stadium.name) st = ST; else return null;   // that stadium wasn't kept with it
     }
     const keep = ST; ST = st;
@@ -8084,9 +8122,27 @@ function resize(){
   cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
 }
 new ResizeObserver(resize).observe(stage); resize();
+// v28.84 ("change the colour of game, other balls"): the pitch's colour and the ball's look, yours only (⚙ Settings → View)
+const PITCH_COLS = {slate: null, grass: '#3c6e3f', night: '#22283a', ocean: '#2d5872', clay: '#8a5a44', purple: '#4a3d6b'};
+const pitchCol = () => (PITCH_COLS[store.get('pb.pitch', 'slate')] || null);
+let BALL_SKIN = store.get('pb.ball', 'classic');   // (read once: drawn every frame)
+function drawBall(ctx, d, base){
+  const k = BALL_SKIN, r = d.radius;
+  if (k === 'classic' || !k){ ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); ctx.fillStyle = base; ctx.fill(); return; }
+  ctx.save(); ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); ctx.clip();
+  const rot = (d.x * 0.9 + d.y * 0.6) / r * 0.35;   // (it seems to roll as it goes)
+  if (k === 'football'){ ctx.fillStyle = '#f7f7f7'; ctx.fillRect(d.x - r, d.y - r, 2 * r, 2 * r); ctx.fillStyle = '#1b1b1b';
+    for (let i = 0; i < 5; i++){ const a = rot + i * C.TAU / 5; ctx.beginPath(); ctx.arc(d.x + Math.cos(a) * r * 0.85, d.y + Math.sin(a) * r * 0.85, r * 0.2, 0, C.TAU); ctx.fill(); }
+    ctx.beginPath(); ctx.arc(d.x, d.y, r * 0.24, 0, C.TAU); ctx.fill(); }
+  else if (k === 'beach'){ const cs = ['#ff4d4d', '#ffffff', '#ffd23f', '#ffffff', '#3fa7ff', '#ffffff']; for (let i = 0; i < 6; i++){ ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.arc(d.x, d.y, r, rot + i * C.TAU / 6, rot + (i + 1) * C.TAU / 6); ctx.closePath(); ctx.fillStyle = cs[i]; ctx.fill(); } }
+  else if (k === 'fire'){ const g = ctx.createRadialGradient(d.x - r * 0.3, d.y - r * 0.3, r * 0.1, d.x, d.y, r); g.addColorStop(0, '#fff2a8'); g.addColorStop(0.45, '#ff9a1f'); g.addColorStop(1, '#d6280f'); ctx.fillStyle = g; ctx.fillRect(d.x - r, d.y - r, 2 * r, 2 * r); }
+  else if (k === 'neon'){ ctx.fillStyle = '#3dffa0'; ctx.fillRect(d.x - r, d.y - r, 2 * r, 2 * r); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.arc(d.x - r * 0.3, d.y - r * 0.3, r * 0.35, 0, C.TAU); ctx.fill(); }
+  else if (k === 'eight'){ ctx.fillStyle = '#151515'; ctx.fillRect(d.x - r, d.y - r, 2 * r, 2 * r); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(d.x, d.y, r * 0.45, 0, C.TAU); ctx.fill(); ctx.fillStyle = '#151515'; ctx.font = `900 ${Math.round(r * 0.75)}px Rubik, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('8', d.x, d.y + r * 0.04); }
+  ctx.restore(); ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU);
+}
 function applyStadiumLayout(){
   stage.style.aspectRatio = `${ST.width * 2} / ${ST.height * 2}`; document.documentElement.style.setProperty('--ar', String(ST.width / ST.height));
-  stage.style.background = ST.bg.type === 'hockey' ? '#1e1e1e' : ST.bg.type === 'hex' ? '#2a2f3b' : ST.bg.color;
+  stage.style.background = ST.bg.type === 'hockey' ? '#1e1e1e' : ST.bg.type === 'hex' ? (pitchCol() || '#2a2f3b') : (pitchCol() || ST.bg.color);
   $('stadiumName').textContent = ST.name; $('mStadium').textContent = 'Stadium · ' + ST.name;
   $('defStBtn').hidden = ST === DEFAULT_ST || ST === TRI_ST;
 }
@@ -8266,7 +8322,7 @@ function render(dt, clip){
   if (fx.shake > 0.2){ sx = (Math.random() - 0.5) * fx.shake; sy = (Math.random() - 0.5) * fx.shake; fx.shake *= Math.pow(0.86, dt * 0.06); } else fx.shake = 0;
 
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
-  if (clip){ ctx.fillStyle = ST.bg.type === 'hockey' ? '#1e1e1e' : ST.bg.type === 'hex' ? '#2a2f3b' : ST.bg.color; ctx.fillRect(0, 0, cv.width, cv.height); }   // a video has no page behind it
+  if (clip){ ctx.fillStyle = ST.bg.type === 'hockey' ? '#1e1e1e' : ST.bg.type === 'hex' ? '#2a2f3b' : (pitchCol() || ST.bg.color); ctx.fillRect(0, 0, cv.width, cv.height); }   // a video has no page behind it
   const fl = !clip && sideFlip() ? -1 : 1; if (!clip) syncSide();   // your side on the right: the world mirrored left to right
   ctx.setTransform(fl * zoom * dpr, 0, 0, zoom * dpr, (cssW / 2 - fl * (cam.x + sx) * zoom) * dpr, (cssH / 2 - (cam.y + sy) * zoom) * dpr);
   drawBackground();
@@ -8347,7 +8403,7 @@ function render(dt, clip){
     for (let i = 0; i < V.discs.length; i++){
       if (V.players.some(p => p.di === i)) continue;
       const d = V.discs[i]; if (!d.color) continue;
-      ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fillStyle = i === 0 ? d.color : tint(d.color); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
+      if (i === 0) drawBall(ctx, d, d.color); else { ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fillStyle = tint(d.color); ctx.fill(); } ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
       if (i === 0 && V.cfg && V.cfg.power){   // (v28.34) a power shot charging: an arc filling round the ball; charged: it glows
         let pw = 0; { const RG = (sess && sess.G) || V; for (const p of RG.players) if ((p.pw | 0) > pw) pw = p.pw | 0; }   // (v28.49, "the moment its charged and we press shoot, its not powershot": the charge as it really is, not as the picture drawn a moment ahead has it: the ring went full a tick or more early)
         // (v28.71, "i didnt see the ring": it was thin, orange on the yellow ball, and tiny zoomed out: now bolder, on a
@@ -8962,6 +9018,7 @@ function start(cfg){
   stopOnlineGameView(); rpHide();
   sfx.unlock();
   kitOverride = cfg.kits || null; applyKits();
+  if (!cfg.online && cfg.mode !== 'online') useMap(['ai', '2p', 'mirror'].includes(cfg.mode) ? mapKeyFor(SET.map, cfg.size) : 'm');   // (v28.84: the pitch's size)
   useTri(cfg.mode === 'tri');   // (1v1v1 on its own arena)
   const roster = cfg.roster || localRoster(cfg);
   const s = newSession('local', cfg, roster);
@@ -9004,6 +9061,7 @@ const pick = (sel, attr, cb) => document.querySelectorAll(sel).forEach(b => b.ad
   document.querySelectorAll(sel).forEach(x => x.classList.remove('on')); b.classList.add('on'); cb(+b.dataset[attr]); }));
 { const fill = (sel, opts, unit) => { sel.textContent = ''; for (const v of opts) sel.add(new Option(v ? v + unit : 'No limit', v)); };
   fill($('setTime'), TIME_OPTS, ' min'); fill($('hoTime'), TIME_OPTS, ' min'); fill($('setGoals'), GOAL_OPTS, ''); fill($('hoGoals'), GOAL_OPTS, ''); }
+$('setMap').addEventListener('change', e => { if (roomRule('setMap', +e.target.value)) return; SET.map = +e.target.value; store.set('pb.map', SET.map); });   // (v28.84)
 $('setDiff').addEventListener('change', e => {
   // (v28.74: Custom: a level for the computer's strikers and one for its keepers, in a row under the match settings)
   if (e.target.value === 'c'){
@@ -10693,7 +10751,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.84';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.85';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -11310,7 +11368,7 @@ async function hostGame1(opts, tk){
   $('hostBtn').disabled = false;
   if (!T){ onErr(slots ? 'All the public rooms are taken. Tick "Not in the room list" to make one with a code.' : 'Could not get a free room code. Try again.'); return; }
   Object.assign(NET, {on: true, host: true, T, code, me: T.myId || null, guests: new Map(), chat: [], chatSeen: new Set(), myChat: [], ver: 1, startedGid: -1, cmdSeen: new Map(), typing: false, pass, kicked: new Set()}); resetPing();
-  NET.lobby = {v: 2, ver: 1, nm: name, lk: pass ? 1 : 0, hid: hidden ? 1 : 0, pm: 0, sz: chosenSize(), tl: SET.time, sl: SET.goals, lv: SET.diff, kl: SET.dk, fill: $('fillAi').checked ? 1 : 0, pu: puSel.slice(), ti: SET.tie, sd: SET.slide ? 1 : 0, dv: SET.dive ? 1 : 0, cv: SET.curve ? 1 : 0, fk: SET.fk ? 1 : 0, pw: SET.power ? 1 : 0, cl: SET.curveLv,
+  NET.lobby = {v: 2, ver: 1, nm: name, lk: pass ? 1 : 0, hid: hidden ? 1 : 0, pm: 0, sz: chosenSize(), tl: SET.time, sl: SET.goals, lv: SET.diff, kl: SET.dk, fill: $('fillAi').checked ? 1 : 0, pu: puSel.slice(), ti: SET.tie, sd: SET.slide ? 1 : 0, dv: SET.dive ? 1 : 0, mp: SET.map | 0, cv: SET.curve ? 1 : 0, fk: SET.fk ? 1 : 0, pw: SET.power ? 1 : 0, cl: SET.curveLv,
                lgs: SET.legs, leg2: null, kit: [kitSel[0], kitSel[1], kitSel[0] === CUS ? custom[0] : null, kitSel[1] === CUS ? custom[1] : null], pl: [], on: 0, gid: 0, ro: null, res: null, adm: [], deny: []};
   T.info = openInfo;
   syncHostOpts();
@@ -11530,7 +11588,7 @@ function startOnline(){
   if (!roster.some(r => r.team === 0) || !roster.some(r => r.team === 1)){ onErr('Each team needs at least one player. Turn on "Computer fills empty places" or wait for friends.'); L.on = 0; L.gid--; return; }
   L.ro = roster.map(r => [r.id, r.team, r.ctrl === 'ai' ? 'a' : 'h', r.peer || '', r.name, r.avatar, r.role === 'keeper' ? 'k' : 's']);
   kitOverride = L.kit; applyKits();
-  useTri(false);
+  useTri(false); useMap(mapKeyFor(L.mp, L.sz | 0), true);   // (v28.84: the host's pitch)
   L.lg = !L.pm && L.lgs === 2 ? (Array.isArray(L.leg2) ? [2, L.leg2[0] | 0, L.leg2[1] | 0] : [1, 0, 0]) : null;   // (v25.9: two legs online)
   const cfg = onlineCfg(L), pens = !!L.pm;
   const s = newSession('host', cfg, roster);
@@ -11820,7 +11878,7 @@ function guestKits(L){ const k = kitFromLobby(L); if (JSON.stringify(k) !== JSON
 function startGuest(L){
   guestKits(L); clearMatchPanels();
   const roster = L.ro.map(r => ({id: r[0] | 0, team: r[1] ? 1 : 0, ctrl: r[2] === 'a' ? 'ai' : r[2] === 'x' ? 'gone' : 'remote', name: clean(r[4], 16), avatar: clean(r[5], 2), role: r[6] === 'k' ? 'keeper' : 'striker', pu: Array.isArray(L.pu) && PU[L.pu[r[1] ? 1 : 0]] ? L.pu[r[1] ? 1 : 0] : 'none'}));
-  useTri(false);
+  useTri(false); useMap(mapKeyFor(L.mp, L.sz | 0), true);   // (v28.84: the host's pitch)
   const cfg = onlineCfg(L), pens = !!L.pm;
   const G = C.newGame(ST, rulesOf(cfg), roster);
   const mine = L.ro.find(r => r[3] === NET.me);
@@ -12466,19 +12524,19 @@ function joinFromLink(){   // opened from an invite link: show the online panel 
 $('fillAi').addEventListener('change', () => { const v = $('fillAi').checked ? 1 : 0; if (isMgr()) sendCmd('set', 'fillAi', v); else if (NET.host) hostSet('fillAi', v); });
 // the host sets the match up in the lobby: team size, time, goals, computer level (the menu's settings follow)
 function syncHostOpts(){ const L = NET.lobby; if (!L) return; rulesSync(); $('hoGame').value = L.pm === 2 ? 2 : L.pm ? 1 : 0; $('hoTime').disabled = $('hoGoals').disabled = $('hoTie').disabled = $('hoSlide').disabled = !!L.pm; $('hoSize').value = L.sz; $('hoTime').value = L.tl; $('hoGoals').value = L.sl; $('hoLevel').value = L.lv; $('hoLevelK').value = [0, 1, 2, 3].includes(L.kl) ? L.kl : -1; $('fillAi').checked = !!L.fill;
-  $('hoTie').value = L.ti | 0; $('hoSlide').checked = !!L.sd; $('hoDive').checked = L.dv !== 0; $('hoDive').disabled = !!L.pm; $('hoCurve').value = curvePct(L.cv, L.cl); $('hoFk').checked = !!L.fk; $('hoFk').disabled = !!L.pm; $('hoPower').checked = !!L.pw; $('hoPower').disabled = !!L.pm; $('hoLegs').value = String(L.lgs === 2 ? 2 : 1); }
-function menuSync(){ $('setDiff').value = SET.dk >= 0 ? 'c' : SET.diff; $('setTime').value = SET.time; $('setGoals').value = SET.goals; $('setSide').value = SET.side; $('setTie').value = SET.tie; $('optSlide').checked = SET.slide; $('optDive').checked = SET.dive; $('optCurve').value = curvePct(SET.curve, SET.curveLv); $('optFk').checked = SET.fk; $('optPower').checked = SET.power; $('optLegs').value = String(SET.legs); rulesSync(); diffSync(); }
+  $('hoTie').value = L.ti | 0; $('hoSlide').checked = !!L.sd; $('hoDive').checked = L.dv !== 0; $('hoDive').disabled = !!L.pm; $('hoMap').value = L.mp | 0; $('hoCurve').value = curvePct(L.cv, L.cl); $('hoFk').checked = !!L.fk; $('hoFk').disabled = !!L.pm; $('hoPower').checked = !!L.pw; $('hoPower').disabled = !!L.pm; $('hoLegs').value = String(L.lgs === 2 ? 2 : 1); }
+function menuSync(){ $('setDiff').value = SET.dk >= 0 ? 'c' : SET.diff; $('setTime').value = SET.time; $('setGoals').value = SET.goals; $('setSide').value = SET.side; $('setTie').value = SET.tie; $('optSlide').checked = SET.slide; $('optDive').checked = SET.dive; $('setMap').value = SET.map | 0; $('optCurve').value = curvePct(SET.curve, SET.curveLv); $('optFk').checked = SET.fk; $('optPower').checked = SET.power; $('optLegs').value = String(SET.legs); rulesSync(); diffSync(); }
 // v27.1 ("the settings for personal and online dont match, fix it"): in a room, ⚙ Settings and the menu's rules show the
 // room's (the host's), not your own, and changing one there changes the room's, as its Match settings do: the host and
 // a manager, between matches; locked during a match and for everyone else. It changed only your own before (during a
 // match the host's change didn't reach the room either). Out of the room, your own again
-const RULE_IDS = {setDiff: 'hoLevel', setTime: 'hoTime', setGoals: 'hoGoals', setTie: 'hoTie', optLegs: 'hoLegs', optSlide: 'hoSlide', optDive: 'hoDive', optFk: 'hoFk', optPower: 'hoPower', optCurve: 'hoCurve'};
+const RULE_IDS = {setDiff: 'hoLevel', setTime: 'hoTime', setGoals: 'hoGoals', setTie: 'hoTie', optLegs: 'hoLegs', optSlide: 'hoSlide', optDive: 'hoDive', setMap: 'hoMap', optFk: 'hoFk', optPower: 'hoPower', optCurve: 'hoCurve'};
 const roomL = () => NET.on ? NET.lobby : null;
 function rulesSync(){
   const L = roomL();
   if (!L){ for (const id in RULE_IDS) $(id).disabled = false; if ($('ruleNote').textContent.startsWith('Online:')) $('ruleNote').textContent = "For your next match. Online, the room's rules count.";diffSync(); return; }
   $('setDiff').value = L.lv | 0; $('setTime').value = L.tl; $('setGoals').value = L.sl; $('setTie').value = L.ti | 0; $('optLegs').value = String(L.lgs === 2 ? 2 : 1);
-  $('optSlide').checked = !!L.sd; $('optDive').checked = L.dv !== 0; $('optFk').checked = !!L.fk; $('optPower').checked = !!L.pw; $('optCurve').value = curvePct(!!L.cv, L.cl);
+  $('optSlide').checked = !!L.sd; $('optDive').checked = L.dv !== 0; $('setMap').value = L.mp | 0; $('optFk').checked = !!L.fk; $('optPower').checked = !!L.pw; $('optCurve').value = curvePct(!!L.cv, L.cl);
   const edit = (NET.host || isMgr()) && L.on !== 1;
   for (const id in RULE_IDS) $(id).disabled = !edit || (!!L.pm && ['setTime', 'setGoals', 'setTie', 'optLegs', 'optSlide', 'optFk', 'optPower'].includes(id));
   $('ruleNote').textContent = !(NET.host || isMgr()) ? "Online: the room's rules, set by the host." : L.on === 1 ? "Online: the room's rules, locked during the match." : "Online: the room's rules, for everyone from the next match.";
@@ -12507,6 +12565,7 @@ const HOST_SET = {
   hoTie: [v => v === 0 || v === 1 || v === 2, v => { NET.lobby.ti = SET.tie = v; store.set('pb.tie', v); }],
   hoSlide: [v => v === 0 || v === 1, v => { NET.lobby.sd = v; SET.slide = !!v; store.set('pb.slide', v); }],
   hoDive: [v => v === 0 || v === 1, v => { NET.lobby.dv = v; SET.dive = !!v; store.set('pb.dive', v); }],   // (v28.84)
+  hoMap: [v => [0, 1, 2, 3].includes(v), v => { NET.lobby.mp = v; SET.map = v; store.set('pb.map', v); }],   // (v28.84: the pitch)
   hoCurve: [v => [0, 20, 40, 60, 80, 100].includes(v), v => { setCurvePct(v); NET.lobby.cv = SET.curve ? 1 : 0; NET.lobby.cl = SET.curveLv; }],   // (v25.1: a percentage)
   hoFk: [v => v === 0 || v === 1, v => { NET.lobby.fk = v; SET.fk = !!v; store.set('pb.fk', v); }],
   hoPower: [v => v === 0 || v === 1, v => { NET.lobby.pw = v; SET.power = !!v; store.set('pb.power', v); }],   // (v28.34)
@@ -12514,7 +12573,7 @@ const HOST_SET = {
 };
 function hostSet(id, v){ const h = HOST_SET[id]; if (!h || !NET.host || !NET.lobby || NET.lobby.on === 1 || !h[0](v)) return false; h[1](v); menuSync(); syncHostOpts(); publishLobby(); return true; }
 for (const id of ['hoSlide', 'hoDive', 'hoFk', 'hoPower']) $(id).addEventListener('change', e => { const v = e.target.checked ? 1 : 0; if (isMgr()) sendCmd('set', id, v); else if (NET.host && !hostSet(id, v)) syncHostOpts(); });
-for (const id of ['hoGame', 'hoSize', 'hoTime', 'hoGoals', 'hoLevel', 'hoLevelK', 'hoTie', 'hoCurve', 'hoLegs']) $(id).addEventListener('change', e => {
+for (const id of ['hoGame', 'hoSize', 'hoTime', 'hoGoals', 'hoLevel', 'hoLevelK', 'hoTie', 'hoCurve', 'hoLegs', 'hoMap']) $(id).addEventListener('change', e => {
   const v = +e.target.value; e.target.blur();
   if (isMgr()){ if (isFinite(v) && NET.lobby.on !== 1) sendCmd('set', id, v); else syncHostOpts(); return; }
   if (!hostSet(id, v)) syncHostOpts();
@@ -12855,6 +12914,9 @@ function setZoom(i){ zi = Math.max(0, Math.min(ZL.length - 1, i)); cam.z = 0; $(
 const ZOOM_KEYS = [7, 0, 1, 2, 3];   // (v28.80: up to 1.5×)
 function zoomStep(d){ const k = ZOOM_KEYS.indexOf(zi), n = ZOOM_KEYS[Math.max(0, Math.min(ZOOM_KEYS.length - 1, (k < 0 ? 1 : k) + d))]; setZoom(n); fx.zoomMsg = {text: 'Zoom · ' + $('zoom').options[n].textContent + (d > 0 && n === zi && k === ZOOM_KEYS.length - 1 ? ' (the closest)' : ''), until: performance.now() + 1300}; }
 $('zoom').addEventListener('change', e => { setZoom(e.target.selectedIndex); e.target.blur(); });
+// (v28.84, "change the colour of game, other balls"): yours only, the pitch's colour and the ball
+$('pitchSel').value = store.get('pb.pitch', 'slate'); $('pitchSel').addEventListener('change', e => { store.set('pb.pitch', e.target.value); applyStadiumLayout(); e.target.blur(); });
+$('ballSel').value = store.get('pb.ball', 'classic'); $('ballSel').addEventListener('change', e => { store.set('pb.ball', e.target.value); BALL_SKIN = e.target.value; e.target.blur(); });
 // (v28.84, "add fps show"): frames a second, top left of the pitch (with the ping online), from ⚙ Settings → View
 { let n = 0, t0 = performance.now(), on = !!store.get('pb.fps', 0);
   const box = $('fpsBox'), tick = now => { n++; if (now - t0 >= 500){ const f = Math.round(n * 1000 / (now - t0)); n = 0; t0 = now;
