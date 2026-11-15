@@ -1050,6 +1050,12 @@
   .zhint{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:8px;max-width:calc(100% - 16px);box-sizing:border-box;
          background:#262c3a;border:2px solid #ffd166;padding:6px 8px 6px 12px;font-size:12px;color:#e3e7f0;box-shadow:0 8px 24px rgba(0,0,0,.5)}
   .zhint[hidden]{display:none} .zhint kbd{font:700 11px Rubik,sans-serif;background:#3a4256;border:1px solid #5a6378;padding:0 4px}
+  .fpsbox{position:absolute;top:6px;left:8px;z-index:4;font:700 11px/1 Rubik,sans-serif;color:#7ee2a0;background:rgba(10,12,17,.6);padding:3px 6px;pointer-events:none;font-variant-numeric:tabular-nums} .fpsbox[hidden]{display:none} .fpsbox.low{color:#ffb3a7}
+  /* v28.84: the Champions Cup's four groups (yours first, wider) */
+  .clgroups{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(820px,100%)} @media (max-width:640px){ .clgroups{grid-template-columns:1fr} }
+  .clgroups .clg h4{margin:0 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)} .clgroups .clg.mine h4{color:var(--accent)}
+  .clgroups .ltab{width:100%;font-size:12px} .clgroups tr.thru td:first-child{color:#7ee2a0;font-weight:700}
+  #clPanel{overflow:auto;justify-content:flex-start;gap:12px;padding:18px 14px}
   /* v28.82: friends: a note to yourself under the name, its box, ✎ */
   .frrow .frwho{display:flex;flex-direction:column;min-width:0;max-width:45%} .frrow .frwho b{max-width:none}
   .frrow .frnote{font-size:11px;color:#9aa3b6;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1215,6 +1221,7 @@
   </div>
   <canvas id="c"></canvas>
   <div class="hud" id="hud" hidden></div>
+  <div class="fpsbox" id="fpsBox" hidden></div>
   <div class="corner"><span class="fsb onlinen" id="onlineN" hidden title="Players with the game open right now"></span><button class="ghost fsb" id="sugBtn" type="button" title="Got an idea or found a bug? Tell us"><span class="mi" data-ic="bulb" aria-hidden="true"></span> Suggestions</button><button class="ghost fsb rolebtn" id="roleBtn" type="button" hidden></button><button class="ghost fsb" id="saveGoalBtn" type="button" title="Keep this goal in My goals (menu) to watch again" hidden>★ Save<span class="wide"> goal</span></button><button class="ghost fsb" id="kpBtn" type="button" title="Put a computer keeper in goal, or take him out (his level is the Computer setting in the menu)" hidden>Keeper: off</button><button class="ghost fsb" id="chatBtn" type="button" title="Chat (Enter)" hidden>Chat</button><button class="ghost fsb" id="pauseBtn" type="button" title="Pause (P)" hidden>Pause</button><button class="ghost fsb setb" id="setCorner" type="button" title="Settings: zoom, extrapolation, sound, controls" hidden>⚙<span class="wide"> Settings</span></button><button class="ghost fsb" id="emoBtn" type="button" title="Emotes (or keys 1–8; two players: P1 1–5, P2 6–0)" aria-expanded="false" hidden>😎</button><button class="ghost fsb" id="gmBtn" type="button" title="Menu: resume, restart, back to the lobby, leave" hidden>☰ Menu</button><button class="ghost fsb" id="fsBtn" type="button" title="Fullscreen (F)">⛶<span class="wide"> Fullscreen</span></button></div>
   <div class="rpbar" id="rpBar" hidden>
     <button class="ghost" id="rpBack" type="button" title="5 s back (←)">« 5 s</button>
@@ -1302,6 +1309,14 @@
     <div class="bracket" id="bracket"></div>
     <div class="row"><button id="cupGo" type="button">Start the World Cup</button><button class="ghost" id="cupQuit" type="button">Abandon</button><button class="ghost" id="cupDone" type="button">Menu</button></div>
   </div>
+  <div class="overlay" id="clPanel" hidden>
+    <h2 id="clTitle">Champions Cup</h2>
+    <p id="clText"></p>
+    <div class="row" id="clPick"><span class="lbl">Your club</span><select id="clTeam"></select><span class="grp" id="clSize"><button class="ghost on" type="button" data-s="1">1v1</button><button class="ghost" type="button" data-s="2">2v2</button></span></div>
+    <div class="clgroups" id="clGroups" hidden></div>
+    <div class="bracket" id="clBracket" hidden></div>
+    <div class="row"><button id="clGo" type="button">Start the Champions Cup</button><button class="ghost" id="clQuit" type="button">Abandon</button><button class="ghost" id="clDone" type="button">Menu</button></div>
+  </div>
   <div class="overlay" id="leaguePanel" hidden>
     <h2 id="lgTitle">League</h2>
     <p id="lgText"></p>
@@ -1364,6 +1379,7 @@
               <div class="tgrid">
                 <label class="chk" for="fillAi"><input type="checkbox" id="fillAi" checked>Computer fills empty places</label>
                 <label class="chk" for="hoSlide"><input type="checkbox" id="hoSlide">Slide tackles</label>
+                <label class="chk" for="hoDive"><input type="checkbox" id="hoDive" checked>Keeper dives</label>
                 <label class="chk" for="hoFk" title="Taking the man instead of the ball anywhere gives a free kick (a power bar to take it); off: only penalties"><input type="checkbox" id="hoFk">Free kicks</label>
                 <label class="chk" for="hoPower" title="Keep the ball at your feet for a moment and it glows: your next kick is a power shot"><input type="checkbox" id="hoPower">Power shot</label>
               </div>
@@ -1386,6 +1402,7 @@
     </section>
     <section class="dsec"><h3>Match rules</h3>
       <label class="opt"><input type="checkbox" id="optSlide"><span><b>Slide tackles</b><small>Get the ball first; take the man in your own area and it's a penalty.</small></span></label>
+      <label class="opt"><input type="checkbox" id="optDive"><span><b>Keeper dives</b><small>In goal, the slide key dives at the ball. Off: a keeper slides like anyone.</small></span></label>
       <label class="opt"><input type="checkbox" id="optFk"><span><b>Free kicks</b><small>Take the man anywhere else and it's a free kick (off: only penalties).</small></span></label>
       <label class="opt"><input type="checkbox" id="optPower"><span><b>Power shot</b><small>Keep the ball at your feet for a moment: a ring fills round it, the ball glows, and your next kick is a power shot (about half as hard again). The computer charges too: watch for its ring. Not in practice drills.</small></span></label>
       <label class="dline" for="optCurve" title="How much your kicks curl when you hold a direction across them as you kick: 0% never, 60% normal, 100% the most (free kicks: you set their curl with left and right)">Curve <select id="optCurve"><option value="0">0% · off</option><option value="20">20%</option><option value="40">40%</option><option value="60">60% · normal</option><option value="80">80%</option><option value="100">100% · max</option></select></label>
@@ -1398,7 +1415,8 @@
     </section>
     <section class="dsec"><h3>View</h3>
       <label class="dline" for="zoom">Zoom <select id="zoom"><option>Auto</option><option>1×</option><option>1.25×</option><option>1.5×</option><option hidden>1.5×</option><option hidden>1.5×</option><option hidden>1.5×</option><option>Follow all</option></select></label>
-      <label class="dline" for="setSide" title="Where your team plays on your screen, whichever side it really is (as on White online): Left, your side on the left going right; Right, on the right going left. The picture, the scoreboard and left/right keys turn with it">Your side <select id="setSide"><option value="0">Left</option><option value="1">Right</option></select></label>
+      <label class="dline" for="fpsOn">Show FPS <input type="checkbox" id="fpsOn"></label>
+      <label class="dline" for="setSide" title="Where your team plays on your screen, whichever side it really is (as on White online): Left, your side on the left going right; Right, on the right going left. The picture, the scoreboard and left/right keys turn with it. Two of you on one keyboard against each other: P1's side">Your side <select id="setSide"><option value="0">Left (P1 left)</option><option value="1">Right (P1 right)</option></select></label>
       <label class="dline" for="fxSel" title="Goal celebrations: Full has the sweeping banner, fireworks and confetti; Calm keeps the motion down (what a device set to reduce motion gets until you pick)">Celebrations <select id="fxSel"><option value="full">Full</option><option value="calm">Calm</option></select></label>
       <div class="drow"><button class="ghost sm tog" id="fillBtn" type="button" aria-pressed="true" title="In a match the game takes up the whole tab, with nothing round it (⛶ or F for real fullscreen)">Fill the tab while playing</button></div>
       <div class="drow"><button class="ghost sm" id="popBtn" type="button" title="Open the game in a tab of its own: real fullscreen there, and the website around it can't take your keys" hidden>⧉ Open in new tab</button></div>
@@ -1530,6 +1548,7 @@
       <div class="tiles c2">
         <button class="tile" id="cupBtn" type="button"><i class="ic" data-ic="cup"></i><span><b>World Cup</b><small>three knockout matches</small></span></button>
         <button class="tile" id="leagueBtn" type="button"><i class="ic" data-ic="table"></i><span><b>League</b><small>a season, every team once</small></span></button>
+        <button class="tile" id="clBtn" type="button"><i class="ic" data-ic="star"></i><span><b>Champions Cup</b><small>groups, then knockouts, clubs only</small></span></button>
         <button class="tile dtile" id="dailyBtn" type="button"><i class="ic" data-ic="cal"></i><span><b>Daily challenge</b><small id="dailySub">the same 10 tries for everyone today</small></span></button>
       </div>
     </div>
@@ -2358,14 +2377,17 @@ function PBCORE(){
   // ball within DIVE_REACH px of him on the way (his arms) is parried, away from his goal; then DIVE_DOWN ticks getting
   // up, DIVE_CD from one to the next. Bumping a man on a dive is no foul
   // (v28.75, "nerf the dive speed a bit bro its kinda op": DIVE_V 3.8, was 4.4: about 46 px a dive, was 53; the slide as it was)
-  const DIVE_V = 3.8, DIVE_T = 18, DIVE_DAMP = 0.95, DIVE_DOWN = 32, DIVE_CD = 60, DIVE_REACH = 10;
+  // (v28.84, "the dives for gk is kinda liek teleporting" / "nerf the speed ot dives": he pushes off over two ticks, half then
+  // three quarters then full (DIVE_RAMP), and the top speed is 3.0, was 3.8 from the first tick: about 44 px a dive, was 46,
+  // over 22 ticks, was 18, so it reads as a dive, not a jump)
+  const DIVE_V = 3.0, DIVE_T = 22, DIVE_DAMP = 0.955, DIVE_DOWN = 32, DIVE_CD = 60, DIVE_REACH = 10, DIVE_RAMP = [0.5, 0.75, 1];
   const canDive = (G, ST, p, d) => p.role === 'keeper' && G.cfg.dive !== false && !ST.tri && inArea(ST, p.team, d.x, d.y);
   function startDive(G, p, d, ev){
     const b = p.input; let x = ((b & 8) > 0) - ((b & 4) > 0), y = ((b & 2) > 0) - ((b & 1) > 0);
     const v = Math.sqrt(d.vx * d.vx + d.vy * d.vy), B = G.discs[0];
     if (x || y){ const L = Math.sqrt(x * x + y * y); x /= L; y /= L; } else if (v > 0.3){ x = d.vx / v; y = d.vy / v; } else { const bx = B.x - d.x, by = B.y - d.y, L = Math.hypot(bx, by); if (!(L > 1)) return; x = bx / L; y = by / L; }
     [x, y] = slideAim(G, d, x, y);
-    d.vx = x * DIVE_V; d.vy = y * DIVE_V;
+    d.vx = x * DIVE_V * DIVE_RAMP[0]; d.vy = y * DIVE_V * DIVE_RAMP[0];
     p.slide = DIVE_T; p.slideCd = DIVE_CD; p.slideDx = x; p.slideDy = y; p.slideBall = false; p.kicking = false; p.slideBump = false; p.diving = true;
     if (ev) ev.push({type:'slide', id: ++G.eventId, frame: G.frame, pid: p.id, dive: true});
   }
@@ -2385,6 +2407,7 @@ function PBCORE(){
       if (p.slideCd > 0) p.slideCd--;
       if (p.slide > 0 && p.diving){   // a keeper's dive: the ball in reach of his arms is parried, away from his goal
         const d = D[p.di];
+        { const age = DIVE_T - p.slide; if (age < DIVE_RAMP.length - 1){ const tgt = DIVE_V * DIVE_RAMP[age + 1], al = d.vx * p.slideDx + d.vy * p.slideDy; if (al < tgt){ d.vx += p.slideDx * (tgt - al); d.vy += p.slideDy * (tgt - al); } } }   // (v28.84: the push-off)
         if (!p.slideBall && G.state === 1 && !G.sp){
           const bx = b.x - d.x, by = b.y - d.y, dist = Math.sqrt(bx * bx + by * by), gap = dist - b.radius - d.radius;
           if (dist > 0 && gap < DIVE_REACH){
@@ -3161,7 +3184,7 @@ function PBCORE(){
 
   return {TAU, TICK, FL, IN, TEAMS, PU, KMH, limitHit, buildStadium, colliders, physics, crossesGoal, newGame, resetPositions, setInput, step, endGame, overtime, topTied,
           copyGame, extrapolate, ballPath, playerDisc, newStats, pstat, timeUp, inArea, areaOf, ballArea, setPiece,
-          CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, DIVE: {V: DIVE_V, T: DIVE_T, DAMP: DIVE_DAMP, DOWN: DIVE_DOWN, CD: DIVE_CD, REACH: DIVE_REACH}, canDive, slideAim, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
+          CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, DIVE: {V: DIVE_V, RAMP: DIVE_RAMP, T: DIVE_T, DAMP: DIVE_DAMP, DOWN: DIVE_DOWN, CD: DIVE_CD, REACH: DIVE_REACH}, canDive, slideAim, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
           fkPreview, FK_SHOW_PW, FK_AUTO, FK_HOLD, FK_HOLD_AIM, CURL, fkWallLine, fkWallSpot, autoCurl, manualCurl, curlTo, AC_BIT, INV_BIT, POWER_T, POWER_MUL, flightCross, curveMul, CURVE_LV,
           AUTO: {RANGE: AUTO_RANGE, WIDE: AUTO_WIDE, FK_WIDE, MID: AUTO_MID, IN: AUTO_IN, MAX: AUTO_MAX, K: AUTO_K, SAFE: AUTO_SAFE, FAR: AUTO_FAR, SMALL: AUTO_SMALL}, FK_CURVE};
 }
@@ -3380,7 +3403,7 @@ function PBAI(C){
   // better the computer, the better the pick (FK_AI_TOP: Insane the best, Easy one of many, and off by its aim error);
   // nothing on (FK_AI_MIN) and a teammate free: a pass to the freest, hit for the distance. He sets the aim and curl and
   // holds kick to that power, and lets go
-  let FK_AI_R = 330, FK_AI_READ = 1, FK_AI_MIN = -6, FK_AI_SIDES = [-5, -4, -3, -2, 0, 2, 3, 4, 5], FK_AI_STEP = 0.025, FK_AI_TOP = [[24, 12], [12, 8], [5, 4], [1, 0]], FK_AI_ERR = 0.5;
+  let FK_AI_FAR = 210, FK_AI_CURLC = 1.5, FK_AI_R = 330, FK_AI_READ = 1, FK_AI_MIN = -6, FK_AI_SIDES = [-5, -4, -3, -2, 0, 2, 3, 4, 5], FK_AI_STEP = 0.025, FK_AI_TOP = [[24, 12], [12, 8], [5, 4], [1, 0]], FK_AI_ERR = 0.5;
   function fkTake(G, ST, p, t, L, mem, sp, team){
     if (sp.t < sp.hold) return 0;
     const key = sp.x + ',' + sp.y + ',' + (G.frame - sp.t);
@@ -3394,6 +3417,9 @@ function PBAI(C){
   function fkWeigh(G, ST, p, t, sp, team, side, out, half){
     const D = G.discs, b = D[0], g = goalOf(ST, 1 - team), lo = Math.min(g.y0, g.y1), hi = Math.max(g.y0, g.y1), gx = (g.x0 + g.x1) / 2, gy = (g.y0 + g.y1) / 2;
     if (Math.hypot(gx - sp.x, gy - sp.y) >= FK_AI_R) return;
+    // (v28.84, "their gk curve the freekicks a bit too much ... its for long range as well": at most 3 of 5 curl, 2 from
+    // beyond FK_AI_FAR, and a curl only when it's clearly better than less)
+    if (Math.abs(side) > (Math.hypot(gx - sp.x, gy - sp.y) > FK_AI_FAR ? 2 : 3)) return;
     const foes = G.players.filter(q => q.team !== team && q.ctrl !== 'gone'), kp = foes.find(q => q.role === 'keeper') || (foes.length === 1 ? foes[0] : null);
     const wall = foes.filter(q => q !== kp), kd = kp ? D[kp.di] : null, kr = kd ? kd.radius + b.radius : 0;
     const base = Math.atan2(gy - sp.y, gx - sp.x), aim0 = sp.aim, side0 = sp.side, n = Math.ceil(Math.hypot(gx - sp.x, gy - sp.y) / 6) + 12;   // (ticks to the line and a few more, at full power)
@@ -3410,7 +3436,7 @@ function PBAI(C){
         let j = 1; while (j < P.length - 1 && (P[j].x - kd.x) * (P[0].x - kd.x) > 0) j++;
         clear = Math.min(clear, Math.abs(P[j].y - ky) - kr - Math.min(t.vmax * j, 0.5 * t.a * j * j));
       }
-      out.push({aim: sp.aim, side, pw: 1, v: clear});
+      out.push({aim: sp.aim, side, pw: 1, v: clear - Math.abs(side) * FK_AI_CURLC});
     }
     sp.aim = aim0; sp.side = side0;
   }
@@ -3828,8 +3854,8 @@ function PBAI(C){
           for (let k = 1; k < 9; k++){
             let ux = DIRS[k][0], uy = DIRS[k][1]; if (ux && uy){ ux *= Math.SQRT1_2; uy *= Math.SQRT1_2; }
             if (C.slideAim) [ux, uy] = C.slideAim(G, me, ux, uy);
-            let x = me.x, y = me.y, vx = ux * V, vy = uy * V;
-            for (let i = 1; i <= T && i < P.length; i++){ x += vx; y += vy; vx *= K; vy *= K; if (Math.hypot(P[i].x - x, P[i].y - y) <= R){ if (i < bt){ bt = i; best = DIRS[k][2]; } break; } }
+            const RP = C.DIVE.RAMP || [1]; let x = me.x, y = me.y, vx = ux * V * RP[0], vy = uy * V * RP[0];   // (v28.84: the push-off, as the engine)
+            for (let i = 1; i <= T && i < P.length; i++){ x += vx; y += vy; if (i < RP.length){ vx = ux * V * RP[i]; vy = uy * V * RP[i]; } else { vx *= K; vy *= K; } if (Math.hypot(P[i].x - x, P[i].y - y) <= R){ if (i < bt){ bt = i; best = DIRS[k][2]; } break; } }
           }
           if (best){
             if (mem.dvAt == null || G.frame - mem.dvAt > 60){ mem.dvAt = G.frame; mem.dvRoll = rnd(mem); }
@@ -4908,7 +4934,7 @@ const SET = {
   ghost: !!store.get('pb.ghost', 0), smooth: store.get('pb.smooth', 1) !== 0, zoom: (z => { const first = !store.get('pb.zoomV', 0); if (first) store.set('pb.zoomV', 1);   // (a kept Auto from before this version is that bug's, written at every load: Follow all once, then whatever is picked)
     return Number.isInteger(z) && z >= 0 && z <= 7 && !(first && z === 0) ? z : 7; })(store.get('pb.zoom', 7)),
   ref: store.get('pb.ref', 1) !== 0, aiCom: store.get('pb.aicom', 1) !== 0, sound: store.get('pb.sound', 1) !== 0, replays: store.get('pb.replays', 1) !== 0, side: store.get('pb.side', 0) === 1 ? 1 : 0,
-  legs: store.get('pb.legs', 1) === 2 ? 2 : 1, ac: [0, 1, 2].map(i => { const v = store.get('pb.ac', null); return Array.isArray(v) && v[i] === 1; }), inv: [0, 1, 2].map(i => { const v = store.get('pb.inv', null); return Array.isArray(v) && v[i] === 1; }), power: store.get('pb.power', 0) === 1, intro: store.get('pb.intro', 1) !== 0, curve: store.get('pb.curve', 1) === 1, slide: store.get('pb.slide', 1) !== 0, fk: store.get('pb.fk', 1) === 1, curveLv: [1, 2, 3, 4, 5].includes(store.get('pb.curveLv', 3)) ? store.get('pb.curveLv', 3) : 3, tie: [0, 1, 2].includes(store.get('pb.tie', 0)) ? store.get('pb.tie', 0) : 0,
+  legs: store.get('pb.legs', 1) === 2 ? 2 : 1, ac: [0, 1, 2].map(i => { const v = store.get('pb.ac', null); return Array.isArray(v) && v[i] === 1; }), inv: [0, 1, 2].map(i => { const v = store.get('pb.inv', null); return Array.isArray(v) && v[i] === 1; }), power: store.get('pb.power', 0) === 1, intro: store.get('pb.intro', 1) !== 0, curve: store.get('pb.curve', 1) === 1, slide: store.get('pb.slide', 1) !== 0, dive: store.get('pb.dive', 1) !== 0, fk: store.get('pb.fk', 1) === 1, curveLv: [1, 2, 3, 4, 5].includes(store.get('pb.curveLv', 3)) ? store.get('pb.curveLv', 3) : 3, tie: [0, 1, 2].includes(store.get('pb.tie', 0)) ? store.get('pb.tie', 0) : 0,
   nick: clean(store.get('pb.nick', ''), 16), avatar: clean(store.get('pb.avatar', ''), 2),
   coach: store.get('pb.coach', null) == null ? null : store.get('pb.coach', 1) !== 0,   // (v28.57: null = on until 8 matches played)
   fill: store.get('pb.fill', 1) !== 0   // (v28.59: the game fills the tab in a match)
@@ -5103,7 +5129,16 @@ function slotBits(slot){
 // (online on White, say), so your own side always goes left to right, the keys and a free kick's left and right with it
 // (its curl is to the kicker's left or right: going the other way on screen it came out the other way round). Two on
 // one keyboard on different sides: as Left. Left (0) and Right (1) as before. Never in a 1v1v1
-function myTeamHere(){ const s = sess; if (!s || !s.G || !s.locals || !s.locals.length) return 0; const ts = new Set(s.locals.map(L => { const p = s.G.players.find(q => q.id === L.pid); return p ? p.team : -1; }).filter(t => t >= 0)); return ts.size === 1 ? [...ts][0] : 0; }
+// (v28.84, "the pause and wait thing, i was mirrored and my keys became mirrored": while your man was out of the match
+// for a moment (waiting for a player, a pause, a seat being changed) no side was found, so it read Orange: a White player's
+// picture and keys flipped round. Now the last side found counts until there's a new one)
+let myTeamLast = {s: null, t: 0};
+function myTeamHere(){ const s = sess; if (!s || !s.G || !s.locals || !s.locals.length) return 0; const ts = new Set(s.locals.map(L => { const p = s.G.players.find(q => q.id === L.pid); return p ? p.team : -1; }).filter(t => t >= 0));
+  if (ts.size === 1){ myTeamLast = {s, t: [...ts][0]}; return myTeamLast.t; } if (ts.size === 0 && myTeamLast.s === s) return myTeamLast.t;
+  // (v28.84, "when playing 2v2 same keyboard, make the your side thing a bit better, maybe like p1p2 side": two of you on
+  // opposite teams: P1's team is "your side", so Left puts P1 on the left; Right puts P2 there)
+  if (ts.size > 1){ const L1 = s.locals.find(L => L.slot === 'p1') || s.locals[0], p1 = L1 && s.G.players.find(q => q.id === L1.pid); if (p1 && p1.team >= 0) return p1.team; }
+  return 0; }
 // v28.11 ("the myside thing, its actually the opposite, when im left its showing im right"): Left and Right were "not
 // mirrored" and "mirrored", whatever side you were on: on White, Left showed you on the right. Now they're where your
 // team plays on your screen: Left, your side on the left going right (what Auto was, and the default); Right, the other way
@@ -5175,7 +5210,7 @@ function localRoster(cfg){
 }
 // the rules a match is played to, for the engine: time, goals, draws (league), curve, slides & fouls, if level
 const otLenFor = tl => 60 * Math.max(1, Math.min(5, Math.round((+tl || 0) / 3)));   // overtime before a shootout: a third of the match, 1-5 min
-const rulesOf = cfg => ({timeLimit: cfg.timeLimit, scoreLimit: cfg.scoreLimit, mode: cfg.mode, draws: !!cfg.draws, curve: !!cfg.curve, slide: !!cfg.slide, power: !!cfg.power, fk: (!!cfg.slide || cfg.mode === 'fkdrill') && !!cfg.fk, curveLv: [1, 2, 3, 4, 5].includes(cfg.curveLv) ? cfg.curveLv : 3,
+const rulesOf = cfg => ({timeLimit: cfg.timeLimit, scoreLimit: cfg.scoreLimit, mode: cfg.mode, draws: !!cfg.draws, curve: !!cfg.curve, slide: !!cfg.slide, power: !!cfg.power, fk: (!!cfg.slide || cfg.mode === 'fkdrill') && !!cfg.fk, dive: cfg.dive !== false, curveLv: [1, 2, 3, 4, 5].includes(cfg.curveLv) ? cfg.curveLv : 3,
   tie: cfg.draws || cfg.mode === 'tri' ? 0 : cfg.tie | 0, otLen: otLenFor(cfg.timeLimit),
   leg: cfg.leg === 1 || cfg.leg === 2 ? cfg.leg : 0, agg: Array.isArray(cfg.agg) && cfg.agg.length === 2 ? cfg.agg.map(v => Math.max(0, v | 0)) : null});   // (1v1v1: level at the top, next goal wins)
 // v28.21 ("make leg 1 and leg 2 better"): each leg opens with its banner over the kick-off: which leg, the first leg's
@@ -6981,6 +7016,9 @@ function tutPanel(s){
     if (nx){ const b = document.createElement('button'); b.type = 'button'; b.textContent = `Next part: ${LESSONS[nx].name} ›`; b.onclick = () => { tutEnd(true, m.lesson); tutStart(nx); }; ex.append(b); }
     { const b = document.createElement('button'); b.type = 'button'; b.className = nx ? 'ghost' : ''; b.textContent = 'Play the computer (Easy)'; b.onclick = () => { tutEnd(true, m.lesson); start(Object.assign(cfgFor('ai', 1), {diff: 0})); }; ex.append(b); }
     { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = m.lesson === 'quick' ? 'Go deeper: the parts' : 'All the parts'; b.onclick = () => { tutEnd(true, m.lesson); exitToMenu(); openLearn(); }; ex.append(b); }
+    // (v28.84, "when tutorial is finished ... if you score the ball reset, so maybe add like training, and shooting practise")
+    { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = 'Shooting practice'; b.onclick = () => { tutEnd(true, m.lesson); start(cfgFor('practice', 1)); }; ex.append(b); }
+    { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = 'All the drills'; b.onclick = () => { tutEnd(true, m.lesson); exitToMenu(); menuTab('train'); }; ex.append(b); }
     if (m.lesson === 'quick' && !store.get('pb.tour', null)){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost'; b.textContent = 'Show me around the menu'; b.onclick = () => { tutEnd(true, m.lesson); exitToMenu(); tourStart(); }; ex.append(b); } }   // (v28.73)
   { const dots = $('tutDots'); dots.textContent = ''; L.forEach((k, j) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'tdot' + (j === tu.i ? ' on' : j < tu.i ? ' done' : ''); b.title = `${j + 1}. ${TUT_TITLE[k] || k}`; b.setAttribute('aria-label', b.title); b.onclick = e => { e.currentTarget.blur(); m.goto(s, j); }; dots.append(b); }); }
   $('tutBack').hidden = tu.i === 0; $('tutAgain').hidden = tu.i === 0;
@@ -7242,6 +7280,7 @@ function keeperMode(){
     for (const e of G.events){
       if (e.type === 'kick' && e.pid === cpu.id && kp.state === 'ready' && G.state === 1){ kp.state = 'shot'; kp.t = 0; kp.touchT = -1; kp.away = 0; kp.speed = e.speed * C.KMH; }
       if (e.type === 'goal' && kp.state !== 'done') M.done(s, e.team === 1 ? 'goal' : 'saved', e.kmh);
+      if (e.type === 'kick' && e.pid === me.id && kp.state === 'shot' && kp.touchT < 0) kp.touchT = kp.t;   // (v28.84, "keeper dives its a save not missed": a dive's parry reaches further than touching, and counted as a miss)
     }
     if (G.state !== 1 || kp.state === 'done') return;
     const touch = Math.hypot(dm.x - b.x, dm.y - b.y) < dm.radius + b.radius + 4;
@@ -8778,7 +8817,7 @@ $('kpBtn').addEventListener('click', () => {
 // ---------- menus ----------
 let pausedForPanel = null;   // the match paused while panels are open over it
 const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one at a time
-const panels = ['sugPanel', 'sitesPanel', 'dailyPanel', 'teamPanel', 'puPanel', 'keysPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'mapPanel', 'scoresPanel', 'cupPanel', 'leaguePanel', 'onlinePanel', 'resPanel', 'gameMenu', 'cbPanel', 'setPanel', 'helpPanel'];
+const panels = ['clPanel', 'sugPanel', 'sitesPanel', 'dailyPanel', 'teamPanel', 'puPanel', 'keysPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'mapPanel', 'scoresPanel', 'cupPanel', 'leaguePanel', 'onlinePanel', 'resPanel', 'gameMenu', 'cbPanel', 'setPanel', 'helpPanel'];
 const panelsClosed = () => panels.every(id => $(id).hidden);
 function showMenu(title, text){ $('menuTitle').textContent = title; $('menuText').textContent = text; $('menu').hidden = false; renderDash(); try { fitMenu(); } catch (e) {} }
 // v28.63 ("add a tiny thing in corner saying like recommendations, and ppl could write what they think we should do and
@@ -8933,7 +8972,8 @@ function start(cfg){
   if (bot){ const opp = s.G.players.find(p => p.team === 1); if (opp) s.custom = new Map([[opp.id, bot]]); }
   sess = s; cam.x = cam.y = 0; cam.z = 0; cam.fk = 0; fx.goal = fx.moment = null; fx.pops.length = 0; fx.trail.length = 0; lines.length = 0;
   for (const id of ['menu', ...panels]) $(id).hidden = true;
-  if (!s.mode) say(cfg.league ? `League matchday ${cfg.lgRound + 1} of ${league.n - 1}: ${KIT[0].name} v ${KIT[1].name} · ${cfg.timeLimit} min${cfg.scoreLimit ? ', first to ' + cfg.scoreLimit : ''}, draws count`
+  if (!s.mode && cfg.cl) say(`Champions Cup, ${CL_RN[cfg.clRound].toLowerCase()}: ${KIT[0].name} v ${KIT[1].name}`, 1);
+  else if (!s.mode) say(cfg.league ? `League matchday ${cfg.lgRound + 1} of ${league.n - 1}: ${KIT[0].name} v ${KIT[1].name} · ${cfg.timeLimit} min${cfg.scoreLimit ? ', first to ' + cfg.scoreLimit : ''}, draws count`
     : `${KIT[0].name} v ${KIT[1].name} · ${cfg.timeLimit ? cfg.timeLimit + ' min' : 'no time limit'}${cfg.scoreLimit ? ', first to ' + cfg.scoreLimit : ''}`, 1);
   if (cfg.mode === 'tri') say(`1v1v1: three goals, one each. Score in either of the others, keep your own · ${cfg.timeLimit ? cfg.timeLimit + ' min' : 'no time limit'}${cfg.scoreLimit ? ', first to ' + cfg.scoreLimit : ''}`, 1);
   if (!s.mode && cfg.mode === 'ai' && you.games && (learnSet.copy || learnSet.exploit)) say(`The computer has studied ${you.games} of your matches`, 1);
@@ -8944,7 +8984,7 @@ function start(cfg){
 const drill = mode => mode === 'practice' || mode === 'pens' || mode === 'duel' || mode === 'keeper' || mode === 'wall' || mode === 'dribble' || mode === 'fkdrill' || mode === 'tutorial';
 function cfgFor(mode, size){
   const c = {mode, size, diff: SET.diff, timeLimit: drill(mode) ? 0 : SET.time, scoreLimit: drill(mode) ? 0 : SET.goals,
-             curve: SET.curve && mode !== 'keeper', slide: SET.slide && !drill(mode), power: SET.power && !drill(mode) && mode !== 'tutorial', fk: mode === 'fkdrill' || (SET.fk && SET.slide && !drill(mode)), curveLv: SET.curveLv, tie: drill(mode) || mode === 'tri' ? 0 : SET.tie};   // the match rules from the settings
+             curve: SET.curve && mode !== 'keeper', slide: SET.slide && !drill(mode), dive: SET.dive || mode === 'keeper' || mode === 'tutorial', power: SET.power && !drill(mode) && mode !== 'tutorial', fk: mode === 'fkdrill' || (SET.fk && SET.slide && !drill(mode)), curveLv: SET.curveLv, tie: drill(mode) || mode === 'tri' ? 0 : SET.tie};   // the match rules from the settings
   // (v28.74: the keepers' own level. The drills against a keeper are at it; matches and penalties carry the difference)
   if (SET.dk >= 0 && SET.dk !== SET.diff){ if (mode === 'practice' || mode === 'fkdrill' || mode === 'wall') c.diff = SET.dk; else if (!drill(mode) || mode === 'pens') c.kOff = SET.dk - SET.diff; }
   if (mode === 'wall') c.keeper = !!store.get('pb.wallKeeper', false);
@@ -8983,6 +9023,7 @@ $('setGoals').addEventListener('change', e => { if (roomRule('setGoals', +e.targ
 $('setSide').addEventListener('change', e => { SET.side = +e.target.value === 1 ? 1 : 0; store.set('pb.side', SET.side); applySide(); });
 $('optLegs').addEventListener('change', e => { e.target.blur(); if (roomRule('optLegs', +e.target.value === 2 ? 2 : 1)) return; SET.legs = +e.target.value === 2 ? 2 : 1; store.set('pb.legs', SET.legs); });
 $('setTie').addEventListener('change', e => { const v = +e.target.value; if (roomRule('setTie', [0, 1, 2].includes(v) ? v : 0)) return; SET.tie = [0, 1, 2].includes(v) ? v : 0; store.set('pb.tie', SET.tie); });
+$('optDive').addEventListener('change', e => { if (roomRule('optDive', e.target.checked ? 1 : 0)) return; SET.dive = !!e.target.checked; store.set('pb.dive', SET.dive ? 1 : 0); liveRules(); });   // (v28.84, "option to turn dives off")
 $('optSlide').addEventListener('change', e => { if (roomRule('optSlide', e.target.checked ? 1 : 0)) return; SET.slide = !!e.target.checked; store.set('pb.slide', SET.slide ? 1 : 0); liveRules(); });
 $('optCurve').addEventListener('change', e => { e.target.blur(); if (roomRule('optCurve', +e.target.value)) return; if (!setCurvePct(e.target.value)) e.target.value = curvePct(SET.curve, SET.curveLv); liveRules(); });
 $('optFk').addEventListener('change', e => { if (roomRule('optFk', e.target.checked ? 1 : 0)) return; SET.fk = !!e.target.checked; store.set('pb.fk', SET.fk ? 1 : 0); liveRules(); });
@@ -8991,10 +9032,10 @@ $('optPower').addEventListener('change', e => { if (roomRule('optPower', e.targe
 // or a rematch kept the rules the match began with. Now they take the settings as they are, and in a match on this device
 // a change to curve, slide tackles or free kicks counts at once (cfgFor: a drill keeps the rules it has to have)
 function freshRules(cfg){ const c = Object.assign({}, cfg); if (cfg.mode === 'tutorial' || cfg.daily) return c;   // (v28.65: the daily challenge's rules are the same for everyone)   // (v28.32: the tutorial keeps its own rules: slide tackles, free kicks and curve on)
-  const r = cfgFor(cfg.mode, cfg.size); for (const k of ['curve', 'curveLv', 'slide', 'fk', 'tie', 'power']) c[k] = r[k]; return c; }
+  const r = cfgFor(cfg.mode, cfg.size); for (const k of ['curve', 'curveLv', 'slide', 'fk', 'tie', 'power', 'dive']) c[k] = r[k]; return c; }
 function liveRules(){
   const s = sess; if (!s || s.kind !== 'local' || s.done || !s.G) return;
-  Object.assign(s.cfg, freshRules(s.cfg)); const r = rulesOf(s.cfg); for (const k of ['curve', 'curveLv', 'slide', 'fk', 'power']) s.G.cfg[k] = r[k];
+  Object.assign(s.cfg, freshRules(s.cfg)); const r = rulesOf(s.cfg); for (const k of ['curve', 'curveLv', 'slide', 'fk', 'power', 'dive']) s.G.cfg[k] = r[k];
 }
 // the menu's tabs (the last one used comes back)
 const TABS = ['play', 'train', 'friends', 'frs', 'me', 'learn'];   // (v28.63: Friends a small tab of its own; "With friends" is Multiplayer)   // (v28.60: the Tutorial a tab like the others, "not in its own thing")
@@ -9485,6 +9526,7 @@ function finishMatch(s){
   }
   learnMatchEnd(s);
   if (s.cfg.league) leagueRecord(s);
+  if (s.cfg.cl) clRecord(s);
   achMatchEnd(s);
   const R = summary(s);
   if (s.net) s.net.ended(R);
@@ -9675,9 +9717,10 @@ function showResults(R, s, after){
     if (R.motm){ const m = el('div', 'motm'); m.append('Player of the match: ', el('b', null, R.motm[0] || R.names[R.motm[1]]), `${+R.motm[5] > 0 ? ' · ' + (+R.motm[5] / 10).toFixed(1) : ''} (${[R.motm[2] ? R.motm[2] + ' goal' + (R.motm[2] > 1 ? 's' : '') : '', R.motm[3] ? R.motm[3] + ' assist' + (R.motm[3] > 1 ? 's' : '') : '', R.motm[4] ? R.motm[4] + ' save' + (R.motm[4] > 1 ? 's' : '') : ''].filter(Boolean).join(', ') || R.names[R.motm[1]]})`); box.append(m); }
   }
   if (s && s.lgNote) box.append(el('div', 'motm', s.lgNote));
+  if (s && s.clNote) box.append(el('div', 'motm', s.clNote));
   if (s && s.adNote) box.append(el('div', 'motm lesson', s.adNote));
   const again = $('resAgain'), menuB = $('resMenu');
-  if (s && s.cfg && (s.cfg.cup || s.cfg.league)){ again.textContent = 'Continue'; again.hidden = false; }
+  if (s && s.cfg && (s.cfg.cup || s.cfg.league || s.cfg.cl)){ again.textContent = 'Continue'; again.hidden = false; }
   else if (NET.on){ again.textContent = NET.host ? 'Back to lobby' : 'Lobby'; again.hidden = false; }
   else { again.textContent = s && s.cfg && s.cfg.leg === 1 && !s.cfg.agg && s.kind === 'local' ? 'Play leg 2' : 'Rematch'; again.hidden = false; }
   menuB.textContent = NET.on ? 'Leave' : 'Menu';
@@ -9782,12 +9825,13 @@ $('resAgain').addEventListener('click', () => {
   const s = sess; $('resPanel').hidden = true;
   if (s && s.cfg && s.cfg.cup){ cupAfterMatch(s); return; }
   if (s && s.cfg && s.cfg.league){ leagueAfterMatch(s); return; }
+  if (s && s.cfg && s.cfg.cl){ clAfterMatch(s); return; }
   if (s && s.cfg && s.cfg.daily){ dailyStart(); return; }
-  if (NET.on){ if (isMgr()) sendCmd('lobby'); backToLobby(); return; }
+  if (NET.on){ if (isMgr() && !(s && s.done)) sendCmd('lobby'); backToLobby(); return; }   // (v28.84: after the match, just you)
   if (s && s.cfg.leg === 1 && !s.cfg.agg && s.G){ start(legNext(s)); return; }   // (two legs: on to the second)
   if (s) start(legOver(freshRules(s.cfg))); else exitToMenu();
 });
-$('resMenu').addEventListener('click', () => { $('resPanel').hidden = true; if (cup.active && sess && sess.cfg.cup) cupAfterMatch(sess); else if (sess && sess.cfg && sess.cfg.league) leagueAfterMatch(sess); else exitToMenu(); });
+$('resMenu').addEventListener('click', () => { $('resPanel').hidden = true; if (cup.active && sess && sess.cfg.cup) cupAfterMatch(sess); else if (sess && sess.cfg && sess.cfg.league) leagueAfterMatch(sess); else if (sess && sess.cfg && sess.cfg.cl) clAfterMatch(sess); else exitToMenu(); });
 
 // ---------- World Cup ----------
 const cup = Object.assign({active: false, team: 2, size: 1, round: 0, slots: [], won: [], out: false}, store.get('pb.cup', {}) || {});
@@ -10009,6 +10053,109 @@ $('lgGo').addEventListener('click', () => {
 });
 $('lgQuit').addEventListener('click', () => { league.active = false; leagueSave(); leagueRender(); });
 $('lgDone').addEventListener('click', () => { $('leaguePanel').hidden = true; if (!sess) $('menu').hidden = false; });
+// ---------- v28.84 ("full champions league with group stage"): the Champions Cup, clubs only ----------
+// 16 clubs in 4 groups of 4 (yours is Group A). Group stage: each team in the group once, 3 matchdays, 3 points for a win
+// and 1 for a draw; the other groups and the other match in yours played out by leagueSim. The top two of each group go
+// through: quarter-finals A1-B2, C1-D2, B1-A2, D1-C2, then semi-finals and the final, one match each, no draws (your
+// tie setting decides: overtime or penalties). Computer levels: the group a level either side of the Computer setting,
+// the quarter-final on it, the semi a level up... as the World Cup. Kept in pb.cl. Not called "Champions League" (a
+// real competition's name)
+const CL_RN = ['Group matchday 1', 'Group matchday 2', 'Group matchday 3', 'Quarter-final', 'Semi-final', 'Final'];
+const CL_GFX = [[[0, 1], [2, 3]], [[0, 2], [1, 3]], [[0, 3], [1, 2]]];   // a group's matchdays, by place in the group
+const cl = (() => { const v = store.get('pb.cl', null), base = {active: false, team: NATIONS, size: 1};
+  if (v && typeof v === 'object'){ if (isClub(v.team)) base.team = v.team; if (v.size === 2) base.size = 2;
+    if (v.active === true && Array.isArray(v.teams) && v.teams.length === 16 && v.teams.every(isClub) && Array.isArray(v.lv) && v.lv.length === 16 && Array.isArray(v.gres) && v.gres.length === 4 && Number.isInteger(v.round) && v.round >= 0 && v.round <= 6 && Array.isArray(v.ko) && typeof v.at === 'number') return Object.assign(base, v); }
+  return base; })();
+const clSave = () => store.set('pb.cl', cl);
+function clNew(){
+  const team = isClub(+$('clTeam').value) ? +$('clTeam').value : NATIONS;
+  const teams = [team, ...shuffled(KITS.map((_, i) => i).filter(i => isClub(i) && i !== team)).slice(0, 15)];
+  const lv = teams.map((_, i) => i === 0 ? SET.diff : Math.max(0, Math.min(3, SET.diff + [-1, 0, 0, 1][Math.floor(Math.random() * 4)])));
+  Object.assign(cl, {active: true, team, size: cl.size === 2 ? 2 : 1, teams, lv, gres: [0, 1, 2, 3].map(() => CL_GFX.map(r => r.map(() => null))), round: 0, ko: [], out: false, at: Date.now()});
+  clSave();
+}
+const clGroup = g => [0, 1, 2, 3].map(j => g * 4 + j);   // team indexes in group g (you: 0, in group A)
+function clTable(g){
+  const ids = clGroup(g), T = ids.map(i => ({i, k: cl.teams[i], p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0}));
+  CL_GFX.forEach((round, r) => round.forEach((pr, j) => { const x = cl.gres[g][r][j]; if (!x) return; const a = T[pr[0]], b = T[pr[1]]; a.p++; b.p++; a.gf += x[0]; a.ga += x[1]; b.gf += x[1]; b.ga += x[0];
+    if (x[0] > x[1]){ a.w++; b.l++; a.pts += 3; } else if (x[0] < x[1]){ b.w++; a.l++; b.pts += 3; } else { a.d++; b.d++; a.pts++; b.pts++; } }));
+  return T.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf || a.i - b.i);
+}
+const clOppGroup = () => { const pr = CL_GFX[cl.round].find(p => p.includes(0)); return pr[0] === 0 ? pr[1] : pr[0]; };
+const clKoOpp = () => { const sl = cl.ko[cl.round - 3], me = sl.indexOf(0); return sl[me ^ 1]; };
+const clOpp = () => cl.round < 3 ? clOppGroup() : clKoOpp();
+const clLevel = () => cl.round < 3 ? cl.lv[clOpp()] : Math.max(0, Math.min(3, SET.diff - 1 + (cl.round - 2)));
+function clPlay(){
+  const opp = clOpp(), cfg = cfgFor('ai', cl.size); delete cfg.leg;
+  Object.assign(cfg, {cl: true, clRound: cl.round, clAt: cl.at, levels: [SET.diff, clLevel()], kits: [cl.teams[0], cl.teams[opp], null, null], timeLimit: SET.time || 3, scoreLimit: SET.goals});
+  if (cl.round < 3) cfg.draws = true; else delete cfg.draws;
+  start(cfg);
+}
+const clKoSim = (a, b) => { const x = leagueSim(cl.lv[a], cl.lv[b]); return x[0] !== x[1] ? (x[0] > x[1] ? a : b) : (Math.random() < 0.5 ? a : b); };
+function clRecord(s){   // the final whistle of your Champions Cup match
+  if (s.clDone) return; s.clDone = true;
+  if (!cl.active || s.cfg.clAt !== cl.at || s.cfg.clRound !== cl.round) return;
+  const G = s.G, a = Math.min(99, G.score[0]), z = Math.min(99, G.score[1]);
+  if (cl.round < 3){
+    const r = cl.round;
+    for (let g = 0; g < 4; g++) CL_GFX[r].forEach((pr, j) => { const ia = g * 4 + pr[0], ib = g * 4 + pr[1]; cl.gres[g][r][j] = ia === 0 ? [a, z] : ib === 0 ? [z, a] : leagueSim(cl.lv[ia], cl.lv[ib]); });
+    cl.round++;
+    if (cl.round === 3){
+      const T = [0, 1, 2, 3].map(clTable), pos = T[0].findIndex(t => t.i === 0) + 1;
+      cl.ko = [[T[0][0].i, T[1][1].i, T[2][0].i, T[3][1].i, T[1][0].i, T[0][1].i, T[3][0].i, T[2][1].i]];
+      if (pos > 2){ cl.out = true; cl.outIn = 'the group stage'; s.clNote = `Champions Cup: ${ordinal(pos)} in Group A, out in the group stage.`; }
+      else s.clNote = `Champions Cup: through to the quarter-finals, ${ordinal(pos)} in Group A!`;
+    } else { const pos = clTable(0).findIndex(t => t.i === 0) + 1; s.clNote = `Champions Cup: ${ordinal(pos)} in Group A after matchday ${cl.round}.`; }
+  } else {
+    const won = s.pensWin != null ? s.pensWin === 0 : G.score[0] > G.score[1], sl = cl.ko[cl.round - 3], next = [];
+    for (let i = 0; i < sl.length; i += 2){ const p = sl[i], q = sl[i + 1]; next.push(p === 0 || q === 0 ? (won ? 0 : (p === 0 ? q : p)) : clKoSim(p, q)); }
+    cl.ko[cl.round - 2] = next;
+    if (!won){ cl.out = true; cl.outIn = 'the ' + CL_RN[cl.round].toLowerCase(); s.clNote = `Champions Cup: out in the ${CL_RN[cl.round].toLowerCase()}.`; }
+    else { cl.round++; s.clNote = cl.round >= 6 ? 'Champions Cup winners!' : `Champions Cup: through to the ${CL_RN[cl.round].toLowerCase()}!`; s.clChamp = cl.round >= 6; if (s.clChamp) achUnlock('cup'); }
+  }
+  clSave();
+}
+function clAfterMatch(s){
+  if (!s.clShown){ s.clShown = true; if (s.clChamp){ fireworks(0, 12); say('Champions Cup winners!'); } }
+  sess = null; kitOverride = null; applyKits();
+  clRender(); $('clPanel').hidden = false;
+}
+function clRender(){
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const on = cl.active, over = on && (cl.out || cl.round >= 6), name = i => KITS[cl.teams[i]].n;
+  $('clPick').hidden = on; $('clQuit').hidden = !on || over;
+  const gb = $('clGroups'), br = $('clBracket'); gb.replaceChildren(); br.replaceChildren(); gb.hidden = !on; br.hidden = !on || cl.round < 3;
+  if (!on){ $('clTitle').textContent = 'Champions Cup';
+    $('clText').textContent = `Pick a club. 16 clubs, 4 groups of 4: play the other three in your group, and the top two go through to the quarter-finals, then the semi-finals and the final. Draws count in the groups; in the knockouts it's decided on the day (${['overtime', 'extra time and penalties', 'penalties'][SET.tie | 0]}).`;
+    $('clGo').textContent = 'Start the Champions Cup'; return; }
+  if (over){ $('clTitle').textContent = cl.round >= 6 ? 'Champions Cup winners!' : 'Knocked out'; $('clText').textContent = cl.round >= 6 ? `${name(0)} won the Champions Cup. Start a new one any time.` : `${name(0)} went out in ${cl.outIn || 'the ' + CL_RN[Math.min(5, cl.round)].toLowerCase()}.`; $('clGo').textContent = 'New Champions Cup'; }
+  else { const opp = clOpp(); $('clTitle').textContent = CL_RN[cl.round]; $('clText').textContent = `${name(0)} v ${name(opp)} · computer ${A.LEVELS[clLevel()].name}`; $('clGo').textContent = 'Play ' + CL_RN[cl.round].toLowerCase(); }
+  for (let g = 0; g < 4; g++){   // the groups: yours first and bigger
+    const box = el('div', 'clg' + (g === 0 ? ' mine' : '')), t = el('table', 'ltab'), tb = el('tbody');
+    box.append(el('h4', null, 'Group ' + 'ABCD'[g]));
+    const head = el('tr'); ['', 'Club', 'P', 'GD', 'Pts'].forEach((h, k) => head.append(el('th', k === 1 ? 'tm' : null, h))); const th = el('thead'); th.append(head);
+    clTable(g).forEach((r, k) => { const tr = el('tr', (r.i === 0 ? 'you ' : '') + (k < 2 && cl.round >= 3 ? 'thru' : '')), c = el('td', 'tm'), lt = el('span', 'lt'); lt.append(kitDot(r.k), el('span', null, KITS[r.k].n)); c.append(lt);
+      const gd = r.gf - r.ga; tr.append(el('td', null, k + 1), c, el('td', null, r.p), el('td', null, (gd > 0 ? '+' : '') + gd), el('td', 'pts', r.pts)); tb.append(tr); });
+    t.append(th, tb); box.append(t); gb.append(box);
+  }
+  if (cl.round >= 3 || cl.ko.length){   // the knockouts, as the World Cup's bracket
+    ['Quarter-finals', 'Semi-finals', 'Final', 'Winners'].forEach((nm, r) => { const col = el('div', 'col'); col.append(el('h4', null, nm)); const sl = cl.ko[r] || [], n = [8, 4, 2, 1][r];
+      for (let i = 0; i < n; i += r < 3 ? 2 : 1){ const m = el('div', 'm'); for (const j of r < 3 ? [i, i + 1] : [i]){ const k = sl[j], t = el('div', 't'), nx = cl.ko[r + 1] || [];
+          if (k != null && nx.length && !nx.includes(k)) t.classList.add('out'); if (k === 0) t.classList.add('you'); if (k != null) t.append(kitDot(cl.teams[k])); t.append(el('span', null, k != null ? name(k) : '—')); m.append(t); } col.append(m); }
+      br.append(col); });
+  }
+}
+$('clBtn').addEventListener('click', () => { clRender(); $('menu').hidden = true; $('clPanel').hidden = false; });
+$('clGo').addEventListener('click', () => {
+  if (cl.active && (cl.out || cl.round >= 6)){ cl.active = false; clSave(); clRender(); return; }
+  if (!cl.active){ clNew(); clRender(); return; }
+  $('clPanel').hidden = true; clPlay();
+});
+$('clQuit').addEventListener('click', () => { cl.active = false; clSave(); clRender(); });
+$('clDone').addEventListener('click', () => { $('clPanel').hidden = true; if (!sess) $('menu').hidden = false; });
+{ const sel = $('clTeam'); KITS.forEach((k, i) => { if (isClub(i)) sel.add(new Option(k.n, i)); }); sel.value = cl.team; sel.addEventListener('change', () => { cl.team = +sel.value; });
+  document.querySelectorAll('#clSize button').forEach(b => { b.classList.toggle('on', +b.dataset.s === (cl.size || 1)); b.addEventListener('click', () => { cl.size = +b.dataset.s; document.querySelectorAll('#clSize button').forEach(x => x.classList.toggle('on', x === b)); }); }); }
+
 { const sel = $('lgTeam'); kitOptions(sel, 2); sel.value = league.team;
   sel.addEventListener('change', () => { league.team = +sel.value; if (!league.active) leagueSave(); });
   document.querySelectorAll('#lgSize button').forEach(b => { b.classList.toggle('on', +b.dataset.s === league.size); b.addEventListener('click', () => { if (league.active) return; league.size = +b.dataset.s; document.querySelectorAll('#lgSize button').forEach(x => x.classList.toggle('on', x === b)); leagueSave(); }); });
@@ -10546,7 +10693,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.83';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.84';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -11163,7 +11310,7 @@ async function hostGame1(opts, tk){
   $('hostBtn').disabled = false;
   if (!T){ onErr(slots ? 'All the public rooms are taken. Tick "Not in the room list" to make one with a code.' : 'Could not get a free room code. Try again.'); return; }
   Object.assign(NET, {on: true, host: true, T, code, me: T.myId || null, guests: new Map(), chat: [], chatSeen: new Set(), myChat: [], ver: 1, startedGid: -1, cmdSeen: new Map(), typing: false, pass, kicked: new Set()}); resetPing();
-  NET.lobby = {v: 2, ver: 1, nm: name, lk: pass ? 1 : 0, hid: hidden ? 1 : 0, pm: 0, sz: chosenSize(), tl: SET.time, sl: SET.goals, lv: SET.diff, kl: SET.dk, fill: $('fillAi').checked ? 1 : 0, pu: puSel.slice(), ti: SET.tie, sd: SET.slide ? 1 : 0, cv: SET.curve ? 1 : 0, fk: SET.fk ? 1 : 0, pw: SET.power ? 1 : 0, cl: SET.curveLv,
+  NET.lobby = {v: 2, ver: 1, nm: name, lk: pass ? 1 : 0, hid: hidden ? 1 : 0, pm: 0, sz: chosenSize(), tl: SET.time, sl: SET.goals, lv: SET.diff, kl: SET.dk, fill: $('fillAi').checked ? 1 : 0, pu: puSel.slice(), ti: SET.tie, sd: SET.slide ? 1 : 0, dv: SET.dive ? 1 : 0, cv: SET.curve ? 1 : 0, fk: SET.fk ? 1 : 0, pw: SET.power ? 1 : 0, cl: SET.curveLv,
                lgs: SET.legs, leg2: null, kit: [kitSel[0], kitSel[1], kitSel[0] === CUS ? custom[0] : null, kitSel[1] === CUS ? custom[1] : null], pl: [], on: 0, gid: 0, ro: null, res: null, adm: [], deny: []};
   T.info = openInfo;
   syncHostOpts();
@@ -11401,7 +11548,7 @@ function startOnline(){
 function onlineCfg(L){
   const pens = !!L.pm, lg = Array.isArray(L.lg) && (L.lg[0] === 1 || L.lg[0] === 2) ? L.lg : null;
   return {mode: 'online', size: L.sz | 0, diff: L.lv | 0, kOff: [0, 1, 2, 3].includes(L.kl) ? L.kl - (L.lv | 0) : 0,   // (v28.74: the computer keepers' own level)
-          timeLimit: pens ? 0 : +L.tl || 0, scoreLimit: pens ? 0 : +L.sl || 0, pens, curve: !!L.cv, slide: !pens && !!L.sd, fk: !pens && !!L.sd && !!L.fk, power: !pens && !!L.pw,
+          timeLimit: pens ? 0 : +L.tl || 0, scoreLimit: pens ? 0 : +L.sl || 0, pens, curve: !!L.cv, slide: !pens && !!L.sd, fk: !pens && !!L.sd && !!L.fk, dive: L.dv !== 0, power: !pens && !!L.pw,
           curveLv: [1, 2, 3, 4, 5].includes(L.cl) ? L.cl : 3, tie: pens ? 0 : [0, 1, 2].includes(L.ti) ? L.ti : 0, leg: lg ? lg[0] : 0, agg: lg && lg[0] === 2 ? [lg[1] | 0, lg[2] | 0] : null, draws: !!(lg && lg[0] === 1)};
 }
 function dynIndexes(G){ const out = [0]; for (let i = 1; i < ST.discs.length; i++){ const d = ST.discs[i]; if (d.invMass !== 0 || d.vx || d.vy || d.gx || d.gy) out.push(i); } for (const p of G.players) out.push(p.di); return out; }
@@ -11661,7 +11808,9 @@ function guestLobby(){
   if (L.on === 1 && L.gid !== NET.startedGid && Array.isArray(L.ro)){ NET.startedGid = L.gid; startGuest(L); }
   else if (L.on === 1 && sess && sess.kind === 'guest' && Array.isArray(L.ro)) guestRoster(sess, L);
   else if (L.on === 2 && L.res && NET.shownRes !== L.gid){ NET.shownRes = L.gid; if (sess && sess.kind === 'guest'){ sess.done = true; if (sess.gid === L.gid) achGuestEnd(sess, L.res); } setTimeout(() => { if (NET.on && NET.lobby && NET.lobby.on === 2) showResults(L.res, null); }, 1500); }
-  else if (L.on === 0 && sess && sess.kind === 'guest'){ sess = null; rpHide(); clearMatchPanels(); showLobby(); }
+  // (v28.84, "when one player presses lobby after game, the other player also goes lobby": after the final whistle the host
+  // going back no longer pulls you off the results or a replay; your own Lobby button does. Stopped mid-match: as before)
+  else if (L.on === 0 && sess && sess.kind === 'guest'){ if (!(sess.done && (!$('resPanel').hidden || sess.rp))){ sess = null; rpHide(); clearMatchPanels(); showLobby(); } }
   if (!sess || sess.kind !== 'guest') guestKits(L);   // the lobby shows the host's teams
   renderLobby();
 }
@@ -11952,10 +12101,15 @@ function frPub(force){
   if (FR.cls) for (const c of FR.cls) try { c.publish(frTopic(FR.fid), JSON.stringify(me), {retain: true}); } catch (e) {}
   if (FR.lobby) FR.lobby.presence({fr: me, finv: FR.inv.length ? {to: FR.inv.slice(-8), c: NET.code, n: myNick(), t: FR.invT} : null, fadd: FR.add.length ? {to: FR.add.slice(-8), n: myNick(), t: FR.addT} : null}).catch(() => {});
 }
+// (v28.84, "do a last seen online for your friends": when each friend was last seen on, kept in this browser (pb.frSeen))
+FR.seenAt = (() => { const v = store.get('pb.frSeen', {}); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; })();
+function frSeen(f){ const now = Date.now(); if (now - (+FR.seenAt[f] || 0) < 60000) { FR.seenAt[f] = now; return; } FR.seenAt[f] = now; const keep = {}; for (const x of FR.list) if (FR.seenAt[x.f]) keep[x.f] = FR.seenAt[x.f]; store.set('pb.frSeen', keep); }
+function agoTxt(t){ const m = Math.round((Date.now() - t) / 60000); if (!(m >= 0)) return ''; if (m < 2) return 'just now'; if (m < 60) return m + ' min ago'; const h = Math.round(m / 60); if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago'); const d = Math.round(h / 24); return d === 1 ? 'yesterday' : d < 30 ? d + ' days ago' : 'over a month ago'; }
 function frGot(o){   // a friend's notice
   if (!o || typeof o !== 'object' || !/^[a-z0-9]{6}$/.test(o.f) || o.f === FR.fid) return;
   const x = FR.list.find(q => q.f === o.f); if (!x) return;
-  if (o.gone){ FR.st.delete(o.f); renderFriends(); return; }
+  if (o.gone){ if (FR.st.has(o.f)) frSeen(o.f); FR.st.delete(o.f); renderFriends(); return; }
+  frSeen(o.f);
   FR.st.set(o.f, {n: clean(o.n || '', 16), a: clean(o.a || '', 2), s: ['match', 'room', 'solo', 'prac'].includes(o.s) ? o.s : 'free', c: /^[a-z0-9]{4,6}$/.test(o.c || '') ? o.c : '', r: clean(o.r || '', 24), k: +o.k | 0, z: +o.z | 0, lk: !!o.lk, sc: Array.isArray(o.sc) ? o.sc.slice(0, 2).map(v => +v | 0) : null, t: +o.t || Date.now()});
   if (o.n && x.n !== clean(o.n, 16)){ x.n = clean(o.n, 16); frSave(); }
   if (FR.off[o.f] && !FR.offT){ FR.offT = setTimeout(() => { FR.offT = null; let ch = false; for (const f of Object.keys(FR.off)) if (FR.st.has(f)){ delete FR.off[f]; ch = true; } if (ch) store.set('pb.dmOff', FR.off); }, 15000); }
@@ -12117,7 +12271,7 @@ $('dmForm').addEventListener('submit', e => { e.preventDefault(); const f = FR.d
 $('dmX').addEventListener('click', dmClose);
 $('dmIn').addEventListener('keydown', e => { if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); dmClose(); } });
 let frToastDo = null;
-function frToast(text, yes, fn){ $('frToastT').textContent = text; $('frToastYes').textContent = yes; frToastDo = fn; $('frToast').hidden = false; sfx.chime && sfx.chime(); clearTimeout(frToast.t); frToast.t = setTimeout(() => { $('frToast').hidden = true; frToastDo = null; }, 30000); }
+function frToast(text, yes, fn, no){ $('frToastT').textContent = text; $('frToastYes').textContent = yes; if (!frToast.no0) frToast.no0 = $('frToastNo').textContent; $('frToastNo').textContent = no || frToast.no0; frToastDo = fn; $('frToast').hidden = false; sfx.chime && sfx.chime(); clearTimeout(frToast.t); frToast.t = setTimeout(() => { $('frToast').hidden = true; frToastDo = null; }, 30000); }
 $('frToastYes').addEventListener('click', () => { const f = frToastDo; frToastDo = null; $('frToast').hidden = true; if (f) f(); });
 $('frToastNo').addEventListener('click', () => { frToastDo = null; $('frToast').hidden = true; });
 // (v28.82, "a option to keep note to self on who they are"): ✎ on a friend's row: a line kept with them, only for you
@@ -12143,7 +12297,7 @@ function renderFriends(){
       if (x.note){ const nt = document.createElement('small'); nt.className = 'frnote'; nt.textContent = x.note; nt.title = 'Your note (only you see it)'; who.append(nt); }
       r.append(who);
       const st = document.createElement('span'); st.className = 'frst';
-      st.textContent = !o ? 'offline' : o.s === 'free' ? 'online' : o.s === 'solo' ? 'playing the computer' : o.s === 'prac' ? 'practising' : o.s === 'room' ? `in room ${o.r ? '“' + o.r + '” ' : ''}(${o.k}/${o.z ? o.z * 2 : '?'})${o.lk ? ' 🔒' : ''}` : `playing${o.r ? ' in “' + o.r + '”' : ''}${o.sc ? ' · ' + o.sc.join('–') : ''}`;
+      st.textContent = !o ? (FR.seenAt[x.f] ? 'last on ' + agoTxt(FR.seenAt[x.f]) : 'offline') : o.s === 'free' ? 'online' : o.s === 'solo' ? 'playing the computer' : o.s === 'prac' ? 'practising' : o.s === 'room' ? `in room ${o.r ? '“' + o.r + '” ' : ''}(${o.k}/${o.z ? o.z * 2 : '?'})${o.lk ? ' 🔒' : ''}` : `playing${o.r ? ' in “' + o.r + '”' : ''}${o.sc ? ' · ' + o.sc.join('–') : ''}`;
       r.append(st);
       const act = (t, fn, cls, ic) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm' + (cls ? ' ' + cls : ''); b.textContent = t; if (ic) b.prepend(icEl(ic), t ? ' ' : ''); b.onclick = e => { e.currentTarget.blur(); fn(); }; r.append(b); };
       // (v28.65, spectate friends: 👁 Watch joins as a spectator; in a match that's what Join did anyway, so it says Watch)
@@ -12154,8 +12308,9 @@ function renderFriends(){
       else if (o && !NET.on && !lobbyView && (o.s === 'free' || o.s === 'solo' || o.s === 'prac')){ act('Invite', () => frHostInvite(x.f)); r.lastChild.title = `Make a room and invite ${nm.textContent}`; }
       if (!lobbyView){ act('✎', () => frNoteEdit(x, r, who), 'frx'); r.lastChild.title = 'A note to yourself about who this is (only you see it)'; }
       // (v28.82, "when remove friend, add again": ✕, then Add again in the note that pops up)
-      if (!lobbyView) act('✕', () => { const i = FR.list.indexOf(x), name = nm.textContent, st0 = FR.st.get(x.f); FR.list = FR.list.filter(q => q.f !== x.f); FR.st.delete(x.f); frSave(); renderFriends();
-        frToast(`Removed ${name}`, 'Add again', () => { if (FR.list.some(q => q.f === x.f)) return; FR.list.splice(Math.max(0, Math.min(i, FR.list.length)), 0, x); if (st0 && Date.now() - st0.t < 70000) FR.st.set(x.f, st0); frSave(); if (FR.cls) for (const cl of FR.cls) try { cl.subscribe(frTopic(x.f)); } catch (e) {} renderFriends(); frPub(); }); }, 'frx');
+      // (v28.84, "u press, it asks, r u sure, and then do u do delete, theres an undo button")
+      if (!lobbyView) act('✕', () => { const name = nm.textContent; frToast(`Remove ${name} from your friends?`, 'Remove', () => { const i = FR.list.indexOf(x), st0 = FR.st.get(x.f); FR.list = FR.list.filter(q => q.f !== x.f); FR.st.delete(x.f); frSave(); renderFriends();
+        frToast(`Removed ${name}`, 'Undo', () => { if (FR.list.some(q => q.f === x.f)) return; FR.list.splice(Math.max(0, Math.min(i, FR.list.length)), 0, x); if (st0 && Date.now() - st0.t < 70000) FR.st.set(x.f, st0); frSave(); if (FR.cls) for (const cl of FR.cls) try { cl.subscribe(frTopic(x.f)); } catch (e) {} renderFriends(); frPub(); }); }, 'No'); }, 'frx');
       box.append(r);
     }
   }
@@ -12311,19 +12466,19 @@ function joinFromLink(){   // opened from an invite link: show the online panel 
 $('fillAi').addEventListener('change', () => { const v = $('fillAi').checked ? 1 : 0; if (isMgr()) sendCmd('set', 'fillAi', v); else if (NET.host) hostSet('fillAi', v); });
 // the host sets the match up in the lobby: team size, time, goals, computer level (the menu's settings follow)
 function syncHostOpts(){ const L = NET.lobby; if (!L) return; rulesSync(); $('hoGame').value = L.pm === 2 ? 2 : L.pm ? 1 : 0; $('hoTime').disabled = $('hoGoals').disabled = $('hoTie').disabled = $('hoSlide').disabled = !!L.pm; $('hoSize').value = L.sz; $('hoTime').value = L.tl; $('hoGoals').value = L.sl; $('hoLevel').value = L.lv; $('hoLevelK').value = [0, 1, 2, 3].includes(L.kl) ? L.kl : -1; $('fillAi').checked = !!L.fill;
-  $('hoTie').value = L.ti | 0; $('hoSlide').checked = !!L.sd; $('hoCurve').value = curvePct(L.cv, L.cl); $('hoFk').checked = !!L.fk; $('hoFk').disabled = !!L.pm; $('hoPower').checked = !!L.pw; $('hoPower').disabled = !!L.pm; $('hoLegs').value = String(L.lgs === 2 ? 2 : 1); }
-function menuSync(){ $('setDiff').value = SET.dk >= 0 ? 'c' : SET.diff; $('setTime').value = SET.time; $('setGoals').value = SET.goals; $('setSide').value = SET.side; $('setTie').value = SET.tie; $('optSlide').checked = SET.slide; $('optCurve').value = curvePct(SET.curve, SET.curveLv); $('optFk').checked = SET.fk; $('optPower').checked = SET.power; $('optLegs').value = String(SET.legs); rulesSync(); diffSync(); }
+  $('hoTie').value = L.ti | 0; $('hoSlide').checked = !!L.sd; $('hoDive').checked = L.dv !== 0; $('hoDive').disabled = !!L.pm; $('hoCurve').value = curvePct(L.cv, L.cl); $('hoFk').checked = !!L.fk; $('hoFk').disabled = !!L.pm; $('hoPower').checked = !!L.pw; $('hoPower').disabled = !!L.pm; $('hoLegs').value = String(L.lgs === 2 ? 2 : 1); }
+function menuSync(){ $('setDiff').value = SET.dk >= 0 ? 'c' : SET.diff; $('setTime').value = SET.time; $('setGoals').value = SET.goals; $('setSide').value = SET.side; $('setTie').value = SET.tie; $('optSlide').checked = SET.slide; $('optDive').checked = SET.dive; $('optCurve').value = curvePct(SET.curve, SET.curveLv); $('optFk').checked = SET.fk; $('optPower').checked = SET.power; $('optLegs').value = String(SET.legs); rulesSync(); diffSync(); }
 // v27.1 ("the settings for personal and online dont match, fix it"): in a room, ⚙ Settings and the menu's rules show the
 // room's (the host's), not your own, and changing one there changes the room's, as its Match settings do: the host and
 // a manager, between matches; locked during a match and for everyone else. It changed only your own before (during a
 // match the host's change didn't reach the room either). Out of the room, your own again
-const RULE_IDS = {setDiff: 'hoLevel', setTime: 'hoTime', setGoals: 'hoGoals', setTie: 'hoTie', optLegs: 'hoLegs', optSlide: 'hoSlide', optFk: 'hoFk', optPower: 'hoPower', optCurve: 'hoCurve'};
+const RULE_IDS = {setDiff: 'hoLevel', setTime: 'hoTime', setGoals: 'hoGoals', setTie: 'hoTie', optLegs: 'hoLegs', optSlide: 'hoSlide', optDive: 'hoDive', optFk: 'hoFk', optPower: 'hoPower', optCurve: 'hoCurve'};
 const roomL = () => NET.on ? NET.lobby : null;
 function rulesSync(){
   const L = roomL();
   if (!L){ for (const id in RULE_IDS) $(id).disabled = false; if ($('ruleNote').textContent.startsWith('Online:')) $('ruleNote').textContent = "For your next match. Online, the room's rules count.";diffSync(); return; }
   $('setDiff').value = L.lv | 0; $('setTime').value = L.tl; $('setGoals').value = L.sl; $('setTie').value = L.ti | 0; $('optLegs').value = String(L.lgs === 2 ? 2 : 1);
-  $('optSlide').checked = !!L.sd; $('optFk').checked = !!L.fk; $('optPower').checked = !!L.pw; $('optCurve').value = curvePct(!!L.cv, L.cl);
+  $('optSlide').checked = !!L.sd; $('optDive').checked = L.dv !== 0; $('optFk').checked = !!L.fk; $('optPower').checked = !!L.pw; $('optCurve').value = curvePct(!!L.cv, L.cl);
   const edit = (NET.host || isMgr()) && L.on !== 1;
   for (const id in RULE_IDS) $(id).disabled = !edit || (!!L.pm && ['setTime', 'setGoals', 'setTie', 'optLegs', 'optSlide', 'optFk', 'optPower'].includes(id));
   $('ruleNote').textContent = !(NET.host || isMgr()) ? "Online: the room's rules, set by the host." : L.on === 1 ? "Online: the room's rules, locked during the match." : "Online: the room's rules, for everyone from the next match.";
@@ -12351,13 +12506,14 @@ const HOST_SET = {
   fillAi: [v => v === 0 || v === 1, v => { NET.lobby.fill = v; }],
   hoTie: [v => v === 0 || v === 1 || v === 2, v => { NET.lobby.ti = SET.tie = v; store.set('pb.tie', v); }],
   hoSlide: [v => v === 0 || v === 1, v => { NET.lobby.sd = v; SET.slide = !!v; store.set('pb.slide', v); }],
+  hoDive: [v => v === 0 || v === 1, v => { NET.lobby.dv = v; SET.dive = !!v; store.set('pb.dive', v); }],   // (v28.84)
   hoCurve: [v => [0, 20, 40, 60, 80, 100].includes(v), v => { setCurvePct(v); NET.lobby.cv = SET.curve ? 1 : 0; NET.lobby.cl = SET.curveLv; }],   // (v25.1: a percentage)
   hoFk: [v => v === 0 || v === 1, v => { NET.lobby.fk = v; SET.fk = !!v; store.set('pb.fk', v); }],
   hoPower: [v => v === 0 || v === 1, v => { NET.lobby.pw = v; SET.power = !!v; store.set('pb.power', v); }],   // (v28.34)
   hoLegs: [v => v === 1 || v === 2, v => { NET.lobby.lgs = SET.legs = v; NET.lobby.leg2 = null; store.set('pb.legs', v); }]
 };
 function hostSet(id, v){ const h = HOST_SET[id]; if (!h || !NET.host || !NET.lobby || NET.lobby.on === 1 || !h[0](v)) return false; h[1](v); menuSync(); syncHostOpts(); publishLobby(); return true; }
-for (const id of ['hoSlide', 'hoFk', 'hoPower']) $(id).addEventListener('change', e => { const v = e.target.checked ? 1 : 0; if (isMgr()) sendCmd('set', id, v); else if (NET.host && !hostSet(id, v)) syncHostOpts(); });
+for (const id of ['hoSlide', 'hoDive', 'hoFk', 'hoPower']) $(id).addEventListener('change', e => { const v = e.target.checked ? 1 : 0; if (isMgr()) sendCmd('set', id, v); else if (NET.host && !hostSet(id, v)) syncHostOpts(); });
 for (const id of ['hoGame', 'hoSize', 'hoTime', 'hoGoals', 'hoLevel', 'hoLevelK', 'hoTie', 'hoCurve', 'hoLegs']) $(id).addEventListener('change', e => {
   const v = +e.target.value; e.target.blur();
   if (isMgr()){ if (isFinite(v) && NET.lobby.on !== 1) sendCmd('set', id, v); else syncHostOpts(); return; }
@@ -12699,6 +12855,14 @@ function setZoom(i){ zi = Math.max(0, Math.min(ZL.length - 1, i)); cam.z = 0; $(
 const ZOOM_KEYS = [7, 0, 1, 2, 3];   // (v28.80: up to 1.5×)
 function zoomStep(d){ const k = ZOOM_KEYS.indexOf(zi), n = ZOOM_KEYS[Math.max(0, Math.min(ZOOM_KEYS.length - 1, (k < 0 ? 1 : k) + d))]; setZoom(n); fx.zoomMsg = {text: 'Zoom · ' + $('zoom').options[n].textContent + (d > 0 && n === zi && k === ZOOM_KEYS.length - 1 ? ' (the closest)' : ''), until: performance.now() + 1300}; }
 $('zoom').addEventListener('change', e => { setZoom(e.target.selectedIndex); e.target.blur(); });
+// (v28.84, "add fps show"): frames a second, top left of the pitch (with the ping online), from ⚙ Settings → View
+{ let n = 0, t0 = performance.now(), on = !!store.get('pb.fps', 0);
+  const box = $('fpsBox'), tick = now => { n++; if (now - t0 >= 500){ const f = Math.round(n * 1000 / (now - t0)); n = 0; t0 = now;
+      let ping = ''; try { const s = sess; if (s && s.kind === 'guest' && NET.pingMs){ const v = [...NET.pingMs.values()][0]; if (v) ping = ` · ${Math.round(v)} ms`; } } catch (e) {}
+      box.textContent = f + ' FPS' + ping; box.classList.toggle('low', f < 45); }
+    if (on) requestAnimationFrame(tick); };
+  const set = v => { on = v; store.set('pb.fps', v ? 1 : 0); box.hidden = !v; $('fpsOn').checked = v; if (v){ n = 0; t0 = performance.now(); requestAnimationFrame(tick); } };
+  $('fpsOn').addEventListener('change', e => set(e.target.checked)); set(on); }
 // celebrations (v26.7): full or calm; until one is picked, as the device asks (reduced motion: calm)
 $('fxSel').value = reduceMotion ? 'calm' : 'full';
 $('fxSel').addEventListener('change', e => { const v = e.target.value === 'calm' ? 'calm' : 'full'; reduceMotion = v === 'calm'; store.set('pb.fx', v); document.documentElement.classList.toggle('calm', reduceMotion); e.target.blur(); });
