@@ -1443,7 +1443,7 @@
     </section>
     <section class="dsec"><h3>View</h3>
       <label class="dline" for="zoom">Zoom <select id="zoom"><option>Auto</option><option>1×</option><option>1.25×</option><option>1.5×</option><option hidden>1.5×</option><option hidden>1.5×</option><option hidden>1.5×</option><option>Follow all</option></select></label>
-      <label class="dline" for="pitchSel">Pitch colour <select id="pitchSel"><option value="slate">Teal (standard)</option><option value="classic">Grey-blue</option><option value="grass">Grass</option><option value="night">Night</option><option value="ocean">Ocean</option><option value="clay">Clay</option><option value="purple">Purple</option></select></label>
+      <label class="dline" for="pitchSel">Pitch colour <select id="pitchSel"><option value="slate">Turf (standard)</option><option value="teal">Teal</option><option value="classic">Grey-blue</option><option value="grass">Grass</option><option value="night">Night</option><option value="ocean">Ocean</option><option value="clay">Clay</option><option value="purple">Purple</option></select></label>
       <label class="dline" for="ballSel">Ball <select id="ballSel"><option value="classic">Classic yellow</option><option value="football">Football</option><option value="beach">Beach ball</option><option value="fire">Fireball</option><option value="neon">Neon</option><option value="eight">8-ball</option></select></label>
       <label class="dline" for="fpsOn">Show FPS <input type="checkbox" id="fpsOn"></label>
       <label class="dline" for="setSide" title="Where your team plays on your screen, whichever side it really is (as on White online): Left, your side on the left going right; Right, on the right going left. The picture, the scoreboard and left/right keys turn with it. Two of you on one keyboard against each other: P1's side">Your side <select id="setSide"><option value="0">Left (P1 left)</option><option value="1">Right (P1 right)</option></select></label>
@@ -8707,7 +8707,7 @@ function resize(){
 }
 new ResizeObserver(resize).observe(stage); resize();
 // v28.84 ("change the colour of game, other balls"): the pitch's colour and the ball's look, yours only (⚙ Settings → View)
-const PITCH_COLS = {slate: null, classic: '#454C5E', grass: '#3c6e3f', night: '#22283a', ocean: '#2d5872', clay: '#8a5a44', purple: '#4a3d6b'};
+const PITCH_COLS = {slate: null, teal: '#2b4a50', classic: '#454C5E', grass: '#3c6e3f', night: '#22283a', ocean: '#2d5872', clay: '#8a5a44', purple: '#4a3d6b'};
 const pitchCol = () => ST && ST.game ? null : (PITCH_COLS[store.get('pb.pitch', 'slate')] || null);   // (v28.92: the other games keep their own colours)
 let BALL_SKIN = store.get('pb.ball', 'classic');   // (read once: drawn every frame)
 // v28.91: a ball in one of the other games. The net games: its shadow on the floor where it is, the ball up the screen by
@@ -8734,6 +8734,24 @@ function drawGameBall(V, d, i, gm){
   ctx.beginPath(); ctx.arc(d.x, y, R, 0, C.TAU); ctx.fillStyle = tint(d.color) || '#fff'; ctx.fill(); ctx.lineWidth = gm === 'pong' ? 1.2 : 2; ctx.strokeStyle = '#000'; ctx.stroke();
   if (gm === 'volley'){ ctx.strokeStyle = 'rgba(40,70,140,.75)'; ctx.lineWidth = 1.4; const a = (d.x + d.y) / r * 0.3; ctx.beginPath(); ctx.arc(d.x, y, R * 0.6, a, a + 2.2); ctx.stroke(); ctx.beginPath(); ctx.arc(d.x, y, R * 0.6, a + 3.1, a + 5.3); ctx.stroke(); }
 }
+// v28.93 ("wha tbaout the futsal colours", after the other games got their own bold looks): our arenas get a court of
+// their own drawn under the lines, with mown stripes, on a darker floor round it, and white lines (they were the futsal
+// map's grey). Standard: turf green; the Pitch colour setting picks the court's colour (the floor a darker shade of it)
+const hexMix = (h, k) => { const n = parseInt(h.replace('#', ''), 16), f = c => Math.max(0, Math.min(255, Math.round(k < 0 ? c * (1 + k) : c + (255 - c) * k))); return '#' + [n >> 16 & 255, n >> 8 & 255, n & 255].map(c => f(c).toString(16).padStart(2, '0')).join(''); };
+const arenaLook = () => { const c = pitchCol() || '#2a8a4c'; return {court: c, court2: hexMix(c, 0.06), floor: hexMix(c, -0.55)}; };
+const COURT_RECT = new Map();
+function arenaCourt(){
+  if (!mapKeyOf(ST)) return null; let r = COURT_RECT.get(ST); if (r) return r;
+  const gx = ST.goals.length ? Math.max(...ST.goals.map(g => Math.abs((g.x0 + g.x1) / 2))) : ST.width;
+  let gy = ST.height; for (const q of ST.planes) if (Math.abs(q.nx) < 0.01 && Math.abs(q.ny) > 0.99 && (q.cMask & ST.discs[0].cGroup)) gy = Math.min(gy, Math.abs(q.dist));
+  r = {x: gx, y: gy}; COURT_RECT.set(ST, r); return r;
+}
+function drawArenaCourt(){
+  const r = arenaCourt(); if (!r) return; const L = arenaLook();
+  ctx.save(); ctx.fillStyle = L.court; ctx.fillRect(-r.x, -r.y, r.x * 2, r.y * 2);
+  ctx.fillStyle = L.court2; const w = r.x / 6; for (let k = 0; k < 12; k += 2) ctx.fillRect(-r.x + k * w, -r.y, w, r.y * 2);
+  ctx.restore();
+}
 function drawBall(ctx, d, base){
   const k = BALL_SKIN, r = d.radius;
   if (k === 'classic' || !k){ ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); ctx.fillStyle = base; ctx.fill(); return; }
@@ -8750,7 +8768,7 @@ function drawBall(ctx, d, base){
 }
 function applyStadiumLayout(){
   stage.style.aspectRatio = `${ST.width * 2} / ${ST.height * 2}`; document.documentElement.style.setProperty('--ar', String(ST.width / ST.height));
-  stage.style.background = ST.bg.type === 'hockey' ? '#1e1e1e' : ST.bg.type === 'hex' ? (pitchCol() || '#2a2f3b') : (pitchCol() || ST.bg.color);
+  stage.style.background = mapKeyOf(ST) ? arenaLook().floor : ST.bg.type === 'hockey' ? '#1e1e1e' : ST.bg.type === 'hex' ? (pitchCol() || '#2a2f3b') : (pitchCol() || ST.bg.color);
   $('stadiumName').textContent = ST.name; $('mStadium').textContent = 'Stadium · ' + ST.name;
   $('defStBtn').hidden = ST === DEFAULT_ST || SPECIAL.has(ST);
 }
@@ -8930,14 +8948,14 @@ function render(dt, clip){
   if (fx.shake > 0.2){ sx = (Math.random() - 0.5) * fx.shake; sy = (Math.random() - 0.5) * fx.shake; fx.shake *= Math.pow(0.86, dt * 0.06); } else fx.shake = 0;
 
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
-  if (clip){ ctx.fillStyle = ST.bg.type === 'hockey' ? '#1e1e1e' : ST.bg.type === 'hex' ? '#2a2f3b' : (pitchCol() || ST.bg.color); ctx.fillRect(0, 0, cv.width, cv.height); }   // a video has no page behind it
+  if (clip){ ctx.fillStyle = mapKeyOf(ST) ? arenaLook().floor : ST.bg.type === 'hockey' ? '#1e1e1e' : ST.bg.type === 'hex' ? '#2a2f3b' : (pitchCol() || ST.bg.color); ctx.fillRect(0, 0, cv.width, cv.height); }   // a video has no page behind it
   const fl = !clip && sideFlip() ? -1 : 1; if (!clip) syncSide();   // your side on the right: the world mirrored left to right
   ctx.setTransform(fl * zoom * dpr, 0, 0, zoom * dpr, (cssW / 2 - fl * (cam.x + sx) * zoom) * dpr, (cssH / 2 - (cam.y + sy) * zoom) * dpr);
-  drawBackground();
-  ctx.lineWidth = 3; ctx.lineCap = 'round';
+  drawBackground(); drawArenaCourt();
+  ctx.lineWidth = 3; ctx.lineCap = 'round'; const arenaLines = !!mapKeyOf(ST);
   for (const sg of ST.segments){
     if (!sg.vis || !sg.color) continue;
-    const ko = sg.cGroup & 24; ctx.strokeStyle = ko === 8 ? KIT[0].color : ko === 16 ? KIT[1].color : tint(sg.color); ctx.beginPath();
+    const ko = sg.cGroup & 24; ctx.strokeStyle = ko === 8 ? KIT[0].color : ko === 16 ? KIT[1].color : arenaLines && /a3acc2/i.test(sg.color) ? '#eef3ee' : tint(sg.color); ctx.beginPath();
     const um = fl < 0 && Math.abs(sg.v0.x) < 45 && Math.abs(sg.v1.x) < 45 && Math.abs(sg.v0.y) < 30 && Math.abs(sg.v1.y) < 30;   // a centre logo: drawn mirrored back
     if (!isFinite(sg.cf)){ ctx.moveTo(um ? -sg.v0.x : sg.v0.x, sg.v0.y); ctx.lineTo(um ? -sg.v1.x : sg.v1.x, sg.v1.y); }
     else if (um) ctx.arc(-sg.cx, sg.cy, sg.R, Math.PI - sg.a1, Math.PI - sg.a0, false); else ctx.arc(sg.cx, sg.cy, sg.R, sg.a0, sg.a1, false);
@@ -11383,7 +11401,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.92';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.93';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
