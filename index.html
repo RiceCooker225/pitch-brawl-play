@@ -5306,7 +5306,7 @@ function gameArenaJSON(game, k){
     V.push({x: 0, y: -60, cMask: []}, {x: 0, y: 60, cMask: []}); S.push({v0: V.length - 2, v1: V.length - 1, curve: 180, cMask: [], vis: true, color: '6b7385'}); V.push({x: 0, y: 60, cMask: []}, {x: 0, y: -60, cMask: []}); S.push({v0: V.length - 2, v1: V.length - 1, curve: 180, cMask: [], vis: true, color: '6b7385'});
     seg([-W, H + 14], [W, H + 14], {color: '5a6274'});
     for (const [nx, ny, d] of [[1, 0, W], [-1, 0, W], [0, 1, H], [0, -1, H]]) plane(nx, ny, d, {bCoef: 0.5});
-    const ball = {radius: 10, bCoef: 0.7, invMass: 1.5, damping: 0.988, color: 'e2453c'};
+    const ball = {radius: 10, bCoef: 0.7, invMass: 1.5, damping: 0.988, color: 'ff2e88'};
     return Object.assign(base, {width: W + 30, height: H + 62, vertexes: V, segments: S, planes: P, ballPhysics: ball,
       discs: [Object.assign({pos: [0, -95], cGroup: ['ball', 'kick'], cMask: ['all']}, ball), Object.assign({pos: [0, 95], cGroup: ['ball', 'kick'], cMask: ['all']}, ball)]});
   }
@@ -5422,7 +5422,7 @@ const GAME_ST = {}, SPECIAL = new Set([TRI_ST]);
 const GAMES = ['volley', 'badminton', 'pong', 'dodge'], isGame = g => GAMES.includes(g);
 function gameST(game, k){
   const g = GAME_ST[game] || (GAME_ST[game] = []); k = Math.max(0, Math.min(2, k | 0));
-  if (!g[k]){ const j = gameArenaJSON(game, k); j.bg.color = ARENA_BG; const st = C.buildStadium(j), sz = GAME_SIZES[game][k];   // (our teal, as the futsal arenas)
+  if (!g[k]){ const j = gameArenaJSON(game, k); j.bg.color = GAME_LOOK[game].bg.slice(1); for (const sg of j.segments) if (sg.vis) sg.vis = false; const st = C.buildStadium(j), sz = GAME_SIZES[game][k];   // (v28.92: its own colours; drawGameCourt draws its lines)
     st.court = {W: sz[0], H: sz[1]}; st.game = game; g[k] = st; SPECIAL.add(st); }
   return g[k];
 }
@@ -7031,22 +7031,56 @@ function gameMode(game, online){
   M.draw = V => drawGameCourt(V, game);
   return M;
 }
-// the table, the net and the touches count, under the players
+// v28.92 ("the colours are so bum bro change it cooler"): each game its own look, drawn under the players: the floor
+// round the court (bg), the court, its lines and the net. Volleyball an orange indoor court on deep blue, badminton a
+// green court, ping pong a bright blue table on a dark floor, dodgeball a royal blue court with each half tinted in its
+// side's colour (not orange courts: the Orange side was lost on them)
+const GAME_LOOK = {
+  volley:    {bg: '#1b1440', court: '#6a3fd0', court2: '#7449dc', line: '#ffffff', sub: 'rgba(255,255,255,.75)', net: '#0e0a24', tape: '#ffffff', post: '#ffd23f'},
+  badminton: {bg: '#123c2c', court: '#22935a', court2: '#28a064', line: '#ffffff', sub: 'rgba(255,255,255,.85)', net: '#0b1a14', tape: '#ffffff', post: '#e8e3e3'},
+  pong:      {bg: '#14182b', court: '#1a63d6', court2: '#1f6fe6', line: '#ffffff', sub: 'rgba(255,255,255,.8)', net: '#0b0f1c', tape: '#ffffff', post: '#9aa3b8', edge: '#0d2a5c'},
+  dodge:     {bg: '#10142e', court: '#24358a', court2: '#2b3e98', line: '#ffffff', sub: 'rgba(255,255,255,.6)'}
+};
 function drawGameCourt(V, game){
-  const c = ST.court; if (!c) return;
-  if (game === 'pong'){
-    ctx.fillStyle = 'rgba(28,86,140,.55)'; ctx.fillRect(-c.W, -c.H, c.W * 2, c.H * 2);
-    ctx.strokeStyle = '#f4f6fa'; ctx.lineWidth = 3; ctx.strokeRect(-c.W, -c.H, c.W * 2, c.H * 2);
+  const c = ST.court, L = GAME_LOOK[game]; if (!c || !L) return;
+  const W = c.W, H = c.H;
+  ctx.save();
+  if (game === 'pong'){   // the table: its shadow, its edge, the top
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(-W + 8, -H + 10, W * 2, H * 2 + 4);
+    ctx.fillStyle = L.edge; ctx.fillRect(-W - 4, -H - 4, W * 2 + 8, H * 2 + 10);
   }
-  if (NETG_OF(game)){   // the net: a band with its posts
-    const H = game === 'pong' ? c.H + 8 : c.H + 18;
-    ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(3, -H); ctx.lineTo(3, H); ctx.stroke();
-    ctx.strokeStyle = '#f4f6fa'; ctx.lineWidth = game === 'pong' ? 3 : 4; ctx.setLineDash([4, 3]); ctx.beginPath(); ctx.moveTo(0, -H); ctx.lineTo(0, H); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = '#c4c9d4'; for (const y of [-H, H]){ ctx.beginPath(); ctx.arc(0, y, 4, 0, C.TAU); ctx.fill(); }
+  ctx.fillStyle = L.court; ctx.fillRect(-W, -H, W * 2, H * 2);
+  if (game === 'dodge'){   // planks, and each half in its side's colour
+    ctx.fillStyle = L.court2; for (let y = -H, i = 0; y < H; y += 18, i++) if (i & 1) ctx.fillRect(-W, y, W * 2, 9);
+    ctx.strokeStyle = 'rgba(0,0,30,.18)'; ctx.lineWidth = 1; for (let y = -H; y < H; y += 9){ ctx.beginPath(); ctx.moveTo(-W, y); ctx.lineTo(W, y); ctx.stroke(); }
+    for (const t of [0, 1]){ ctx.globalAlpha = 0.14; ctx.fillStyle = KIT[t].color; ctx.fillRect(t ? 0 : -W, -H, W, H * 2); } ctx.globalAlpha = 1;
+  } else {   // soft stripes across
+    ctx.fillStyle = L.court2; const st = game === 'pong' ? 40 : 60; for (let x = -W, i = 0; x < W; x += st, i++) if (i & 1) ctx.fillRect(x, -H, Math.min(st, W - x), H * 2);
+  }
+  // the lines
+  ctx.strokeStyle = L.line; ctx.lineWidth = game === 'pong' ? 3 : 4; ctx.strokeRect(-W, -H, W * 2, H * 2);
+  ctx.strokeStyle = L.sub; ctx.lineWidth = 2.5;
+  const ln = (x0, y0, x1, y1) => { ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); };
+  if (game === 'volley'){ for (const sx of [-1, 1]) ln(sx * 75, -H, sx * 75, H); }
+  else if (game === 'badminton'){ for (const sx of [-1, 1]){ ln(sx * 70, -H, sx * 70, H); ln(sx * (W - 26), -H, sx * (W - 26), H); ln(sx * 70, 0, sx * W, 0); } ln(-W, -H + 16, W, -H + 16); ln(-W, H - 16, W, H - 16); }
+  else if (game === 'pong'){ ctx.lineWidth = 1.5; ln(-W, 0, W, 0); }
+  else if (game === 'dodge'){ ctx.strokeStyle = L.line; ctx.lineWidth = 4; ln(0, -H, 0, H); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 60, 0, C.TAU); ctx.stroke();
+    ctx.strokeStyle = L.sub; ctx.lineWidth = 2; for (const sx of [-1, 1]) ln(sx * W * 0.45, -H, sx * W * 0.45, H);
+    ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.fillRect(-W, H + 12, W * 2, 40); ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.font = '700 10px Rubik, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText('OUT', -W + 18, H + 16); ctx.fillText('OUT', W - 18, H + 16); }
+  ctx.restore();
+  if (NETG_OF(game)){   // the net: its shadow, the mesh, the white tape, the posts
+    const NH = game === 'pong' ? H + 8 : H + 18;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(5, -NH); ctx.lineTo(5, NH); ctx.stroke();
+    ctx.strokeStyle = L.net; ctx.lineWidth = game === 'pong' ? 4 : 6; ctx.beginPath(); ctx.moveTo(0, -NH); ctx.lineTo(0, NH); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1; for (let y = -NH; y < NH; y += 5){ ctx.beginPath(); ctx.moveTo(-2.5, y); ctx.lineTo(2.5, y + 2.5); ctx.stroke(); }
+    ctx.strokeStyle = L.tape; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-1.5, -NH); ctx.lineTo(-1.5, NH); ctx.stroke();
+    ctx.fillStyle = L.post; ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1.5; for (const y of [-NH, NH]){ ctx.beginPath(); ctx.arc(0, y, 5, 0, C.TAU); ctx.fill(); ctx.stroke(); }
+    ctx.restore();
     const vb = V.vb, N = NETG_OF(game);
     if (vb && N.touches > 1 && vb.n > 0 && V.state === 1){   // volleyball: touches used by the side playing it, dots by the net on its side
       const sx = vb.side === 0 ? -1 : 1;
-      for (let i = 0; i < N.touches; i++){ ctx.beginPath(); ctx.arc(sx * 14, -c.H - 26 + i * 11, 4, 0, C.TAU); ctx.fillStyle = i < vb.n ? KIT[vb.side].color : 'rgba(255,255,255,.18)'; ctx.fill(); }
+      for (let i = 0; i < N.touches; i++){ ctx.beginPath(); ctx.arc(sx * 16, -H - 26 + i * 11, 4.5, 0, C.TAU); ctx.fillStyle = i < vb.n ? KIT[vb.side].color : 'rgba(255,255,255,.25)'; ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 1.2; ctx.stroke(); }
     }
   }
 }
@@ -8674,7 +8708,7 @@ function resize(){
 new ResizeObserver(resize).observe(stage); resize();
 // v28.84 ("change the colour of game, other balls"): the pitch's colour and the ball's look, yours only (⚙ Settings → View)
 const PITCH_COLS = {slate: null, classic: '#454C5E', grass: '#3c6e3f', night: '#22283a', ocean: '#2d5872', clay: '#8a5a44', purple: '#4a3d6b'};
-const pitchCol = () => (PITCH_COLS[store.get('pb.pitch', 'slate')] || null);
+const pitchCol = () => ST && ST.game ? null : (PITCH_COLS[store.get('pb.pitch', 'slate')] || null);   // (v28.92: the other games keep their own colours)
 let BALL_SKIN = store.get('pb.ball', 'classic');   // (read once: drawn every frame)
 // v28.91: a ball in one of the other games. The net games: its shadow on the floor where it is, the ball up the screen by
 // its height and a little bigger (a volleyball with its seams, a shuttle with its feathers pointing back, an orange ping
@@ -8682,7 +8716,7 @@ let BALL_SKIN = store.get('pb.ball', 'classic');   // (read once: drawn every fr
 function drawGameBall(V, d, i, gm){
   const z = Math.max(0, d.z || 0), r = d.radius;
   if (gm === 'dodge'){
-    ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); const g = ctx.createRadialGradient(d.x - r * 0.35, d.y - r * 0.35, r * 0.15, d.x, d.y, r); g.addColorStop(0, '#ff8a7a'); g.addColorStop(1, tint(d.color) || '#c8302a'); ctx.fillStyle = g; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); const g = ctx.createRadialGradient(d.x - r * 0.35, d.y - r * 0.35, r * 0.15, d.x, d.y, r); g.addColorStop(0, '#ffa6d2'); g.addColorStop(1, tint(d.color) || '#ff2e88'); ctx.fillStyle = g; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
     ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(d.x, d.y, r * 0.62, 0.4, 2.6); ctx.stroke();
     if (d.lt === 0 || d.lt === 1){ ctx.strokeStyle = KIT[d.lt].color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(d.x, d.y, r + 3.5, 0, C.TAU); ctx.stroke(); }
     return;
@@ -11349,7 +11383,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.91';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.92';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
