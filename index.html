@@ -2420,7 +2420,9 @@ function PBCORE(){
   // 10), and only the inner part of that (DIVE_SOLID) parries it away: a ball met at the fingertips is only tipped
   // (DIVE_TIP of its speed kept, a small push out), so a hard shot into the corner can still go in. Down 40 ticks after
   // (was 32) and 90 between dives (was 60): a dive that misses costs him
-  const DIVE_V = 2.4, DIVE_T = 22, DIVE_DAMP = 0.955, DIVE_DOWN = 40, DIVE_CD = 90, DIVE_REACH = 7, DIVE_RAMP = [0.3, 0.5, 0.7, 0.85, 1], DIVE_SOLID = 3, DIVE_TIP = 0.8;
+  // (v28.94, "i think the gk got nerfed a bit too much": halfway back: 2.7 a tick after a three-tick push-off, about 40 px
+  // (v28.90 44, v28.91 31), arms 8.5, parried from 5 px in (3), a tip keeps 0.7 of the ball's speed (0.8), down 36, 75 between)
+  const DIVE_V = 2.7, DIVE_T = 22, DIVE_DAMP = 0.955, DIVE_DOWN = 36, DIVE_CD = 75, DIVE_REACH = 8.5, DIVE_RAMP = [0.4, 0.65, 0.85, 1], DIVE_SOLID = 5, DIVE_TIP = 0.7;
   const canDive = (G, ST, p, d) => p.role === 'keeper' && G.cfg.dive !== false && !ST.tri && inArea(ST, p.team, d.x, d.y);
   function startDive(G, p, d, ev){
     const b = p.input; let x = ((b & 8) > 0) - ((b & 4) > 0), y = ((b & 2) > 0) - ((b & 1) > 0);
@@ -11401,7 +11403,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.93';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.94';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
