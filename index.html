@@ -8957,7 +8957,9 @@ function render(dt, clip){
   ctx.lineWidth = 3; ctx.lineCap = 'round'; const arenaLines = !!mapKeyOf(ST);
   for (const sg of ST.segments){
     if (!sg.vis || !sg.color) continue;
-    const ko = sg.cGroup & 24; ctx.strokeStyle = ko === 8 ? KIT[0].color : ko === 16 ? KIT[1].color : arenaLines && /a3acc2/i.test(sg.color) ? '#eef3ee' : tint(sg.color); ctx.beginPath();
+    // (v28.95, "make the pitch colour does not reflect on the team colours so the pitch colour never change": the goals, nets,
+    // posts, centre circle, logo and kick-off lines keep the pitch's own colours whatever kits are on; they took the teams')
+    ctx.strokeStyle = arenaLines && /a3acc2/i.test(sg.color) ? '#eef3ee' : sg.color; ctx.beginPath();
     const um = fl < 0 && Math.abs(sg.v0.x) < 45 && Math.abs(sg.v1.x) < 45 && Math.abs(sg.v0.y) < 30 && Math.abs(sg.v1.y) < 30;   // a centre logo: drawn mirrored back
     if (!isFinite(sg.cf)){ ctx.moveTo(um ? -sg.v0.x : sg.v0.x, sg.v0.y); ctx.lineTo(um ? -sg.v1.x : sg.v1.x, sg.v1.y); }
     else if (um) ctx.arc(-sg.cx, sg.cy, sg.R, Math.PI - sg.a1, Math.PI - sg.a0, false); else ctx.arc(sg.cx, sg.cy, sg.R, sg.a0, sg.a1, false);
@@ -9038,7 +9040,7 @@ function render(dt, clip){
       if (V.players.some(p => p.di === i)) continue;
       const d = V.discs[i]; if (!d.color) continue;
       if (gm){ drawGameBall(V, d, i, gm); continue; }   // (v28.91: the other games' balls, in the air or live)
-      if (i === 0) drawBall(ctx, d, d.color); else { ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fillStyle = tint(d.color); ctx.fill(); } ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
+      if (i === 0) drawBall(ctx, d, d.color); else { ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fillStyle = d.color; ctx.fill(); } ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
       if (i === 0 && V.cfg && V.cfg.power){   // (v28.34) a power shot charging: an arc filling round the ball; charged: it glows
         let pw = 0; { const RG = (sess && sess.G) || V; for (const p of RG.players) if ((p.pw | 0) > pw) pw = p.pw | 0; }   // (v28.49, "the moment its charged and we press shoot, its not powershot": the charge as it really is, not as the picture drawn a moment ahead has it: the ring went full a tick or more early)
         // (v28.71, "i didnt see the ring": it was thin, orange on the yellow ball, and tiny zoomed out: now bolder, on a
@@ -9058,7 +9060,7 @@ function render(dt, clip){
     }
     if (SPV) safeDraw('free kick dots', () => drawFkGuide(SPV, s));
   } else {
-    for (let i = 1; i < ST.discs.length; i++){ const d = ST.discs[i]; if (!d.color) continue; ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fillStyle = tint(d.color); ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
+    for (let i = 1; i < ST.discs.length; i++){ const d = ST.discs[i]; if (!d.color) continue; ctx.beginPath(); ctx.arc(d.x, d.y, d.radius, 0, C.TAU); ctx.fillStyle = d.color; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke(); }
   }
   // fireworks: rockets, shockwaves, dust; then the sparks, each with a soft glow round a bright core
   const k = dt * 0.06;
@@ -11403,7 +11405,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.94';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.95';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
