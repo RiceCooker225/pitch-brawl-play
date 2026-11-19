@@ -2756,15 +2756,15 @@ function PBCORE(){
   // the clock, the score limit, overtime and the pause after a point work as in a match.
   //
   // The net games: the ball has a height (b.z, b.vz, gravity g). Players touch it only while it's low enough (reach):
-  // walking into it bumps it up, kick hits it the way from you to the ball, further when you run into it (run), a smash
-  // when you're by the net and it's up high (fast and low: it can hit the net). Touches a side (volleyball 3, the others
+  // walking into it bumps it up (and in), kick hits it over to come down in their court (v28.98: gameKick), deeper when
+  // you run into it (run), a smash when you're by the net and it's up high (fast and low, but over the net). Touches a side (volleyball 3, the others
   // 1), then it must be over; under the net's height as it crosses the middle it hits the net. Where it comes down decides
   // the point: on a side's court, the other side's point; outside, a point against the side that touched it last. The side
   // that won the point serves from the back (a kick or a bump; after NG_AUTO ticks it goes by itself).
   // Ping pong: a table; the ball must bounce once on the other half (bounce, rest: how much it keeps), then be hit back
   // before it lands again. Down on your own half after your hit, off the table without a bounce, or a second bounce: a
-  // point. A hit's length is worked out so it comes down on their half (aim): middle-deep standing, deep running into it,
-  // short backing off (aimed off the table it still goes off).
+  // point. A hit comes down on their half (aim): middle-deep standing, deep running into it, short backing off
+  // (v28.98: aimed off the table too, at an even pace).
   // Badminton: a shuttle (the air slows it fast: the arena's ball damping), one touch, a higher net.
   //
   // Dodgeball: three balls on the middle line; a kicked ball is live (d.lt: the thrower's side, d.lp: who) until it slows
@@ -2772,12 +2772,12 @@ function PBCORE(){
   // size: 3 / 2 / 1), a moment you can't be hit again (DB_INV); out of lives, off to the bench at the side. Kicking a live
   // ball of theirs: a catch, the thrower loses a life instead. A side with nobody left loses the round: a point to the other.
   const NETG = {
-    volley:    {g: 0.08,  reach: 24, net: 12, hitH: 4.0, run: 1.25, back: 0.35, hitZ: 3.3, spikeD: 75, spikeZ: 10, spikeH: 5.6, spikeVZ: 0.6, bumpZ: 2.6, bumpH: 1.5, serveH: 4.4, serveZ: 3.4, z0: 0, touches: 3},
-    badminton: {g: 0.07,  reach: 26, net: 16, hitH: 5.0, run: 1.2,  back: 0.35, hitZ: 3.3, spikeD: 70, spikeZ: 12, spikeH: 6.6, spikeVZ: 0.3, bumpZ: 2.6, bumpH: 1.3, serveH: 4.8, serveZ: 3.2, z0: 0, touches: 1},
-    pong:      {g: 0.07,  reach: 18, net: 6,  hitH: 4.6, run: 1.25, back: 0.35, hitZ: 1.6, spikeD: 0,  spikeZ: 99, spikeH: 0,   spikeVZ: 0,   bumpZ: 1.2, bumpH: 1.6, serveH: 4.2, serveZ: 1.0, z0: 10, touches: 1, bounce: true, rest: 0.82, grip: 0.8, aim: true}
+    volley:    {g: 0.08,  reach: 24, net: 12, hitH: 4.0, run: 1.25, back: 0.35, hitZ: 3.3, spikeD: 95, spikeZ: 10, spikeH: 5.6, spikeVZ: 1.25, bumpZ: 2.6, bumpH: 1.5, serveH: 4.4, serveZ: 3.4, z0: 0, touches: 3},
+    badminton: {g: 0.07,  reach: 26, net: 16, hitH: 5.0, run: 1.2,  back: 0.35, hitZ: 3.3, spikeD: 85, spikeZ: 12, spikeH: 6.6, spikeVZ: 1.1, bumpZ: 2.6, bumpH: 1.3, serveH: 4.8, serveZ: 3.2, z0: 0, touches: 1},
+    pong:      {g: 0.07,  reach: 18, net: 6,  hitH: 4.6, run: 1.25, back: 0.35, hitZ: 1.6, spikeD: 0,  spikeZ: 99, spikeH: 0,   spikeVZ: 0,   bumpZ: 1.2, bumpH: 1.6, serveH: 4.2, serveZ: 1.0, z0: 10, touches: 1, bounce: true, rest: 0.55, grip: 0.85, aim: true}
   };
-  const NG_AUTO = 480, NG_SAME = 12, NG_POINT_T = 120;
-  const DB_CATCH = 3.4, DB_LIVE = 2.0, DB_INV = 80, DB_POINT_T = 150, DB_BALL_Y = [0, -95, 95], DB_EDGE = 18, DB_SLOPE = 0.035;
+  const NG_AUTO = 480, NG_SAME = 12, NG_POINT_T = 120, NG_KICK_GAP = 5, PONG_GAP = 7, PONG_PACE = 4.0;
+  const DB_CATCH = 3.4, DB_AIM = 0.4, DB_LIVE = 2.0, DB_INV = 80, DB_POINT_T = 150, DB_BALL_Y = [0, -95, 95], DB_EDGE = 18, DB_SLOPE = 0.035;
   const gameOf = G => G.cfg && G.cfg.game || null;
   const netG = G => NETG[gameOf(G)] || null;
   const courtOf = ST => ST.court || {W: 300, H: 150};
@@ -2821,7 +2821,7 @@ function PBCORE(){
       gamePoint(G, ST, overTable ? V.side : p.team, overTable ? V.last : p.id, overTable ? 'early' : 'out', ev); return false;
     }
     if (V.side !== p.team || G.state === 0){ V.side = p.team; V.n = 1; } else V.n++;
-    V.last = p.id; V.lf = G.frame; V.bn = 0; V.lt = p.team; V.lp = p.id; if (G.state === 1) pstat(G, p).touches++;   // (v28.97: lt / lp: the side and man who touched it last, kept when it crosses)
+    V.last = p.id; V.lf = G.frame; V.bn = 0; V.lt = p.team; V.lp = p.id; V.tid = G.frame; if (G.state === 1) pstat(G, p).touches++;   // (v28.97: lt / lp: the side and man who touched it last, kept when it crosses. v28.98 tid: the frame this touch began; the computer reads each ball once)
     if (V.n > N.touches && G.state === 1){ gamePoint(G, ST, 1 - p.team, p.id, 'touches', ev); return false; }
     return true;
   }
@@ -2834,15 +2834,55 @@ function PBCORE(){
       const spike = !serve && N.spikeD > 0 && Math.abs(d.x) < N.spikeD && z0 >= N.spikeZ && ux * (d.x < 0 ? 1 : -1) > 0.3;
       let h = serve ? N.serveH : spike ? N.spikeH : N.hitH * (1 + run * (run > 0 ? N.run - 1 : N.back));
       const vz = serve ? N.serveZ : spike ? N.spikeVZ : N.hitZ;
-      if (N.aim && ux * (d.x < 0 ? 1 : -1) > 0.15){   // ping pong: long enough to come down on their half
-        const T = ngFlight(z0, vz, N.g), k = o.damping, dep = 0.55 + 0.35 * run, gx = (d.x < 0 ? 1 : -1) * c.W * Math.max(0.15, Math.min(0.92, dep));
-        const fall = (1 - Math.pow(k, T)) / (1 - k);
-        // and it comes down on the table across: aimed wider than its side, it's turned in to the side's edge
-        let dist = Math.max(20, (gx - o.x) / ux); const ly = o.y + uy * dist, edge = c.H - 6;
-        if (Math.abs(ly) > edge){ const ty = Math.sign(ly) * edge, dx = gx - o.x, dy = ty - o.y, l2 = Math.hypot(dx, dy) || 1; ux = dx / l2; uy = dy / l2; dist = l2; }
-        h = Math.min(8, dist / fall);
+      let vzOut = vz;
+      // (v28.98) ping pong: every hit comes down on their half (the angle from you to the ball steers it, kept on the
+      // table; middle-deep standing, deep running into it, short backing off), at an even pace (PONG_PACE: a longer one
+      // flies longer, higher), so there's time to get across for it. Hits that weren't aimed at the table flew off it
+      if (N.aim){
+        const dir = d.x < 0 ? 1 : -1, k = o.damping || 0.996;
+        const ax = Math.max(0.45, Math.abs(ux)), slope = Math.max(-1.6, Math.min(1.6, uy / ax));
+        const tx = dir * c.W * Math.max(0.45, Math.min(0.85, 0.6 + 0.25 * run));
+        const ty = Math.max(-(c.H - 8), Math.min(c.H - 8, o.y + slope * (tx - o.x) * dir));
+        const dl = Math.hypot(tx - o.x, ty - o.y) || 1, T = Math.round(Math.max(45, Math.min(110, dl / PONG_PACE)));
+        ux = (tx - o.x) / dl; uy = (ty - o.y) / dl; h = dl * (1 - k) / (1 - Math.pow(k, T)); vzOut = (N.g * T * (T - 1) / 2 - z0) / T;
       }
-      o.vx = ux * h; o.vy = uy * h; o.vz = vz; o.sp = 0; o.atT = 0;
+      // (v28.98, "make the new modes better, they kinda hard to play and not fun, u should test": a casual player's hits went
+      // out three times in four. Where a hit went was only the line from you to the ball, to the pixel, so one taken from the
+      // side flew into the hall's wall. Volleyball and badminton now: a hit always goes over and comes down in their court.
+      // The angle from you to the ball still steers it left or right (kept inside the side lines), and how deep is up to
+      // you: the middle standing, deep running into it, short backing off. A smash: fast and low, but always over the net.
+      // A serve comes down in their court too. Volleyball, kicked away from the net with touches left (you're between the ball and the net): a set, up high to
+      // the front of your own court, for a smash)
+      if (!N.aim){
+        const V = G.vb || {}, side = d.x < 0 ? -1 : 1, dir = -side, used = V.side === p.team ? (V.n | 0) : 0, k = o.damping || 0.99;
+        const fallOf = w => { const T = ngFlight(z0, w, N.g); return (1 - Math.pow(k, T)) / (1 - k); };
+        const maxX = c.W - 14, maxY = c.H - 14;
+        if (!serve && N.touches > 1 && ux * dir < -0.25 && used < N.touches - 1 && !spike){
+          vzOut = N.hitZ * 1.12; const tx = side * c.W * 0.22, ty = o.y * 0.5, dl = Math.hypot(tx - o.x, ty - o.y);
+          h = Math.min(N.hitH, dl / fallOf(vzOut)); ux = dl > 1 ? (tx - o.x) / dl : 0; uy = dl > 1 ? (ty - o.y) / dl : 0;
+        } else {
+          const ax = Math.max(0.45, Math.abs(ux)), slope = Math.max(-1.6, Math.min(1.6, uy / ax));
+          let tx, ty;
+          if (spike){
+            const fx = Math.max(0.55, ux * dir), fl = Math.hypot(fx, uy) || 1, reach = N.spikeH * fallOf(vz);
+            tx = o.x + dir * reach * fx / fl; ty = o.y + reach * uy / fl;
+            if (tx * dir > maxX){ const t = (dir * maxX - o.x) / (tx - o.x); tx = o.x + (tx - o.x) * t; ty = o.y + (ty - o.y) * t; }
+            if (tx * dir < c.W * 0.5) tx = dir * c.W * 0.5;
+            ty = Math.max(-maxY * 0.7, Math.min(maxY * 0.7, ty));   // (deep and not into the corner by the net: it can be dug)
+          } else {
+            tx = dir * c.W * Math.max(0.25, Math.min(0.86, 0.55 + 0.32 * run));
+            ty = o.y + slope * (tx - o.x) * dir;
+          }
+          ty = Math.max(-maxY, Math.min(maxY, ty));
+          const dl = Math.hypot(tx - o.x, ty - o.y) || 1; ux = (tx - o.x) / dl; uy = (ty - o.y) / dl;
+          if (spike){
+            h = Math.min(N.spikeH, dl / fallOf(vz));
+            const tc = Math.abs(o.x) / Math.max(0.5, h * Math.abs(ux)), need = N.net + 3 - z0 + 0.5 * N.g * tc * tc;   // (clears the net)
+            if (need / tc > vzOut){ vzOut = need / tc; h = Math.min(h, dl / fallOf(vzOut)); }
+          } else h = dl / fallOf(vz);
+        }
+      }
+      o.vx = ux * h; o.vy = uy * h; o.vz = vzOut; o.sp = 0; o.atT = 0;
       if (spike){ pstat(G, p).spikes = (pstat(G, p).spikes || 0) + 1; if (ev) ev.push({type:'spike', id: ++G.eventId, frame: G.frame, pid: p.id}); }
       vbTouch(G, ST, p, ev);
     } else if (gm === 'dodge' && (o.cGroup & 1)){
@@ -2851,6 +2891,17 @@ function PBCORE(){
         if (ev) ev.push({type:'catch', id: ++G.eventId, frame: G.frame, pid: p.id, vid: th ? th.id : -1});
         pstat(G, p).catches = (pstat(G, p).catches || 0) + 1;
         if (th && !th.out) dbHit(G, ST, th, p, ev, true);
+      }
+      // (v28.98, "make the new modes better": a throw went exactly the line from you to the ball, so a person had to line
+      // up a moving man to the pixel and most throws missed. A person's throw at their side is turned onto the man it was
+      // nearest to (within DB_AIM), where he'll be when it gets there; the computer aims its own)
+      const v = Math.hypot(o.vx, o.vy);
+      if (G.state === 1 && p.ctrl !== 'ai' && v > 3){
+        const ux = o.vx / v, uy = o.vy / v; let best = null, ba = DB_AIM;
+        for (const q of G.players){ if (q.team === p.team || q.out || q.ctrl === 'gone') continue; const e = G.discs[q.di], t = Math.hypot(e.x - o.x, e.y - o.y) / v;
+          const ex = e.x + e.vx * t * 0.8, ey = e.y + e.vy * t * 0.8, el = Math.hypot(ex - o.x, ey - o.y) || 1, a = Math.acos(Math.max(-1, Math.min(1, ((ex - o.x) * ux + (ey - o.y) * uy) / el)));
+          if (a < ba){ ba = a; best = [ex - o.x, ey - o.y, el]; } }
+        if (best){ o.vx = best[0] / best[2] * v; o.vy = best[1] / best[2] * v; }
       }
       o.lt = p.team; o.lp = p.id; o.lf = G.frame;
       if (G.state === 1) pstat(G, p).throws = (pstat(G, p).throws || 0) + 1;
@@ -2907,9 +2958,19 @@ function PBCORE(){
         if (p.ctrl === 'gone') continue; const d = D[p.di], dx = b.x - d.x, dy = b.y - d.y, dist = Math.hypot(dx, dy);
         if (dist <= b.radius + d.radius + 0.6 && !(V.last === p.id && G.frame - V.lf < NG_SAME)){
           if (!vbTouch(G, ST, p, ev)) return;
-          const h = Math.hypot(b.vx, b.vy); if (h > N.bumpH){ b.vx *= N.bumpH / h; b.vy *= N.bumpH / h; }
-          if (h < 0.8 && dist > 0){ b.vx += dx / dist * 0.8; b.vy += dy / dist * 0.8; }
-          b.vz = Math.max(b.vz || 0, N.bumpZ);
+          if (N.bounce){   // (v28.98) ping pong: a block, back short on their half
+            const dir = d.x < 0 ? 1 : -1, k = b.damping || 0.996, tx = dir * c.W * 0.5, ty = Math.max(-(c.H - 8), Math.min(c.H - 8, b.y * 0.6));
+            const dl = Math.hypot(tx - b.x, ty - b.y) || 1, T = Math.round(Math.max(50, Math.min(110, dl / (PONG_PACE * 0.8)))), z0 = b.z || 0;
+            const h = dl * (1 - k) / (1 - Math.pow(k, T)); b.vx = (tx - b.x) / dl * h; b.vy = (ty - b.y) / dl * h; b.vz = (N.g * T * (T - 1) / 2 - z0) / T;
+          } else {
+            // (v28.98: a bump went on the way you walked into it, often out by the side line. Now it goes up and in:
+            // volleyball with touches left, to the front of your own court (a dig, to play next); the last touch and
+            // badminton, gently over towards theirs)
+            const side = d.x < 0 ? -1 : 1, last = V.n >= N.touches, tx = (last ? -side * 0.45 : side * 0.2) * c.W, ty = b.y * (last ? 0.5 : 0.4);
+            const vz = Math.max(b.vz || 0, N.bumpZ), T = ngFlight(b.z || 0, vz, N.g), k = b.damping || 0.99, fall = (1 - Math.pow(k, T)) / (1 - k);
+            const ex = tx - b.x, ey = ty - b.y, el = Math.hypot(ex, ey) || 1, h = Math.min(N.bumpH * (last ? 2.4 : 1), el / fall);
+            b.vx = ex / el * h; b.vy = ey / el * h; b.vz = vz;
+          }
         } else if (dist <= b.radius + d.radius + 0.6 && V.last === p.id) V.lf = G.frame;
       }
       // the net
@@ -3011,7 +3072,7 @@ function PBCORE(){
   function kickDisc(G, ST, p, d, o, pw, fkc){
     const pp = ST.pp, m = PU[p.pu] || PU.none;
     let x = o.x - d.x, y = o.y - d.y; const dist = Math.sqrt(x * x + y * y);
-    if (!(dist - o.radius - d.radius < 4 + (m.reach || 0)) || dist === 0) return false;
+    if (!(dist - o.radius - d.radius < 4 + (m.reach || 0) + (o === G.discs[0] && G.cfg.game && NETG[G.cfg.game] ? (NETG[G.cfg.game].bounce ? PONG_GAP : NG_KICK_GAP) : 0)) || dist === 0) return false;   // (v28.98: the net games, a longer reach)
     x /= dist; y /= dist;
     const ks = pp.kickStrength * (m.kick || 1) * (pw || 1);
     const vIn = o === G.discs[0] ? Math.sqrt(o.vx * o.vx + o.vy * o.vy) : 0;
@@ -3452,7 +3513,7 @@ function PBCORE(){
 
   return {TAU, TICK, FL, IN, TEAMS, PU, KMH, limitHit, buildStadium, colliders, physics, crossesGoal, newGame, resetPositions, setInput, step, endGame, overtime, topTied,
           copyGame, extrapolate, ballPath, playerDisc, newStats, pstat, timeUp, inArea, areaOf, ballArea, setPiece,
-          CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, DIVE: {V: DIVE_V, RAMP: DIVE_RAMP, T: DIVE_T, DAMP: DIVE_DAMP, DOWN: DIVE_DOWN, CD: DIVE_CD, REACH: DIVE_REACH, SOLID: DIVE_SOLID}, canDive, fkNoSlide, slideAim, ballIdx, courtOf, NETG, netG, ngFlight, DB: {LIVE: DB_LIVE, INV: DB_INV}, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
+          NETG, ngFlight, CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, DIVE: {V: DIVE_V, RAMP: DIVE_RAMP, T: DIVE_T, DAMP: DIVE_DAMP, DOWN: DIVE_DOWN, CD: DIVE_CD, REACH: DIVE_REACH, SOLID: DIVE_SOLID}, canDive, fkNoSlide, slideAim, ballIdx, courtOf, NETG, netG, ngFlight, DB: {LIVE: DB_LIVE, INV: DB_INV}, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
           fkPreview, FK_SHOW_PW, FK_AUTO, FK_HOLD, FK_HOLD_AIM, CURL, fkWallLine, fkWallSpot, autoCurl, manualCurl, curlTo, AC_BIT, INV_BIT, POWER_T, POWER_MUL, flightCross, curveMul, CURVE_LV,
           AUTO: {RANGE: AUTO_RANGE, WIDE: AUTO_WIDE, FK_WIDE, MID: AUTO_MID, IN: AUTO_IN, MAX: AUTO_MAX, K: AUTO_K, SAFE: AUTO_SAFE, FAR: AUTO_FAR, SMALL: AUTO_SMALL}, FK_CURVE};
 }
@@ -5066,7 +5127,9 @@ function PBAI(C){
     return worst;
   }
   // ---------- other games (v28.91): volleyball and dodgeball. Keys like a person; the level sets how quick and how exact ----------
-  const GL = [{react: 18, err: 34, duty: 0.75, catchP: 0, dodge: 0.3}, {react: 10, err: 18, duty: 0.95, catchP: 0.1, dodge: 0.5}, {react: 5, err: 8, duty: 1, catchP: 0.25, dodge: 0.7}, {react: 1, err: 2, duty: 1, catchP: 0.45, dodge: 0.85}];
+  // (v28.98) miss: the chance it misreads a ball coming over (goes to the wrong spot, by about missD): the net games' hits
+  // all come down in now, so the computer's mistakes end rallies too
+  const GL = [{react: 18, err: 34, duty: 0.75, catchP: 0, dodge: 0.3, miss: 0.16, missD: 40}, {react: 10, err: 18, duty: 0.95, catchP: 0.1, dodge: 0.5, miss: 0.12, missD: 34}, {react: 5, err: 8, duty: 1, catchP: 0.25, dodge: 0.7, miss: 0.08, missD: 32}, {react: 1, err: 2, duty: 1, catchP: 0.45, dodge: 0.85, miss: 0.03, missD: 28}];
   function keysTo(me, tx, ty, slowR){   // 8-way keys toward a spot, easing off as it gets there
     const dx = tx - me.x, dy = ty - me.y, dist = Math.hypot(dx, dy); if (dist < 1.5 && Math.hypot(me.vx, me.vy) < 0.6) return 0;
     const want = Math.min(2.7, dist * (slowR || 0.09)), wx = dist > 0 ? dx / dist * want : 0, wy = dist > 0 ? dy / dist * want : 0;
@@ -5125,8 +5188,15 @@ function PBAI(C){
     for (let i = 0; i < P.length; i++){ const q = P[i]; if (q.x * sx > 4 && q.z <= V.reach - 4 && (q.vz < 0 || q.z < 6 || V.bounce) && (!V.bounce || ((q.bn || bnNow) && hitter !== p.team && (Math.abs(q.x) > c.W + 8 || Math.abs(q.y) > c.H + 8)))){ hit = q; hi = i; break; } }
     const mineNow = G.vb && G.vb.side === p.team ? G.vb.n : 0;
     if (!hit) return keysTo(me, home.x, home.y);
+    if (G.vb){   // (a misread: once for each ball that comes over)
+      const key = G.vb.tid | 0; if (mem.missK !== key){ mem.missK = key; const a = rnd(mem) * C.TAU; mem.miss = G.vb.lt !== p.team && rnd(mem) < L.miss ? {x: Math.cos(a) * L.missD, y: Math.sin(a) * L.missD} : null; }
+      if (mem.miss && G.vb.lt !== p.team){ hit = {x: hit.x + mem.miss.x, y: hit.y + mem.miss.y, z: hit.z, vz: hit.vz}; }
+    }
     // the one of us who gets there soonest plays it
-    const tOf = q => Math.hypot(D[q.di].x - hit.x, D[q.di].y - hit.y) / 2.4 + (G.vb && G.vb.last === q.id ? 30 : 0);
+    // (v28.98: the one who just played it lets a mate have it only if the mate gets there in time; 2v2 sets were dropped
+    // by a mate running in from the back while the one beside it waited)
+    const raw = q => Math.hypot(D[q.di].x - hit.x, D[q.di].y - hit.y) / 2.4 + 12;
+    const tOf = q => raw(q) + (G.vb && G.vb.last === q.id && mates.some(o => o !== q && raw(o) < hi) ? 30 : 0);
     const mine = mates.slice().sort((a, q) => tOf(a) - tOf(q))[0] === p;
     if (!mine) return keysTo(me, home.x * 0.8 + hit.x * 0.2, home.y);
     // volleyball: pass it up to a mate by the net on the first touch (a bump: walk into it), else hit it over
@@ -6988,10 +7058,11 @@ function triResults(s){
 // ---------- v28.91: the other games (volleyball, badminton, ping pong, dodgeball): points, words, clock, results ----------
 // The rules run in the engine (gameReset / gamePost in engine.js); this says what happened and keeps the tally. online:
 // the host's or a guest's match (a guest hears of points and hits from the host's snapshots: netPoint, netHit)
-const GAME_HOW = {volley: 'Volleyball: kick hits it (run into it to hit it further, by the net when it\'s high: a spike), walking into it bumps it up. Three touches a side; where it lands wins the point · first to 15',
-  badminton: 'Badminton: one touch a side, the shuttle slows fast in the air; by the net when it\'s high: a smash · first to 11',
-  pong: 'Ping pong: it must bounce once on their half, then they hit it back before it lands again. Aim with where you stand; run into it to hit it deep · first to 11',
-  dodge: 'Dodgeball: kick a ball at them: a hit costs a life, out of lives you\'re out. Kick one of theirs as it comes at you: a catch, the thrower loses a life · first to 3 rounds'};
+// (v28.98: the hits come down in by themselves now; the ring on the floor shows where the ball lands)
+const GAME_HOW = {volley: 'Volleyball: get under the ball (the ring shows where it lands) and kick: it goes over and lands in. Run into it to hit deep, the angle you take it at aims it; by the net when it\'s high: a spike. Kick it away from the net to set it up. Three touches a side · first to 15',
+  badminton: 'Badminton: get to the ring where the shuttle lands and kick: it goes over and lands in. Run into it to hit deep; by the net when it\'s high: a smash. One touch a side · first to 11',
+  pong: 'Ping pong: it bounces once on your half, then hit it back before it lands (the ring shows where). Every hit lands on their half: the angle aims it, run into it to hit deep · first to 11',
+  dodge: 'Dodgeball: kick a ball at them (your throw homes in a little): a hit costs a life, out of lives you\'re out. Kick a slow one of theirs as it comes at you: a catch · first to 3 rounds'};
 const GAME_WHY = {
   kill: ['POINT', (w, l) => `${w} put it down`], drop: ['POINT', (w, l) => `it dropped on ${l}'s side`], out: ['OUT', (w, l) => `point to ${w}`],
   touches: ['FAULT', (w, l, g) => `${g === 'volley' ? 'four touches' : 'two touches'}: point to ${w}`], early: ['FAULT', (w, l) => `hit before the bounce: point to ${w}`],
@@ -8730,6 +8801,19 @@ function drawGameBall(V, d, i, gm){
     ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(d.x, d.y, r * 0.62, 0.4, 2.6); ctx.stroke();
     if (d.lt === 0 || d.lt === 1){ ctx.strokeStyle = KIT[d.lt].color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(d.x, d.y, r + 3.5, 0, C.TAU); ctx.stroke(); }
     return;
+  }
+  // (v28.98, "make the new modes better, they kinda hard to play"): where it comes down, a ring on the floor (ping pong:
+  // where it next meets the table), closing in as it gets there
+  const N = NETG_OF(gm);
+  if (N && z > 0.5 && (V.state === 1 || V.state === 0) && (d.vz || d.vx || d.vy)){
+    let x = d.x, y = d.y, h = z, vx = d.vx, vy = d.vy, vz = d.vz || 0, t = 0; const k = d.damping || 0.99;
+    for (; t < 300 && h > 0; t++){ x += vx; y += vy; vx *= k; vy *= k; h += vz; vz -= N.g; }
+    if (t < 300){
+      const cl = Math.min(1, t / 70), R2 = r + 3 + 12 * cl, a = 0.55 + 0.4 * (1 - cl);
+      ctx.save(); ctx.lineWidth = 2.2; ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.arc(x, y + 1, R2, 0, C.TAU); ctx.stroke();
+      ctx.strokeStyle = `rgba(255,255,255,${a.toFixed(2)})`; ctx.setLineDash([5, 4]); ctx.lineDashOffset = -t * 0.4; ctx.beginPath(); ctx.arc(x, y, R2, 0, C.TAU); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = `rgba(255,255,255,${(a * 0.8).toFixed(2)})`; ctx.beginPath(); ctx.arc(x, y, 2, 0, C.TAU); ctx.fill(); ctx.restore();
+    }
   }
   const sk = Math.max(0.35, 1 - z / 70);   // the shadow: smaller and fainter the higher it is
   ctx.fillStyle = `rgba(0,0,0,${0.18 + 0.22 * sk})`; ctx.beginPath(); ctx.ellipse(d.x, d.y, r * sk + 1, r * sk * 0.6 + 0.6, 0, 0, C.TAU); ctx.fill();
@@ -11414,7 +11498,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.97';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.98';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -12333,7 +12417,7 @@ function hostNet(s){
     if (s2.mode && s2.mode.wire) o.pk = s2.mode.wire(s2);   // a penalty shootout: its state
     if (G.cfg.game){   // (v28.91) the other games: the ball's height and the touches; dodgeball's live balls and lives
       const b0 = G.discs[0], V = G.vb;
-      if (V) o.gv = [r3(b0.z || 0), r4(b0.vz || 0), V.side, V.n, V.last, V.lf, V.wait, V.serve, V.bn | 0];
+      if (V) o.gv = [r3(b0.z || 0), r4(b0.vz || 0), V.side, V.n, V.last, V.lf, V.wait, V.serve, V.bn | 0, V.lt == null ? -1 : V.lt, V.lp == null ? -1 : V.lp];   // (v28.98: + who touched it last, for outs)
       if (G.cfg.game === 'dodge') o.db = [C.ballIdx(G).map(i => { const d = G.discs[i]; return [d.lt >= 0 ? d.lt : -1, d.lp >= 0 ? d.lp : -1, d.lf | 0]; }), G.players.map(q => [q.lives | 0, q.out ? 1 : 0, q.inv | 0])];
     }
     return o;
@@ -12619,7 +12703,7 @@ function guestApply(s, o){
   G.fkDone = Array.isArray(o.fd) ? {f: o.fd[0] | 0, team: o.fd[1] ? 1 : 0} : null;
   if (G.cfg.game){   // (v28.91) the other games' state, as the host has it
     const b0 = G.discs[0], v = o.gv;
-    if (Array.isArray(v) && v.length >= 9){ b0.z = Math.max(0, +v[0] || 0); b0.vz = +v[1] || 0; G.vb = {side: v[2] ? 1 : 0, n: v[3] | 0, last: v[4] | 0, lf: v[5] | 0, wait: v[6] | 0, serve: v[7] ? 1 : 0, bn: v[8] | 0}; }
+    if (Array.isArray(v) && v.length >= 9){ b0.z = Math.max(0, +v[0] || 0); b0.vz = +v[1] || 0; G.vb = {side: v[2] ? 1 : 0, n: v[3] | 0, last: v[4] | 0, lf: v[5] | 0, wait: v[6] | 0, serve: v[7] ? 1 : 0, bn: v[8] | 0}; if (v[9] === 0 || v[9] === 1){ G.vb.lt = v[9]; G.vb.lp = v[10] | 0; } }
     if (Array.isArray(o.db) && Array.isArray(o.db[0]) && Array.isArray(o.db[1])){
       C.ballIdx(G).forEach((i, k) => { const r = o.db[0][k], d = G.discs[i]; if (Array.isArray(r)){ d.lt = r[0] === 0 || r[0] === 1 ? r[0] : -1; d.lp = r[1] | 0; d.lf = r[2] | 0; } });
       G.players.forEach((q, j) => { const r = o.db[1][j]; if (Array.isArray(r)){ q.lives = r[0] | 0; q.out = !!r[1]; q.inv = r[2] | 0; } });
