@@ -2777,7 +2777,7 @@ function PBCORE(){
     pong:      {g: 0.07,  reach: 18, net: 6,  hitH: 4.6, run: 1.25, back: 0.35, hitZ: 1.6, spikeD: 0,  spikeZ: 99, spikeH: 0,   spikeVZ: 0,   bumpZ: 1.2, bumpH: 1.6, serveH: 4.2, serveZ: 1.0, z0: 10, touches: 1, bounce: true, rest: 0.82, grip: 0.8, aim: true}
   };
   const NG_AUTO = 480, NG_SAME = 12, NG_POINT_T = 120;
-  const DB_LIVE = 2.0, DB_INV = 80, DB_POINT_T = 150, DB_BALL_Y = [0, -95, 95], DB_EDGE = 18, DB_SLOPE = 0.035;
+  const DB_CATCH = 3.4, DB_LIVE = 2.0, DB_INV = 80, DB_POINT_T = 150, DB_BALL_Y = [0, -95, 95], DB_EDGE = 18, DB_SLOPE = 0.035;
   const gameOf = G => G.cfg && G.cfg.game || null;
   const netG = G => NETG[gameOf(G)] || null;
   const courtOf = ST => ST.court || {W: 300, H: 150};
@@ -2805,8 +2805,12 @@ function PBCORE(){
       for (const p of G.players){ p.lives = dbLives(Math.max(n[0], n[1])); p.out = false; p.inv = 0; }
     }
   }
-  function gameCanKick(G, i){
+  // (v28.97, "Bug in dodgeball, u can save it for some reason": kick was a catch whatever the throw, so a throw at you could
+  // always be saved by kicking it; now only a slower one (under DB_CATCH px a tick) can be caught; a fast one goes past
+  // your kick and hits you)
+  function gameCanKick(G, i, p){
     const N = netG(G); if (N && i === 0){ const b = G.discs[0]; return !(b.z > N.reach) && G.state < 2; }
+    if (gameOf(G) === 'dodge' && p){ const o = G.discs[i]; if (o && o.lt >= 0 && o.lt !== p.team && Math.hypot(o.vx, o.vy) > DB_CATCH) return false; }
     return true;
   }
   function vbTouch(G, ST, p, ev){   // a touch of the ball in a net game: counted for p's side (true), or a fault ended the rally (false)
@@ -2817,7 +2821,7 @@ function PBCORE(){
       gamePoint(G, ST, overTable ? V.side : p.team, overTable ? V.last : p.id, overTable ? 'early' : 'out', ev); return false;
     }
     if (V.side !== p.team || G.state === 0){ V.side = p.team; V.n = 1; } else V.n++;
-    V.last = p.id; V.lf = G.frame; V.bn = 0; if (G.state === 1) pstat(G, p).touches++;
+    V.last = p.id; V.lf = G.frame; V.bn = 0; V.lt = p.team; V.lp = p.id; if (G.state === 1) pstat(G, p).touches++;   // (v28.97: lt / lp: the side and man who touched it last, kept when it crosses)
     if (V.n > N.touches && G.state === 1){ gamePoint(G, ST, 1 - p.team, p.id, 'touches', ev); return false; }
     return true;
   }
@@ -2914,6 +2918,10 @@ function PBCORE(){
         if ((b.z || 0) < N.net && (!N.bounce || Math.abs(b.y) <= c.H + 12)){ b.x = Math.sign(px || -b.vx) * (b.radius + 0.5); b.vx = -b.vx * 0.35; b.vy *= 0.6; if (ev) ev.push({type:'net', id: ++G.eventId, frame: G.frame}); }
         else if (!N.bounce){ V.side = b.x > 0 ? 1 : 0; V.n = 0; V.last = -1; }   // over: the other side's touches start
       }
+      // (v28.97) volleyball and badminton: in the air and off a wall round the court (the hall's), it's out: it bounced back in
+      if (!N.bounce && G.state === 1 && (b.z || 0) > 0 && V.lf !== G.frame && V.pv && ((Math.abs(b.x) > c.W && b.vx * V.pv[0] < 0) || (Math.abs(b.y) > c.H && b.vy * V.pv[1] < 0))){
+        const lt = V.lt != null ? V.lt : V.side; V.pv = null; gamePoint(G, ST, 1 - lt, V.lp != null ? V.lp : null, 'out', ev); return; }
+      V.pv = [b.vx, b.vy];
       // in the air
       b.z += b.vz; b.vz -= N.g;
       if (b.z <= 0){
@@ -2928,7 +2936,7 @@ function PBCORE(){
           b.z = 0; b.vz = 0;
           const inside = Math.abs(b.x) <= c.W + b.radius * 0.5 && Math.abs(b.y) <= c.H + b.radius * 0.5;
           if (inside) gamePoint(G, ST, 1 - half, lastP, half === V.side && V.n > 0 ? 'drop' : 'kill', ev);
-          else gamePoint(G, ST, 1 - V.side, lastP, 'out', ev);
+          else { const lt = V.lt != null ? V.lt : V.side; gamePoint(G, ST, 1 - lt, V.lp != null ? V.lp : lastP, 'out', ev); }   // (v28.97, "out is supposed to be out": out is the fault of the side that touched it last; it was given to whoever's half it had crossed into, so hitting it long won you the point)
         }
         b.vx *= 0.3; b.vy *= 0.3;
       }
@@ -3118,7 +3126,7 @@ function PBCORE(){
       if (!bar && p.kicking && p.kickMin <= 0 && p.kickBurst >= 0 && !noKick && !notMine && !(p.slide > 0)){
         let kicked = false;
         const pwr = p.pw >= POWER_T && G.cfg.power; let powered = false;
-        for (let i = 0; i < D.length; i++){ const o = D[i]; if (o !== d && (o.cGroup & 64) && (!G.cfg.game || gameCanKick(G, i)) && kickDisc(G, ST, p, d, o, i === 0 && pwr ? POWER_MUL : undefined)){ kicked = true; if (G.cfg.game) gameKick(G, ST, p, d, o, i, ev); if (i === 0){ powered = pwr; if (!predict) touch(G, p, true); } } }
+        for (let i = 0; i < D.length; i++){ const o = D[i]; if (o !== d && (o.cGroup & 64) && (!G.cfg.game || gameCanKick(G, i, p)) && kickDisc(G, ST, p, d, o, i === 0 && pwr ? POWER_MUL : undefined)){ kicked = true; if (G.cfg.game) gameKick(G, ST, p, d, o, i, ev); if (i === 0){ powered = pwr; if (!predict) touch(G, p, true); } } }
         if (kicked){
           p.kicking = false; p.kickMin = G.kickRate.min; p.kickBurst -= G.kickRate.rate;
           if (powered){ p.pw = 0; p.pwOff = 0; }
@@ -11406,7 +11414,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '28.96';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '28.97';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -13635,7 +13643,7 @@ $('zoom').addEventListener('change', e => { setZoom(e.target.selectedIndex); e.t
 $('pitchSel').value = store.get('pb.pitch', 'slate'); $('pitchSel').addEventListener('change', e => { store.set('pb.pitch', e.target.value); applyStadiumLayout(); e.target.blur(); });
 $('ballSel').value = store.get('pb.ball', 'classic'); $('ballSel').addEventListener('change', e => { store.set('pb.ball', e.target.value); BALL_SKIN = e.target.value; e.target.blur(); });
 // (v28.84, "add fps show"): frames a second, top left of the pitch (with the ping online), from ⚙ Settings → View
-{ let n = 0, t0 = performance.now(), on = !!store.get('pb.fps', 0);
+{ let n = 0, t0 = performance.now(), on = !!store.get('pb.fps', 1);   // (v28.97, "make fps show automaticaly on and can be turned off")
   const box = $('fpsBox'), tick = now => { n++; if (now - t0 >= 500){ const f = Math.round(n * 1000 / (now - t0)); n = 0; t0 = now;
       let ping = ''; try { const s = sess; if (s && s.kind === 'guest' && NET.pingMs){ const v = [...NET.pingMs.values()][0]; if (v) ping = ` · ${Math.round(v)} ms`; } } catch (e) {}
       box.textContent = f + ' FPS' + ping; box.classList.toggle('low', f < 45); }
