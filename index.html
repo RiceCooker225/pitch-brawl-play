@@ -11964,7 +11964,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '29.3';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '29.4';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -13272,6 +13272,12 @@ function keysAt(L, k, s, R, have){
 // lag spike left them going the wrong way for a moment and the catch-up, 41-49 px, was a jump; e2e t_other.js, 4 runs:
 // biggest 41-49 px in 3 of 4 -> 7-10 px in 3 of 4)
 const SMOOTH_MS = +(window.__smOther != null ? window.__smOther : 80), SMOOTH_MAX = +(window.__smOtherMax != null ? window.__smOtherMax : 70);   // (window.__smOther*: e2e tuning)
+// v29.4 ("is it smooth when i join smone elses room", measured from both ends: scratchpad net/smooth.js): on the joiner's
+// screen the other players lurched each time the host's news corrected them, the glide starting at full speed (bad
+// network over the relay: 71 hitches a minute of over 3 px/frame², jumps of 8-10 px). Their corrections now ride a
+// critically damped spring (SM_SPRING ms): position and speed both carry on, the correction eases in and out. Bad
+// relay 71 -> 3-6 a minute, bad direct 41 -> 0; how far off where they really are about the same (11-13 px)
+const SM_SPRING = +(window.__smSpring != null ? window.__smSpring : 95);   // (0: the old glide)
 // v28.17 ("the freekicks are kinda glitchy online, same is player, not as smooth as haxball, like i wanna the 93
 // extrapolation be the same as offline"): the correction was taken as the last picture run on to now against the new
 // one, so it held your key presses too (your player was left out for that) and the ball was left out (a kick shows at
@@ -13288,7 +13294,12 @@ function smoothView(s, V){
   if (NET.smooth === false || !SET.smooth || !V || V === s.G) return V;
   const now = viewNow(), sm = s.sm || (s.sm = {at: now, h: -1, base: null, R: s.ackR, off: new Map()});
   const dt = Math.max(0, now - sm.at);
-  for (const [i, o] of sm.off){ const f = Math.exp(-dt / o[2]); o[0] *= f; o[1] *= f; if (Math.hypot(o[0], o[1]) < 0.05) sm.off.delete(i); }
+  for (const [i, o] of sm.off){
+    if (o[5]){   // (v29.4) a spring (critically damped, time o[2] ms): the correction eases in and out, no lurch
+      const w = 1 / o[2]; let left = Math.min(dt, 150); while (left > 0){ const h = Math.min(8, left); left -= h; o[3] += (-w * w * o[0] - 2 * w * o[3]) * h; o[4] += (-w * w * o[1] - 2 * w * o[4]) * h; o[0] += o[3] * h; o[1] += o[4] * h; }
+      if (Math.hypot(o[0], o[1]) < 0.05 && Math.hypot(o[3], o[4]) < 0.002) sm.off.delete(i);
+    } else { const f = Math.exp(-dt / o[2]); o[0] *= f; o[1] *= f; if (Math.hypot(o[0], o[1]) < 0.05) sm.off.delete(i); }
+  }
   if (!sm.base || V.state !== sm.base.state || !!V.sp !== !!sm.base.sp || dt > 150 || s.snapH - sm.h > 30) sm.off.clear();   // (v28.29: a free kick given or taken: everyone put in place at once, not glided there)
   else if (s.snapH !== sm.h || s.ackR !== sm.R){   // news from the host: the same moment from the last snapshot (and the last measure of your keys' trip), against this one
     const rNow = s.ackR; s.ackR = sm.R; const was = guestView(s, false, sm.base, sm.h); s.ackR = rNow;
@@ -13300,8 +13311,8 @@ function smoothView(s, V){
         if (ball && Math.hypot(a.vx - b.vx, a.vy - b.vy) > SM_BALL_DV){   // (a kick nobody here saw coming: quickly there, not in one frame)
           const o = sm.off.get(i) || [0, 0, 0], ox = o[0] + a.x - b.x, oy = o[1] + a.y - b.y;
           if (SM_KICK > 0 && Math.hypot(ox, oy) <= SM_KICK_MAX) sm.off.set(i, [ox, oy, SM_KICK]); else sm.off.delete(i); continue; }
-        const o = sm.off.get(i) || [0, 0, 0], ox = o[0] + a.x - b.x, oy = o[1] + a.y - b.y;
-        if (Math.hypot(ox, oy) > cap) sm.off.delete(i); else sm.off.set(i, [ox, oy, ball ? SM_BALL : me ? SM_ME : SMOOTH_MS]);
+        const o = sm.off.get(i) || [0, 0, 0, 0, 0, 0], ox = o[0] + a.x - b.x, oy = o[1] + a.y - b.y, spr = !ball && !me && SM_SPRING > 0;
+        if (Math.hypot(ox, oy) > cap) sm.off.delete(i); else sm.off.set(i, spr ? [ox, oy, SM_SPRING, o[5] ? o[3] : 0, o[5] ? o[4] : 0, 1] : [ox, oy, ball ? SM_BALL : me ? SM_ME : SMOOTH_MS]);
       }
       if (NET.smDbg) NET.smDbg.push({h: s.snapH, was: sm.h, c: s.dyn.map(i => was.discs[i] && V.discs[i] ? Math.round(Math.hypot(was.discs[i].x - V.discs[i].x, was.discs[i].y - V.discs[i].y) * 10) / 10 : 0)});
     }
