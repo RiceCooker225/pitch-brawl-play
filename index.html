@@ -4049,14 +4049,21 @@ function PBAI(C){
   const slackR = (t, d, q, i, rr, R) => { if (!(R > 0)) return slack(t, d, q, i, rr); const n = Math.min(i, t.N), m = Math.max(0, Math.min(i - R, t.N)), x = q.x - d.x - d.vx * t.KD[n], y = q.y - d.y - d.vy * t.KD[n]; return t.F[m] - (Math.sqrt(x * x + y * y) - rr); };
 
   // pick keys: the direction whose next-tick velocity best matches the wanted velocity
-  function steer(t, d, vx, vy, kicking, ST){
+  const STEER_DEAD = 0.75, GK_SMOOTH = 0.3, GK_JUMP = 0.9, STR_HURRY_T = 30, STR_HURRY_BACK = -0.35, STR_HURRY_AWAY = 0;
+  function steer(t, d, vx, vy, kicking, ST, dead){
     const a = (kicking ? ST.pp.kickingAcceleration : ST.pp.acceleration), k = kicking ? ST.pp.kickingDamping : ST.pp.damping;
-    let best = 0, be = Infinity;
+    let best = 0, be = Infinity, e0 = Infinity, i0 = 0;
     for (let i = 0; i < 9; i++){
       let ux = DIRS[i][0], uy = DIRS[i][1]; if (ux && uy){ ux *= Math.SQRT1_2; uy *= Math.SQRT1_2; }
       const ex = k * (d.vx + a * ux) - vx, ey = k * (d.vy + a * uy) - vy, e = ex * ex + ey * ey;
+      if (!ux && !uy){ e0 = e; i0 = i; }
       if (e < be - 1e-12){ be = e; best = i; }
     }
+    // (v29.2, "fix the gk like moving fasting around like its tweaking": standing about where it wants to be, every tick
+    // it pressed whichever key cancelled the last tick's drift, left, right, left: 15 flips a second. Now no key unless
+    // a key does clearly better than none (STEER_DEAD of a tick's push), and none when the speed wanted is nearly what it has)
+    const push = k * a;
+    if (dead && (e0 < (STEER_DEAD * push) * (STEER_DEAD * push) || e0 - be < push * push * 0.25)) return DIRS[i0][2];   // (keepers only)
     return DIRS[best][2];
   }
   // wanted velocity to arrive at (tx, ty) and stop there, or to run through it at `through` speed
@@ -4208,7 +4215,20 @@ function PBAI(C){
       let tx = cx, ty = cy, through = pl.kind === 'dribble' ? t.vmax * th.dribble : pl.kind === 'shot' || pl.kind === 'clear' ? t.vmax : t.vmax * 0.6;
       const careful = KEEP_CAREFUL && pl.kind === 'pass' && p.role === 'keeper' && !G.players.some(o => o.team !== team && Math.hypot(D[o.di].x - ball.x, D[o.di].y - ball.y) < 90);
       if (careful){ tx = Pn.x - Dx * (rr + 1.5); ty = Pn.y - Dy * (rr + 1.5); through = null; }
-      if (along > -rr * 0.35){
+      // (v29.2, "players try to go around the ball which can lead to freeball for me": on the wrong side of it a striker
+      // walked round it to get behind it, and the man closing in just took it. Now with one of theirs reaching it within
+      // STR_HURRY_T ticks (and me no later), it's played from where I am: straight at it, kicked the way I face it unless
+      // that's back toward my own goal)
+      let hurry = false, hk = null, hnf = 999;
+      if (along > -rr * 0.35 && p.role !== 'keeper' && STR_HURRY_T > 0){
+        let fo = null; for (const o of G.players) if (o.team !== team && o.ctrl !== 'gone' && !(pl.kind === 'shot' && o.role === 'keeper')){ const n2 = intercept(t, D[o.di], P, rr, 2); if (n2 < hnf){ hnf = n2; fo = o; } }   // (their keeper coming out at a shot isn't a man about to take it off me)
+        if (hnf < STR_HURRY_T && intercept(t, me, P, rr, 2) <= hnf + 2){ hurry = true;
+          // the way to play it: away from him, and on toward their goal rather than back toward mine
+          const fd = D[fo.di]; let ax = Pn.x - fd.x, ay = Pn.y - fd.y; const al = Math.hypot(ax, ay) || 1; ax = ax / al + dir * 0.7; ay /= al;
+          if (ax * dir < -STR_HURRY_BACK * -1) ax = dir * 0.2; const kl = Math.hypot(ax, ay) || 1; hk = [ax / kl, ay / kl]; }
+      }
+      if (along > -rr * 0.35 && !hurry){
+        mem.circleF = G.frame;
         const side = (rx * -Dy + ry * Dx) >= 0 ? 1 : -1, c = rr + th.clear;
         tx = Pn.x - Dx * c * 0.9 - Dy * side * c; ty = Pn.y - Dy * c * 0.9 + Dx * side * c; through = null;
         if (p.role === 'keeper' && KP_AVOID){ const bw = ballDetour(me, ball, tx, ty, rr); if (bw){ tx = bw[0]; ty = bw[1]; } }
@@ -4217,6 +4237,7 @@ function PBAI(C){
       // the pass from where it ends up, as usual
       const recvNow = !!pl.recv && G.frame - mem.planAt <= pl.recv.n + 3 && Math.hypot(ball.vx, ball.vy) >= RECV_V * 0.6 && Math.hypot(ball.x - me.x, ball.y - me.y) - rr > 2;
       if (recvNow){ tx = pl.recv.x; ty = pl.recv.y; through = null; }
+      if (hurry && !recvNow){ if (STR_HURRY_AWAY){ tx = Pn.x - hk[0] * (rr - 2); ty = Pn.y - hk[1] * (rr - 2); } else { tx = Pn.x; ty = Pn.y; } through = t.vmax * 0.7; }   // (straight at it)
       v = arrive(t, me, tx, ty, through);
       if (through == null && !recvNow && !(careful && along <= -rr * 0.35) && Math.hypot(tx - me.x, ty - me.y) > 4){ const L2 = Math.hypot(v[0], v[1]) || 1, s = Math.max(L2, t.vmax * 0.85); v = [v[0] / L2 * s, v[1] / L2 * s]; }
       // kick when the ball is in range and lined up with the wanted direction
@@ -4279,6 +4300,11 @@ function PBAI(C){
           for (const o of G.players){ if (o === p || o.ctrl === 'gone') continue; const n = intercept(t, D[o.di], S, rr, 2); if (o.team === team){ if (n < us) us = n; } else if (n < them) them = n; }
           if (!(us + KNOCK_MARGIN <= them)) wantKick = false;
         }
+      }
+      if (hurry && !wantKick && dist > 0 && gap < 4 + th.pre){   // (v29.2: lined up away from him (or he's on it), and not back at my goal)
+        const ux = bx / dist, uy = by / dist, ownG = goalOf(ST, team);
+        if (ux * dir > STR_HURRY_BACK && (!STR_HURRY_AWAY || ux * hk[0] + uy * hk[1] > 0.55 || hnf < 7)){ const S = C.ballPath(ST, {x: ball.x, y: ball.y, vx: ball.vx + ux * t.kickV, vy: ball.vy + uy * t.kickV, gx: 0, gy: 0, radius: ball.radius, bCoef: ball.bCoef, invMass: ball.invMass, damping: ball.damping, cMask: ball.cMask, cGroup: ball.cGroup}, 90, G.discs);
+          if (shotOnGoal(ST, S, ownG) < 0) wantKick = true; }
       }
       // a keeper with room: a ball still running at him against the way he wants to pass is stopped first (a pass struck
       // into its run keeps only half its pace)
@@ -4452,7 +4478,11 @@ function PBAI(C){
   function finish(G, ST, t, L, mem, me, p, v, wantKick){
     let bits = 0;
     mem.duty = (mem.duty || 0) + L.duty;
-    if (mem.duty >= 1){ mem.duty -= 1; bits = steer(t, me, v[0], v[1], p.kicking || (wantKick && !(p.input & 16)), ST); }
+    // (v29.2) a keeper's wanted speed went back and forth between two spots every tick (its keys up, down, up: "moving
+    // fasting around like its tweaking"): smoothed over a few ticks (GK_SMOOTH), at once when it changes a lot (a shot)
+    if (p.role === 'keeper'){ const sm = mem.vSm || (mem.vSm = [v[0], v[1]]), dv = Math.hypot(v[0] - sm[0], v[1] - sm[1]);
+      if (dv > GK_JUMP){ sm[0] = v[0]; sm[1] = v[1]; } else { sm[0] += (v[0] - sm[0]) * GK_SMOOTH; sm[1] += (v[1] - sm[1]) * GK_SMOOTH; } v = sm; }
+    if (mem.duty >= 1){ mem.duty -= 1; bits = steer(t, me, v[0], v[1], p.kicking || (wantKick && !(p.input & 16)), ST, p.role === 'keeper'); }
     if (wantKick){
       // Haxball kicks on a fresh press: if the kick already went (or never armed), let go for a tick first
       if ((p.input & 16) && !p.kicking) { /* released this tick */ } else bits |= 16;
@@ -11919,7 +11949,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '29.1';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '29.2';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
