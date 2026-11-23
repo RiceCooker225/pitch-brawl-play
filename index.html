@@ -3414,7 +3414,10 @@ function PBCORE(){
       case 0: {
         const ko = TEAMS[G.koTeam].ko;
         for (const p of G.players) D[p.di].cMask = (ST.pmask || 39) | ko;
-        const b = D[0]; if (0 < b.vx * b.vx + b.vy * b.vy){ G.state = 1; if (ev) ev.push({type:'kickoff', id: ++G.eventId, frame: G.frame}); }
+        // (v29.9, "bounces off me and none of us lose a life": dodgeball has several balls but only the first one's moving
+        // started the round, so a throw with any other ball came while the round still waited: no hit, no catch, no clock)
+        const moved = i => { const b = D[i]; return !!b && 0 < b.vx * b.vx + b.vy * b.vy; };
+        if (gameOf(G) === 'dodge' ? ballIdx(G).some(moved) : moved(0)){ G.state = 1; if (ev) ev.push({type:'kickoff', id: ++G.eventId, frame: G.frame}); }
         break;
       }
       case 1: {
@@ -10099,6 +10102,8 @@ const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one
 // understand"): each update a short headline, each change one short line: [kind, where, what]. Kinds: new, fix, better,
 // change. Every release adds its entry here (notes.md, release routine)
 const PATCH = [
+  {v: '29.9', d: '23 Nov 2026', title: 'Dodgeball hits always count', items: [
+    ['fix', 'Dodgeball', 'At the start of a round, throws and catches with most of the balls did nothing (the ball just bounced off) until one particular ball was moved. Now every throw counts from the start.']]},
   {v: '29.8', d: '23 Nov 2026', title: 'Fairer dodgeball catches', items: [
     ['fix', 'Dodgeball', 'A throw that bounces off a wall still counts. Catching it now costs the thrower a life (before, nothing happened).'],
     ['new', 'Dodgeball', 'Live throws have a coloured trail. A ball with no trail is rolling too slowly to hit you or be caught.']]},
@@ -12109,7 +12114,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '29.8';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '29.9';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
