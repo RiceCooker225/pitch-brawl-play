@@ -3214,9 +3214,11 @@ function PBCORE(){
           const q = D[p.di]; if (Math.hypot(q.x - d.x, q.y - d.y) <= q.radius + d.radius + 1.2){ hitWho = p; break; }
         }
         if (hitWho && G.state === 1){ const by = G.players.find(q => q.id === d.lp) || null; d.lt = -1; if (!(hitWho.inv > 0)) dbHit(G, ST, hitWho, by, ev, false); else if (ev) ev.push({type: 'dbsafe', id: ++G.eventId, frame: G.frame, vid: hitWho.id}); continue; }   // (v29.6: safe while just hit, now said)
-        const pv = Math.hypot(d.pvx || 0, d.pvy || 0), turn = pv > 0 && sp > 0 ? ((d.pvx || 0) * d.vx + (d.pvy || 0) * d.vy) / (pv * sp) : 1;
+        // (v29.8, "there is still times where i attempt cathc and neither of loses a lfie": a bounce off a wall or another
+        // ball ended the throw though it still flew at you fast, so a catch did nothing; about a third of the balls coming
+        // at someone were dead that way. Now a ball counts till it slows right down, hits someone or reaches the thrower's side)
         const byMate = G.players.some(p => p.team === d.lt && !p.out && Math.hypot(D[p.di].x - d.x, D[p.di].y - d.y) <= D[p.di].radius + d.radius + 1.2);
-        if (sp < DB_LIVE || (turn < 0.6 && !byMate) || (byMate && G.frame - d.lf > 3)) d.lt = -1;
+        if (sp < DB_LIVE || (byMate && G.frame - d.lf > 3)) d.lt = -1;
       }
       if (G.state === 1) for (const t of [0, 1]){
         const side = G.players.filter(p => p.team === t && p.ctrl !== 'gone');
@@ -7416,7 +7418,7 @@ function triResults(s){
 const GAME_HOW = {volley: 'Volleyball (from the side): ← → run, ↑ jump, press kick as the ball reaches you (it goes through you otherwise). Where it meets you decides the shot: over your head high, in front of you longer, behind you short; hold towards the net for more, away for less (from the back of your court, push or it won\'t get over). Jump by the net and kick when it\'s high: a spike. Three touches a side · first to 15',
   badminton: 'Badminton (from the side): ← → run, ↑ jump, press kick as the shuttle reaches you. Over your head it goes high, in front of you longer, behind you short; towards the net: more, away: a drop shot. Jump as it comes high over you and kick: a smash (from most of your half). One touch a side · first to 11',
   pong: 'Ping pong: it bounces once on your half, then hit it back before it lands (the ring shows where). Every hit lands on their half: the angle aims it, run into it to hit deep · first to 11',
-  dodge: 'Dodgeball: kick a ball at them (your throw homes in a little): a hit costs a life, out of lives you\'re out. Kick a slow one of theirs as it comes at you: a catch · first to 3 rounds'};
+  dodge: 'Dodgeball: kick a ball at them (your throw homes in a little): a hit costs a life, out of lives you\'re out. A throw with a coloured trail is live: press kick just as one of theirs reaches you to catch it (the thrower loses a life). A ball rolling slowly, with no trail, can\'t hit or be caught · first to 3 rounds'};
 const GAME_WHY = {
   kill: ['POINT', (w, l) => `${w} put it down`], drop: ['POINT', (w, l) => `it dropped on ${l}'s side`], out: ['OUT', (w, l) => `point to ${w}`],
   touches: ['FAULT', (w, l, g) => `${g === 'volley' ? 'four touches' : 'two touches'}: point to ${w}`], early: ['FAULT', (w, l) => `hit before the bounce: point to ${w}`],
@@ -7450,7 +7452,7 @@ const GTUT = {
     {t: 'Move', x: `Move with ${K.move}. You stay on your half.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
     {t: 'Throw', x: `Walk up to a ball on your side and press ${K.kick} to throw it, away from you the way you face it.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
     {t: 'Hit them', x: 'Throw it at them: each hit costs a life. Your throw bends a little towards them.', ok: (k, e, p) => k === 'ev' && e.type === 'hit' && e.pid === p.id && !e.caught},
-    {t: 'Catch', x: `A throw coming at you: press ${K.kick} just as it reaches you to catch it, and the thrower loses a life. Too early, held or mashed, and it hits you. Or just get out of the way.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'catch' && e.pid === p.id},
+    {t: 'Catch', x: `A throw coming at you (it has a coloured trail): press ${K.kick} just as it reaches you to catch it, and the thrower loses a life. Too early, held or mashed, and it hits you. Or just get out of the way. A ball rolling slowly with no trail can't hit you.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'catch' && e.pid === p.id},
     {t: 'Win a round', x: 'Knock them out of lives.', ok: (k, e, p) => k === 'ev' && e.type === 'goal' && e.team === p.team}]};
 function gtBox(){ let b = $('gtBox'); if (!b){ b = document.createElement('div'); b.id = 'gtBox'; b.className = 'gtbox'; b.hidden = true; b.setAttribute('role', 'status'); b.setAttribute('aria-live', 'polite'); ($('game') || document.body).append(b); } return b; }   // (in #game: over the court when it fills the tab)
 function gameTut(s, game, real){
@@ -9267,10 +9269,15 @@ function drawSideBall(V, d, gm){
   ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); ctx.fillStyle = tint(d.color) || '#fff'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
   ctx.strokeStyle = 'rgba(40,90,190,.8)'; ctx.lineWidth = 1.5; const a = (d.x * 0.08) % C.TAU; ctx.beginPath(); ctx.arc(d.x, d.y, r * 0.62, a, a + 2.2); ctx.stroke(); ctx.beginPath(); ctx.arc(d.x, d.y, r * 0.62, a + 3.1, a + 5.3); ctx.stroke();
 }
+const colA = (c, a) => { const m = /^#?([0-9a-f]{6})$/i.exec(String(c || '').trim()); if (!m) return `rgba(255,255,255,${a})`; const n = parseInt(m[1], 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };   // (v29.8: a kit colour, see-through)
 function drawGameBall(V, d, i, gm){
   if (ST.court && ST.court.side){ drawSideBall(V, d, gm); return; }   // (v29.0)
   const z = Math.max(0, d.z || 0), r = d.radius;
   if (gm === 'dodge'){
+    // (v29.8) a live throw trails a streak in the thrower's colour: that ball can hit you, and it can be caught
+    if ((d.lt === 0 || d.lt === 1) && isFinite(d.vx) && isFinite(d.vy)){ const v = Math.hypot(d.vx, d.vy); if (v > 1.2){ const L = Math.min(60, v * 8), ux = d.vx / v, uy = d.vy / v;
+      const g2 = ctx.createLinearGradient(d.x, d.y, d.x - ux * L, d.y - uy * L); g2.addColorStop(0, colA(KIT[d.lt].color, 0.85)); g2.addColorStop(0.5, colA(KIT[d.lt].color, 0.4)); g2.addColorStop(1, colA(KIT[d.lt].color, 0));
+      ctx.save(); ctx.strokeStyle = g2; ctx.lineCap = 'round'; ctx.lineWidth = r * 1.7; ctx.beginPath(); ctx.moveTo(d.x - ux * r * 0.3, d.y - uy * r * 0.3); ctx.lineTo(d.x - ux * L, d.y - uy * L); ctx.stroke(); ctx.restore(); } }
     ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); const g = ctx.createRadialGradient(d.x - r * 0.35, d.y - r * 0.35, r * 0.15, d.x, d.y, r); g.addColorStop(0, '#ffa6d2'); g.addColorStop(1, tint(d.color) || '#ff2e88'); ctx.fillStyle = g; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
     ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(d.x, d.y, r * 0.62, 0.4, 2.6); ctx.stroke();
     if (d.lt === 0 || d.lt === 1){ ctx.strokeStyle = KIT[d.lt].color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(d.x, d.y, r + 3.5, 0, C.TAU); ctx.stroke(); }
@@ -10092,6 +10099,9 @@ const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one
 // understand"): each update a short headline, each change one short line: [kind, where, what]. Kinds: new, fix, better,
 // change. Every release adds its entry here (notes.md, release routine)
 const PATCH = [
+  {v: '29.8', d: '23 Nov 2026', title: 'Fairer dodgeball catches', items: [
+    ['fix', 'Dodgeball', 'A throw that bounces off a wall still counts. Catching it now costs the thrower a life (before, nothing happened).'],
+    ['new', 'Dodgeball', 'Live throws have a coloured trail. A ball with no trail is rolling too slowly to hit you or be caught.']]},
   {v: '29.7', d: '23 Nov 2026', title: 'Close menus without scrolling', items: [
     ['new', 'Menus', 'A Done button stays at the top right of every menu page, so you never have to scroll down to close it.']]},
   {v: '29.6', d: '23 Nov 2026', title: 'Team up with a friend', items: [
@@ -12099,7 +12109,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '29.7';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '29.8';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
