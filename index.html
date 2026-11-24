@@ -2848,7 +2848,7 @@ function PBCORE(){
     pong:      {g: 0.07,  reach: 18, net: 6,  hitH: 4.6, run: 1.25, back: 0.35, hitZ: 1.6, spikeD: 0,  spikeZ: 99, spikeH: 0,   spikeVZ: 0,   bumpZ: 1.2, bumpH: 1.6, serveH: 4.2, serveZ: 1.0, z0: 10, touches: 1, bounce: true, rest: 0.55, grip: 0.85, aim: true}
   };
   const NG_AUTO = 480, NG_SAME = 12, NG_POINT_T = 120, NG_KICK_GAP = 5, PONG_GAP = 7, PONG_PACE = 3.7, PONG_UP = 0.04, PONG_MAX = 1.6;
-  const DB_CATCH = 3.4, DB_CATCH_WIN = 9, DB_CATCH_GAP = 30, DB_IDLE = 360, DB_AIM = 0.4, DB_LIVE = 1.4, DB_INV = 40, DB_POINT_T = 150, DB_SPOTS = [[-0.5, -0.4], [0.5, 0.4], [-0.5, 0.4], [0.5, -0.4]], DB_EDGE = 18, DB_SLOPE = 0.035;
+  const DB_FAST = 7.0, DB_FAST_WIN = 4, DB_CATCH = 3.4, DB_CATCH_WIN = 9, DB_CATCH_GAP = 30, DB_IDLE = 360, DB_AIM = 0.4, DB_LIVE = 1.4, DB_INV = 40, DB_POINT_T = 150, DB_SPOTS = [[-0.5, -0.4], [0.5, 0.4], [-0.5, 0.4], [0.5, -0.4]], DB_EDGE = 18, DB_SLOPE = 0.035;
   const gameOf = G => G.cfg && G.cfg.game || null;
   const netG = G => NETG[gameOf(G)] || null;
   const courtOf = ST => ST.court || {W: 300, H: 150};
@@ -2967,7 +2967,7 @@ function PBCORE(){
         d.vx = d.vy = 0; }
     } else if (gm === 'dodge'){
       const bi = ballIdx(G);
-      bi.forEach((i, k) => { const d = D[i], s0 = ST.discs[i], q = DB_SPOTS[k % DB_SPOTS.length]; if (s0) Object.assign(d, s0); d.x = q[0] * c.W; d.y = q[1] * c.H; d.vx = d.vy = 0; d.lt = -1; d.lp = -1; d.lf = 0; d.idle = 0; });   // (v29.6: idle too; a ring filling when a round ended carried on into the next)   // (v29.0: on each side, not on the middle line where the first there threw it point blank)
+      bi.forEach((i, k) => { const d = D[i], s0 = ST.discs[i], q = DB_SPOTS[k % DB_SPOTS.length]; if (s0) Object.assign(d, s0); d.x = q[0] * c.W; d.y = q[1] * c.H; d.vx = d.vy = 0; d.lt = -1; d.lp = -1; d.lf = 0; d.idle = 0; d.bounceF = -1; });   // (v29.6: idle too; a ring filling when a round ended carried on into the next)   // (v29.0: on each side, not on the middle line where the first there threw it point blank)
       const n = [0, 0]; for (const p of G.players) if (p.ctrl !== 'gone') n[p.team]++;
       for (const p of G.players){ p.lives = dbLives(Math.max(n[0], n[1])); p.out = false; p.inv = 0; }
     }
@@ -2987,7 +2987,10 @@ function PBCORE(){
     // (v29.0, "can u save before gettign hit in dodgeball?": yes, by timing it: kick pressed just as it comes (within
     // DB_CATCH_WIN ticks of it reaching you) and not mashed (the press before at least DB_CATCH_GAP earlier); held or
     // mashed it hits you. A slow one (under DB_CATCH) can be picked up any time)
-    if (gameOf(G) === 'dodge' && p){ const o = G.discs[i]; if (o && o.lt >= 0 && o.lt !== p.team && Math.hypot(o.vx, o.vy) > DB_CATCH && !(p.kickAt != null && G.frame - p.kickAt <= DB_CATCH_WIN && (p.kickAt0 == null || p.kickAt - p.kickAt0 >= DB_CATCH_GAP))) return false; }
+    // (v30.0, "not all shots can be caught" / "it can but harder": a throw still faster than DB_FAST needs the press within
+    // DB_FAST_WIN ticks of it reaching you, not DB_CATCH_WIN)
+    if (gameOf(G) === 'dodge' && p){ const o = G.discs[i]; if (o && o.lt >= 0 && o.lt !== p.team){ const v = Math.hypot(o.vx, o.vy), win = v > DB_FAST ? DB_FAST_WIN : DB_CATCH_WIN;
+      if (v > DB_CATCH && !(p.kickAt != null && G.frame - p.kickAt <= win && (p.kickAt0 == null || p.kickAt - p.kickAt0 >= DB_CATCH_GAP))) return false; } }
     return true;
   }
   function vbTouch(G, ST, p, ev){   // a touch of the ball in a net game: counted for p's side (true), or a fault ended the rally (false)
@@ -3077,6 +3080,9 @@ function PBCORE(){
         if (ev) ev.push({type:'catch', id: ++G.eventId, frame: G.frame, pid: p.id, vid: th ? th.id : -1});
         pstat(G, p).catches = (pstat(G, p).catches || 0) + 1;
         if (th && !th.out) dbHit(G, ST, th, p, ev, true);
+        // (v30.0) caught: it drops at your feet, dead, yours to throw (it flew back at the thrower as a throw, often a
+        // second life off them for one catch)
+        o.vx *= 0.15; o.vy *= 0.15; o.lt = -1; o.lp = p.id; o.lf = G.frame; o.bounceF = -1; return;
       }
       // (v28.98, "make the new modes better": a throw went exactly the line from you to the ball, so a person had to line
       // up a moving man to the pixel and most throws missed. A person's throw at their side is turned onto the man it was
@@ -3213,12 +3219,19 @@ function PBCORE(){
           if (p.team === d.lt || p.out || p.ctrl === 'gone') continue;
           const q = D[p.di]; if (Math.hypot(q.x - d.x, q.y - d.y) <= q.radius + d.radius + 1.2){ hitWho = p; break; }
         }
-        if (hitWho && G.state === 1){ const by = G.players.find(q => q.id === d.lp) || null; d.lt = -1; if (!(hitWho.inv > 0)) dbHit(G, ST, hitWho, by, ev, false); else if (ev) ev.push({type: 'dbsafe', id: ++G.eventId, frame: G.frame, vid: hitWho.id}); continue; }   // (v29.6: safe while just hit, now said)
-        // (v29.8, "there is still times where i attempt cathc and neither of loses a lfie": a bounce off a wall or another
-        // ball ended the throw though it still flew at you fast, so a catch did nothing; about a third of the balls coming
-        // at someone were dead that way. Now a ball counts till it slows right down, hits someone or reaches the thrower's side)
+        if (hitWho && G.state <= 1){ const by = G.players.find(q => q.id === d.lp) || null; d.lt = -1;   // (v30.0: state 0 too: a throw from point blank that lands in the tick that starts the round)
+          if (!(hitWho.inv > 0)) dbHit(G, ST, hitWho, by, ev, false); else if (ev) ev.push({type: 'dbsafe', id: ++G.eventId, frame: G.frame, vid: hitWho.id}); continue; }   // (v29.6: safe while just hit, now said)
+        // (v30.0, "rebounces no catch just safe": a bounce off a wall or another ball ends the throw again (v29.8 had kept it
+        // live); while it's still moving, one touching someone of the other side says SAFE)
+        const pv = Math.hypot(d.pvx || 0, d.pvy || 0), turn = pv > 0 && sp > 0 ? ((d.pvx || 0) * d.vx + (d.pvy || 0) * d.vy) / (pv * sp) : 1;
         const byMate = G.players.some(p => p.team === d.lt && !p.out && Math.hypot(D[p.di].x - d.x, D[p.di].y - d.y) <= D[p.di].radius + d.radius + 1.2);
-        if (sp < DB_LIVE || (byMate && G.frame - d.lf > 3)) d.lt = -1;
+        if (turn < 0.6 && !byMate && sp >= DB_LIVE){ d.bounceF = G.frame; d.bounceT = d.lt; d.lt = -1; }
+        else if (sp < DB_LIVE || (byMate && G.frame - d.lf > 3)) d.lt = -1;
+      }
+      if (G.state === 1) for (const i of ballIdx(G)){   // (v30.0) a bounced ball touching someone of the other side: SAFE, once
+        const d = D[i]; if (!(d.bounceF >= 0) || d.lt >= 0) continue; if (G.frame - d.bounceF > 60 || Math.hypot(d.vx, d.vy) < DB_LIVE){ d.bounceF = -1; continue; }
+        for (const p of G.players){ if (p.team === d.bounceT || p.out || p.ctrl === 'gone') continue; const q = D[p.di];
+          if (Math.hypot(q.x - d.x, q.y - d.y) <= q.radius + d.radius + 1.2){ d.bounceF = -1; if (ev) ev.push({type: 'dbsafe', id: ++G.eventId, frame: G.frame, vid: p.id, why: 'bounce'}); break; } }
       }
       if (G.state === 1) for (const t of [0, 1]){
         const side = G.players.filter(p => p.team === t && p.ctrl !== 'gone');
@@ -3459,8 +3472,16 @@ function PBCORE(){
   // over, out 4-3), or it ended level on the total. Now a second leg ends at the limit only for a side that has it in
   // this leg and is ahead on the total; the other side goes on (to the clock, or till the leader has the limit too, or
   // till it goes ahead itself). A first leg, and one match, as before: the first to the limit
+  // (v30.0, "make the volleyball etc win by two points so it matches real": the net games need a two-point lead at the
+  // limit; badminton stops at its cap as the real game does at 30 (21 + 9: here the limit + 9), volleyball and ping pong don't)
+  function netWinner(G, sc){
+    const sl = G.cfg.scoreLimit, s = sc || G.score; if (!(sl > 0) || s.length !== 2) return -1;
+    const hi = Math.max(s[0], s[1]), t = s[0] > s[1] ? 0 : s[1] > s[0] ? 1 : -1, cap = gameOf(G) === 'badminton' ? sl + 9 : Infinity;
+    return t >= 0 && hi >= sl && (Math.abs(s[0] - s[1]) >= 2 || hi >= cap) ? t : -1;
+  }
   function limitHit(G){
     const sl = G.cfg.scoreLimit; if (!(sl > 0)) return false;
+    if (netG(G) && G.score.length === 2 && !G.cfg.agg) return netWinner(G) >= 0;
     const a = G.cfg.agg; if (!a || G.score.length !== 2) return G.score.some(v => v >= sl);
     const tot = [G.score[0] + (+a[0] || 0), G.score[1] + (+a[1] || 0)];
     return [0, 1].some(t => G.score[t] >= sl && tot[t] > tot[1 - t]);
@@ -3719,7 +3740,7 @@ function PBCORE(){
 
   return {TAU, TICK, FL, IN, TEAMS, PU, KMH, limitHit, buildStadium, colliders, physics, crossesGoal, newGame, resetPositions, setInput, step, endGame, overtime, topTied,
           copyGame, extrapolate, ballPath, playerDisc, newStats, pstat, timeUp, inArea, areaOf, ballArea, setPiece,
-          NETG, ngFlight, SIDE, sidePath, sideAim, sideShot, CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, DIVE: {V: DIVE_V, RAMP: DIVE_RAMP, T: DIVE_T, DAMP: DIVE_DAMP, DOWN: DIVE_DOWN, CD: DIVE_CD, REACH: DIVE_REACH, SOLID: DIVE_SOLID}, canDive, fkNoSlide, slideAim, ballIdx, courtOf, NETG, netG, ngFlight, DB: {IDLE: DB_IDLE, LIVE: DB_LIVE, INV: DB_INV}, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
+          NETG, ngFlight, SIDE, sidePath, sideAim, sideShot, CURVE_FADE, SLIDE: {V: SLIDE_V, T: SLIDE_T, DAMP: SLIDE_DAMP, DOWN: SLIDE_DOWN, CD: SLIDE_CD, REACH: SLIDE_REACH, LEG: SLIDE_LEG, WIN: SLIDE_WIN}, DIVE: {V: DIVE_V, RAMP: DIVE_RAMP, T: DIVE_T, DAMP: DIVE_DAMP, DOWN: DIVE_DOWN, CD: DIVE_CD, REACH: DIVE_REACH, SOLID: DIVE_SOLID}, canDive, fkNoSlide, slideAim, ballIdx, courtOf, NETG, netG, ngFlight, DB: {IDLE: DB_IDLE, LIVE: DB_LIVE, INV: DB_INV, FAST: DB_FAST}, netWinner, FK_R, fkLineOk, PA_R, PEN_SPOT, PEN_BACK, FK_CHARGE,
           fkPreview, FK_SHOW_PW, FK_AUTO, FK_HOLD, FK_HOLD_AIM, CURL, fkWallLine, fkWallSpot, autoCurl, manualCurl, curlTo, AC_BIT, INV_BIT, POWER_T, POWER_MUL, flightCross, curveMul, CURVE_LV,
           AUTO: {RANGE: AUTO_RANGE, WIDE: AUTO_WIDE, FK_WIDE, MID: AUTO_MID, IN: AUTO_IN, MAX: AUTO_MAX, K: AUTO_K, SAFE: AUTO_SAFE, FAR: AUTO_FAR, SMALL: AUTO_SMALL}, FK_CURVE};
 }
@@ -5365,7 +5386,9 @@ function PBAI(C){
   // ---------- other games (v28.91): volleyball and dodgeball. Keys like a person; the level sets how quick and how exact ----------
   // (v28.98) miss: the chance it misreads a ball coming over (goes to the wrong spot, by about missD): the net games' hits
   // all come down in now, so the computer's mistakes end rallies too
-  const GL = [{react: 18, err: 34, duty: 0.75, catchP: 0, dodge: 0.3, miss: 0.16, missD: 40}, {react: 10, err: 18, duty: 0.95, catchP: 0.1, dodge: 0.5, miss: 0.12, missD: 34}, {react: 5, err: 8, duty: 1, catchP: 0.25, dodge: 0.7, miss: 0.08, missD: 32}, {react: 1, err: 2, duty: 1, catchP: 0.45, dodge: 0.85, miss: 0.03, missD: 28}];
+  // (v30.0, "some of them gets caught way too easily and we cant win": catchP 0.1 / 0.25 / 0.45 -> 0.07 / 0.16 / 0.3)
+  const DB_FAST_CATCH = 0.35;
+  const GL = [{react: 18, err: 34, duty: 0.75, catchP: 0, dodge: 0.3, miss: 0.16, missD: 40}, {react: 10, err: 18, duty: 0.95, catchP: 0.07, dodge: 0.5, miss: 0.12, missD: 34}, {react: 5, err: 8, duty: 1, catchP: 0.16, dodge: 0.7, miss: 0.08, missD: 32}, {react: 1, err: 2, duty: 1, catchP: 0.3, dodge: 0.85, miss: 0.03, missD: 28}];
   function keysTo(me, tx, ty, slowR){   // 8-way keys toward a spot, easing off as it gets there
     const dx = tx - me.x, dy = ty - me.y, dist = Math.hypot(dx, dy); if (dist < 1.5 && Math.hypot(me.vx, me.vy) < 0.6) return 0;
     const want = Math.min(2.7, dist * (slowR || 0.09)), wx = dist > 0 ? dx / dist * want : 0, wy = dist > 0 ? dy / dist * want : 0;
@@ -5557,7 +5580,7 @@ function PBAI(C){
     }
     if (threat){
       if (mem.thr !== threat.lf){ mem.thr = threat.lf; mem.thrRoll = rnd(mem); mem.dodgeRoll = rnd(mem); }
-      if (tBest <= 4 && mem.thrRoll < L.catchP) return 16;
+      if (tBest <= 4 && mem.thrRoll < L.catchP * (Math.hypot(threat.vx, threat.vy) > C.DB.FAST ? DB_FAST_CATCH : 1)) return 16;   // (v30.0: a fast one, a third as often)
       if (mem.dodgeRoll < DB_DODGE[Math.max(0, GL.indexOf(L))]){   // (v29.1, "try to avoid ball": more often, and to the side with room)
         const v = Math.hypot(threat.vx, threat.vy) || 1, nx = -threat.vy / v, ny = threat.vx / v, lean = (me.x - threat.x) * nx + (me.y - threat.y) * ny;
         const room = k => { const ty = me.y + ny * k * 70; return Math.min(c.H - 18 - Math.abs(ty), 70); };
@@ -7418,10 +7441,10 @@ function triResults(s){
 // The rules run in the engine (gameReset / gamePost in engine.js); this says what happened and keeps the tally. online:
 // the host's or a guest's match (a guest hears of points and hits from the host's snapshots: netPoint, netHit)
 // (v28.98: the hits come down in by themselves now; the ring on the floor shows where the ball lands)
-const GAME_HOW = {volley: 'Volleyball (from the side): ← → run, ↑ jump, press kick as the ball reaches you (it goes through you otherwise). Where it meets you decides the shot: over your head high, in front of you longer, behind you short; hold towards the net for more, away for less (from the back of your court, push or it won\'t get over). Jump by the net and kick when it\'s high: a spike. Three touches a side · first to 15',
-  badminton: 'Badminton (from the side): ← → run, ↑ jump, press kick as the shuttle reaches you. Over your head it goes high, in front of you longer, behind you short; towards the net: more, away: a drop shot. Jump as it comes high over you and kick: a smash (from most of your half). One touch a side · first to 11',
-  pong: 'Ping pong: it bounces once on your half, then hit it back before it lands (the ring shows where). Every hit lands on their half: the angle aims it, run into it to hit deep · first to 11',
-  dodge: 'Dodgeball: kick a ball at them (your throw homes in a little): a hit costs a life, out of lives you\'re out. A throw with a coloured trail is live: press kick just as one of theirs reaches you to catch it (the thrower loses a life). A ball rolling slowly, with no trail, can\'t hit or be caught · first to 3 rounds'};
+const GAME_HOW = {volley: 'Volleyball (from the side): ← → run, ↑ jump, press kick as the ball reaches you (it goes through you otherwise). Where it meets you decides the shot: over your head high, in front of you longer, behind you short; hold towards the net for more, away for less (from the back of your court, push or it won\'t get over). Jump by the net and kick when it\'s high: a spike. Three touches a side · first to 15, win by 2',
+  badminton: 'Badminton (from the side): ← → run, ↑ jump, press kick as the shuttle reaches you. Over your head it goes high, in front of you longer, behind you short; towards the net: more, away: a drop shot. Jump as it comes high over you and kick: a smash (from most of your half). One touch a side · first to 11, win by 2',
+  pong: 'Ping pong: it bounces once on your half, then hit it back before it lands (the ring shows where). Every hit lands on their half: the angle aims it, run into it to hit deep · first to 11, win by 2',
+  dodge: 'Dodgeball: kick a ball at them (your throw homes in a little): a hit costs a life, out of lives you\'re out. A throw with a coloured trail is live: press kick just as it reaches you to catch it (the thrower loses a life). One with a yellow core is fast: much harder to catch, press right as it gets to you. A ball that bounced off a wall, or rolls slowly, is safe · first to 3 rounds'};
 const GAME_WHY = {
   kill: ['POINT', (w, l) => `${w} put it down`], drop: ['POINT', (w, l) => `it dropped on ${l}'s side`], out: ['OUT', (w, l) => `point to ${w}`],
   touches: ['FAULT', (w, l, g) => `${g === 'volley' ? 'four touches' : 'two touches'}: point to ${w}`], early: ['FAULT', (w, l) => `hit before the bounce: point to ${w}`],
@@ -7455,7 +7478,7 @@ const GTUT = {
     {t: 'Move', x: `Move with ${K.move}. You stay on your half.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
     {t: 'Throw', x: `Walk up to a ball on your side and press ${K.kick} to throw it, away from you the way you face it.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
     {t: 'Hit them', x: 'Throw it at them: each hit costs a life. Your throw bends a little towards them.', ok: (k, e, p) => k === 'ev' && e.type === 'hit' && e.pid === p.id && !e.caught},
-    {t: 'Catch', x: `A throw coming at you (it has a coloured trail): press ${K.kick} just as it reaches you to catch it, and the thrower loses a life. Too early, held or mashed, and it hits you. Or just get out of the way. A ball rolling slowly with no trail can't hit you.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'catch' && e.pid === p.id},
+    {t: 'Catch', x: `A throw coming at you (it has a coloured trail): press ${K.kick} just as it reaches you to catch it, and the thrower loses a life. Too early, held or mashed, and it hits you. A throw with a yellow core is fast: much harder, press right as it gets to you. A ball that bounced off a wall, or rolls slowly, is safe.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'catch' && e.pid === p.id},
     {t: 'Win a round', x: 'Knock them out of lives.', ok: (k, e, p) => k === 'ev' && e.type === 'goal' && e.team === p.team}]};
 function gtBox(){ let b = $('gtBox'); if (!b){ b = document.createElement('div'); b.id = 'gtBox'; b.className = 'gtbox'; b.hidden = true; b.setAttribute('role', 'status'); b.setAttribute('aria-live', 'polite'); ($('game') || document.body).append(b); } return b; }   // (in #game: over the court when it fills the tab)
 function gameTut(s, game, real){
@@ -7487,6 +7510,12 @@ function gameTut(s, game, real){
 }
 // (v29.1 showed a card with the keys over the court at the start of each game; v29.6, "remove the control thing at the start of
 // every game its annoying": gone. The keys are in ⚙ Settings, How to play and each game's tutorial)
+// (v30.0) the net games, win by two: match point (one more point wins it), or deuce (level at the limit or past it)
+function netCall(G){
+  const sl = G.cfg.scoreLimit, sc = G.score; if (!(sl > 0) || !C.netWinner || sc.length !== 2) return '';
+  if (C.netWinner(G, [sc[0] + 1, sc[1]]) === 0 || C.netWinner(G, [sc[0], sc[1] + 1]) === 1) return ' · match point';
+  return sc[0] === sc[1] && sc[0] >= sl - 1 ? ' · deuce: win by two' : '';
+}
 function gameMode(game, online){
   const M = {kind: 'game', game, online: !!online, pts: {}, err: {}, list: [], rounds: 0};
   const nameT = (s, t) => { const ps = s.G.players.filter(q => q.team === t && q.ctrl !== 'gone'); return ps.length === 1 ? nameOf(s, ps[0]) : KIT[t].name; };
@@ -7499,8 +7528,8 @@ function gameMode(game, online){
     s.msg = {text: W[0], sub, until: s.ticks + 100, untilMs: performance.now() + 1700, team};
     sfx.whistle(game === 'dodge' ? 0.9 : 0.45);
     const lead = Math.max(...G.score), sl = G.cfg.scoreLimit;
-    say(`${W[0] === 'POINT' || W[0] === 'ROUND' ? '' : W[0][0] + W[0].slice(1).toLowerCase() + ': '}${W[1](w, l, game)} · ${G.score[0]}–${G.score[1]}${sl > 0 && lead === sl - 1 && G.score[0] !== G.score[1] ? (game === 'dodge' ? ' · one round from winning' : ' · match point') : ''}`);
-    if (G.score[team] >= (sl || 99) || game === 'dodge') fireworks(team, game === 'dodge' ? 3 : 2);
+    say(`${W[0] === 'POINT' || W[0] === 'ROUND' ? '' : W[0][0] + W[0].slice(1).toLowerCase() + ': '}${W[1](w, l, game)} · ${G.score[0]}–${G.score[1]}${game === 'dodge' ? (sl > 0 && lead === sl - 1 && G.score[0] !== G.score[1] ? ' · one round from winning' : '') : netCall(G)}`);
+    if (game === 'dodge' || (C.netWinner ? C.netWinner(G) === team : G.score[team] >= (sl || 99))) fireworks(team, game === 'dodge' ? 3 : 2);   // (v30.0: the point that wins it, by two)
   };
   M.goal = (s, e) => M.point(s, e.team, e.pid, e.why || 'kill');
   M.hit = (s, e) => {
@@ -7526,7 +7555,7 @@ function gameMode(game, online){
   M.clock = s => {
     const G = s.G, tl = G.cfg.timeLimit, t = G.time;
     if (G.pause > 0) return [G.pause < 120 ? 'Get ready' : 'Paused', tl > 0 ? fmt(Math.max(0, Math.ceil(tl * 60 - t))) : fmt(t)];
-    const lab = game === 'dodge' ? `Round ${Math.min(G.score[0] + G.score[1] + 1, 99)}` : G.state === 0 ? 'Serve' : G.cfg.scoreLimit ? `To ${G.cfg.scoreLimit}` : GAME_NAMES[game];
+    const lab = game === 'dodge' ? `Round ${Math.min(G.score[0] + G.score[1] + 1, 99)}` : G.state === 0 ? 'Serve' : G.cfg.scoreLimit ? `To ${G.cfg.scoreLimit} · by 2` : GAME_NAMES[game];
     if (tl > 0){ if (t >= tl * 60) return [G.state < 3 && G.score[0] === G.score[1] ? 'Next wins' : 'Full time', G.state < 3 ? '+' + fmt(t - tl * 60) : '0:00']; return [lab, fmt(Math.ceil(tl * 60 - t))]; }
     return [lab, fmt(t)];
   };
@@ -9280,7 +9309,9 @@ function drawGameBall(V, d, i, gm){
     // (v29.8) a live throw trails a streak in the thrower's colour: that ball can hit you, and it can be caught
     if ((d.lt === 0 || d.lt === 1) && isFinite(d.vx) && isFinite(d.vy)){ const v = Math.hypot(d.vx, d.vy); if (v > 1.2){ const L = Math.min(60, v * 8), ux = d.vx / v, uy = d.vy / v;
       const g2 = ctx.createLinearGradient(d.x, d.y, d.x - ux * L, d.y - uy * L); g2.addColorStop(0, colA(KIT[d.lt].color, 0.85)); g2.addColorStop(0.5, colA(KIT[d.lt].color, 0.4)); g2.addColorStop(1, colA(KIT[d.lt].color, 0));
-      ctx.save(); ctx.strokeStyle = g2; ctx.lineCap = 'round'; ctx.lineWidth = r * 1.7; ctx.beginPath(); ctx.moveTo(d.x - ux * r * 0.3, d.y - uy * r * 0.3); ctx.lineTo(d.x - ux * L, d.y - uy * L); ctx.stroke(); ctx.restore(); } }
+      ctx.save(); ctx.strokeStyle = g2; ctx.lineCap = 'round'; ctx.lineWidth = r * 1.7; ctx.beginPath(); ctx.moveTo(d.x - ux * r * 0.3, d.y - uy * r * 0.3); ctx.lineTo(d.x - ux * L, d.y - uy * L); ctx.stroke();
+      if (C.DB && v > C.DB.FAST){ const g3 = ctx.createLinearGradient(d.x, d.y, d.x - ux * L * 0.8, d.y - uy * L * 0.8); g3.addColorStop(0, 'rgba(255,214,40,1)'); g3.addColorStop(0.6, 'rgba(255,190,30,.55)'); g3.addColorStop(1, 'rgba(255,190,30,0)'); ctx.strokeStyle = g3; ctx.lineWidth = r * 0.7; ctx.beginPath(); ctx.moveTo(d.x - ux * r * 0.3, d.y - uy * r * 0.3); ctx.lineTo(d.x - ux * L * 0.8, d.y - uy * L * 0.8); ctx.stroke(); }   // (v30.0: fast, harder to catch: a yellow core, on either kit's colour)
+      ctx.restore(); } }
     ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, C.TAU); const g = ctx.createRadialGradient(d.x - r * 0.35, d.y - r * 0.35, r * 0.15, d.x, d.y, r); g.addColorStop(0, '#ffa6d2'); g.addColorStop(1, tint(d.color) || '#ff2e88'); ctx.fillStyle = g; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#000'; ctx.stroke();
     ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(d.x, d.y, r * 0.62, 0.4, 2.6); ctx.stroke();
     if (d.lt === 0 || d.lt === 1){ ctx.strokeStyle = KIT[d.lt].color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(d.x, d.y, r + 3.5, 0, C.TAU); ctx.stroke(); }
@@ -10102,6 +10133,12 @@ const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one
 // understand"): each update a short headline, each change one short line: [kind, where, what]. Kinds: new, fix, better,
 // change. Every release adds its entry here (notes.md, release routine)
 const PATCH = [
+  {v: '30.0', d: '24 Nov 2026', title: 'Win by two, and fairer dodgeball catches', items: [
+    ['change', 'Volleyball, badminton, ping pong', 'You have to win by two points, like the real games. Badminton stops at 20 (the next point wins at 19-19).'],
+    ['change', 'Dodgeball', 'Fast throws are much harder to catch: press right as they reach you. They have a yellow core in their trail.'],
+    ['better', 'Dodgeball', 'The computer catches far less often (on Hard and Insane, about a fifth as often as before).'],
+    ['change', 'Dodgeball', 'A caught ball drops at the catcher\'s feet, so a catch costs the thrower one life, not two.'],
+    ['change', 'Dodgeball', 'A ball that bounced off a wall is safe: it can\'t hit you or be caught. It says SAFE if it touches you.']]},
   {v: '29.9', d: '23 Nov 2026', title: 'Dodgeball hits always count', items: [
     ['fix', 'Dodgeball', 'At the start of a round, throws and catches with most of the balls did nothing (the ball just bounced off) until one particular ball was moved. Now every throw counts from the start.']]},
   {v: '29.8', d: '23 Nov 2026', title: 'Fairer dodgeball catches', items: [
@@ -12114,7 +12151,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '29.9';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '30.0';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
