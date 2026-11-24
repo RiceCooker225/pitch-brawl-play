@@ -1264,6 +1264,40 @@
   .panelx{position:fixed;z-index:70;display:inline-flex;align-items:center;gap:7px;background:#1f232b;border:2px solid var(--accent);border-radius:0;color:#fff;font:700 15px/1 var(--cond),sans-serif;text-transform:uppercase;letter-spacing:.05em;padding:9px 14px;box-shadow:0 6px 18px rgba(0,0,0,.45);cursor:pointer}
   .panelx .pxx{color:var(--accent);font-size:14px} .panelx:hover{background:var(--accent);color:#15100a} .panelx:hover .pxx{color:#15100a}
   .panelx[hidden]{display:none}
+  /* v30.1 ("beginner friendly showing every control like before game"): before a match, every key for that game and what it does */
+  .kcard{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;width:min(600px,calc(100vw - 24px));max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);display:flex;flex-direction:column;gap:8px;background:rgba(22,25,33,.96);border:1px solid #4d5566;border-top:4px solid var(--accent);padding:14px 18px 12px;box-shadow:0 16px 44px rgba(0,0,0,.5);color:#d6dbe6;text-align:left}
+  .kcard[hidden]{display:none}
+  .kcard .kch{font-family:var(--cond);font-style:italic;font-weight:800;text-transform:uppercase;font-size:24px;line-height:1.1;color:#fff}
+  .kcard .kcwin{margin:0;font-size:14px;line-height:1.4;color:#e8e3e3} .kcard .kcwin b{color:var(--accent);font-family:var(--cond);text-transform:uppercase;letter-spacing:.04em;margin-right:6px}
+  .kcard .kcsc{overflow:auto;min-height:0;flex:1 1 auto}
+  .kcard .kctab{width:100%;border-collapse:collapse}
+  .kcard .kctab th{font:700 12px/1.2 var(--cond),sans-serif;text-transform:uppercase;letter-spacing:.06em;color:#a8b0c2;text-align:left;padding:2px 8px 6px}
+  .kcard .kctab td{padding:5px 8px;border-top:1px solid #343a49;vertical-align:middle}
+  .kcard .kck{white-space:nowrap;color:#a8b0c2;font-size:12px;width:1%}
+  .kcard .kcw b{display:block;color:#fff;font-size:14px} .kcard .kcw small{display:block;color:#b9c0cf;font-size:12.5px;line-height:1.35;margin-top:1px}
+  .kcard kbd{display:inline-block;min-width:22px;margin:1px 2px 1px 0;padding:2px 6px;border:1px solid #6b7385;border-bottom-width:3px;background:#2d3342;color:#fff;font:700 12px/1.3 Rubik,system-ui,sans-serif;text-align:center;border-radius:3px}
+  .kcard .kct{color:#fff;font-size:12px} .kcard .kcno{color:#ff9b9b;font-size:11px}
+  .kcard.kcmulti{width:min(720px,calc(100vw - 24px))}
+  .kcard .kcm td{border-top:1px solid #343a49;padding-bottom:1px} .kcard .kcs td{border-top:0;padding-top:0;color:#b9c0cf;font-size:12.5px;line-height:1.35}
+  .kcard .kcm .kcw b{display:inline}
+  .kcard .kcmore{margin:0;font-size:12px;color:#a8b0c2}
+  .kcard .kcrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap} .kcard .kcrow .gsp{flex:1}
+  .kcard .kcchk{display:flex;align-items:center;gap:6px;font-size:13px;color:#d6dbe6;cursor:pointer}
+  .kcard .kcgo{border-radius:0;font:800 17px/1 var(--cond),sans-serif;text-transform:uppercase;letter-spacing:.05em;padding:10px 26px}
+  .kcard .kcnote{margin:0;font-size:11px;color:#7f889c;text-align:right}
+  @media (max-width:640px){ .kcard{padding:10px 12px} .kcard .kch{font-size:20px} .kcard .kcw small{font-size:12px} .kcard .kck{white-space:normal} }
+  /* v30.1 ("add a section wehre u can talk to friends in game"): Messages, every chat in one list */
+  .msgs{display:flex;flex-direction:column;gap:6px;width:min(560px,100%);text-align:left}
+  #msgPanel .msgrow{display:flex;align-items:center;gap:10px;width:100%;background:var(--card,#30374a);border:1px solid var(--line,#454c5e);border-left:4px solid #5a6378;border-radius:0;padding:9px 12px;color:var(--text,#e8e3e3);text-align:left;cursor:pointer;box-shadow:none;font:inherit;text-transform:none;letter-spacing:0}
+  #msgPanel .msgrow:hover{border-color:var(--accent)} #msgPanel .msgrow.unread{border-left-color:#7ee2a0} .msgrow.on .msgmid b{color:#fff}
+  .msgrow .frdot{flex:none}
+  .msgmid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;text-transform:none;font-family:Rubik,system-ui,sans-serif;letter-spacing:0} .msgmid b{font-size:15px;color:#d6dbe6;font-weight:700}
+  .msgmid small{color:#a8b0c2;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .msgrow.unread .msgmid small{color:#fff}
+  .msgrt{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px;text-transform:none;font-family:Rubik,system-ui,sans-serif;letter-spacing:0} .msgrt small{color:#7f889c;font-size:11px}
+  .msgu,.msgn{display:inline-block;min-width:18px;padding:1px 5px;background:#7ee2a0;color:#11261a;font:800 11px/1.4 Rubik,sans-serif;text-align:center;border-radius:9px}
+  .msgb .msgn{margin-left:4px} .msgb .msgn[hidden]{display:none}
+  #menu .mhead .mnews.msgb.unseen{border-color:#7ee2a0;color:#fff}
+  .msgempty{max-width:420px}
 </style>
 <!-- v28.99+ the loading screen: the logo while the page (one big file) comes in; boot() fades it out -->
 <div id="splash" aria-hidden="true"><div class="splc"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 883 513" class="spllogo" role="img" aria-label="Pitch Brawl"><g transform="translate(251.3,0) scale(0.7421875)"><polygon points="367.7,367.7 276.5,314.5 241.9,380.9 223.0,308.5 164.7,313.4 194.4,262.9 116.2,207.1 212.2,212.2 207.1,116.2 262.9,194.4 313.4,164.7 308.5,223.0 380.9,241.9 314.5,276.5" fill="#ffd166" stroke="#10131b" stroke-width="9.5" stroke-linejoin="round"/><polygon points="314.1,314.1 267.3,288.2 248.6,321.6 237.9,284.9 207.7,286.3 222.1,259.8 183.1,230.5 231.9,231.9 230.5,183.1 259.8,222.1 286.3,207.7 284.9,237.9 321.6,248.6 288.2,267.3" fill="#fff7dc"/><line x1="62.6" y1="378.7" x2="32.9" y2="408.4" stroke="#10131b" stroke-width="20.0" stroke-linecap="round"/><line x1="62.6" y1="378.7" x2="32.9" y2="408.4" stroke="#f08a2b" stroke-width="9.0" stroke-linecap="round"/><line x1="98.0" y1="414.0" x2="54.1" y2="457.9" stroke="#10131b" stroke-width="20.0" stroke-linecap="round"/><line x1="98.0" y1="414.0" x2="54.1" y2="457.9" stroke="#f08a2b" stroke-width="9.0" stroke-linecap="round"/><line x1="133.3" y1="449.4" x2="106.4" y2="476.3" stroke="#10131b" stroke-width="20.0" stroke-linecap="round"/><line x1="133.3" y1="449.4" x2="106.4" y2="476.3" stroke="#f08a2b" stroke-width="9.0" stroke-linecap="round"/><line x1="449.4" y1="133.3" x2="479.1" y2="103.6" stroke="#10131b" stroke-width="20.0" stroke-linecap="round"/><line x1="449.4" y1="133.3" x2="479.1" y2="103.6" stroke="#f4f1ea" stroke-width="9.0" stroke-linecap="round"/><line x1="414.0" y1="98.0" x2="457.9" y2="54.1" stroke="#10131b" stroke-width="20.0" stroke-linecap="round"/><line x1="414.0" y1="98.0" x2="457.9" y2="54.1" stroke="#f4f1ea" stroke-width="9.0" stroke-linecap="round"/><line x1="378.7" y1="62.6" x2="405.6" y2="35.7" stroke="#10131b" stroke-width="20.0" stroke-linecap="round"/><line x1="378.7" y1="62.6" x2="405.6" y2="35.7" stroke="#f4f1ea" stroke-width="9.0" stroke-linecap="round"/><circle cx="334.2" cy="191.8" r="100.0" fill="#000" opacity=".35"/><circle cx="329.2" cy="182.8" r="100.0" fill="#f4f1ea" stroke="#10131b" stroke-width="11.0"/><circle cx="329.2" cy="182.8" r="74.0" fill="none" stroke="#cfd3dc" stroke-width="7.0"/><path d="M326.0841629639188 233.56444814719234H296.3591629639188Q295.4891629639188 233.56444814719234 294.9816629639188 232.98444814719232Q294.4741629639188 232.40444814719234 294.6191629639188 231.38944814719233L306.5091629639188 134.23944814719235Q306.6541629639188 133.22444814719233 307.3066629639188 132.64444814719235Q307.9591629639188 132.06444814719234 308.8291629639188 132.06444814719234H334.3491629639188Q348.2691629639188 132.06444814719234 356.0266629639188 137.93694814719234Q363.7841629639188 143.80944814719234 363.7841629639188 155.69944814719236Q363.7841629639188 157.14944814719235 363.4941629639188 160.62944814719236Q361.7541629639188 174.11444814719235 352.9091629639188 180.63944814719235Q352.0391629639188 181.07444814719236 352.4741629639188 181.50944814719233Q360.30416296391877 188.17944814719235 360.30416296391877 200.21444814719234Q360.30416296391877 201.51944814719235 360.0141629639188 204.41944814719233Q358.4191629639188 218.48444814719232 348.9216629639188 226.02444814719235Q339.4241629639188 233.56444814719234 326.0841629639188 233.56444814719234ZM330.2891629639188 156.13444814719236 328.4041629639188 170.92444814719235Q328.4041629639188 171.64944814719235 328.9841629639188 171.64944814719235H329.8541629639188Q336.0891629639188 171.64944814719235 337.2491629639188 163.52944814719234L337.3941629639188 161.64444814719235Q337.3941629639188 155.40944814719234 331.8841629639188 155.40944814719234H331.0141629639188Q330.2891629639188 155.40944814719234 330.2891629639188 156.13444814719236ZM334.2041629639188 198.47444814719233Q334.2041629639188 195.13944814719235 332.8991629639188 193.10944814719235Q331.5941629639188 191.07944814719235 329.2741629639188 191.07944814719235H326.6641629639188Q325.9391629639188 191.07944814719235 325.9391629639188 191.80444814719235L323.7641629639188 209.49444814719234Q323.4741629639188 210.21944814719234 324.3441629639188 210.21944814719234H326.80916296391877Q329.9991629639188 210.21944814719234 332.1016629639188 207.17444814719232Q334.2041629639188 204.12944814719233 334.2041629639188 198.47444814719233Z" fill="#2a2f3b" stroke="#f4f1ea" stroke-width="13.0" stroke-linejoin="round" paint-order="stroke"/><circle cx="187.8" cy="338.2" r="100.0" fill="#000" opacity=".35"/><circle cx="182.8" cy="329.2" r="100.0" fill="#f08a2b" stroke="#10131b" stroke-width="11.0"/><circle cx="182.8" cy="329.2" r="74.0" fill="none" stroke="#d9701a" stroke-width="7.0"/><path d="M218.3555592583034 305.6955518528076Q218.3555592583034 309.17555185280764 218.0655592583034 311.06055185280763Q216.9055592583034 320.3405518528076 212.6280592583034 327.4455518528076Q208.3505592583034 334.55055185280764 201.6080592583034 338.3930518528076Q194.86555925830342 342.23555185280765 186.74555925830342 342.23555185280765H178.77055925830342Q178.0455592583034 342.23555185280765 178.0455592583034 342.9605518528076L173.6955592583034 377.7605518528076Q173.55055925830342 378.7755518528076 172.89805925830342 379.3555518528076Q172.24555925830342 379.93555185280763 171.3755592583034 379.93555185280763H149.04555925830343Q148.17555925830342 379.93555185280763 147.6680592583034 379.3555518528076Q147.1605592583034 378.7755518528076 147.30555925830342 377.7605518528076L159.1955592583034 280.61055185280765Q159.34055925830341 279.59555185280766 159.99305925830342 279.0155518528077Q160.64555925830342 278.43555185280763 161.51555925830343 278.43555185280763H193.27055925830342Q204.87055925830342 278.43555185280763 211.6130592583034 285.9030518528076Q218.3555592583034 293.37055185280764 218.3555592583034 305.6955518528076ZM191.5305592583034 311.6405518528076Q191.6755592583034 310.77055185280767 191.6755592583034 309.17555185280764Q191.6755592583034 305.55055185280764 190.0805592583034 303.66555185280765Q188.4855592583034 301.78055185280766 185.7305592583034 301.78055185280766H183.70055925830343Q182.9755592583034 301.78055185280766 182.9755592583034 302.5055518528076L180.8005592583034 320.48555185280765Q180.5105592583034 321.2105518528076 181.3805592583034 321.2105518528076H183.26555925830343Q186.45555925830342 321.2105518528076 188.70305925830343 318.8180518528076Q190.9505592583034 316.42555185280764 191.5305592583034 311.6405518528076Z" fill="#f4f1ea" stroke="#10131b" stroke-width="13.0" stroke-linejoin="round" paint-order="stroke"/></g><path d="M112.32000000000001 401.96Q112.32000000000001 406.03999999999996 111.98 408.25Q110.62 419.13 105.605 427.46000000000004Q100.59 435.79 92.685 440.295Q84.78 444.8 75.26 444.8H65.91Q65.06 444.8 65.06 445.65L59.96 486.45Q59.790000000000006 487.64 59.025000000000006 488.32Q58.260000000000005 489.0 57.24 489.0H31.06Q30.04 489.0 29.445 488.32Q28.85 487.64 29.02 486.45L42.96 372.55Q43.13 371.36 43.894999999999996 370.68Q44.66 370.0 45.68 370.0H82.91Q96.51 370.0 104.415 378.755Q112.32000000000001 387.51 112.32000000000001 401.96ZM80.87 408.93Q81.04 407.90999999999997 81.04 406.03999999999996Q81.04 401.78999999999996 79.17000000000002 399.58Q77.30000000000001 397.37 74.07 397.37H71.69Q70.84 397.37 70.84 398.22L68.29 419.3Q67.95 420.15 68.97 420.15H71.18Q74.92 420.15 77.555 417.34499999999997Q80.19 414.53999999999996 80.87 408.93ZM110.45 486.45 124.39 372.55Q124.56 371.36 125.325 370.68Q126.09 370.0 127.11 370.0H153.29000000000002Q154.31 370.0 154.905 370.68Q155.5 371.36 155.33 372.55L141.39000000000001 486.45Q141.22 487.64 140.45499999999998 488.32Q139.69 489.0 138.67000000000002 489.0H112.49000000000001Q111.47 489.0 110.875 488.32Q110.28 487.64 110.45 486.45ZM240.67000000000002 372.55 237.95000000000002 394.82Q237.78000000000003 396.01 237.10000000000002 396.69Q236.42000000000002 397.37 235.23000000000002 397.37H215.51Q214.66000000000003 397.37 214.66000000000003 398.22L203.78 486.45Q203.61 487.64 202.93 488.32Q202.25 489.0 201.06 489.0H175.05Q173.86 489.0 173.26500000000001 488.32Q172.67000000000002 487.64 172.84 486.45L183.72 398.22Q183.72 397.37 182.87 397.37H163.83Q162.64000000000001 397.37 162.04500000000002 396.69Q161.45000000000002 396.01 161.62 394.82L164.34 372.55Q164.51000000000002 371.36 165.27500000000003 370.68Q166.04000000000002 370.0 167.23000000000002 370.0H238.63Q239.65 370.0 240.245 370.68Q240.84000000000003 371.36 240.67000000000002 372.55ZM238.29 459.93Q238.29 458.23 238.63 454.15L244.75 404.51Q246.79 388.02 257.84 378.33Q268.89 368.64 285.21 368.64Q300.0 368.64 308.67 376.715Q317.34000000000003 384.78999999999996 317.34000000000003 398.9Q317.34000000000003 400.43 317.0 404.51L316.83 405.36Q316.65999999999997 406.55 315.895 407.315Q315.13 408.08 314.11 408.08L287.93 408.93Q285.38 408.93 285.72 406.55L286.23 402.3Q286.57 399.40999999999997 285.38 397.71Q284.19 396.01 281.98 396.01Q279.6 396.01 277.985 397.71Q276.37 399.40999999999997 276.03 402.3L269.4 456.87Q269.06 459.59 270.16499999999996 461.28999999999996Q271.27 462.99 273.65 462.99Q276.03 462.99 277.645 461.375Q279.26 459.76 279.6 456.87L280.11 452.28Q280.28 451.09 281.04499999999996 450.495Q281.81 449.9 282.83 449.9L308.84000000000003 450.75Q310.03 450.75 310.625 451.515Q311.22 452.28 311.05 453.47L310.88 454.15Q308.84000000000003 470.64 297.70500000000004 480.5Q286.57 490.36 270.25 490.36Q255.46 490.36 246.875 482.20000000000005Q238.29 474.04 238.29 459.93ZM373.27 370.0H399.28000000000003Q400.47 370.0 401.06500000000005 370.68Q401.66 371.36 401.49 372.55L387.55 486.45Q387.38 487.64 386.615 488.32Q385.85 489.0 384.66 489.0H358.65Q357.46000000000004 489.0 356.865 488.32Q356.27 487.64 356.44 486.45L361.71000000000004 443.95Q361.71000000000004 443.1 361.03000000000003 443.1H353.04Q352.19 443.1 352.19 443.95L346.92 486.45Q346.75 487.64 345.985 488.32Q345.22 489.0 344.2 489.0H318.02Q317.0 489.0 316.405 488.32Q315.81 487.64 315.98 486.45L329.92 372.55Q330.09000000000003 371.36 330.855 370.68Q331.62 370.0 332.64 370.0H358.82Q359.84000000000003 370.0 360.43500000000006 370.68Q361.03000000000003 371.36 360.86 372.55L355.76 414.88Q355.42 415.73 356.44 415.73H364.43Q364.77 415.73 365.025 415.475Q365.28000000000003 415.22 365.28000000000003 414.88L370.55 372.55Q370.72 371.36 371.4 370.68Q372.08 370.0 373.27 370.0Z" fill="#10131b" transform="translate(6.0,8.3)" stroke="#10131b" stroke-width="12.8" stroke-linejoin="round"/><path d="M461.84 489.0H426.98999999999995Q425.96999999999997 489.0 425.375 488.32Q424.78 487.64 424.95 486.45L438.89 372.55Q439.06 371.36 439.825 370.68Q440.59 370.0 441.60999999999996 370.0H471.53Q487.84999999999997 370.0 496.94499999999994 376.885Q506.03999999999996 383.77 506.03999999999996 397.71Q506.03999999999996 399.40999999999997 505.7 403.49Q503.65999999999997 419.3 493.28999999999996 426.95Q492.27 427.46 492.78 427.97Q501.96 435.79 501.96 449.9Q501.96 451.43 501.62 454.83Q499.75 471.32 488.615 480.15999999999997Q477.47999999999996 489.0 461.84 489.0ZM466.77 398.22 464.56 415.56Q464.56 416.40999999999997 465.24 416.40999999999997H466.26Q473.57 416.40999999999997 474.92999999999995 406.89L475.09999999999997 404.68Q475.09999999999997 397.37 468.64 397.37H467.62Q466.77 397.37 466.77 398.22ZM471.35999999999996 447.86Q471.35999999999996 443.95 469.8299999999999 441.57Q468.29999999999995 439.19 465.58 439.19H462.52Q461.66999999999996 439.19 461.66999999999996 440.04L459.12 460.78Q458.78 461.63 459.79999999999995 461.63H462.69Q466.42999999999995 461.63 468.895 458.06Q471.35999999999996 454.49 471.35999999999996 447.86ZM548.71 486.79 543.78 443.95Q543.78 443.27 543.27 443.27Q542.59 443.27 542.59 444.12L537.3199999999999 486.45Q537.15 487.64 536.385 488.32Q535.62 489.0 534.6 489.0H508.41999999999996Q507.4 489.0 506.80499999999995 488.32Q506.21 487.64 506.38 486.45L520.3199999999999 372.55Q520.49 371.36 521.255 370.68Q522.02 370.0 523.04 370.0H560.27Q573.87 370.0 581.775 378.66999999999996Q589.68 387.34 589.68 401.62Q589.68 405.7 589.34 407.90999999999997Q588.15 417.26 584.0699999999999 424.655Q579.99 432.05 573.53 436.64Q572.68 437.15 573.02 437.83L580.3299999999999 486.11V486.79Q580.3299999999999 487.81 579.65 488.405Q578.97 489.0 577.95 489.0H551.09Q549.05 489.0 548.71 486.79ZM549.05 397.37Q548.1999999999999 397.37 548.1999999999999 398.22L545.65 418.11Q545.65 418.96 546.5 418.96H548.71Q552.79 418.96 555.595 415.39Q558.4 411.82 558.4 405.53Q558.4 401.62 556.53 399.495Q554.66 397.37 551.43 397.37ZM638.13 486.62 637.7900000000001 473.7Q637.96 473.36 637.62 473.105Q637.28 472.85 636.94 472.85H622.15Q621.3000000000001 472.85 620.96 473.7L617.73 486.62Q617.22 489.0 614.84 489.0H589.0Q586.45 489.0 587.13 486.28L624.53 372.21Q625.21 370.0 627.59 370.0H657.6800000000001Q660.0600000000001 370.0 660.23 372.21L669.58 486.28V486.62Q669.58 489.0 667.03 489.0H640.34Q637.96 489.0 638.13 486.62ZM628.44 448.37H636.4300000000001Q636.94 448.37 637.28 447.52L636.6 416.07Q636.6 415.39 636.175 415.475Q635.75 415.56 635.75 416.07L627.9300000000001 447.52Q627.59 448.37 628.44 448.37ZM698.65 486.79 690.15 372.71999999999997Q690.15 370.0 692.87 370.0H719.73Q722.11 370.0 722.11 372.38L721.26 425.08Q721.09 425.59 721.6 425.59Q722.11 425.59 722.11 425.08L734.69 372.38Q735.2 370.0 737.75 370.0H757.8100000000001Q760.19 370.0 760.19 372.38L760.7 425.08Q760.7 425.42 761.125 425.505Q761.5500000000001 425.59 761.5500000000001 425.08L772.94 372.38Q773.62 370.0 775.83 370.0H802.01Q804.9000000000001 370.0 803.88 372.71999999999997L768.86 486.79Q768.1800000000001 489.0 765.8000000000001 489.0H743.02Q740.64 489.0 740.64 486.62L740.3000000000001 431.2Q740.47 430.69 740.0450000000001 430.775Q739.62 430.86 739.45 431.37L727.0400000000001 486.62Q726.36 489.0 723.98 489.0H701.2Q698.82 489.0 698.65 486.79ZM798.4399999999999 486.45 812.3799999999999 372.55Q812.55 371.36 813.3149999999999 370.68Q814.0799999999999 370.0 815.0999999999999 370.0H841.28Q842.3 370.0 842.895 370.68Q843.4899999999999 371.36 843.3199999999999 372.55L832.6099999999999 460.78Q832.27 461.63 833.29 461.63H865.5899999999999Q866.78 461.63 867.375 462.31Q867.9699999999999 462.99 867.8 464.18L865.0799999999999 486.45Q864.5699999999999 489.0 862.1899999999999 489.0H800.4799999999999Q799.4599999999999 489.0 798.865 488.32Q798.27 487.64 798.4399999999999 486.45Z" fill="#10131b" transform="translate(6.0,8.3)" stroke="#10131b" stroke-width="12.8" stroke-linejoin="round"/><path d="M112.32000000000001 401.96Q112.32000000000001 406.03999999999996 111.98 408.25Q110.62 419.13 105.605 427.46000000000004Q100.59 435.79 92.685 440.295Q84.78 444.8 75.26 444.8H65.91Q65.06 444.8 65.06 445.65L59.96 486.45Q59.790000000000006 487.64 59.025000000000006 488.32Q58.260000000000005 489.0 57.24 489.0H31.06Q30.04 489.0 29.445 488.32Q28.85 487.64 29.02 486.45L42.96 372.55Q43.13 371.36 43.894999999999996 370.68Q44.66 370.0 45.68 370.0H82.91Q96.51 370.0 104.415 378.755Q112.32000000000001 387.51 112.32000000000001 401.96ZM80.87 408.93Q81.04 407.90999999999997 81.04 406.03999999999996Q81.04 401.78999999999996 79.17000000000002 399.58Q77.30000000000001 397.37 74.07 397.37H71.69Q70.84 397.37 70.84 398.22L68.29 419.3Q67.95 420.15 68.97 420.15H71.18Q74.92 420.15 77.555 417.34499999999997Q80.19 414.53999999999996 80.87 408.93ZM110.45 486.45 124.39 372.55Q124.56 371.36 125.325 370.68Q126.09 370.0 127.11 370.0H153.29000000000002Q154.31 370.0 154.905 370.68Q155.5 371.36 155.33 372.55L141.39000000000001 486.45Q141.22 487.64 140.45499999999998 488.32Q139.69 489.0 138.67000000000002 489.0H112.49000000000001Q111.47 489.0 110.875 488.32Q110.28 487.64 110.45 486.45ZM240.67000000000002 372.55 237.95000000000002 394.82Q237.78000000000003 396.01 237.10000000000002 396.69Q236.42000000000002 397.37 235.23000000000002 397.37H215.51Q214.66000000000003 397.37 214.66000000000003 398.22L203.78 486.45Q203.61 487.64 202.93 488.32Q202.25 489.0 201.06 489.0H175.05Q173.86 489.0 173.26500000000001 488.32Q172.67000000000002 487.64 172.84 486.45L183.72 398.22Q183.72 397.37 182.87 397.37H163.83Q162.64000000000001 397.37 162.04500000000002 396.69Q161.45000000000002 396.01 161.62 394.82L164.34 372.55Q164.51000000000002 371.36 165.27500000000003 370.68Q166.04000000000002 370.0 167.23000000000002 370.0H238.63Q239.65 370.0 240.245 370.68Q240.84000000000003 371.36 240.67000000000002 372.55ZM238.29 459.93Q238.29 458.23 238.63 454.15L244.75 404.51Q246.79 388.02 257.84 378.33Q268.89 368.64 285.21 368.64Q300.0 368.64 308.67 376.715Q317.34000000000003 384.78999999999996 317.34000000000003 398.9Q317.34000000000003 400.43 317.0 404.51L316.83 405.36Q316.65999999999997 406.55 315.895 407.315Q315.13 408.08 314.11 408.08L287.93 408.93Q285.38 408.93 285.72 406.55L286.23 402.3Q286.57 399.40999999999997 285.38 397.71Q284.19 396.01 281.98 396.01Q279.6 396.01 277.985 397.71Q276.37 399.40999999999997 276.03 402.3L269.4 456.87Q269.06 459.59 270.16499999999996 461.28999999999996Q271.27 462.99 273.65 462.99Q276.03 462.99 277.645 461.375Q279.26 459.76 279.6 456.87L280.11 452.28Q280.28 451.09 281.04499999999996 450.495Q281.81 449.9 282.83 449.9L308.84000000000003 450.75Q310.03 450.75 310.625 451.515Q311.22 452.28 311.05 453.47L310.88 454.15Q308.84000000000003 470.64 297.70500000000004 480.5Q286.57 490.36 270.25 490.36Q255.46 490.36 246.875 482.20000000000005Q238.29 474.04 238.29 459.93ZM373.27 370.0H399.28000000000003Q400.47 370.0 401.06500000000005 370.68Q401.66 371.36 401.49 372.55L387.55 486.45Q387.38 487.64 386.615 488.32Q385.85 489.0 384.66 489.0H358.65Q357.46000000000004 489.0 356.865 488.32Q356.27 487.64 356.44 486.45L361.71000000000004 443.95Q361.71000000000004 443.1 361.03000000000003 443.1H353.04Q352.19 443.1 352.19 443.95L346.92 486.45Q346.75 487.64 345.985 488.32Q345.22 489.0 344.2 489.0H318.02Q317.0 489.0 316.405 488.32Q315.81 487.64 315.98 486.45L329.92 372.55Q330.09000000000003 371.36 330.855 370.68Q331.62 370.0 332.64 370.0H358.82Q359.84000000000003 370.0 360.43500000000006 370.68Q361.03000000000003 371.36 360.86 372.55L355.76 414.88Q355.42 415.73 356.44 415.73H364.43Q364.77 415.73 365.025 415.475Q365.28000000000003 415.22 365.28000000000003 414.88L370.55 372.55Q370.72 371.36 371.4 370.68Q372.08 370.0 373.27 370.0Z" fill="#f4f1ea" stroke="#10131b" stroke-width="12.8" stroke-linejoin="round" paint-order="stroke"/><path d="M461.84 489.0H426.98999999999995Q425.96999999999997 489.0 425.375 488.32Q424.78 487.64 424.95 486.45L438.89 372.55Q439.06 371.36 439.825 370.68Q440.59 370.0 441.60999999999996 370.0H471.53Q487.84999999999997 370.0 496.94499999999994 376.885Q506.03999999999996 383.77 506.03999999999996 397.71Q506.03999999999996 399.40999999999997 505.7 403.49Q503.65999999999997 419.3 493.28999999999996 426.95Q492.27 427.46 492.78 427.97Q501.96 435.79 501.96 449.9Q501.96 451.43 501.62 454.83Q499.75 471.32 488.615 480.15999999999997Q477.47999999999996 489.0 461.84 489.0ZM466.77 398.22 464.56 415.56Q464.56 416.40999999999997 465.24 416.40999999999997H466.26Q473.57 416.40999999999997 474.92999999999995 406.89L475.09999999999997 404.68Q475.09999999999997 397.37 468.64 397.37H467.62Q466.77 397.37 466.77 398.22ZM471.35999999999996 447.86Q471.35999999999996 443.95 469.8299999999999 441.57Q468.29999999999995 439.19 465.58 439.19H462.52Q461.66999999999996 439.19 461.66999999999996 440.04L459.12 460.78Q458.78 461.63 459.79999999999995 461.63H462.69Q466.42999999999995 461.63 468.895 458.06Q471.35999999999996 454.49 471.35999999999996 447.86ZM548.71 486.79 543.78 443.95Q543.78 443.27 543.27 443.27Q542.59 443.27 542.59 444.12L537.3199999999999 486.45Q537.15 487.64 536.385 488.32Q535.62 489.0 534.6 489.0H508.41999999999996Q507.4 489.0 506.80499999999995 488.32Q506.21 487.64 506.38 486.45L520.3199999999999 372.55Q520.49 371.36 521.255 370.68Q522.02 370.0 523.04 370.0H560.27Q573.87 370.0 581.775 378.66999999999996Q589.68 387.34 589.68 401.62Q589.68 405.7 589.34 407.90999999999997Q588.15 417.26 584.0699999999999 424.655Q579.99 432.05 573.53 436.64Q572.68 437.15 573.02 437.83L580.3299999999999 486.11V486.79Q580.3299999999999 487.81 579.65 488.405Q578.97 489.0 577.95 489.0H551.09Q549.05 489.0 548.71 486.79ZM549.05 397.37Q548.1999999999999 397.37 548.1999999999999 398.22L545.65 418.11Q545.65 418.96 546.5 418.96H548.71Q552.79 418.96 555.595 415.39Q558.4 411.82 558.4 405.53Q558.4 401.62 556.53 399.495Q554.66 397.37 551.43 397.37ZM638.13 486.62 637.7900000000001 473.7Q637.96 473.36 637.62 473.105Q637.28 472.85 636.94 472.85H622.15Q621.3000000000001 472.85 620.96 473.7L617.73 486.62Q617.22 489.0 614.84 489.0H589.0Q586.45 489.0 587.13 486.28L624.53 372.21Q625.21 370.0 627.59 370.0H657.6800000000001Q660.0600000000001 370.0 660.23 372.21L669.58 486.28V486.62Q669.58 489.0 667.03 489.0H640.34Q637.96 489.0 638.13 486.62ZM628.44 448.37H636.4300000000001Q636.94 448.37 637.28 447.52L636.6 416.07Q636.6 415.39 636.175 415.475Q635.75 415.56 635.75 416.07L627.9300000000001 447.52Q627.59 448.37 628.44 448.37ZM698.65 486.79 690.15 372.71999999999997Q690.15 370.0 692.87 370.0H719.73Q722.11 370.0 722.11 372.38L721.26 425.08Q721.09 425.59 721.6 425.59Q722.11 425.59 722.11 425.08L734.69 372.38Q735.2 370.0 737.75 370.0H757.8100000000001Q760.19 370.0 760.19 372.38L760.7 425.08Q760.7 425.42 761.125 425.505Q761.5500000000001 425.59 761.5500000000001 425.08L772.94 372.38Q773.62 370.0 775.83 370.0H802.01Q804.9000000000001 370.0 803.88 372.71999999999997L768.86 486.79Q768.1800000000001 489.0 765.8000000000001 489.0H743.02Q740.64 489.0 740.64 486.62L740.3000000000001 431.2Q740.47 430.69 740.0450000000001 430.775Q739.62 430.86 739.45 431.37L727.0400000000001 486.62Q726.36 489.0 723.98 489.0H701.2Q698.82 489.0 698.65 486.79ZM798.4399999999999 486.45 812.3799999999999 372.55Q812.55 371.36 813.3149999999999 370.68Q814.0799999999999 370.0 815.0999999999999 370.0H841.28Q842.3 370.0 842.895 370.68Q843.4899999999999 371.36 843.3199999999999 372.55L832.6099999999999 460.78Q832.27 461.63 833.29 461.63H865.5899999999999Q866.78 461.63 867.375 462.31Q867.9699999999999 462.99 867.8 464.18L865.0799999999999 486.45Q864.5699999999999 489.0 862.1899999999999 489.0H800.4799999999999Q799.4599999999999 489.0 798.865 488.32Q798.27 487.64 798.4399999999999 486.45Z" fill="#f08a2b" stroke="#10131b" stroke-width="12.8" stroke-linejoin="round" paint-order="stroke"/></svg><div class="splbar"><i></i></div></div></div>
@@ -1364,6 +1398,12 @@
     <p class="newsnote">What each update changed, the newest first.</p>
     <div class="news" id="newsList"></div>
     <div class="row"><button id="newsDone" type="button">Done</button></div>
+  </div>
+  <div class="overlay" id="msgPanel" hidden>
+    <h2>Messages</h2>
+    <p class="newsnote">Chat with your friends from anywhere: the menu, or in a match (☰ Menu → Messages). The newest first.</p>
+    <div class="msgs" id="msgList"></div>
+    <div class="row"><button id="msgDone" type="button">Done</button></div>
   </div>
   <div class="overlay" id="achPanel" hidden>
     <h2>Achievements</h2>
@@ -1496,7 +1536,7 @@
   <div class="overlay drawer" id="setPanel" hidden>
     <div class="dhead"><h2>Settings</h2><button id="setDone" type="button">Done</button></div>
     <section class="dsec"><h3>Game</h3>
-      <div class="drow"><button class="ghost sm tog" id="soundBtn" type="button" aria-pressed="true" title="Sound on or off">Sound</button><button class="ghost sm tog" id="replayBtn" type="button" aria-pressed="true" title="Show each goal again before the kick-off">Goal replays</button><button class="ghost sm tog" id="coachBtn" type="button" aria-pressed="true" title="Under the pitch: your keys, lit as you press them, and a tip for what to do right now (shoot, curl, slide, call for it, dive...); each tip goes once you've done it a few times">Help for beginners</button><button class="ghost sm" id="tutAgainBtn" type="button" title="The tutorial from the start: every control, step by step">Tutorial again</button><button class="ghost sm tog" id="introBtn" type="button" aria-pressed="true" title="Before each match the teams walk out, line up and shake hands, then go to their places (Skip, or any key, to go straight to the kick-off)">Walk-out</button><button class="ghost sm tog" id="refBtn" type="button" aria-pressed="true" title="A referee on the pitch: follows play, whistles and points at fouls, goals and kick-offs (only drawn: nothing touches him)">Referee</button><button class="ghost sm tog" id="aiBtn" type="button" aria-pressed="true" title="At the end of a match Claude writes a line about it (here in Claude: it asks you once, and uses a little of your Claude usage). Off, or in the downloaded file: the game's own commentator">Claude's comment</button></div>
+      <div class="drow"><button class="ghost sm tog" id="soundBtn" type="button" aria-pressed="true" title="Sound on or off">Sound</button><button class="ghost sm tog" id="replayBtn" type="button" aria-pressed="true" title="Show each goal again before the kick-off">Goal replays</button><button class="ghost sm tog" id="coachBtn" type="button" aria-pressed="true" title="Under the pitch: your keys, lit as you press them, and a tip for what to do right now (shoot, curl, slide, call for it, dive...); each tip goes once you've done it a few times">Help for beginners</button><button class="ghost sm" id="tutAgainBtn" type="button" title="The tutorial from the start: every control, step by step">Tutorial again</button><button class="ghost sm tog" id="kcSetBtn" type="button" aria-pressed="true" title="Before a match, a card with every key for that game and what it does, and how to win. By itself before your first three matches of each game; or before every match; or never (☰ Menu → Keys for this game shows it any time)">Controls card: first games</button><button class="ghost sm tog" id="introBtn" type="button" aria-pressed="true" title="Before each match the teams walk out, line up and shake hands, then go to their places (Skip, or any key, to go straight to the kick-off)">Walk-out</button><button class="ghost sm tog" id="refBtn" type="button" aria-pressed="true" title="A referee on the pitch: follows play, whistles and points at fouls, goals and kick-offs (only drawn: nothing touches him)">Referee</button><button class="ghost sm tog" id="aiBtn" type="button" aria-pressed="true" title="At the end of a match Claude writes a line about it (here in Claude: it asks you once, and uses a little of your Claude usage). Off, or in the downloaded file: the game's own commentator">Claude's comment</button></div>
     </section>
     <section class="dsec"><h3>Match rules</h3>
       <label class="opt"><input type="checkbox" id="optSlide"><span><b>Slide tackles</b><small>Get the ball first; take the man in your own area and it's a penalty.</small></span></label>
@@ -1542,13 +1582,13 @@
       <div class="lobby gmboard" id="gmBoard" hidden></div>
       <div class="frlobby" id="frGm" hidden><b>Friends online</b><div class="frlist" id="frList3"></div></div>
       <div class="gmbar">
-        <button class="ghost" id="gmPause" type="button" title="Pause the match for everyone (P)" hidden>Pause the match</button><button class="ghost" id="lobbyBtn" type="button" title="Stop the match and take everyone back to the lobby">Back to lobby</button><button class="ghost" id="gmRestart" type="button">Restart</button><button class="ghost" id="gmKeeper" type="button" title="Swap with the computer keeper on your side: you go in goal and the computer plays your man (its key is in Controls)" hidden>Go in goal <kbd>G</kbd></button>
+        <button class="ghost" id="gmPause" type="button" title="Pause the match for everyone (P)" hidden>Pause the match</button><button class="ghost" id="lobbyBtn" type="button" title="Stop the match and take everyone back to the lobby">Back to lobby</button><button class="ghost" id="gmRestart" type="button">Restart</button><button class="ghost msgb" id="gmMsg" type="button" title="Chat with your friends (the match waits while you type, against the computer)"><span class="mi" data-ic="chat" aria-hidden="true"></span> Messages<b class="msgn" hidden></b></button><button class="ghost" id="gmKeeper" type="button" title="Swap with the computer keeper on your side: you go in goal and the computer plays your man (its key is in Controls)" hidden>Go in goal <kbd>G</kbd></button>
         <span class="gsp"></span>
         <button class="ghost gmexit" id="exitBtn" type="button">Leave to the main menu</button>
       </div>
       <div class="gmsure" id="gmSure" hidden><p id="gmSureTxt"></p><span class="gsp"></span><button class="ghost" id="gmSureNo" type="button">Cancel</button><button class="gmyes" id="gmSureYes" type="button">Leave</button></div>
       <div class="gmbar gmsub">
-        <button class="ghost sm" id="gmSound" type="button" hidden>Sound: on</button><button class="ghost sm setb" id="gmSet" type="button">⚙ Settings</button><button class="ghost sm ctl" type="button">Controls</button><button class="ghost sm tmb" type="button">Kits</button><button class="ghost sm pub" type="button">Power-ups</button><button class="ghost sm" id="gmMap" type="button">Shot map</button><button class="ghost sm hlpb" type="button">How to play</button>
+        <button class="ghost sm" id="gmSound" type="button" hidden>Sound: on</button><button class="ghost sm setb" id="gmSet" type="button">⚙ Settings</button><button class="ghost sm" id="gmKeys" type="button" title="Every key for this game and what it does">Keys for this game</button><button class="ghost sm ctl" type="button">Controls</button><button class="ghost sm tmb" type="button">Kits</button><button class="ghost sm pub" type="button">Power-ups</button><button class="ghost sm" id="gmMap" type="button">Shot map</button><button class="ghost sm hlpb" type="button">How to play</button>
       </div>
     </div>
   </div>
@@ -1634,7 +1674,7 @@
     </div>
   </div>
   <div class="overlay" id="menu" data-tab="play">
-    <div class="mhead"><h2 id="menuTitle" title="Home: back to Play">Pitch <span class="tb">Brawl</span></h2><button class="mshare" id="shareBtn" type="button" title="Copy the link to send to your friends">Share it with your friends!</button><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p><div class="mhrow"><button class="mtour mhome" id="homeBtn" type="button" title="Back to Play, the first page"><span class="mi" data-ic="home" aria-hidden="true"></span> Home</button><button class="tourb mtour" type="button" title="A tour of the menu: what every part is for, in under a minute"><span class="mi" data-ic="compass" aria-hidden="true"></span> Show me around</button><button class="mnews newsb" type="button" title="What changed in each update"><span class="mi" data-ic="star" aria-hidden="true"></span> What's new</button></div></div>
+    <div class="mhead"><h2 id="menuTitle" title="Home: back to Play">Pitch <span class="tb">Brawl</span></h2><button class="mshare" id="shareBtn" type="button" title="Copy the link to send to your friends">Share it with your friends!</button><p id="menuText">Haxball-style futsal: bump, block and bend it into the net.</p><div class="mhrow"><button class="mtour mhome" id="homeBtn" type="button" title="Back to Play, the first page"><span class="mi" data-ic="home" aria-hidden="true"></span> Home</button><button class="tourb mtour" type="button" title="A tour of the menu: what every part is for, in under a minute"><span class="mi" data-ic="compass" aria-hidden="true"></span> Show me around</button><button class="mnews newsb" type="button" title="What changed in each update"><span class="mi" data-ic="star" aria-hidden="true"></span> What's new</button><button class="mnews msgb" id="msgBtn" type="button" title="Chat with your friends"><span class="mi" data-ic="chat" aria-hidden="true"></span> Messages<b class="msgn" hidden></b></button></div></div>
     <div class="mtabs" role="tablist" aria-label="Modes">
       <button type="button" role="tab" data-tab="play" title="Matches against the computer, the World Cup, the League and the Daily challenge" aria-selected="true" class="on">Play</button><button type="button" role="tab" data-tab="train" title="Drills on your own: shooting, free kicks, dribbling, keeper, penalties" aria-selected="false">Practice</button><button type="button" role="tab" data-tab="friends" title="Play online with a room code, or two or three of you on one keyboard" aria-selected="false">Multiplayer</button><button type="button" role="tab" data-tab="frs" title="Your friend code and your friends: join, invite, watch or message them" aria-selected="false">Friends</button><button type="button" role="tab" data-tab="me" title="Your saved goals, scores, achievements and shot map" aria-selected="false">My stuff</button><button type="button" role="tab" data-tab="learn" title="Learn to play: a two-minute Quick start, then parts that go deeper" aria-selected="false">Tutorial</button>
     </div>
@@ -1690,7 +1730,7 @@
         <div class="frbox"><span class="lbl">Your friend code</span><div class="frcode"><b class="code" id="frMine"></b><button class="ghost sm" id="frCopy" type="button">Copy</button></div><small>give it to a friend; they add you with it</small></div>
         <div class="frbox"><span class="lbl">Add a friend</span><div class="frcode"><input type="text" id="frAdd" maxlength="6" size="9" placeholder="their code" autocomplete="off" spellcheck="false" aria-label="A friend's code"><button id="frAddBtn" type="button">Add</button></div><small class="note" id="frMsg"></small></div>
       </div>
-      <div class="frhead"><span class="lbl">Your friends</span><span class="note" id="frNote"></span></div>
+      <div class="frhead"><span class="lbl">Your friends</span><span class="note" id="frNote"></span><button class="ghost sm msgb" id="frMsgs" type="button" title="All your chats in one place"><span class="mi" data-ic="chat" aria-hidden="true"></span> Messages<b class="msgn" hidden></b></button></div>
       <div class="frlist" id="frList"></div>
       <p class="mnote frwhere" id="frWhere"></p>
       <div class="frhead"><span class="lbl">Others online now</span><span class="note" id="whoNote"></span></div>
@@ -5387,8 +5427,11 @@ function PBAI(C){
   // (v28.98) miss: the chance it misreads a ball coming over (goes to the wrong spot, by about missD): the net games' hits
   // all come down in now, so the computer's mistakes end rallies too
   // (v30.0, "some of them gets caught way too easily and we cant win": catchP 0.1 / 0.25 / 0.45 -> 0.07 / 0.16 / 0.3)
+  // (v30.1, "are all the modes begineer friendly": Easy misreads more balls, miss 0.16 -> 0.27, missD 40 -> 45. A new player's
+  // share of the points on Easy, 240 points each: volleyball 30% -> 37%, badminton 40% -> 58%, ping pong 25% -> 42% (gs/beg.js: late,
+  // sloppy, misreads, never holds a direction when hitting))
   const DB_FAST_CATCH = 0.35;
-  const GL = [{react: 18, err: 34, duty: 0.75, catchP: 0, dodge: 0.3, miss: 0.16, missD: 40}, {react: 10, err: 18, duty: 0.95, catchP: 0.07, dodge: 0.5, miss: 0.12, missD: 34}, {react: 5, err: 8, duty: 1, catchP: 0.16, dodge: 0.7, miss: 0.08, missD: 32}, {react: 1, err: 2, duty: 1, catchP: 0.3, dodge: 0.85, miss: 0.03, missD: 28}];
+  const GL = [{react: 18, err: 34, duty: 0.75, catchP: 0, dodge: 0.3, miss: 0.27, missD: 45}, {react: 10, err: 18, duty: 0.95, catchP: 0.07, dodge: 0.5, miss: 0.12, missD: 34}, {react: 5, err: 8, duty: 1, catchP: 0.16, dodge: 0.7, miss: 0.08, missD: 32}, {react: 1, err: 2, duty: 1, catchP: 0.3, dodge: 0.85, miss: 0.03, missD: 28}];
   function keysTo(me, tx, ty, slowR){   // 8-way keys toward a spot, easing off as it gets there
     const dx = tx - me.x, dy = ty - me.y, dist = Math.hypot(dx, dy); if (dist < 1.5 && Math.hypot(me.vx, me.vy) < 0.6) return 0;
     const want = Math.min(2.7, dist * (slowR || 0.09)), wx = dist > 0 ? dx / dist * want : 0, wy = dist > 0 ? dy / dist * want : 0;
@@ -5816,7 +5859,7 @@ const TIME_OPTS = [1, 2, 3, 5, 7, 10, 15, 20, 0], GOAL_OPTS = [1, 2, 3, 4, 5, 7,
 try { if (!localStorage.getItem('pb.tut') && !localStorage.getItem('pb.you') && !localStorage.getItem('pb.keys') && !localStorage.getItem('pb.newRules')){
   for (const [k, v] of [['pb.curve', 0], ['pb.slide', 0], ['pb.fk', 0], ['pb.power', 0], ['pb.newRules', 1]]) localStorage.setItem(k, JSON.stringify(v)); } } catch (e) {}
 const SET = {
-  diff: [0, 1, 2, 3].includes(store.get('pb.diff', 1)) ? store.get('pb.diff', 1) : 1,
+  diff: (() => { const d = store.get('pb.diff', null); if ([0, 1, 2, 3].includes(d)) return d; if (!store.get('pb.you', null)){ store.set('pb.diff', 0); return 0; } return 1; })(),   // (v30.1: someone new starts on Easy; who has played and never picked keeps Normal)
   dk: [0, 1, 2, 3].includes(store.get('pb.diffK', -1)) ? store.get('pb.diffK', -1) : -1,   // (v28.74: the computer's keepers at a level of their own; -1: the same as the rest, which diff is)
   time: TIME_OPTS.includes(store.get('pb.time', 3)) ? store.get('pb.time', 3) : 3, goals: GOAL_OPTS.includes(store.get('pb.goals', 3)) ? store.get('pb.goals', 3) : 3,
   extrapAuto: false,
@@ -5826,7 +5869,7 @@ const SET = {
   ghost: !!store.get('pb.ghost', 0), smooth: store.get('pb.smooth', 1) !== 0, zoom: (z => { const first = !store.get('pb.zoomV', 0); if (first) store.set('pb.zoomV', 1);   // (a kept Auto from before this version is that bug's, written at every load: Follow all once, then whatever is picked)
     return Number.isInteger(z) && z >= 0 && z <= 7 && !(first && z === 0) ? z : 7; })(store.get('pb.zoom', 7)),
   ref: store.get('pb.ref', 1) !== 0, aiCom: store.get('pb.aicom', 1) !== 0, sound: store.get('pb.sound', 1) !== 0, replays: store.get('pb.replays', 1) !== 0, side: store.get('pb.side', 0) === 1 ? 1 : 0,
-  legs: store.get('pb.legs', 1) === 2 ? 2 : 1, ac: [0, 1, 2].map(i => { const v = store.get('pb.ac', null); return Array.isArray(v) && v[i] === 1; }), inv: [0, 1, 2].map(i => { const v = store.get('pb.inv', null); return Array.isArray(v) && v[i] === 1; }), power: store.get('pb.power', 0) === 1, intro: store.get('pb.intro', 1) !== 0, curve: store.get('pb.curve', 1) === 1, slide: store.get('pb.slide', 1) !== 0, dive: store.get('pb.dive', 1) !== 0, map: [0, 1, 2, 3].includes(store.get('pb.map', 0)) ? store.get('pb.map', 0) : 0, fk: store.get('pb.fk', 1) === 1, curveLv: [1, 2, 3, 4, 5].includes(store.get('pb.curveLv', 3)) ? store.get('pb.curveLv', 3) : 3, tie: [0, 1, 2].includes(store.get('pb.tie', 0)) ? store.get('pb.tie', 0) : 0,
+  legs: store.get('pb.legs', 1) === 2 ? 2 : 1, ac: [0, 1, 2].map(i => { const v = store.get('pb.ac', null); return Array.isArray(v) && v[i] === 1; }), inv: [0, 1, 2].map(i => { const v = store.get('pb.inv', null); return Array.isArray(v) && v[i] === 1; }), power: store.get('pb.power', 0) === 1, kc: [0, 1, 2].includes(store.get('pb.kc', 0)) ? store.get('pb.kc', 0) : 0, intro: store.get('pb.intro', 1) !== 0, curve: store.get('pb.curve', 1) === 1, slide: store.get('pb.slide', 1) !== 0, dive: store.get('pb.dive', 1) !== 0, map: [0, 1, 2, 3].includes(store.get('pb.map', 0)) ? store.get('pb.map', 0) : 0, fk: store.get('pb.fk', 1) === 1, curveLv: [1, 2, 3, 4, 5].includes(store.get('pb.curveLv', 3)) ? store.get('pb.curveLv', 3) : 3, tie: [0, 1, 2].includes(store.get('pb.tie', 0)) ? store.get('pb.tie', 0) : 0,
   nick: clean(store.get('pb.nick', ''), 16), avatar: clean(store.get('pb.avatar', ''), 2),
   coach: store.get('pb.coach', null) == null ? null : store.get('pb.coach', 1) !== 0,   // (v28.57: null = on until 8 matches played)
   fill: store.get('pb.fill', 1) !== 0   // (v28.59: the game fills the tab in a match)
@@ -6313,6 +6356,7 @@ function updateLocal(s, dt){
 function tick(s){
   const G = s.G;
   if (s.intro && s.kind !== 'guest'){ if (introOver(s)) introEnd(s); else G.pause = Math.max(G.pause, 120); }   // (v28.34: the walk-out: the match waits)
+  if (s.kcard && s.kind === 'local') G.pause = Math.max(G.pause, 120);   // (v30.1: the controls card: the match waits)
   if (s.mode && s.mode.before) s.mode.before(s);
   if (s.net) s.net.beforeTick(s);
   for (const p of G.players) if (p.ctrl === 'ai'){
@@ -7391,7 +7435,7 @@ function triMode(){
   };
   M.clock = s => {
     const G = s.G, tl = G.cfg.timeLimit, t = G.time;
-    if (G.pause > 0) return [G.pause < 120 ? 'Get ready' : 'Paused', tl > 0 ? fmt(Math.max(0, Math.ceil(tl * 60 - t))) : fmt(t)];
+    if (G.pause > 0) return [s.kcard ? 'Controls' : G.pause < 120 ? 'Get ready' : 'Paused', tl > 0 ? fmt(Math.max(0, Math.ceil(tl * 60 - t))) : fmt(t)];
     if (tl > 0){
       if (t >= tl * 60) return G.state < 3 && C.topTied(G) ? ['Overtime', '+' + fmt(t - tl * 60)] : ['Full time', '0:00'];
       return [G.sp && G.state === 1 ? 'Free kick' : G.state === 0 ? 'Kick off' : 'Time left', fmt(Math.ceil(tl * 60 - t))];
@@ -7509,7 +7553,98 @@ function gameTut(s, game, real){
   M.gtut = st; setTimeout(show, 0);   // (once the session is the one running)
 }
 // (v29.1 showed a card with the keys over the court at the start of each game; v29.6, "remove the control thing at the start of
-// every game its annoying": gone. The keys are in ⚙ Settings, How to play and each game's tutorial)
+// every game its annoying": gone)
+// v30.1 ("beginner friendly showing every control like before game so they know what everything does"): before a match, a
+// card with every key this game uses and what it does, and how to win; the match waits till Play (Enter, Space or your kick
+// key; other keys do nothing to it, so it isn't skipped by accident). It comes by itself before your first KC_FIRST matches of each game
+// (pb.kcSeen), then no more, so it isn't the every-game card v29.6 took away; ⚙ Settings → Controls card: first games /
+// every match / never, and ☰ Menu → Keys for this game any time. Two or three on one keyboard: a column of keys each.
+// Online the match doesn't wait for it: Play, a click or your kick key closes it
+const KC_FIRST = 3, KC_SET = ['first games', 'every match', 'never'];
+const kcGame = s => (s && s.G && s.G.cfg && s.G.cfg.game) || 'foot';
+function kcWanted(s, again){
+  if (!s || !s.G || again || SET.kc === 2 || s.cfg.gtut || s.cfg.daily || !s.locals || !s.locals.length) return false;
+  if (s.mode && s.mode.kind !== 'game' && s.cfg.mode !== 'tri') return false;   // (the tutorial and the drills say their own)
+  if (SET.kc === 1) return true;
+  const seen = store.get('pb.kcSeen', {}); return !((seen && seen[kcGame(s)]) >= KC_FIRST);
+}
+const kcEsc = t => String(t).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'})[c]);
+function kcRows(s){
+  const G = s.G, cfg = G.cfg, gm = kcGame(s), touch = coarseScreen() && !kbUsed;
+  const locs = touch ? s.locals.slice(0, 1) : s.locals.slice().sort((a, b) => String(a.slot).localeCompare(String(b.slot)));
+  const kb = t => t ? `<kbd>${kcEsc(t)}</kbd>` : '<i class="kcno">(no key)</i>';
+  const key = (sl, a) => { const p = sl === 'p2' || sl === 'p3' ? sl : 'p1'; return bind[p] && bind[p][a] ? kname(bind[p][a]) : ''; };
+  const K = sl => ({U: key(sl, 'up'), D: key(sl, 'down'), L: key(sl, 'left'), R: key(sl, 'right'), k: key(sl, 'kick'), sl: key(sl, 'slide'), gk: key(sl, 'gk')});
+  const four = sl => { const k = K(sl); return [k.U, k.L, k.D, k.R].map(kb).join('') + (sl === 'both' ? ' <small>or the arrows</small>' : ''); };
+  const pl = L => G.players.find(p => p.id === L.pid), rows = [];
+  const row = (n, t, k, tk) => rows.push({n, t, k: sl => touch ? `<b class="kct">${tk || ''}</b>` : k(sl, K(sl))});
+  let win = '';
+  if (gm === 'volley' || gm === 'badminton'){
+    const v = gm === 'volley';
+    row('Run', '', (sl, k) => kb(k.L) + kb(k.R), 'the stick');
+    row('Jump', '', (sl, k) => kb(k.U), 'stick up');
+    row('Hit', 'just as the ball reaches you (it goes straight through you otherwise). The ring on the floor shows where it comes down', (sl, k) => kb(k.k), 'KICK');
+    row('Aim', 'where it meets you: over your head it goes high, in front of you longer, behind you short', () => '<small>your spot</small>', 'your spot');
+    row('More / less', 'hold towards the net for a longer shot, away for a shorter one. From the back of your court, push or it won\'t get over', (sl, k) => `hold ${kb(k.L)} or ${kb(k.R)}`, 'stick left / right');
+    if (v) row('Spike', 'by the net, jump as the ball comes down high and hit: fast and down', (sl, k) => `${kb(k.U)} + ${kb(k.k)}`, 'jump + KICK');
+    else row('Smash', 'jump as the shuttle comes down high over you and hit: fast and down', (sl, k) => `${kb(k.U)} + ${kb(k.k)}`, 'jump + KICK');
+    if (v) row('Set it up', 'hit it short and high to yourself or a teammate, then spike it', (sl, k) => `hold away + ${kb(k.k)}`, 'away + KICK');
+    win = `${v ? 'Land it on their side' : 'Put the shuttle down on their side'} · ${v ? 'three touches a side' : 'one hit a side'} · first to ${cfg.scoreLimit || (v ? 15 : 11)}, win by 2`;
+  } else if (gm === 'pong'){
+    row('Move', '', four, 'the stick');
+    row('Hit', 'it bounces once on your half, then hit it before it lands again (the ring shows where it will be)', (sl, k) => kb(k.k), 'KICK');
+    row('Go wide', 'hold up or down as you hit: it goes to that side of the table', (sl, k) => `hold ${kb(k.U)} or ${kb(k.D)}`, 'stick up / down');
+    row('Deep / short', 'hold towards the net for a deep one, away for a short one', (sl, k) => `hold ${kb(k.L)} or ${kb(k.R)}`, 'stick left / right');
+    win = `Make them miss · first to ${cfg.scoreLimit || 11}, win by 2`;
+  } else if (gm === 'dodge'){
+    row('Move', 'you stay on your half', four, 'the stick');
+    row('Throw', 'walk up to a ball and press kick: it goes the way you face, and bends a little towards them', (sl, k) => kb(k.k), 'KICK');
+    row('Catch', 'press kick just as a throw (it has a coloured trail) reaches you: the thrower loses a life. Too early, held or mashed, and it hits you', (sl, k) => kb(k.k), 'KICK');
+    row('Fast throw', 'a yellow core in the trail: much harder to catch, press right as it gets to you (or just get out of the way)', () => '<small>dodge it</small>', 'dodge it');
+    row('Safe ball', 'a ball that bounced off a wall, or rolls slowly, can\'t hit you', () => '<small>—</small>', '—');
+    win = `A hit costs a life; out of lives, you're out · knock out their whole side to win the round · first to ${cfg.scoreLimit || 3} rounds`;
+  } else {
+    const me = pl(locs[0]) || {}, mates = q => G.players.some(r => r.team === q.team && r !== q && r.ctrl === 'ai');
+    row('Move', '', four, 'the stick');
+    row('Kick', 'when you\'re right next to the ball. Hold it as you run in and it kicks the moment you touch', (sl, k) => kb(k.k), 'KICK');
+    if (cfg.curve) row('Curl', 'hold up or down as you kick: the ball bends round people (it still goes where you aim)', (sl, k) => `hold ${kb(k.U)} or ${kb(k.D)} + ${kb(k.k)}`, 'stick up / down + KICK');
+    if (cfg.power) row('Power shot', 'stay right on the ball until it glows, then kick: a much faster shot', (sl, k) => `stay on it, ${kb(k.k)}`, 'stay on it, KICK');
+    if (locs.some(L => { const q = pl(L); return q && mates(q); })) row('Call for it', 'tap kick twice quickly: your teammate passes to you', (sl, k) => kb(k.k) + kb(k.k), 'KICK twice');
+    if (cfg.slide) row('Slide tackle', 'slide in to win the ball: get the ball, not the man (a foul in your own area is a penalty). In goal it\'s a dive', (sl, k) => kb(k.sl), 'SLIDE');
+    if (cfg.fk) row('Free kick', 'when you\'re fouled: up / down aims, left / right curls, hold kick for power and let go to shoot', (sl, k) => `${kb(k.U)}${kb(k.D)} ${kb(k.L)}${kb(k.R)} hold ${kb(k.k)}`, 'stick, hold KICK');
+    if (!touch && locs.some(L => { const q = pl(L); return q && G.players.some(r => r.team === q.team && r !== q && r.role === 'keeper' && r.ctrl === 'ai'); })) row('Go in goal', 'swap with your keeper (the computer plays your man); again to come back out', (sl, k) => kb(k.gk));
+    if (!s.mode){ const tl = cfg.timeLimit, sl = cfg.scoreLimit, d = C.TEAMS[me.team | 0] ? C.TEAMS[me.team | 0].dir : 0, side = d * (sideFlip() ? -1 : 1);
+      win = `${d && locs.length === 1 ? `You're ${KIT[me.team | 0].name}: score in the goal on the ${side < 0 ? 'right' : 'left'}` : 'Score in their goal'} · ${tl ? tl + ' minutes' : 'no time limit'}${sl ? ', first to ' + sl : ''}`; }
+    else if (s.cfg && s.cfg.mode === 'tri') win = '1v1v1: three goals, one each. Score in either of the others, keep your own out';
+  }
+  const heads = !touch && locs.length > 1 ? locs.map(L => { const q = pl(L); return `${String(L.slot).toUpperCase()}${q && KIT[q.team] ? ' · ' + KIT[q.team].name : ''}`; }) : null;
+  return {rows, win, heads, slots: locs.map(L => L.slot), touch};
+}
+function kcBox(){ let b = $('kcCard'); if (!b){ b = document.createElement('div'); b.id = 'kcCard'; b.className = 'kcard'; b.hidden = true; b.setAttribute('role', 'dialog'); b.setAttribute('aria-label', 'Controls'); ($('game') || document.body).append(b); } return b; }
+let kcGo = null;
+function kcShow(s, go, byHand){
+  const R = kcRows(s), box = kcBox(), gm = kcGame(s), online = s.kind !== 'local';
+  const head = R.heads ? `<tr><th></th>${R.heads.map(h => `<th>${kcEsc(h)}</th>`).join('')}</tr>` : '';
+  const body = R.rows.map(r => R.heads ? `<tr class="kcm"><td class="kcw"><b>${r.n}</b></td>${R.slots.map(sl => `<td class="kck">${r.k(sl)}</td>`).join('')}</tr>${r.t ? `<tr class="kcs"><td colspan="${R.slots.length + 1}"><small>${r.t}</small></td></tr>` : ''}`
+    : `<tr><td class="kck">${r.k(R.slots[0])}</td><td class="kcw"><b>${r.n}</b>${r.t ? `<small>${r.t}</small>` : ''}</td></tr>`).join('');
+  const more = R.touch ? '' : `<p class="kcmore"><kbd>P</kbd> pause · <kbd>Esc</kbd> menu${online ? ' · <kbd>Enter</kbd> chat' : ' · <kbd>R</kbd> restart'} · <kbd>1</kbd>–<kbd>8</kbd> emotes · <kbd>F</kbd> full screen</p>`;
+  box.innerHTML = `<div class="kch">${kcEsc(GAME_NAMES[gm] || 'Football')} · controls</div>${R.win ? `<p class="kcwin"><b>How to win</b> ${kcEsc(R.win)}</p>` : ''}<div class="kcsc"><table class="kctab">${head}${body}</table></div>${more}`
+    + `<div class="kcrow"><label class="kcchk"><input type="checkbox" id="kcEvery"${SET.kc === 1 ? ' checked' : ''}> Show before every match</label><span class="gsp"></span><button type="button" class="kcgo" id="kcPlay">${byHand ? 'Back to the match' : online ? 'Got it' : 'Play'}</button></div>`
+    + `<p class="kcnote">${R.touch ? 'Tap Play' : `Enter, Space or ${R.slots.length > 1 ? 'a kick key' : 'your kick key'} ${byHand ? 'goes back' : 'plays'}`} · see this any time: ☰ Menu → Keys for this game</p>`;
+  box.classList.toggle('kcmulti', !!R.heads); box.hidden = false; box.dataset.hand = byHand ? '1' : ''; kcGo = go || null; s.kcard = !online;
+  $('kcEvery').onchange = e => { SET.kc = e.target.checked ? 1 : 0; store.set('pb.kc', SET.kc); kcSetTxt(); };
+  $('kcPlay').onclick = e => { e.currentTarget.blur(); kcClose(); };
+  box.onpointerdown = online ? (e => { if (!e.target.closest('input,label')) kcClose(); }) : null;   // (online: a click anywhere on it)
+  if (!byHand && SET.kc !== 1){ const seen = store.get('pb.kcSeen', {}), o = seen && typeof seen === 'object' && !Array.isArray(seen) ? seen : {}; o[gm] = (o[gm] | 0) + 1; store.set('pb.kcSeen', o); }
+}
+function kcClose(){
+  const box = $('kcCard'); if (!box || box.hidden) return;
+  box.hidden = true; const s = sess, go = kcGo; kcGo = null;
+  if (s && s.kcard){ s.kcard = false; if (s.G && s.G.pause >= 120) s.G.pause = box.dataset.hand ? 119 : 0; }   // (opened from the menu: back with the countdown)
+  if (go) try { go(); } catch (e) {}
+}
+const kcOpen = () => !!$('kcCard') && !$('kcCard').hidden;
+function kcSetTxt(){ const b = $('kcSetBtn'); if (b){ b.textContent = 'Controls card: ' + KC_SET[SET.kc | 0]; b.setAttribute('aria-pressed', String(SET.kc !== 2)); } }
 // (v30.0) the net games, win by two: match point (one more point wins it), or deuce (level at the limit or past it)
 function netCall(G){
   const sl = G.cfg.scoreLimit, sc = G.score; if (!(sl > 0) || !C.netWinner || sc.length !== 2) return '';
@@ -7554,7 +7689,7 @@ function gameMode(game, online){
   };
   M.clock = s => {
     const G = s.G, tl = G.cfg.timeLimit, t = G.time;
-    if (G.pause > 0) return [G.pause < 120 ? 'Get ready' : 'Paused', tl > 0 ? fmt(Math.max(0, Math.ceil(tl * 60 - t))) : fmt(t)];
+    if (G.pause > 0) return [s.kcard ? 'Controls' : G.pause < 120 ? 'Get ready' : 'Paused', tl > 0 ? fmt(Math.max(0, Math.ceil(tl * 60 - t))) : fmt(t)];
     const lab = game === 'dodge' ? `Round ${Math.min(G.score[0] + G.score[1] + 1, 99)}` : G.state === 0 ? 'Serve' : G.cfg.scoreLimit ? `To ${G.cfg.scoreLimit} · by 2` : GAME_NAMES[game];
     if (tl > 0){ if (t >= tl * 60) return [G.state < 3 && G.score[0] === G.score[1] ? 'Next wins' : 'Full time', G.state < 3 ? '+' + fmt(t - tl * 60) : '0:00']; return [lab, fmt(Math.ceil(tl * 60 - t))]; }
     return [lab, fmt(t)];
@@ -9885,12 +10020,13 @@ function overlayText(s, V){
     ctx.font = '500 12px Rubik, sans-serif'; ctx.lineWidth = 3; ctx.strokeText('Practise on your own till it restarts · only you see this', cssW / 2, 32); ctx.fillStyle = 'rgba(232,227,227,.9)'; ctx.fillText('Practise on your own till it restarts · only you see this', cssW / 2, 32);
   }
   if (V.pause > 0 && s.hostIntro){ ctx.font = '500 13px Rubik, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = '#e3e6ec'; ctx.fillText('The teams are walking out · the host can skip it', cssW / 2, 10); }
+  else if (V.pause > 0 && s.kcard){ ctx.fillStyle = 'rgba(26,30,40,.45)'; ctx.fillRect(0, 0, cssW, cssH); }   // (v30.1: the controls card over it)
   else if (V.pause > 0){
     ctx.fillStyle = 'rgba(26,30,40,.55)'; ctx.fillRect(0, 0, cssW, cssH);
     // (v25.6, "the get ready and puase screen combine maybe": one screen; resuming, it counts down under PAUSED)
     bigText('PAUSED', null, '#e8e3e3', cssH / 2 - 10, 36);
     if (V.pause < 120){ const w = V.pause / 120 * 200; ctx.fillStyle = '#fff'; ctx.fillRect(cssW / 2 - w / 2, cssH / 2 + 24, w, 8); ctx.font = '600 14px Rubik, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = '#ffd166'; ctx.fillText(`Back in ${Math.max(1, Math.ceil(V.pause / 60))}…`, cssW / 2, cssH / 2 + 40); }
-    else { ctx.font = '500 13px Rubik, sans-serif'; ctx.fillStyle = '#a3acc2'; ctx.fillText(s.kind === 'guest' ? 'The host paused the game' : 'P, Esc or Pause to resume · R to restart', cssW / 2, cssH / 2 + 28); }
+    else { ctx.font = '500 13px Rubik, sans-serif'; ctx.fillStyle = '#a3acc2'; ctx.fillText(s.kind === 'guest' ? 'The host paused the game' : dmPaused === s ? 'Waiting while you type a message · it carries on when you stop' : 'P, Esc or Pause to resume · R to restart', cssW / 2, cssH / 2 + 28); }
   }
 }
 // v25.6.3 ("add a cool animation"): the goal's title. A slanted band in the scorers' colours sweeps in across the screen
@@ -10004,7 +10140,7 @@ function clockInfo(s){
   const G = s.G;
   if (s.mode && s.mode.clock) return s.mode.clock(s).concat(false);
   if (s.mode && (s.mode.kind === 'practice' || s.mode.kind === 'keeper')) return ['Practice', fmt(G.frame / 60), false];
-  if (G.pause > 0) return [s.intro || s.hostIntro ? 'Walk-out' : G.pause < 120 ? 'Get ready' : 'Paused', clockText(G)[1], false];
+  if (G.pause > 0) return [s.intro || s.hostIntro ? 'Walk-out' : s.kcard ? 'Controls' : G.pause < 120 ? 'Get ready' : 'Paused', clockText(G)[1], false];
   return clockText(G);
 }
 function clockText(G){
@@ -10090,7 +10226,7 @@ function updateUI(){
   if (s.kind === 'guest' && s.lag) hud = (hud ? hud + '\n' : '') + s.lag;
   if ((s.kind === 'host' || s.kind === 'guest') && NET.on){ const pl = pingLine(); if (pl) hud = (hud ? hud + '\n' : '') + pl; }
   setHidden('hud', !hud); if (hud) setText('hud', hud);
-  setHidden('exitBtn', false); kpButton(s); roleBtn(s); setHidden('gmBtn', !!s.done); { const ok = !(s.done || s.rp || !s.locals || !s.locals.length || s.mode); setHidden('emoBtn', !ok); if (!ok) setHidden('emoBar', true); } setHidden('setCorner', true); setHidden('pauseBtn', !!(s.done || s.rp || s.intro || (s.kind === 'guest' && !isMgr())));   // (v25.6: settings live in ☰ Menu during a match. v28.6, "pause doesnt work when im manager": the Pause button's line had ended up inside this comment, so it never showed)
+  setHidden('exitBtn', false); kpButton(s); roleBtn(s); setHidden('gmBtn', !!s.done); { const ok = !(s.done || s.rp || !s.locals || !s.locals.length || s.mode); setHidden('emoBtn', !ok); if (!ok) setHidden('emoBar', true); } setHidden('setCorner', true); setHidden('pauseBtn', !!(s.done || s.rp || s.intro || s.kcard || (s.kind === 'guest' && !isMgr())));   // (v25.6: settings live in ☰ Menu during a match. v28.6, "pause doesnt work when im manager": the Pause button's line had ended up inside this comment, so it never showed)
   { const sg = !!lastGoalToSave(s); setHidden('saveGoalBtn', !sg); if (shown.sg !== sg){ shown.sg = sg; $('stage').classList.toggle('sg', sg); } }
   setHidden('chat', !NET.on);
   setHidden('slideBtn', !(G.cfg && G.cfg.slide && !s.done));
@@ -10133,6 +10269,13 @@ const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one
 // understand"): each update a short headline, each change one short line: [kind, where, what]. Kinds: new, fix, better,
 // change. Every release adds its entry here (notes.md, release routine)
 const PATCH = [
+  {v: '30.1', d: '24 Nov 2026', title: 'Messages, a controls card, and an easier Easy', items: [
+    ['new', 'Messages', 'All your chats with friends in one place: Messages at the top of the menu, in the Friends tab, and in a match under ☰ Menu. Unread chats come first, with a count.'],
+    ['new', 'Messages', 'Against the computer, the match waits while you type a message and carries on when you stop.'],
+    ['new', 'Every game', 'Before a match, a card shows every key for that game, what it does, and how to win. Two of you on one keyboard get a column each.'],
+    ['change', 'Every game', 'The card shows by itself for your first 3 matches of each game, then stops. Settings → Controls card: first games, every match or never. ☰ Menu → Keys for this game shows it any time.'],
+    ['better', 'Volleyball, badminton, ping pong', 'The computer on Easy misses more often, so someone new can win points.'],
+    ['change', 'Computer level', 'Someone playing for the first time starts on Easy. If you\'ve played before, your level stays as it was.']]},
   {v: '30.0', d: '24 Nov 2026', title: 'Win by two, and fairer dodgeball catches', items: [
     ['change', 'Volleyball, badminton, ping pong', 'You have to win by two points, like the real games. Badminton stops at 20 (the next point wins at 19-19).'],
     ['change', 'Dodgeball', 'Fast throws are much harder to catch: press right as they reach you. They have a yellow core in their trail.'],
@@ -10376,6 +10519,8 @@ function autoPause(){
 function start(cfg){
   setTimeout(() => { try { frPub(); } catch (e) {} }, 300);   // (v28.58: friends see what you're playing)
   $('tutBox').hidden = true; $('tutWelcome').hidden = true; tourEnd(1);
+  { const kb = $('kcCard'); if (kb) kb.hidden = true; kcGo = null; }   // (v30.1: the controls card goes with its session)
+  const again = !!(sess && sess.kind === 'local' && !sess.done && sess.cfg && sess.cfg.mode === cfg.mode);   // (a restart: no card again)
   { const gb = $('gtBox'); if (gb) gb.hidden = true; }   // (v29.0: a game's tutorial box goes with its session)
   // (v29.0) the first time you play one of the other games on your own: its tutorial first, against the computer on Easy
   if (isGame(cfg.mode) && !cfg.online && !cfg.two && !cfg.three && cfg.gtut !== false && !cfg.gtut && !store.get('pb.gtut.' + cfg.mode, 0)) cfg = Object.assign({}, cfg, {gtut: true, real: Object.assign({}, cfg), diff: 0, size: 1, timeLimit: 0, scoreLimit: 0});
@@ -10394,7 +10539,8 @@ function start(cfg){
   if (isGame(cfg.mode)){ s.mode = gameMode(cfg.mode); if (cfg.gtut) gameTut(s, cfg.mode, cfg.real || cfg); } else if (cfg.mode === 'tri') s.mode = triMode(); else if (cfg.mode === 'practice') s.mode = practiceMode(); else if (cfg.mode === 'pens') s.mode = pensMode(!!cfg.two); else if (cfg.mode === 'duel') s.mode = duelMode(!!cfg.two); else if (cfg.mode === 'keeper') s.mode = keeperMode(); else if (cfg.mode === 'wall') s.mode = wallMode(cfg); else if (cfg.mode === 'dribble') s.mode = dribbleMode(); else if (cfg.mode === 'fkdrill') s.mode = fkMode(); else if (cfg.mode === 'tutorial') s.mode = tutorialMode(cfg.lesson);
   if (cfg.daily && s.mode) dailyWrap(s);
   if (s.mode && s.mode.init) s.mode.init(s);
-  if (introWanted(s)) introStart(s); else { legIntro(s); if (!s.mode) setTimeout(() => { if (sess === s && !s.done && s.G && s.G.state === 0) refStart(s); }, 250); }   // (v28.69: the coin toss while the kick-off waits)   // (v28.34: the walk-out first; a leg's banner after it)
+  const go = () => { if (introWanted(s)) introStart(s); else { legIntro(s); if (!s.mode) setTimeout(() => { if (sess === s && !s.done && s.G && s.G.state === 0) refStart(s); }, 250); } };   // (v28.69: the coin toss while the kick-off waits)   // (v28.34: the walk-out first; a leg's banner after it)
+  if (kcWanted(s, again)) setTimeout(() => { if (sess === s && !s.done) kcShow(s, go); else go(); }, 0); else go();   // (v30.1: the controls card first, the match waiting)
   if (bot){ const opp = s.G.players.find(p => p.team === 1); if (opp) s.custom = new Map([[opp.id, bot]]); }
   sess = s; cam.x = cam.y = 0; cam.z = 0; cam.fk = 0; fx.goal = fx.moment = null; fx.pops.length = 0; fx.trail.length = 0; lines.length = 0;
   for (const id of ['menu', ...panels]) $(id).hidden = true;
@@ -10711,6 +10857,7 @@ $('helpDone').addEventListener('click', () => closePanel('helpPanel'));
 function exitToMenu(text){
   setTimeout(() => { try { frPub(); } catch (e) {} }, 0);   // (v28.58: friends see you're back in the menu)
   const s = sess, given = !!text; $('tutBox').hidden = true;
+  { const kb = $('kcCard'); if (kb) kb.hidden = true; kcGo = null; }
   learnLeave(s);
   if (NET.on) leaveOnline();
   sess = null; fx.goal = fx.moment = null; fx.pops.length = 0; lines.length = 0; kitOverride = null; applyKits(); rpHide(); useTri(false);
@@ -12151,7 +12298,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '30.0';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '30.1';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -13003,6 +13150,7 @@ function startOnline(){
   for (const id2 of ['menu', ...panels]) $(id2).hidden = true;
   rpHide(); sfx.unlock(); say(`${KIT[0].name} v ${KIT[1].name} · online`, 1);
   NET.T.set({s: s.net.snap(s), rp: null}); publishLobby(); pushInputs();
+  if (kcWanted(s)) kcShow(s);   // (v30.1: the keys for this game; online the match doesn't wait for it)
 }
 // the match's rules from the lobby (host and guests alike); a two-legged tie's first leg can end level, its second is
 // decided on the total (L.lg: [leg, first leg's score])
@@ -13312,6 +13460,7 @@ function startGuest(L){
   for (const id of ['menu', ...panels]) $(id).hidden = true;
   sfx.unlock(); say(`${KIT[0].name} v ${KIT[1].name} · online`, 1);
   pushInputs();
+  if (kcWanted(s)) kcShow(s);   // (v30.1)
 }
 function guestRoster(s, L){   // someone took a computer's place, moved, or left
   for (const r of L.ro){ const p = s.G.players.find(q => q.id === r[0]); if (!p) continue; p.ctrl = r[2] === 'a' ? 'ai' : r[2] === 'x' ? 'gone' : 'remote'; s.info.set(p.id, {name: clean(r[4], 16), avatar: clean(r[5], 2)}); }
@@ -13787,7 +13936,7 @@ function dmRender(){
   $('dmSt').textContent = o ? 'online' : FR.cls ? 'offline: they get it next time they\'re on' : inArtifact ? 'offline (in Claude, messages only reach friends who are on)' : 'offline';
   $('dmIn').disabled = !can; $('dmForm').querySelector('button').disabled = !can;
 }
-function dmOpen(f){ if (!dmOk(f)) return; FR.dmWith = f; FR.unread.delete(f); $('dmBox').hidden = false; dmRender(); renderFriends(); setTimeout(() => { try { $('dmIn').focus(); } catch (e) {} }, 30); }
+function dmOpen(f){ if (!dmOk(f)) return; FR.dmWith = f; FR.unread.delete(f); if (frToast.dmFrom === f && !$('frToast').hidden){ $('frToast').hidden = true; frToastDo = null; frToastNoDo = null; } $('dmBox').hidden = false; dmRender(); renderFriends(); setTimeout(() => { try { $('dmIn').focus(); } catch (e) {} }, 30); }
 function dmClose(){ FR.dmWith = ''; $('dmBox').hidden = true; try { $('dmIn').blur(); } catch (e) {} }
 function dmGot(m){
   const f = m.from, x = clean(m.x, 120); if (!x) return;
@@ -13795,6 +13944,7 @@ function dmGot(m){
   if (FR.dmWith === f && !$('dmBox').hidden){ dmRender(); try { sfx.chime && sfx.chime(); } catch (e) {} return; }
   FR.unread.set(f, (FR.unread.get(f) || 0) + 1); renderFriends();
   frToast(`${dmName(f)}${m.away ? ' (while you were away)' : ''}: ${x}`, 'Reply', () => dmOpen(f));
+  frToast.dmFrom = f;   // (v30.1: opening their chat another way puts it away)
 }
 $('dmForm').addEventListener('submit', e => { e.preventDefault(); const f = FR.dmWith, x = clean($('dmIn').value, 120); if (!f || !x) return;
   if (Date.now() - FR.dmAt < 600) return; FR.dmAt = Date.now();
@@ -13802,8 +13952,54 @@ $('dmForm').addEventListener('submit', e => { e.preventDefault(); const f = FR.d
   frSend(f, {k: 'msg', x}); dmAdd(f, true, x, Date.now()); $('dmIn').value = ''; dmRender(); });
 $('dmX').addEventListener('click', dmClose);
 $('dmIn').addEventListener('keydown', e => { if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); dmClose(); } });
+// v30.1 ("add a section wehre u can talk to friends in game"): Messages, every chat in one list (your friends, and anyone
+// you've messaged), the unread first, then the newest; a row opens its chat box. From the menu's header and the Friends
+// tab, and in a match from ☰ Menu (the count of unread on each button). Against the computer the match waits while you
+// type and comes back with the countdown when you stop (online it can't: the room plays on)
+function msgRows(){
+  const ids = new Set([...FR.list.map(x => x.f), ...Object.keys(FR.dm).filter(f => Array.isArray(FR.dm[f]) && FR.dm[f].length)]);
+  return [...ids].filter(dmOk).map(f => { const a = (Array.isArray(FR.dm[f]) ? FR.dm[f] : []).filter(e => Array.isArray(e) && typeof e[2] === 'string'), last = a[a.length - 1] || null;
+    return {f, last, t: last ? +last[1] || 0 : 0, o: dmOn(f), u: FR.unread.get(f) || 0, friend: FR.list.some(q => q.f === f)}; })
+    .sort((a, b) => (b.u > 0) - (a.u > 0) || b.t - a.t || (!!b.o) - (!!a.o) || dmName(a.f).localeCompare(dmName(b.f)));
+}
+function renderMsgs(){
+  const box = $('msgList'); if (!box) return; box.textContent = '';
+  const rows = msgRows();
+  if (!rows.length){ const p = document.createElement('p'); p.className = 'note msgempty'; p.textContent = 'No friends yet. Give a friend your code (Friends tab), or add theirs: then you can chat here.'; box.append(p);
+    if (!sess){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm'; b.textContent = 'Go to Friends'; b.onclick = () => { closePanel('msgPanel'); $('menu').hidden = false; menuTab('frs'); }; box.append(b); }
+    return; }
+  for (const r of rows){
+    const row = document.createElement('button'); row.type = 'button'; row.className = 'msgrow' + (r.u ? ' unread' : '') + (r.o ? ' on' : '');
+    const dot = document.createElement('i'); dot.className = 'frdot ' + (r.o ? (r.o.s || 'free') : 'off');
+    const mid = document.createElement('span'); mid.className = 'msgmid';
+    const nm = document.createElement('b'); nm.textContent = dmName(r.f) + (r.friend ? '' : ' (not a friend)');
+    const pv = document.createElement('small'); pv.textContent = r.last ? (r.last[0] ? 'You: ' : '') + r.last[2] : r.o ? 'online · say hi' : 'no messages yet';
+    mid.append(nm, pv);
+    const rt = document.createElement('span'); rt.className = 'msgrt';
+    const tm = document.createElement('small'); tm.textContent = r.t ? agoTxt(r.t) : r.o ? 'online' : ''; rt.append(tm);
+    if (r.u){ const n = document.createElement('b'); n.className = 'msgu'; n.textContent = String(r.u); rt.append(n); }
+    row.append(dot, mid, rt);
+    row.title = `Chat with ${dmName(r.f)}`;
+    row.onclick = () => { closePanel('msgPanel'); dmOpen(r.f); };
+    box.append(row);
+  }
+}
+function msgCount(){
+  let n = 0; for (const [f, u] of FR.unread) if (dmOk(f)) n += u | 0;
+  document.querySelectorAll('.msgb .msgn').forEach(b => { b.hidden = !n; b.textContent = n > 9 ? '9+' : String(n); });
+  document.querySelectorAll('.msgb').forEach(b => b.classList.toggle('unseen', n > 0));
+  if (!$('msgPanel').hidden) renderMsgs();
+}
+function openMsgs(){ renderMsgs(); openPanel('msgPanel'); }
+for (const id of ['msgBtn', 'frMsgs']) $(id).addEventListener('click', e => { e.currentTarget.blur(); openMsgs(); });
+$('gmMsg').addEventListener('click', e => { e.currentTarget.blur(); closePanel('gameMenu'); openMsgs(); });
+$('msgDone').addEventListener('click', () => closePanel('msgPanel'));
+// against the computer: the match waits while you type a message
+let dmPaused = null;
+$('dmIn').addEventListener('focus', () => { const s = sess; if (s && s.kind === 'local' && !s.done && !s.rp && !s.replay && s.G && s.G.state !== 3 && !s.kcard && s.G.pause < 120){ s.G.pause = 120; dmPaused = s; } });
+$('dmIn').addEventListener('blur', () => { const s = dmPaused; dmPaused = null; if (s && s === sess && s.G && s.G.pause >= 120 && panelsClosed()) s.G.pause = 119; });
 let frToastDo = null;
-function frToast(text, yes, fn, no, onNo){ $('frToastT').textContent = text; $('frToastYes').textContent = yes; if (!frToast.no0) frToast.no0 = $('frToastNo').textContent; $('frToastNo').textContent = no || frToast.no0; $('frToastNo').hidden = no === ' '; frToastDo = fn; frToastNoDo = onNo || null; $('frToast').hidden = false; sfx.chime && sfx.chime(); clearTimeout(frToast.t); frToast.t = setTimeout(() => { $('frToast').hidden = true; frToastDo = null; }, 30000); }
+function frToast(text, yes, fn, no, onNo){ frToast.dmFrom = null; $('frToastT').textContent = text; $('frToastYes').textContent = yes; if (!frToast.no0) frToast.no0 = $('frToastNo').textContent; $('frToastNo').textContent = no || frToast.no0; $('frToastNo').hidden = no === ' '; frToastDo = fn; frToastNoDo = onNo || null; $('frToast').hidden = false; sfx.chime && sfx.chime(); clearTimeout(frToast.t); frToast.t = setTimeout(() => { $('frToast').hidden = true; frToastDo = null; }, 30000); }
 $('frToastYes').addEventListener('click', () => { const f = frToastDo; frToastDo = null; frToastNoDo = null; $('frToast').hidden = true; if (f) f(); });
 let frToastNoDo = null;
 $('frToastNo').addEventListener('click', () => { const f = frToastNoDo; frToastDo = null; frToastNoDo = null; $('frToast').hidden = true; if (f) f(); });
@@ -13849,6 +14045,7 @@ function renderFriends(){
   }
   $('frLobby').hidden = !(NET.on && rows.some(r => r.o)); if ($('frGm')) $('frGm').hidden = $('frLobby').hidden;   // (v28.82: in a match's menu too)
   if (FR.dmWith && !$('dmBox').hidden) dmRender();
+  msgCount();   // (v30.1: the unread on the Messages buttons)
   { const n = rows.filter(r => r.o).length, sm = $('onlineBtn') && $('onlineBtn').querySelector('small'); if (sm) sm.textContent = "make a room, or join a friend's with a code" + (n ? ` · ${n} friend${n > 1 ? 's' : ''} online` : ''); }
 }
 $('frBackup').addEventListener('click', e => { e.currentTarget.blur(); openPanel('setPanel'); const sec = $('xferSave') && $('xferSave').closest('.dsec'); if (sec) setTimeout(() => sec.scrollIntoView({block: 'start'}), 50); });
@@ -14128,6 +14325,11 @@ addEventListener('keydown', e => {
   }
   // (v28.34) the walk-out: any key skips it (not one held over from before it)
   if (sess && sess.intro && !e.repeat && $('menu').hidden && panelsClosed() && !/^(Tab|Control|Alt|Meta|OS)/.test(e.code)){ e.preventDefault(); introSkip(); return; }
+  // (v30.1) the controls card: Enter, Space or a kick key plays (online, where Enter is the chat, a kick key); other keys wait
+  if (kcOpen() && sess && !e.repeat && $('menu').hidden && panelsClosed()){
+    const kick = PL.some(q => bind[q].kick === e.code) || e.code === 'Space';
+    if (kick || (!NET.on && (e.code === 'Enter' || e.code === 'NumpadEnter'))){ e.preventDefault(); kcClose(); return; }
+  }
   // online, Enter is the chat (as in Haxball), never a key in the game
   if ((e.code === 'Enter' || e.code === 'NumpadEnter') && NET.on){ e.preventDefault(); if (!e.repeat && (panelsClosed() || !$('onlinePanel').hidden)) openChat(); return; }
   if (sess && sess.rp){ rpKey(sess, e); return; }
@@ -14142,7 +14344,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Escape'){
     if (!$('plMenu').hidden){ plMenuClose(); return; }
     if (!$('gameMenu').hidden && fsBack && !inFs()) fsAgain = true;
-    const open = ['sugPanel', 'helpPanel', 'teamPanel', 'puPanel', 'keysPanel', 'setPanel', 'scoresPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'cupPanel', 'leaguePanel', 'gameMenu'].find(id => !$(id).hidden);
+    const open = ['msgPanel', 'sugPanel', 'helpPanel', 'teamPanel', 'puPanel', 'keysPanel', 'setPanel', 'scoresPanel', 'trainPanel', 'goalsPanel', 'achPanel', 'cupPanel', 'leaguePanel', 'gameMenu'].find(id => !$(id).hidden);
     if (open){ if (open === 'trainPanel') closeTrain(); else if (open === 'goalsPanel') closeGoals(); else if (open === 'setPanel') closeSettings(); else closePanel(open); if (!sess && (open === 'cupPanel' || open === 'leaguePanel' || open === 'achPanel' || open === 'scoresPanel')) $('menu').hidden = false; }
     else if (!$('onlinePanel').hidden && !NET.on) $('onClose').click();
     else if (sess && $('menu').hidden && panelsClosed()){ fsBack = false; if (sess.rp || sess.replay || sess.done) togglePause(); else openGameMenu(); }   // (v25.9: Esc is the room menu, P pauses; v27.8: in fullscreen too)
@@ -14449,6 +14651,9 @@ const soundTxt = () => { $('coachBtn').setAttribute('aria-pressed', String(coach
   $('soundBtn').title = SET.sound ? 'Sound is on: tap to turn it off' : 'Sound is off: tap to turn it on'; $('replayBtn').title = SET.replays ? 'Each goal is shown again before the kick-off: tap to turn it off' : 'Goal replays are off: tap to turn them on'; };
 $('fillBtn').addEventListener('click', () => { SET.fill = !SET.fill; store.set('pb.fill', SET.fill ? 1 : 0); soundTxt(); $('fillBtn').blur(); });
 $('refBtn').addEventListener('click', () => { SET.ref = !SET.ref; store.set('pb.ref', SET.ref ? 1 : 0); soundTxt(); $('refBtn').blur(); });
+$('kcSetBtn').addEventListener('click', () => { SET.kc = ((SET.kc | 0) + 1) % 3; store.set('pb.kc', SET.kc); kcSetTxt(); $('kcSetBtn').blur(); });   // (v30.1: first games → every match → never)
+kcSetTxt();
+$('gmKeys').addEventListener('click', e => { e.currentTarget.blur(); const s = sess; if (!s || !s.G || !s.locals || !s.locals.length) return; closePanel('gameMenu'); kcShow(s, null, true); });
 $('introBtn').addEventListener('click', () => { SET.intro = !SET.intro; store.set('pb.intro', SET.intro ? 1 : 0); soundTxt(); $('introBtn').blur(); });
 $('aiBtn').addEventListener('click', () => { SET.aiCom = !SET.aiCom; store.set('pb.aicom', SET.aiCom ? 1 : 0); soundTxt(); $('aiBtn').blur(); });
 $('soundBtn').addEventListener('click', () => { SET.sound = !SET.sound; store.set('pb.sound', SET.sound ? 1 : 0); soundTxt(); if (SET.sound) sfx.unlock(); });
@@ -14642,7 +14847,7 @@ document.addEventListener('visibilitychange', () => {
 // v29.7 ("maybe have the done button on the sides asw as we have to scroll down to exit some stuff"): a Done button
 // pinned to the top right of the game whatever is scrolled, for the panel on top; it presses that panel's own button
 // (Done, Close, Menu, Back, Resume), so each closes as it always did. Not on the results or the comeback card
-const PANEL_X = {teamPanel: 'teamDone', puPanel: 'puDone', keysPanel: 'keyDone', goalsPanel: 'goalsDone', newsPanel: 'newsDone', achPanel: 'achDone', scoresPanel: 'scDone', trainPanel: 'trainDone', cupPanel: 'cupDone', clPanel: 'clDone', leaguePanel: 'lgDone', onlinePanel: 'onClose', setPanel: 'setDone', gameMenu: 'gmResume', sugPanel: 'sugClose', dailyPanel: 'dailyClose', sitesPanel: 'sitesClose', mapPanel: 'mapDone', helpPanel: 'helpDone'};
+const PANEL_X = {msgPanel: 'msgDone', teamPanel: 'teamDone', puPanel: 'puDone', keysPanel: 'keyDone', goalsPanel: 'goalsDone', newsPanel: 'newsDone', achPanel: 'achDone', scoresPanel: 'scDone', trainPanel: 'trainDone', cupPanel: 'cupDone', clPanel: 'clDone', leaguePanel: 'lgDone', onlinePanel: 'onClose', setPanel: 'setDone', gameMenu: 'gmResume', sugPanel: 'sugClose', dailyPanel: 'dailyClose', sitesPanel: 'sitesClose', mapPanel: 'mapDone', helpPanel: 'helpDone'};
 const pxBtn = document.createElement('button'); pxBtn.type = 'button'; pxBtn.id = 'panelX'; pxBtn.className = 'panelx'; pxBtn.hidden = true;
 ($('game') || document.body).append(pxBtn);   // (in #game, so it shows in fullscreen too)
 const pxShown = b => !!b && !b.hidden && !b.disabled && b.getClientRects().length > 0;
@@ -14678,7 +14883,7 @@ function boot(){
   requestAnimationFrame(() => { const sp = $('splash'); if (sp){ sp.classList.add('gone'); setTimeout(() => sp.remove(), 500); } });
 }
 window.pitchBrawl = {get session(){ return sess; }, get ref(){ return refS; }, get stadium(){ return ST; }, get net(){ return NET; }, core: C, ai: A, get brain(){ return brain; },
-  get adapt(){ return adapt; }, get trick(){ return trick; }, get you(){ return you; }, get fx(){ return fx; }, get cam(){ return cam; }, youBot, test: {updCheck: () => updCheck(), openNews: () => openNews(), lesson, trickPlay, guestView: (...a) => guestView(...a), winChance: (...a) => winChance(...a), get lines(){ return lines; }, showResults, start, comebackOf}};
+  get adapt(){ return adapt; }, get trick(){ return trick; }, get you(){ return you; }, get fx(){ return fx; }, get cam(){ return cam; }, youBot, test: {updCheck: () => updCheck(), openNews: () => openNews(), dmGot: m => dmGot(m), openMsgs: () => openMsgs(), msgRows: () => msgRows(), lesson, trickPlay, guestView: (...a) => guestView(...a), winChance: (...a) => winChance(...a), get lines(){ return lines; }, showResults, start, comebackOf}};
 // (v28.34) the walk-out's Skip, or a click or tap on the pitch
 $('introSkip').addEventListener('click', e => { e.currentTarget.blur(); introSkip(); });
 $('c').addEventListener('pointerdown', () => { if (sess && sess.intro) introSkip(); });
