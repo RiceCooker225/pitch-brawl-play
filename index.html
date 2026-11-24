@@ -1401,7 +1401,7 @@
   </div>
   <div class="overlay" id="msgPanel" hidden>
     <h2>Messages</h2>
-    <p class="newsnote">Chat with your friends from anywhere: the menu, or in a match (☰ Menu → Messages). The newest first.</p>
+    <p class="newsnote">Chat with your friends. In a match: ☰ Menu → Messages.</p>
     <div class="msgs" id="msgList"></div>
     <div class="row"><button id="msgDone" type="button">Done</button></div>
   </div>
@@ -1775,7 +1775,7 @@
     <div class="tutwel" id="tutWelcome" hidden><div>
       <small>Welcome to Pitch Brawl</small>
       <h3>First time?</h3>
-      <p>A quick start shows you how to play in about two minutes. Or have a look around the menu first: what everything is, in under a minute.</p>
+      <p>Learn to play in two minutes.</p>
       <div class="row"><button id="tutGo" type="button">Start the tutorial</button><button class="ghost tourb" type="button">Show me around first</button><button class="ghost" id="tutNo" type="button">Skip, I know how to play</button></div>
     </div></div>
   </div>
@@ -7485,10 +7485,10 @@ function triResults(s){
 // The rules run in the engine (gameReset / gamePost in engine.js); this says what happened and keeps the tally. online:
 // the host's or a guest's match (a guest hears of points and hits from the host's snapshots: netPoint, netHit)
 // (v28.98: the hits come down in by themselves now; the ring on the floor shows where the ball lands)
-const GAME_HOW = {volley: 'Volleyball (from the side): ← → run, ↑ jump, press kick as the ball reaches you (it goes through you otherwise). Where it meets you decides the shot: over your head high, in front of you longer, behind you short; hold towards the net for more, away for less (from the back of your court, push or it won\'t get over). Jump by the net and kick when it\'s high: a spike. Three touches a side · first to 15, win by 2',
-  badminton: 'Badminton (from the side): ← → run, ↑ jump, press kick as the shuttle reaches you. Over your head it goes high, in front of you longer, behind you short; towards the net: more, away: a drop shot. Jump as it comes high over you and kick: a smash (from most of your half). One touch a side · first to 11, win by 2',
-  pong: 'Ping pong: it bounces once on your half, then hit it back before it lands (the ring shows where). Every hit lands on their half: the angle aims it, run into it to hit deep · first to 11, win by 2',
-  dodge: 'Dodgeball: kick a ball at them (your throw homes in a little): a hit costs a life, out of lives you\'re out. A throw with a coloured trail is live: press kick just as it reaches you to catch it (the thrower loses a life). One with a yellow core is fast: much harder to catch, press right as it gets to you. A ball that bounced off a wall, or rolls slowly, is safe · first to 3 rounds'};
+const GAME_HOW = {volley: 'Volleyball: ← → run, ↑ jump, kick as the ball reaches you. Towards the net: longer, away: shorter. Jump by the net: spike · 3 touches a side · first to 15, win by 2',   // (v30.2: short)
+  badminton: 'Badminton: ← → run, ↑ jump, kick as it reaches you. Towards the net: deep, away: drop shot. Jump on a high one: smash · 1 hit a side · first to 11, win by 2',
+  pong: 'Ping pong: let it bounce once, then kick. Up / down: wide. Towards the net: deep · first to 11, win by 2',
+  dodge: 'Dodgeball: kick to throw. A hit costs a life. Kick right as a throw hits you: catch. Yellow core: hard to catch · first to 3 rounds'};
 const GAME_WHY = {
   kill: ['POINT', (w, l) => `${w} put it down`], drop: ['POINT', (w, l) => `it dropped on ${l}'s side`], out: ['OUT', (w, l) => `point to ${w}`],
   touches: ['FAULT', (w, l, g) => `${g === 'volley' ? 'four touches' : 'two touches'}: point to ${w}`], early: ['FAULT', (w, l) => `hit before the bounce: point to ${w}`],
@@ -7497,33 +7497,34 @@ const GAME_WHY = {
 // v29.0 ("add a tutorial for each mode"): a short one for each of the other games, played for real against the computer
 // on Easy with a box of steps over the court that tick off as you do them (Skip step on the harder ones, Skip tutorial).
 // It starts the first time you play a game (pb.gtut.<game> not set), and from the Tutorial button under Play
+// (v30.2, "somne of them are lot of words bro jsut say short", "liek the tutorials": every step a short line)
 const GTUT = {
   volley: K => [
-    {t: 'Run', x: `Run with ${K.left} and ${K.right}.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
-    {t: 'Jump', x: `Jump with ${K.up}.`, ok: (k, e, p, G) => k === 'tick' && G.discs[p.di].y < ST.court.H - G.discs[p.di].radius - 25},
-    {t: 'Hit it', x: `The ball goes straight through you: press ${K.kick} just as it reaches you to hit it. The ring on the floor shows where it comes down: get under it.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
-    {t: 'Aim', x: `Where the ball meets you decides the shot: over your head it goes high, in front of you longer, behind you short. Hold ${K.right} (towards the net) for more, ${K.left} for less: from the back of your court, push or it won't get over.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id && (p.input & 12)},
-    {t: 'Spike', x: `By the net, jump as the ball comes down high and press ${K.kick}: a spike, fast and down. Tip: hit it short to yourself first (hold ${K.left}) to set one up.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'spike' && e.pid === p.id},
-    {t: 'Win a point', x: 'Land it on their side where they can\'t get to it.', ok: (k, e, p) => k === 'ev' && e.type === 'goal' && e.team === p.team}],
+    {t: 'Run', x: `Run: ${K.left} ${K.right}.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
+    {t: 'Jump', x: `Jump: ${K.up}.`, ok: (k, e, p, G) => k === 'tick' && G.discs[p.di].y < ST.court.H - G.discs[p.di].radius - 25},
+    {t: 'Hit it', x: `Get under the ring. Press ${K.kick} as the ball reaches you.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
+    {t: 'Aim', x: `Hold ${K.right} as you hit: longer. ${K.left}: shorter. From the back, push!`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id && (p.input & 12)},
+    {t: 'Spike', x: `By the net, jump and hit a high ball.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'spike' && e.pid === p.id},
+    {t: 'Win a point', x: 'Land it where they can\'t reach.', ok: (k, e, p) => k === 'ev' && e.type === 'goal' && e.team === p.team}],
   badminton: K => [
-    {t: 'Run', x: `Run with ${K.left} and ${K.right}.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
-    {t: 'Jump', x: `Jump with ${K.up}.`, ok: (k, e, p, G) => k === 'tick' && G.discs[p.di].y < ST.court.H - G.discs[p.di].radius - 25},
-    {t: 'Hit it', x: `The shuttle goes straight through you: press ${K.kick} just as it reaches you. The ring on the floor shows where it comes down.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
-    {t: 'Clear and drop', x: `Over your head it goes high, in front of you longer, behind you short. Hold ${K.right} (towards the net) to send it deep, ${K.left} for a drop shot just over.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id && (p.input & 12)},
-    {t: 'Smash', x: `Jump as the shuttle comes down high over you and press ${K.kick}: a smash, fast and down. It works from most of your half, not just by the net.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'spike' && e.pid === p.id},
+    {t: 'Run', x: `Run: ${K.left} ${K.right}.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
+    {t: 'Jump', x: `Jump: ${K.up}.`, ok: (k, e, p, G) => k === 'tick' && G.discs[p.di].y < ST.court.H - G.discs[p.di].radius - 25},
+    {t: 'Hit it', x: `Get under the ring. Press ${K.kick} as the shuttle reaches you.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
+    {t: 'Clear and drop', x: `Hold ${K.right} as you hit: deep. ${K.left}: a drop shot.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id && (p.input & 12)},
+    {t: 'Smash', x: `Jump and hit a high shuttle.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'spike' && e.pid === p.id},
     {t: 'Win a point', x: 'Put it down on their side.', ok: (k, e, p) => k === 'ev' && e.type === 'goal' && e.team === p.team}],
   pong: K => [
-    {t: 'Move', x: `Move with ${K.move}. You play from your end of the table.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
-    {t: 'Hit it back', x: `It bounces once on your half: press ${K.kick} as it reaches you (it goes through you otherwise). The ring shows where it'll be.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
-    {t: 'Go wide', x: `Hold ${K.up} or ${K.down} as you hit to send it to that side of the table.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id && (p.input & 3)},
-    {t: 'Deep and short', x: `Hold ${K.right} (towards the net) for a deep one, ${K.left} for a short one. The longer the rally, the faster it gets.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id && (p.input & 12)},
-    {t: 'Win a point', x: 'Make them miss it.', ok: (k, e, p) => k === 'ev' && e.type === 'goal' && e.team === p.team}],
+    {t: 'Move', x: `Move: ${K.move}.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
+    {t: 'Hit it back', x: `Let it bounce once, then press ${K.kick}.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
+    {t: 'Go wide', x: `Hold ${K.up} or ${K.down} as you hit: it goes that way.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id && (p.input & 3)},
+    {t: 'Deep and short', x: `Hold ${K.right} as you hit: deep. ${K.left}: short.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id && (p.input & 12)},
+    {t: 'Win a point', x: 'Make them miss.', ok: (k, e, p) => k === 'ev' && e.type === 'goal' && e.team === p.team}],
   dodge: K => [
-    {t: 'Move', x: `Move with ${K.move}. You stay on your half.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
-    {t: 'Throw', x: `Walk up to a ball on your side and press ${K.kick} to throw it, away from you the way you face it.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
-    {t: 'Hit them', x: 'Throw it at them: each hit costs a life. Your throw bends a little towards them.', ok: (k, e, p) => k === 'ev' && e.type === 'hit' && e.pid === p.id && !e.caught},
-    {t: 'Catch', x: `A throw coming at you (it has a coloured trail): press ${K.kick} just as it reaches you to catch it, and the thrower loses a life. Too early, held or mashed, and it hits you. A throw with a yellow core is fast: much harder, press right as it gets to you. A ball that bounced off a wall, or rolls slowly, is safe.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'catch' && e.pid === p.id},
-    {t: 'Win a round', x: 'Knock them out of lives.', ok: (k, e, p) => k === 'ev' && e.type === 'goal' && e.team === p.team}]};
+    {t: 'Move', x: `Move: ${K.move}. Stay on your half.`, ok: (k, e, p, G, st) => k === 'tick' && st.moved > 90},
+    {t: 'Throw', x: `Walk to a ball, press ${K.kick}.`, ok: (k, e, p) => k === 'ev' && e.type === 'kick' && e.pid === p.id},
+    {t: 'Hit them', x: 'Hit them: they lose a life.', ok: (k, e, p) => k === 'ev' && e.type === 'hit' && e.pid === p.id && !e.caught},
+    {t: 'Catch', x: `Press ${K.kick} right as a throw hits you. Don't spam it. Yellow ones: just dodge.`, skip: true, ok: (k, e, p) => k === 'ev' && e.type === 'catch' && e.pid === p.id},
+    {t: 'Win a round', x: 'Knock them all out.', ok: (k, e, p) => k === 'ev' && e.type === 'goal' && e.team === p.team}]};
 function gtBox(){ let b = $('gtBox'); if (!b){ b = document.createElement('div'); b.id = 'gtBox'; b.className = 'gtbox'; b.hidden = true; b.setAttribute('role', 'status'); b.setAttribute('aria-live', 'polite'); ($('game') || document.body).append(b); } return b; }   // (in #game: over the court when it fills the tab)
 function gameTut(s, game, real){
   const M = s.mode, steps = GTUT[game](tutKeys()), st = {i: 0, moved: 0, lx: null, ly: null, done: false};
@@ -7537,7 +7538,7 @@ function gameTut(s, game, real){
     const h = document.createElement('div'); h.className = 'gth'; h.textContent = `${GAME_NAMES[game]} tutorial` + (st.done ? '' : ` · ${st.i + 1} of ${steps.length}`); box.append(h);
     const dots = document.createElement('div'); dots.className = 'gtdots'; steps.forEach((x, k) => { const d = document.createElement('i'); if (k < st.i || st.done) d.className = 'ok'; else if (k === st.i) d.className = 'on'; dots.append(d); }); box.append(dots);
     const t = document.createElement('b'); t.className = 'gtt'; const x = document.createElement('p'); x.className = 'gtx';
-    if (st.done){ t.textContent = `That's ${GAME_NAMES[game].toLowerCase()}!`; x.textContent = 'You\'ve got it. Play the computer for real, or keep practising here.'; }
+    if (st.done){ t.textContent = `That's ${GAME_NAMES[game].toLowerCase()}!`; x.textContent = 'Got it! Play for real, or keep practising.'; }
     else { t.textContent = steps[st.i].t; x.textContent = steps[st.i].x; }
     box.append(t, x);
     const row = document.createElement('div'); row.className = 'gtrow';
@@ -7583,39 +7584,39 @@ function kcRows(s){
     const v = gm === 'volley';
     row('Run', '', (sl, k) => kb(k.L) + kb(k.R), 'the stick');
     row('Jump', '', (sl, k) => kb(k.U), 'stick up');
-    row('Hit', 'just as the ball reaches you (it goes straight through you otherwise). The ring on the floor shows where it comes down', (sl, k) => kb(k.k), 'KICK');
-    row('Aim', 'where it meets you: over your head it goes high, in front of you longer, behind you short', () => '<small>your spot</small>', 'your spot');
-    row('More / less', 'hold towards the net for a longer shot, away for a shorter one. From the back of your court, push or it won\'t get over', (sl, k) => `hold ${kb(k.L)} or ${kb(k.R)}`, 'stick left / right');
-    if (v) row('Spike', 'by the net, jump as the ball comes down high and hit: fast and down', (sl, k) => `${kb(k.U)} + ${kb(k.k)}`, 'jump + KICK');
-    else row('Smash', 'jump as the shuttle comes down high over you and hit: fast and down', (sl, k) => `${kb(k.U)} + ${kb(k.k)}`, 'jump + KICK');
-    if (v) row('Set it up', 'hit it short and high to yourself or a teammate, then spike it', (sl, k) => `hold away + ${kb(k.k)}`, 'away + KICK');
-    win = `${v ? 'Land it on their side' : 'Put the shuttle down on their side'} · ${v ? 'three touches a side' : 'one hit a side'} · first to ${cfg.scoreLimit || (v ? 15 : 11)}, win by 2`;
+    row('Hit', 'as the ball reaches you. Stand under the ring', (sl, k) => kb(k.k), 'KICK');
+    row('Aim', 'over your head: high · in front: long · behind: short', () => '<small>your spot</small>', 'your spot');
+    row('More / less', 'towards the net: longer · away: shorter. From the back, push!', (sl, k) => `hold ${kb(k.L)} or ${kb(k.R)}`, 'stick left / right');
+    if (v) row('Spike', 'jump by the net, hit a high ball', (sl, k) => `${kb(k.U)} + ${kb(k.k)}`, 'jump + KICK');
+    else row('Smash', 'jump, hit a high shuttle', (sl, k) => `${kb(k.U)} + ${kb(k.k)}`, 'jump + KICK');
+    if (v) row('Set it up', 'a short high one, then spike', (sl, k) => `hold away + ${kb(k.k)}`, 'away + KICK');
+    win = `Land it on their side · ${v ? '3 touches a side' : '1 hit a side'} · first to ${cfg.scoreLimit || (v ? 15 : 11)}, win by 2`;
   } else if (gm === 'pong'){
     row('Move', '', four, 'the stick');
-    row('Hit', 'it bounces once on your half, then hit it before it lands again (the ring shows where it will be)', (sl, k) => kb(k.k), 'KICK');
-    row('Go wide', 'hold up or down as you hit: it goes to that side of the table', (sl, k) => `hold ${kb(k.U)} or ${kb(k.D)}`, 'stick up / down');
-    row('Deep / short', 'hold towards the net for a deep one, away for a short one', (sl, k) => `hold ${kb(k.L)} or ${kb(k.R)}`, 'stick left / right');
+    row('Hit', 'after one bounce on your side', (sl, k) => kb(k.k), 'KICK');
+    row('Go wide', 'up / down: that side', (sl, k) => `hold ${kb(k.U)} or ${kb(k.D)}`, 'stick up / down');
+    row('Deep / short', 'towards the net: deep · away: short', (sl, k) => `hold ${kb(k.L)} or ${kb(k.R)}`, 'stick left / right');
     win = `Make them miss · first to ${cfg.scoreLimit || 11}, win by 2`;
   } else if (gm === 'dodge'){
-    row('Move', 'you stay on your half', four, 'the stick');
-    row('Throw', 'walk up to a ball and press kick: it goes the way you face, and bends a little towards them', (sl, k) => kb(k.k), 'KICK');
-    row('Catch', 'press kick just as a throw (it has a coloured trail) reaches you: the thrower loses a life. Too early, held or mashed, and it hits you', (sl, k) => kb(k.k), 'KICK');
-    row('Fast throw', 'a yellow core in the trail: much harder to catch, press right as it gets to you (or just get out of the way)', () => '<small>dodge it</small>', 'dodge it');
-    row('Safe ball', 'a ball that bounced off a wall, or rolls slowly, can\'t hit you', () => '<small>—</small>', '—');
-    win = `A hit costs a life; out of lives, you're out · knock out their whole side to win the round · first to ${cfg.scoreLimit || 3} rounds`;
+    row('Move', 'your half only', four, 'the stick');
+    row('Throw', 'walk to a ball, press kick', (sl, k) => kb(k.k), 'KICK');
+    row('Catch', 'press right as a throw hits you. Don\'t spam', (sl, k) => kb(k.k), 'KICK');
+    row('Fast throw', 'yellow core: hard to catch, dodge it', () => '<small>dodge it</small>', 'dodge it');
+    row('Safe ball', 'bounced or slow balls can\'t hit you', () => '<small>—</small>', '—');
+    win = `Hit = they lose a life · knock them all out · first to ${cfg.scoreLimit || 3} rounds`;
   } else {
     const me = pl(locs[0]) || {}, mates = q => G.players.some(r => r.team === q.team && r !== q && r.ctrl === 'ai');
     row('Move', '', four, 'the stick');
-    row('Kick', 'when you\'re right next to the ball. Hold it as you run in and it kicks the moment you touch', (sl, k) => kb(k.k), 'KICK');
-    if (cfg.curve) row('Curl', 'hold up or down as you kick: the ball bends round people (it still goes where you aim)', (sl, k) => `hold ${kb(k.U)} or ${kb(k.D)} + ${kb(k.k)}`, 'stick up / down + KICK');
-    if (cfg.power) row('Power shot', 'stay right on the ball until it glows, then kick: a much faster shot', (sl, k) => `stay on it, ${kb(k.k)}`, 'stay on it, KICK');
-    if (locs.some(L => { const q = pl(L); return q && mates(q); })) row('Call for it', 'tap kick twice quickly: your teammate passes to you', (sl, k) => kb(k.k) + kb(k.k), 'KICK twice');
-    if (cfg.slide) row('Slide tackle', 'slide in to win the ball: get the ball, not the man (a foul in your own area is a penalty). In goal it\'s a dive', (sl, k) => kb(k.sl), 'SLIDE');
-    if (cfg.fk) row('Free kick', 'when you\'re fouled: up / down aims, left / right curls, hold kick for power and let go to shoot', (sl, k) => `${kb(k.U)}${kb(k.D)} ${kb(k.L)}${kb(k.R)} hold ${kb(k.k)}`, 'stick, hold KICK');
-    if (!touch && locs.some(L => { const q = pl(L); return q && G.players.some(r => r.team === q.team && r !== q && r.role === 'keeper' && r.ctrl === 'ai'); })) row('Go in goal', 'swap with your keeper (the computer plays your man); again to come back out', (sl, k) => kb(k.gk));
+    row('Kick', 'when you\'re next to the ball', (sl, k) => kb(k.k), 'KICK');
+    if (cfg.curve) row('Curl', 'hold up / down as you kick: it bends', (sl, k) => `hold ${kb(k.U)} or ${kb(k.D)} + ${kb(k.k)}`, 'stick up / down + KICK');
+    if (cfg.power) row('Power shot', 'stay on the ball till it glows, then kick', (sl, k) => `stay on it, ${kb(k.k)}`, 'stay on it, KICK');
+    if (locs.some(L => { const q = pl(L); return q && mates(q); })) row('Call for it', 'double tap kick: they pass to you', (sl, k) => kb(k.k) + kb(k.k), 'KICK twice');
+    if (cfg.slide) row('Slide tackle', 'win the ball. In goal: dive', (sl, k) => kb(k.sl), 'SLIDE');
+    if (cfg.fk) row('Free kick', 'up / down aim · left / right curl · hold kick, let go', (sl, k) => `${kb(k.U)}${kb(k.D)} ${kb(k.L)}${kb(k.R)} hold ${kb(k.k)}`, 'stick, hold KICK');
+    if (!touch && locs.some(L => { const q = pl(L); return q && G.players.some(r => r.team === q.team && r !== q && r.role === 'keeper' && r.ctrl === 'ai'); })) row('Go in goal', 'swap with your keeper', (sl, k) => kb(k.gk));
     if (!s.mode){ const tl = cfg.timeLimit, sl = cfg.scoreLimit, d = C.TEAMS[me.team | 0] ? C.TEAMS[me.team | 0].dir : 0, side = d * (sideFlip() ? -1 : 1);
-      win = `${d && locs.length === 1 ? `You're ${KIT[me.team | 0].name}: score in the goal on the ${side < 0 ? 'right' : 'left'}` : 'Score in their goal'} · ${tl ? tl + ' minutes' : 'no time limit'}${sl ? ', first to ' + sl : ''}`; }
-    else if (s.cfg && s.cfg.mode === 'tri') win = '1v1v1: three goals, one each. Score in either of the others, keep your own out';
+      win = `${d && locs.length === 1 ? `Score on the ${side < 0 ? 'right' : 'left'}` : 'Score in their goal'} · ${tl ? tl + ' min' : 'no time limit'}${sl ? ', first to ' + sl : ''}`; }
+    else if (s.cfg && s.cfg.mode === 'tri') win = 'Score in either other goal';
   }
   const heads = !touch && locs.length > 1 ? locs.map(L => { const q = pl(L); return `${String(L.slot).toUpperCase()}${q && KIT[q.team] ? ' · ' + KIT[q.team].name : ''}`; }) : null;
   return {rows, win, heads, slots: locs.map(L => L.slot), touch};
@@ -7630,7 +7631,7 @@ function kcShow(s, go, byHand){
   const more = R.touch ? '' : `<p class="kcmore"><kbd>P</kbd> pause · <kbd>Esc</kbd> menu${online ? ' · <kbd>Enter</kbd> chat' : ' · <kbd>R</kbd> restart'} · <kbd>1</kbd>–<kbd>8</kbd> emotes · <kbd>F</kbd> full screen</p>`;
   box.innerHTML = `<div class="kch">${kcEsc(GAME_NAMES[gm] || 'Football')} · controls</div>${R.win ? `<p class="kcwin"><b>How to win</b> ${kcEsc(R.win)}</p>` : ''}<div class="kcsc"><table class="kctab">${head}${body}</table></div>${more}`
     + `<div class="kcrow"><label class="kcchk"><input type="checkbox" id="kcEvery"${SET.kc === 1 ? ' checked' : ''}> Show before every match</label><span class="gsp"></span><button type="button" class="kcgo" id="kcPlay">${byHand ? 'Back to the match' : online ? 'Got it' : 'Play'}</button></div>`
-    + `<p class="kcnote">${R.touch ? 'Tap Play' : `Enter, Space or ${R.slots.length > 1 ? 'a kick key' : 'your kick key'} ${byHand ? 'goes back' : 'plays'}`} · see this any time: ☰ Menu → Keys for this game</p>`;
+    + `<p class="kcnote">${R.touch ? 'Tap Play' : `Space or kick ${byHand ? 'to go back' : 'to play'}`} · ☰ Menu → Keys for this game</p>`;
   box.classList.toggle('kcmulti', !!R.heads); box.hidden = false; box.dataset.hand = byHand ? '1' : ''; kcGo = go || null; s.kcard = !online;
   $('kcEvery').onchange = e => { SET.kc = e.target.checked ? 1 : 0; store.set('pb.kc', SET.kc); kcSetTxt(); };
   $('kcPlay').onclick = e => { e.currentTarget.blur(); kcClose(); };
@@ -8167,32 +8168,32 @@ function tutorialMode(lesson){
   M.after = s => {
     const G = s.G, P = me(s), d = G.discs[P.di], b = G.discs[0], st = step();
     for (const e of G.events){
-      if (e.type === 'kick' && e.pid === P.id){ tu.kicked = true; if (st === 'kick') pass(s, 'Nice kick! Running into the ball only pushes it: the kick key is what gives it power.');
+      if (e.type === 'kick' && e.pid === P.id){ tu.kicked = true; if (st === 'kick') pass(s, 'Nice kick!');
         if (st === 'curl' || curlStep(st) || st === 'cfk'){ tu.curled = Math.abs(b.sp || 0) > 0.01; tu.bend = Math.sign(b.sp || 0); tu.keys = P.input; }
         if (st === 'slide' && e.slide && !e.dive) pass(s, 'Clean tackle: you got the ball first.');
         if (st === 'dive' && e.dive) tu.dived = true; }
-      if (e.type === 'foul' && e.pid === P.id && st === 'slide' && tu.tries >= 2){ tu.tries++; pass(s, 'Foul again, but that\'s the idea: go for the ball, not the man. You can go on.'); }
-      else if (e.type === 'foul' && e.pid === P.id && st === 'slide'){ tu.tries++; tu.note = 'Foul! You took the man first. Slide at the ball, from the side it sticks out.'; setTimeout(() => { if (sess === s && step() === 'slide' && !tu.ok) M.setup(s); }, 1400); tutPanel(s); }
+      if (e.type === 'foul' && e.pid === P.id && st === 'slide' && tu.tries >= 2){ tu.tries++; pass(s, 'Foul again. Ball, not the man. Go on.'); }
+      else if (e.type === 'foul' && e.pid === P.id && st === 'slide'){ tu.tries++; tu.note = 'Foul! Slide at the ball, not the man.'; setTimeout(() => { if (sess === s && step() === 'slide' && !tu.ok) M.setup(s); }, 1400); tutPanel(s); }
       if (e.type === 'call' && e.pid === P.id && st === 'call' && !tu.ok && tu.called == null){ tu.called = G.frame; tu.note = 'Called! Here it comes…'; const Q = cp(s); if (Q){ Q.ctrl = 'ai'; aiMem(s, Q).plan = null; } tutPanel(s); }
-      if (e.type === 'pcharge' && e.pid === P.id && st === 'pcharge') pass(s, 'Charged: the ball glows. Kick it now and it goes half as hard again; step off it and the charge is gone.');
-      if (e.type === 'power' && e.pid === P.id){ tu.powered = true; if (st === 'plose' && !tu.ok){ tu.full = false; tu.note = 'That one went off: this time, once it glows, step away from it instead.'; tutPanel(s); } }
+      if (e.type === 'pcharge' && e.pid === P.id && st === 'pcharge') pass(s, 'Charged! Kick it now.');
+      if (e.type === 'power' && e.pid === P.id){ tu.powered = true; if (st === 'plose' && !tu.ok){ tu.full = false; tu.note = 'You shot it. This time, step away.'; tutPanel(s); } }
       if (e.type === 'kick' && e.pid === P.id && (st === 'pshot' || st === 'pkeeper')){ tu.kicked = true; tu.kickF = G.frame; }
-      if (e.type === 'emote' && e.pid === P.id && st === 'emote') pass(s, 'Online everyone sees it. Two on one keyboard: P1 has 1–5, P2 6–0.');
+      if (e.type === 'emote' && e.pid === P.id && st === 'emote') pass(s, 'Everyone online sees it.');
       if (e.type === 'goal'){
-        if (st === 'dive'){ tu.tries++; M.setup(s); tu.note = tu.tries >= 3 ? '' : `In. Again: press ${tutKeys().slide} as it comes, pointing at it.`; if (tu.tries >= 3) pass(s, 'Have it as done: you can go on.'); else tutPanel(s); }
-        else if (st === 'score' && e.team === P.team) pass(s, 'Goal! After a goal everyone\'s keys are let go: press them again to move.');
-        else if (st === 'curl' && e.team === P.team){ tu.tries++; if (tu.curled) pass(s, 'Curled it in! Holding up or down as you kick bends the ball.'); else { tu.note = tu.tries >= 2 ? 'Scored. It went in straight, which is fine too; you can go on.' : 'Scored, but straight: hold up or down as you kick to bend it.'; if (tu.tries >= 2) pass(s, tu.note); else tutPanel(s); } }
+        if (st === 'dive'){ tu.tries++; M.setup(s); tu.note = tu.tries >= 3 ? '' : `In. Again: ${tutKeys().slide} as it comes.`; if (tu.tries >= 3) pass(s, 'Have it as done: you can go on.'); else tutPanel(s); }
+        else if (st === 'score' && e.team === P.team) pass(s, 'Goal! After a goal, press your keys again to move.');
+        else if (st === 'curl' && e.team === P.team){ tu.tries++; if (tu.curled) pass(s, 'Curled it in!'); else { tu.note = tu.tries >= 2 ? 'Scored, straight. Fine: go on.' : 'Scored, but straight. Hold up or down as you kick.'; if (tu.tries >= 2) pass(s, tu.note); else tutPanel(s); } }
         else if (st === 'fk' && e.team === P.team) pass(s, 'Free kick goal!');
         else if ((st === 'pshot' || st === 'pkeeper') && e.team === P.team){   // (the power shot lesson: in, and a power shot)
           tu.tries++;
-          if (tu.powered) pass(s, st === 'pshot' ? 'Power shot! Charge it, then hit it while it glows.' : 'Past him with a power shot: he has half as long to get there.');
-          else { tu.note = 'In, but a normal kick: stay right by the ball until the ring is full and it glows, then shoot.'; if (tu.tries >= 4) pass(s, tu.note + ' Go on when you like.'); else tutPanel(s); }
+          if (tu.powered) pass(s, st === 'pshot' ? 'Power shot!' : 'Past him with a power shot!');
+          else { tu.note = 'In, but not charged. Wait for the glow.'; if (tu.tries >= 4) pass(s, tu.note + ' Go on when you like.'); else tutPanel(s); }
         }
         else if ((curlStep(st) || st === 'cfk') && e.team === P.team){   // (the curl lesson: in, and bent the way asked)
           const dir = Math.sign(goalMid(1).x) || 1, up = tu.bend * dir < 0, inv = !!SET.inv[0]; tu.tries++;
           const ok = st === 'cup' ? tu.curled && !up : st === 'cdown' ? tu.curled && up : st === 'cauto' ? tu.curled && (tu.keys & C.AC_BIT) && !(tu.keys & 3) : tu.curled;
-          if (ok) pass(s, {cup: 'Over the top of him: it went out wide that way and bent back down in.', cdown: 'Underneath him and back up in. Whichever key, it still ends where you aimed.', cfar: 'In off the bend at the far post: from out wide, aim outside it and bend it back in.', cauto: 'Auto curl did it: it bends your shots toward the corner, away from the keeper. Keep it on or off as you like.', cfk: 'Curled free kick! The keeper reads your aim: aim one way, curl it the other.'}[st]);
-          else { tu.note = !tu.curled ? (st === 'cauto' ? 'In, but straight: auto curl only bends a shot it can still put in. Aim at a corner.' : st === 'cfk' ? 'In, but straight: press ← or → before you shoot to curl it.' : 'In, but straight: hold the key as you kick, not before or after.')
+          if (ok) pass(s, {cup: 'Over the top of him and in!', cdown: 'Under him and in!', cfar: 'Bent in at the far post!', cauto: 'Auto curl did it. Keep it on or off.', cfk: 'Curled free kick!'}[st]);
+          else { tu.note = !tu.curled ? (st === 'cauto' ? 'In, but straight. Aim at a corner.' : st === 'cfk' ? 'In, but straight. Press ← or → first.' : 'In, but straight. Hold the key as you kick.')
               : st === 'cup' ? `In, but the other way round: hold ${inv ? '↑ (your curl keys are swapped)' : '↓'} as you kick.` : st === 'cdown' ? `In, but the other way round: hold ${inv ? '↓ (your curl keys are swapped)' : '↑'} as you kick.`
               : !(tu.keys & C.AC_BIT) ? 'Auto curl is off: switch it on above, then shoot.' : 'That was your key bending it: let go of ↑ and ↓ and let auto curl do it.';
             if (tu.tries >= 4) pass(s, tu.note + ' Go on when you like.'); else tutPanel(s); }
@@ -8208,20 +8209,20 @@ function tutorialMode(lesson){
     if (st === 'call' && !tu.ok && tu.called != null){
       const lt = G.lastTouch, Q = cp(s);
       if (lt && Q && lt.id === Q.id && lt.kick) tu.passed = true;
-      if (tu.passed && lt && lt.id === P.id) pass(s, 'He passed it to you. When one of theirs is through on your goal, the same two taps send your keeper out at him.');
-      else if (G.frame - tu.called > 360){ tu.tries++; if (tu.tries >= 2){ pass(s, 'He\'ll pass when it\'s safe: two quick taps of kick is all it takes. You can go on.'); } else { M.setup(s); tu.note = 'Again: two quick taps of kick, away from the ball.'; tutPanel(s); } }
+      if (tu.passed && lt && lt.id === P.id) pass(s, 'He passed it to you!');
+      else if (G.frame - tu.called > 360){ tu.tries++; if (tu.tries >= 2){ pass(s, 'He passes when it\'s safe. Go on.'); } else { M.setup(s); tu.note = 'Again: two quick taps.'; tutPanel(s); } }
     }
     if (st === 'dive' && !tu.ok){
       if (tu.wait > 0 && G.pause === 0 && --tu.wait === 0){ const g0 = goalMid(0), ty = g0.y + tu.sy * (g0.half - 14), dx = g0.x - b.x, dy = ty - b.y, l = Math.hypot(dx, dy) || 1; b.vx = dx / l * 4.6; b.vy = dy / l * 4.6; }
-      if (tu.dived && G.lastTouch && G.lastTouch.id === P.id && tu.wait === 0){ pass(s, 'Saved with a dive! In goal your slide key dives: it reaches further than you can run. You get up slowly, so dive only when you must.'); }
-      else if (tu.wait === 0 && Math.hypot(b.vx, b.vy) < 0.05){ tu.tries++; M.setup(s); tu.note = tu.tries >= 3 ? 'Have it as done: you can go on.' : `Again: press ${tutKeys().slide} as the ball comes, pointing at it.`; if (tu.tries >= 3) pass(s, tu.note); else tutPanel(s); }
+      if (tu.dived && G.lastTouch && G.lastTouch.id === P.id && tu.wait === 0){ pass(s, 'Saved! Dive only when you must: you get up slowly.'); }
+      else if (tu.wait === 0 && Math.hypot(b.vx, b.vy) < 0.05){ tu.tries++; M.setup(s); tu.note = tu.tries >= 3 ? 'Have it as done: you can go on.' : `Again: ${tutKeys().slide} as it comes.`; if (tu.tries >= 3) pass(s, tu.note); else tutPanel(s); }
     }
-    if (st === 'move' && !tu.ok){ const t = tu.targets[tu.n]; if (t && Math.hypot(d.x - t[0], d.y - t[1]) < 24){ tu.n++; sfx.kick && sfx.kick(0.3); if (tu.n >= tu.targets.length) pass(s, 'You can move. Diagonals work too: hold two keys.'); else tutPanel(s); } }
-    if (st === 'fk' && !tu.ok && !G.sp && tu.kicked){ tu.fkT = (tu.fkT || 0) + 1; if (tu.fkT > 150) pass(s, 'That\'s a free kick. The keeper reads your aim: aim one way, curl it the other.'); }
+    if (st === 'move' && !tu.ok){ const t = tu.targets[tu.n]; if (t && Math.hypot(d.x - t[0], d.y - t[1]) < 24){ tu.n++; sfx.kick && sfx.kick(0.3); if (tu.n >= tu.targets.length) pass(s, 'You can move!'); else tutPanel(s); } }
+    if (st === 'fk' && !tu.ok && !G.sp && tu.kicked){ tu.fkT = (tu.fkT || 0) + 1; if (tu.fkT > 150) pass(s, 'That\'s a free kick!'); }
     if (st === 'pcharge' || st === 'pshot' || st === 'plose' || st === 'pkeeper'){ const k = Math.min(10, Math.floor(10 * (P.pw | 0) / C.POWER_T)); if (k !== tu.pk){ tu.pk = k; if (!tu.ok) tutPanel(s); } }   // (the charge, as it fills)
-    if (st === 'plose' && !tu.ok){ if ((P.pw | 0) >= C.POWER_T) tu.full = true; else if (tu.full && !(P.pw > 0)) pass(s, 'Gone: the ring emptied. A charge lasts only while the ball stays at your feet: a touch by anyone else, a goal or a slide ends it too.'); }
+    if (st === 'plose' && !tu.ok){ if ((P.pw | 0) >= C.POWER_T) tu.full = true; else if (tu.full && !(P.pw > 0)) pass(s, 'Gone: the charge only lasts while you stay on it.'); }
     if ((st === 'pshot' || st === 'pkeeper') && !tu.ok && tu.kicked && (G.frame - tu.kickF > 300 || (Math.hypot(b.vx, b.vy) < 0.05 && G.frame - tu.kickF > 60))){ tu.tries++; const nt = tu.powered ? 'Not in. Again: charge it, then shoot at a corner.' : 'Not in, and a normal kick: stay by the ball until it glows first.'; M.setup(s); tu.note = nt; tutPanel(s); }
-    if ((st === 'cfk') && !tu.ok && !G.sp && tu.kicked && Math.hypot(b.vx, b.vy) < 0.05 && ++tu.fkT > 90){ tu.tries++; M.setup(s); tu.note = 'Not in. Again: ← or → sets the curl, the dots show it.'; tutPanel(s); }
+    if ((st === 'cfk') && !tu.ok && !G.sp && tu.kicked && Math.hypot(b.vx, b.vy) < 0.05 && ++tu.fkT > 90){ tu.tries++; M.setup(s); tu.note = 'Not in. Again: ← or → curls it.'; tutPanel(s); }
     if (st === 'kick' || st === 'score' || st === 'curl' || curlStep(st)){   // (the ball gone off somewhere, or stopped short: put it back)
       const v = Math.hypot(b.vx, b.vy); if (tu.kicked && !tu.ok && v < 0.05){ tu.wait = (tu.wait || 0) + 1; if (tu.wait > 90){ tu.wait = 0; if (st !== 'kick'){ tu.tries++; const nt = (st === 'curl' || curlStep(st)) && tu.tries < 3 ? 'Not in. Again: hold the key as you kick.' : 'Not in. Have another go.'; M.setup(s); tu.note = nt; tutPanel(s); } } } else tu.wait = 0;
     }
@@ -8269,43 +8270,43 @@ function tutPanel(s){
   if (!m){ box.hidden = true; return; }
   const tu = m.tu, L = tutSteps(m), st = L[tu.i], K = tutKeys(), kb = t => `<kbd>${t}</kbd>`, inv = !!SET.inv[0], kUp = inv ? K.down : K.up, kDn = inv ? K.up : K.down, swapped = inv ? ' (your curl keys are swapped)' : '';
   const T = {
-    qKeys: ['The other keys', `<span class="qk">${[[kb(K.up) + ' / ' + kb(K.down) + ' while kicking', 'curl it'], [kb(K.kick) + ' ×2', 'call for the ball'], [kb(K.slide), 'slide tackle (in goal: dive)'], [kb(bind.p1.gk ? kname(bind.p1.gk) : 'G'), 'go in goal (2v2)'], [kb('P'), 'pause'], [kb('Esc'), 'menu']].map(([k, w]) => `<span><b>${k}</b><i>${w}</i></span>`).join('')}</span>Curling, slides and power shots start off: their parts of the Tutorial switch them on.`, ''],   // (v28.69: one per line, was one long sentence)
-    qDone: ['You\'re ready!', `That's enough to play. Want more? Each part of the Tutorial goes deeper, one thing at a time.`, ''],
-    sLevel: ['Computer level', `How good the computer is. ★ <b>Easy</b> while you learn, Normal once you score, Hard or Insane for a fight. Or set everything at once: <b>Use all recommended</b>.`, ''],
-    sHelp: ['Help bar', `Your keys under the pitch, lit as you press them, with a tip for what to do. ★ <b>On</b> while you learn.`, ''],
-    sKeys: ['Your keys', `Kick ${kb(K.kick)}, slide ${kb(K.slide)}, move ${kb(K.move)}. ★ These are fine to start; change any in ⌨ Controls.`, ''],
-    sZoom: ['Zoom', `${kb('+')} and ${kb('−')} change it. ★ <b>Follow all</b>: you see everyone, so you know where to go. Auto follows the ball closer.`, ''],
-    sExtrap: ['Extrapolation', `Makes moving feel smoother and more instant online (it draws everyone a little ahead). ★ <b>60 ms</b>. Too high and players jump about.`, ''],
-    sCurve: ['Curve', `How much shots bend when you curl them. ★ <b>Off</b> for now: the Attacking part turns it on once you've tried it. 60% is the normal amount.`, ''],
-    sRules: ['Match rules', `For your matches. ★ All <b>off</b> to start: each part of the tutorial lets you switch its one on (slides, free kicks, power shots).`, ''],
-    sCurlHelp: ['Curl help', `<b>Auto curl</b>: shots bend into the corner by themselves. <b>Swap curl keys</b>: ${kb(K.up)} bends it down. ★ Both <b>off</b>: you learn to curl it yourself.`, ''],
-    sDone: ['All set!', `Change any of it in ⚙ Settings, any time. Next: the basics.`, ''],
+    qKeys: ['The other keys', `<span class="qk">${[[kb(K.up) + ' / ' + kb(K.down) + ' while kicking', 'curl it'], [kb(K.kick) + ' ×2', 'call for the ball'], [kb(K.slide), 'slide tackle (in goal: dive)'], [kb(bind.p1.gk ? kname(bind.p1.gk) : 'G'), 'go in goal (2v2)'], [kb('P'), 'pause'], [kb('Esc'), 'menu']].map(([k, w]) => `<span><b>${k}</b><i>${w}</i></span>`).join('')}</span>Curl, slides and power shots start off.`, ''],   // (v28.69: one per line, was one long sentence)
+    qDone: ['You\'re ready!', `That's enough to play. Want more? Try the other parts.`, ''],
+    sLevel: ['Computer level', `How good the computer is. ★ <b>Easy</b> to learn.`, ''],
+    sHelp: ['Help bar', `Keys and tips under the pitch. ★ <b>On</b> to learn.`, ''],
+    sKeys: ['Your keys', `Kick ${kb(K.kick)}, slide ${kb(K.slide)}, move ${kb(K.move)}. Change them in ⌨ Controls.`, ''],
+    sZoom: ['Zoom', `${kb('+')} and ${kb('−')}. ★ <b>Follow all</b> shows everyone.`, ''],
+    sExtrap: ['Extrapolation', `Smoother online. ★ <b>60 ms</b>. Too high: players jump about.`, ''],
+    sCurve: ['Curve', `How much shots bend. ★ <b>Off</b> for now. 60% is normal.`, ''],
+    sRules: ['Match rules', `Slides, free kicks, power shots. ★ All <b>off</b> to start.`, ''],
+    sCurlHelp: ['Curl help', `<b>Auto curl</b>: shots bend by themselves. <b>Swap</b>: flips the curl keys. ★ Both <b>off</b>.`, ''],
+    sDone: ['All set!', `Change it any time in ⚙ Settings. Next: the basics.`, ''],
     bDone: ['That\'s the basics', `You can move, kick and score. Next: attacking.`, ''],
-    aDone: ['That\'s attacking', `Curl it round people, call for the ball. Switch curling on for your matches below. Next: defending.`, ''],
-    dDone: ['That\'s defending', `Slide for the ball, not the man. Switch slide tackles on for your matches below. Next: free kicks.`, ''],
-    fDone: ['That\'s free kicks', `Aim one way, curl it the other. Switch free kicks on below (they need slide tackles on). Next: the extras.`, ''],
+    aDone: ['That\'s attacking', `Switch curling on below. Next: defending.`, ''],
+    dDone: ['That\'s defending', `Switch slides on below. Next: free kicks.`, ''],
+    fDone: ['That\'s free kicks', `Switch free kicks on below. Next: the extras.`, ''],
     xDone: ['All done!', `That's every control. All the keys are in ☰ Menu → How to play.`, ''],
     move: ['Move', `Move with ${kb(K.move)}. Run through the yellow circles.`, `${tu.n} of ${tu.targets.length || 3}`],
-    kick: ['Kick', `Walk up to the ball and ${K.touch ? 'tap' : 'press'} ${kb(K.kick)}. It goes the way the arrow shows: from you, through the ball.`, ''],
-    score: ['Score', `Stand in the ring behind the ball, then ${kb(K.kick)}. The arrow turns green when it's going in.`, ''],   // (v28.69: was "face the goal": nothing faces, the kick goes from you through the ball)
+    kick: ['Kick', `Walk to the ball, ${K.touch ? 'tap' : 'press'} ${kb(K.kick)}. It goes where the arrow points.`, ''],
+    score: ['Score', `Stand in the ring, press ${kb(K.kick)}. Green arrow: it's going in.`, ''],   // (v28.69: was "face the goal": nothing faces, the kick goes from you through the ball)
     curl: ['Curl it', `Hold ${kb(K.up)} or ${kb(K.down)} while you kick: it bends round the man.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    call: ['Call for the ball', `Tap ${kb(K.kick)} twice, quickly: your teammate passes to you.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    slide: ['Slide tackle', `${kb(K.slide)} slides in. Hit the ball, not the man (that's a foul).`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    dive: ['In goal: dive', `You're in goal. When the shot comes, ${kb(K.slide)} dives at it. (In 2v2, ${kb(bind.p1.gk ? kname(bind.p1.gk) : 'G')} puts you in goal.)`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    fk: ['Free kick', `${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)} and let go. The dots show the path.`, ''],
+    call: ['Call for the ball', `Double tap ${kb(K.kick)}: your teammate passes.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    slide: ['Slide tackle', `${kb(K.slide)} slides. Hit the ball, not the man.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    dive: ['In goal: dive', `You're in goal. ${kb(K.slide)} dives at the shot.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    fk: ['Free kick', `${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)}, let go.`, ''],
     emote: ['Emotes', K.touch ? `Tap 😎 on the pitch and pick one.` : `Press ${kb('1')} to ${kb('8')}: an emote over your player.`, ''],
     keys: ['Other keys', K.touch ? `The corner buttons: Pause, ⚙ Settings, ☰ Menu, ⛶ fullscreen. Try Pause, then again to play on.` : `${kb('P')} pause · ${kb('Esc')} menu · ${kb('F')} fullscreen · ${kb('R')} restart · ${kb('Enter')} chat online. Try ${kb('P')} twice.`, tu.pz === 2 ? '✓ pause' : ''],
-    cup: ['Round him: over the top', `Aim at the goal and hold ${kb(kDn)}${swapped} as you kick: it swings out over him and bends back in.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cdown: ['Round him: underneath', `Now hold ${kb(kUp)}${swapped} as you kick: it swings out under him and back up.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cfar: ['Far post from out wide', `Aim just outside the far post and hold ${kb(kDn)}${swapped}: it bends back into the corner.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cauto: ['Auto curl', `Switch it on below, then shoot at a corner without ${kb(K.up)} or ${kb(K.down)}: it curls by itself.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cfk: ['Free kick curl', `${kb(K.left)} ${kb(K.right)} set the curl, ${kb(K.up)} ${kb(K.down)} aim, hold ${kb(K.kick)} and let go. Aim one way, curl it the other.`, tu.tries ? `try ${tu.tries + 1}` : ''],
-    cdone: ['That\'s curling', `It swings out one side and bends back to where you aimed. How much: Curve in ⚙ Settings. Next: power shots.`, ''],
-    pcharge: ['Charge a power shot', `Stay right on the ball without kicking: a ring fills, and when it's full the ball glows.`, P_STATE(s)],
-    pshot: ['Shoot it', `Charge it till it glows, then ${kb(K.kick)}: it goes half as hard again. Score one.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
-    plose: ['Keep it or lose it', `Charge it, then step away: the ring empties. A touch by anyone else ends it too.`, P_STATE(s)],
-    pkeeper: ['Past the keeper', `Charge it, then hit it at a corner: he has half as long to get there.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
-    pdone: ['That\'s the power shot', `It's a match rule: switch it on below or in ⚙ Settings. Watch for the computer's ring too.`, ''],
+    cup: ['Round him: over the top', `Aim at goal, hold ${kb(kDn)}${swapped} as you kick: it bends round him.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cdown: ['Round him: underneath', `Now hold ${kb(kUp)}${swapped}: it bends the other way.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cfar: ['Far post from out wide', `Aim wide of the far post, hold ${kb(kDn)}${swapped}: it bends in.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cauto: ['Auto curl', `Switch it on below, shoot at a corner: it curls by itself.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cfk: ['Free kick curl', `${kb(K.up)} ${kb(K.down)} aim, ${kb(K.left)} ${kb(K.right)} curl, hold ${kb(K.kick)}, let go.`, tu.tries ? `try ${tu.tries + 1}` : ''],
+    cdone: ['That\'s curling', `How much it bends: Curve in ⚙ Settings. Next: power shots.`, ''],
+    pcharge: ['Charge a power shot', `Stay on the ball, don't kick. It glows when it's charged.`, P_STATE(s)],
+    pshot: ['Shoot it', `Charge it, then ${kb(K.kick)}. Score one.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
+    plose: ['Keep it or lose it', `Charge it, then step away: the charge is gone.`, P_STATE(s)],
+    pkeeper: ['Past the keeper', `Charge it, shoot at a corner. Hard to save.`, tu.tries ? `try ${tu.tries + 1} · ` + P_STATE(s) : P_STATE(s)],
+    pdone: ['That\'s the power shot', `Switch power shots on below.`, ''],
   }[st];
   $('tutStep').textContent = `${tu.i + 1} / ${L.length}`; $('tutTitle').textContent = T[0];
   $('tutText').innerHTML = T[1];
@@ -10026,7 +10027,7 @@ function overlayText(s, V){
     // (v25.6, "the get ready and puase screen combine maybe": one screen; resuming, it counts down under PAUSED)
     bigText('PAUSED', null, '#e8e3e3', cssH / 2 - 10, 36);
     if (V.pause < 120){ const w = V.pause / 120 * 200; ctx.fillStyle = '#fff'; ctx.fillRect(cssW / 2 - w / 2, cssH / 2 + 24, w, 8); ctx.font = '600 14px Rubik, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = '#ffd166'; ctx.fillText(`Back in ${Math.max(1, Math.ceil(V.pause / 60))}…`, cssW / 2, cssH / 2 + 40); }
-    else { ctx.font = '500 13px Rubik, sans-serif'; ctx.fillStyle = '#a3acc2'; ctx.fillText(s.kind === 'guest' ? 'The host paused the game' : dmPaused === s ? 'Waiting while you type a message · it carries on when you stop' : 'P, Esc or Pause to resume · R to restart', cssW / 2, cssH / 2 + 28); }
+    else { ctx.font = '500 13px Rubik, sans-serif'; ctx.fillStyle = '#a3acc2'; ctx.fillText(s.kind === 'guest' ? 'The host paused the game' : dmPaused === s ? 'Paused while you type' : 'P, Esc or Pause to resume · R to restart', cssW / 2, cssH / 2 + 28); }
   }
 }
 // v25.6.3 ("add a cool animation"): the goal's title. A slanted band in the scorers' colours sweeps in across the screen
@@ -10269,52 +10270,55 @@ const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one
 // understand"): each update a short headline, each change one short line: [kind, where, what]. Kinds: new, fix, better,
 // change. Every release adds its entry here (notes.md, release routine)
 const PATCH = [
+  {v: '30.2', d: '24 Nov 2026', title: 'Shorter text', items: [
+    ['better', 'Tutorials', 'Every step is one short line.'],
+    ['better', 'Every game', 'Shorter controls card and how-to lines.']]},
   {v: '30.1', d: '24 Nov 2026', title: 'Messages, a controls card, and an easier Easy', items: [
-    ['new', 'Messages', 'All your chats with friends in one place: Messages at the top of the menu, in the Friends tab, and in a match under ☰ Menu. Unread chats come first, with a count.'],
-    ['new', 'Messages', 'Against the computer, the match waits while you type a message and carries on when you stop.'],
-    ['new', 'Every game', 'Before a match, a card shows every key for that game, what it does, and how to win. Two of you on one keyboard get a column each.'],
-    ['change', 'Every game', 'The card shows by itself for your first 3 matches of each game, then stops. Settings → Controls card: first games, every match or never. ☰ Menu → Keys for this game shows it any time.'],
-    ['better', 'Volleyball, badminton, ping pong', 'The computer on Easy misses more often, so someone new can win points.'],
-    ['change', 'Computer level', 'Someone playing for the first time starts on Easy. If you\'ve played before, your level stays as it was.']]},
+    ['new', 'Messages', 'All your chats in one place: top of the menu, Friends, or ☰ Menu in a match.'],
+    ['new', 'Messages', 'Typing pauses a match against the computer.'],
+    ['new', 'Every game', 'A card before a match: every key and how to win.'],
+    ['change', 'Every game', 'It shows for your first 3 matches of each game. Change it in Settings.'],
+    ['better', 'Volleyball, badminton, ping pong', 'Easy misses more, so new players can win.'],
+    ['change', 'Computer level', 'New players start on Easy.']]},
   {v: '30.0', d: '24 Nov 2026', title: 'Win by two, and fairer dodgeball catches', items: [
-    ['change', 'Volleyball, badminton, ping pong', 'You have to win by two points, like the real games. Badminton stops at 20 (the next point wins at 19-19).'],
-    ['change', 'Dodgeball', 'Fast throws are much harder to catch: press right as they reach you. They have a yellow core in their trail.'],
-    ['better', 'Dodgeball', 'The computer catches far less often (on Hard and Insane, about a fifth as often as before).'],
-    ['change', 'Dodgeball', 'A caught ball drops at the catcher\'s feet, so a catch costs the thrower one life, not two.'],
-    ['change', 'Dodgeball', 'A ball that bounced off a wall is safe: it can\'t hit you or be caught. It says SAFE if it touches you.']]},
+    ['change', 'Volleyball, badminton, ping pong', 'Win by two, like the real games. Badminton stops at 20.'],
+    ['change', 'Dodgeball', 'Fast throws (yellow core) are harder to catch.'],
+    ['better', 'Dodgeball', 'The computer catches much less.'],
+    ['change', 'Dodgeball', 'A catch costs one life, not two.'],
+    ['change', 'Dodgeball', 'A ball that bounced off a wall is safe. It says SAFE.']]},
   {v: '29.9', d: '23 Nov 2026', title: 'Dodgeball hits always count', items: [
-    ['fix', 'Dodgeball', 'At the start of a round, throws and catches with most of the balls did nothing (the ball just bounced off) until one particular ball was moved. Now every throw counts from the start.']]},
+    ['fix', 'Dodgeball', 'Throws at the start of a round did nothing. Now they all count.']]},
   {v: '29.8', d: '23 Nov 2026', title: 'Fairer dodgeball catches', items: [
-    ['fix', 'Dodgeball', 'A throw that bounces off a wall still counts. Catching it now costs the thrower a life (before, nothing happened).'],
-    ['new', 'Dodgeball', 'Live throws have a coloured trail. A ball with no trail is rolling too slowly to hit you or be caught.']]},
+    ['fix', 'Dodgeball', 'Catching a bounced throw costs the thrower a life.'],
+    ['new', 'Dodgeball', 'Live throws have a coloured trail.']]},
   {v: '29.7', d: '23 Nov 2026', title: 'Close menus without scrolling', items: [
-    ['new', 'Menus', 'A Done button stays at the top right of every menu page, so you never have to scroll down to close it.']]},
+    ['new', 'Menus', 'A Done button at the top right of every menu.']]},
   {v: '29.6', d: '23 Nov 2026', title: 'Team up with a friend', items: [
-    ['new', 'All games', 'P1 and P2 can play on the same team against the computer. Go to Friends, then Teams: "P1 and P2 together".'],
+    ['new', 'All games', 'P1 and P2 can team up against the computer.'],
     ['new', 'Ping pong', 'Doubles: play 2v2.'],
     ['fix', 'Other games', 'With 3 players, P2 couldn\'t play. Now everyone plays.'],
-    ['change', 'All games', 'The controls box at the start of each game is gone. The keys are still in Settings.'],
-    ['fix', 'Dodgeball', 'The ring on a ball left alone no longer carries on into the next round.'],
+    ['change', 'All games', 'The controls box at the start of each game is gone.'],
+    ['fix', 'Dodgeball', 'The idle-ball ring no longer carries on.'],
     ['better', 'Dodgeball', 'Slower throws still count as hits.'],
-    ['better', 'Dodgeball', 'You\'re safe for a shorter time after being hit. If a ball hits you then, it says SAFE. A catch says CAUGHT!']]},
+    ['better', 'Dodgeball', 'Shorter safe time after a hit. Says SAFE or CAUGHT!']]},
   {v: '29.5', d: '23 Nov 2026', title: 'What\'s new page', items: [
     ['new', 'Menu', 'This page: see what changed in every update.'],
-    ['new', 'Menu', 'A message when the game updates. Refresh the page to get the newest version.']]},
+    ['new', 'Menu', 'A message when the game updates.']]},
   {v: '29.4', d: '22 Nov 2026', title: 'Smoother online play', items: [
-    ['better', 'Online', 'Other players move much more smoothly when you join a room, even on slow wifi.']]},
+    ['better', 'Online', 'Smoother online, even on slow wifi.']]},
   {v: '29.3', d: '22 Nov 2026', title: 'Fixes for the new games', items: [
     ['fix', 'Volleyball, badminton', 'Pressing shoot twice no longer hits the ball twice.'],
     ['fix', 'Badminton, ping pong', 'No more unfair "two touches" faults.'],
     ['better', 'Volleyball', 'Faster rallies. The computer spikes away from you.'],
     ['better', 'Badminton', 'Jump smash from most of your half, not only at the net.'],
     ['new', 'Volleyball, badminton', 'A gold ring shows when you can hit the ball.'],
-    ['new', 'Dodgeball', 'A ring shows when a ball is about to go to the other team. Faster throws on big courts.'],
+    ['new', 'Dodgeball', 'A ring shows when a ball is about to switch sides.'],
     ['fix', 'Phones', 'The court is no longer hidden behind the buttons.']]},
   {v: '29.2', d: '22 Nov 2026', title: 'Smarter computer players', items: [
     ['fix', 'Football', 'Computer keepers don\'t shake about any more.'],
-    ['better', 'Football', 'Computer players take the ball straight away instead of walking round it.']]},
+    ['better', 'Football', 'Computer players don\'t walk round the ball.']]},
   {v: '29.1', d: '21 Nov 2026', title: 'Better volleyball and badminton', items: [
-    ['better', 'Volleyball, badminton', 'Where the ball meets you decides the shot: high, long or short.'],
+    ['better', 'Volleyball, badminton', 'Where the ball hits you decides the shot.'],
     ['new', 'Dodgeball', 'A ball nobody touches for 6 seconds goes to the other team.'],
     ['better', 'Dodgeball', 'The computer aims and dodges better.']]},
   {v: '29.0', d: '21 Nov 2026', title: 'Big update for the other games', items: [
@@ -10326,20 +10330,20 @@ const PATCH = [
     ['new', 'All games', 'A tutorial for each game.'],
     ['new', 'Menu', 'A loading screen with the logo.']]},
   {v: '28.99', d: '21 Nov 2026', title: 'New logo', items: [
-    ['new', 'Menu', 'The Pitch Brawl logo on the menu, the browser tab and your home screen.'],
+    ['new', 'Menu', 'A new Pitch Brawl logo.'],
     ['fix', 'Phones', 'Game names are no longer cut off.']]},
   {v: '28.98', d: '19 Nov 2026', title: 'Easier new games', items: [
-    ['better', 'Other games', 'A ring shows where the ball will land. The computer makes mistakes too.']]},
+    ['better', 'Other games', 'A ring shows where the ball lands.']]},
   {v: '28.97', d: '19 Nov 2026', title: 'Fairer rules', items: [
     ['fix', 'Dodgeball', 'Fast throws can\'t be blocked by kicking them.'],
     ['fix', 'Volleyball, badminton', 'Out counts against whoever touched the ball last.'],
-    ['change', 'Settings', 'The FPS counter is on at first (turn it off in Settings, View).']]},
+    ['change', 'Settings', 'The FPS counter is on at first.']]},
   {v: '28.96', d: '17 Nov 2026', title: 'New pitch look', items: [
     ['new', 'Football', 'Striped grass and white lines.'],
     ['change', 'Football', 'Keeper dives a little stronger.']]},
   {v: '28.92', d: '16 Nov 2026', title: 'Four new games', items: [
     ['new', 'Menu', 'Volleyball, badminton, ping pong and dodgeball.'],
-    ['change', 'Football', 'Keeper dives toned down. No slide tackles right after a free kick.']]}];
+    ['change', 'Football', 'Keeper dives toned down.']]}];
 const verCmp = (a, b) => { const x = String(a).split('.').map(n => +n || 0), y = String(b).split('.').map(n => +n || 0); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
 function newsDot(){ const seen = store.get('pb.seenVer', null), unseen = !!seen && verCmp(NET_VER, seen) > 0; document.querySelectorAll('.newsb').forEach(b => b.classList.toggle('unseen', unseen)); }
 function renderNews(){
@@ -12298,7 +12302,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '30.1';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '30.2';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
@@ -13965,7 +13969,7 @@ function msgRows(){
 function renderMsgs(){
   const box = $('msgList'); if (!box) return; box.textContent = '';
   const rows = msgRows();
-  if (!rows.length){ const p = document.createElement('p'); p.className = 'note msgempty'; p.textContent = 'No friends yet. Give a friend your code (Friends tab), or add theirs: then you can chat here.'; box.append(p);
+  if (!rows.length){ const p = document.createElement('p'); p.className = 'note msgempty'; p.textContent = 'No friends yet. Add one in Friends.'; box.append(p);
     if (!sess){ const b = document.createElement('button'); b.type = 'button'; b.className = 'ghost sm'; b.textContent = 'Go to Friends'; b.onclick = () => { closePanel('msgPanel'); $('menu').hidden = false; menuTab('frs'); }; box.append(b); }
     return; }
   for (const r of rows){
