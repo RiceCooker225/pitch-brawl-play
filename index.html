@@ -10289,6 +10289,9 @@ const TOOLP = ['teamPanel', 'puPanel', 'keysPanel'];   // the set-up panels: one
 // understand"): each update a short headline, each change one short line: [kind, where, what]. Kinds: new, fix, better,
 // change. Every release adds its entry here (notes.md, release routine)
 const PATCH = [
+  {v: '26.0', d: '25 Nov 2026', title: 'New version numbers', items: [
+    ['change', 'Versions', 'Numbers now go like iOS: year . update . fix.'],
+    ['change', 'Example', '26.1.2 = 2026, update 1, fix 2. 30.3 was the last old number.']]},
   {v: '30.3', d: '24 Nov 2026', title: 'Smarter computer, clearer help', items: [
     ['better', 'Volleyball, badminton', 'The computer lets balls that are going out drop.'],
     ['better', 'How to play', 'Short and clear: one line per control.'],
@@ -10367,13 +10370,17 @@ const PATCH = [
   {v: '28.92', d: '16 Nov 2026', title: 'Four new games', items: [
     ['new', 'Menu', 'Volleyball, badminton, ping pong and dodgeball.'],
     ['change', 'Football', 'Keeper dives toned down.']]}];
-const verCmp = (a, b) => { const x = String(a).split('.').map(n => +n || 0), y = String(b).split('.').map(n => +n || 0); for (let i = 0; i < Math.max(x.length, y.length); i++){ const d = (x[i] || 0) - (y[i] || 0); if (d) return d; } return 0; };
-function newsDot(){ const seen = store.get('pb.seenVer', null), unseen = !!seen && verCmp(NET_VER, seen) > 0; document.querySelectorAll('.newsb').forEach(b => b.classList.toggle('unseen', unseen)); }
+// v26.0 ("like ios 26.2.1"): versions go year.update.fix now (26 = 2026; 26.1 the next update, 26.1.1 a quick fix to it),
+// so 26.0 came after 30.3 and the numbers can't say which is newer: PATCH's order does (the newest first). A version not
+// in PATCH is newer than this page (an update it doesn't know yet: version.json, or one opened somewhere else)
+const verAt = v => PATCH.findIndex(e => e.v === v);
+const verNewer = (a, b) => { a = String(a); b = String(b); if (a === b) return false; const i = verAt(a), j = verAt(b); return i < 0 || (j >= 0 && i < j); };
+function newsDot(){ const seen = store.get('pb.seenVer', null), unseen = !!seen && verNewer(NET_VER, seen); document.querySelectorAll('.newsb').forEach(b => b.classList.toggle('unseen', unseen)); }
 function renderNews(){
   const box = $('newsList'); if (!box) return; box.textContent = ''; const seen = store.get('pb.seenVer', null);
   const mk = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
   PATCH.forEach((e, i) => {   // (v29.6: the newest and any you haven't read open; the older ones a line each, tap to open)
-    const unseen = !!seen && verCmp(e.v, seen) > 0, sec = mk('details', 'newsv' + (e.v === NET_VER ? ' cur' : '')); sec.open = i === 0 || unseen;
+    const unseen = !!seen && verNewer(e.v, seen), sec = mk('details', 'newsv' + (e.v === NET_VER ? ' cur' : '')); sec.open = i === 0 || unseen;
     const sum = mk('summary'), h = mk('h3', '', `v${e.v}`); h.append(' ', mk('small', '', e.d)); if (unseen) h.append(' ', mk('em', 'newtag', 'NEW'));
     sum.append(h, mk('span', 'ntitle', e.title || '')); sec.append(sum);
     const ul = mk('ul');
@@ -10389,7 +10396,7 @@ function newsBoot(){
   let seen = store.get('pb.seenVer', null);
   if (seen == null){ const back = store.get('pb.tut', null) || store.get('pb.nick', null) || (you && you.games > 0); seen = back ? '29.4' : NET_VER; store.set('pb.seenVer', seen); }   // (players from before patch notes had no pb.seenVer: they get this one)
   newsDot();
-  if (verCmp(NET_VER, seen) > 0) setTimeout(function tryNote(){
+  if (verNewer(NET_VER, seen)) setTimeout(function tryNote(){
     if (!$('nickAsk').hidden || !$('tutWelcome').hidden || sess){ setTimeout(tryNote, 4000); return; }
     const e = PATCH.find(x => x.v === NET_VER), n = e ? e.items.length : 0;
     frToast(`Pitch Brawl updated to v${NET_VER}${e && e.title ? `: ${e.title}` : ''}${n ? ` (${n} change${n === 1 ? '' : 's'})` : ''}`, 'What\'s new', openNews, 'Later', () => {});
@@ -10403,7 +10410,7 @@ function updCheck(){
   if (!/^https?:$/.test(location.protocol) || inArtifact || typeof fetch !== 'function') return;
   updCheck.at = Date.now();
   fetch('version.json?t=' + Date.now(), {cache: 'no-store'}).then(r => r.ok ? r.json() : null).then(j => {
-    if (!j || !j.v || verCmp(j.v, NET_VER) <= 0 || updCheck.said === j.v) return; updCheck.said = j.v;
+    if (!j || !j.v || !verNewer(j.v, NET_VER) || updCheck.said === j.v) return; updCheck.said = j.v;
     frToast(`A new update is out: v${j.v}. Refresh the page to get it${sess && !sess.done ? ' (after this game)' : ''}`, 'Refresh', () => location.reload(), 'Later', () => {});
   }).catch(() => {});
 }
@@ -12325,7 +12332,7 @@ function notePing(id, seq){
 // v27.9 ("my screen is just in game while my friend started the game"): a guest on another version of the game than
 // the host's threw every snapshot away (they didn't fit: guestApply) and sat on the first picture. Each says its
 // version now; not the same, both are told to refresh
-const NET_VER = '30.3';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
+const NET_VER = '26.0';   // (v28.11: the whole version: friends on two 28.x versions weren't told to refresh)
 const pingOf = id => { const v = NET.host ? NET.pingMs.get(id) : NET.pn.get(id); return typeof v === 'number' && isFinite(v) ? v : null; };
 function pingLine(){   // for the box on the pitch: "Ping · you 84 ms · Sam 120 ms"
   const L = NET.lobby; if (!L || !Array.isArray(L.pl) || !L.pl.length) return '';
