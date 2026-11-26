@@ -1,4 +1,4 @@
-# Massage booking site: setup
+# Magic Massage booking site: setup
 
 Three files make up the site:
 
@@ -12,9 +12,15 @@ Until you finish step 2 the site runs in **preview mode**: it works, but booking
 
 ---
 
-## 1. Put in your shop details (5 min)
+## 1. Check your shop details (5 min)
 
-Open `index.html` and look for the two `EDIT` blocks near the top:
+Your details are already filled in from magicmassageau.com and the Stockland listing: address, phone, opening hours and the full price list. Please check them, especially:
+
+- **Hot stone massage $175** and **Feet, neck & shoulders $155** are set to **90 minutes**. Your price list picture says "60mins" for both, which looks like a typo. If they really are 60 minutes, change the `90` to `60`.
+- **Closed days**: only Christmas Day is in `closedDates`. Add other days the shop is shut, e.g. `"2027-01-01"`.
+- **Booking rules**: start times every 15 minutes, a 15-minute gap after each treatment, and nobody can book less than 1 hour ahead. Change `slotStep`, `bufferMinutes` and `minNoticeHours` to suit.
+
+To change anything, open `index.html` and look for the two `EDIT` blocks near the top:
 
 - **EDIT 1**: the shop name and description that Facebook and Google show.
 - **EDIT 2** (`window.CONFIG`): your name, phone, address, prices, massages, opening hours, holidays, FAQs.
@@ -24,8 +30,10 @@ Keep the quotes and commas as they are. Times are 24-hour (`"09:00"`, `"19:30"`)
 ## 2. Connect a Google Sheet so bookings are saved (10 min, free)
 
 1. Go to [sheets.new](https://sheets.new) to make a new Google Sheet. Call it something like "Bookings".
-2. **File › Settings**: set the **Time zone** to your shop's time zone, then press Save.
-3. **Extensions › Apps Script**. Delete everything in the editor, paste in the whole of `apps-script.gs`, and change the `SETTINGS` block at the top (shop name, phone, address).
+2. **File › Settings**: set the **Time zone** to **(GMT+10:00) Brisbane**, then press Save. (Queensland has no daylight saving, so pick Brisbane, not Sydney.)
+3. **Extensions › Apps Script**. Delete everything in the editor and paste in the whole of `apps-script.gs`. The `SETTINGS` block at the top already has your shop name, phone and address.
+
+   Do this while logged in to the Google account you want booking emails sent to (e.g. magicmassagerockhampton@gmail.com), or put that address in `notifyEmail`.
 4. Press **Save** (the disk icon). In the function menu next to **Run**, pick `setup` and press **Run**.
    Google asks for permission: **Review permissions** › choose your account › **Advanced** › **Go to (project name)** › **Allow**.
    It warns you because you wrote the script yourself and Google hasn't checked it. That's normal.
@@ -51,7 +59,9 @@ To test it, open the URL in your browser. It should say `"Booking system is runn
 **GitHub Pages** (where it is now): this folder lives in the `pitch-brawl-play` repo. Once it's merged into `main` it goes live at
 `https://ricecooker225.github.io/pitch-brawl-play/booking/`
 
-For a cleaner address, make a new repo (e.g. `stillwater-massage`), put these files in it, and turn on **Settings › Pages › Deploy from branch › main**. You can also connect your own domain there (e.g. `stillwatermassage.com`).
+For a cleaner address, make a new repo (e.g. `magic-massage`), put these files in it, and turn on **Settings › Pages › Deploy from branch › main**.
+
+**Your own domain**: you already have `magicmassageau.com`. Under **Settings › Pages › Custom domain** you can point it at this new site instead of the old one, at the company you bought the domain from. Customers then book at magicmassageau.com.
 
 **Netlify**: go to [app.netlify.com/drop](https://app.netlify.com/drop) and drag this folder in. It's live in seconds.
 
@@ -85,8 +95,9 @@ The site then reports these events to Facebook:
 An ad can open the site with a massage already picked, so customers go straight to choosing a time:
 
 ```
-https://YOUR-SITE/?service=deep-tissue-60&utm_source=facebook&utm_campaign=deep-tissue
-https://YOUR-SITE/?service=hot-stone&utm_source=facebook&utm_campaign=hot-stone
+https://YOUR-SITE/?service=whole-body-60&utm_source=facebook&utm_campaign=whole-body
+https://YOUR-SITE/?service=sports&utm_source=facebook&utm_campaign=sports
+https://YOUR-SITE/?service=acupuncture-45&utm_source=facebook&utm_campaign=dry-needling
 ```
 
 The `service` value is the massage `id` from CONFIG, plus `-minutes` when it comes in more than one length.
@@ -96,7 +107,7 @@ Paste your URL into [developers.facebook.com/tools/debug](https://developers.fac
 
 ## Good to know
 
-- Times are always in your shop's local time.
+- Times are always Queensland time.
 - Google lets a free account send about 100 emails a day, which is plenty for a shop.
 - The availability the site loads only says which times are taken. Customer names and phone numbers never leave your sheet.
 - If you use the Meta Pixel, you may need a privacy policy, depending on where you are. The footer already mentions the Pixel when it's switched on.

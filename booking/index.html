@@ -8,19 +8,20 @@
      EDIT 1 of 2: what Facebook, Google and the browser tab show.
      Change the shop name, the description and the two web addresses.
      =================================================================== -->
-<title>Stillwater Massage · Book online</title>
-<meta name="description" content="Relaxation, deep tissue, sports and hot stone massage. See live availability and book your time online in under a minute.">
+<title>Magic Massage Rockhampton · Book online</title>
+<meta name="description" content="Remedial, deep tissue, sports, pregnancy and hot stone massage, acupuncture and cupping at Stockland Rockhampton. HICAPS health fund claiming. Book online in under a minute.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Stillwater Massage">
-<meta property="og:title" content="Stillwater Massage · Book your massage online">
-<meta property="og:description" content="See live availability and pick a time that suits you. Booked in under a minute, pay on the day.">
+<meta property="og:site_name" content="Magic Massage Rockhampton">
+<meta property="og:title" content="Magic Massage Rockhampton · Book online">
+<meta property="og:description" content="At Stockland Rockhampton. See free times and book in under a minute. HICAPS health fund claiming available.">
 <meta property="og:url" content="https://ricecooker225.github.io/pitch-brawl-play/booking/">
 <meta property="og:image" content="https://ricecooker225.github.io/pitch-brawl-play/booking/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#f6f1ea">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#f8f3ec">
+<link rel="icon" href="favicon-64.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 
 <script>
 /* =====================================================================
@@ -28,14 +29,16 @@
    Keep the quotes and commas. Times are 24-hour ("09:00", "19:30").
    ===================================================================== */
 window.CONFIG = {
-  businessName: "Stillwater Massage",
-  phone: "0400 000 000",
-  email: "bookings@example.com",
-  address: "12 Example Street, Your Suburb",
-  mapsUrl: "",                 // optional: paste a Google Maps link to your shop
+  businessName: "Magic Massage Rockhampton",
+  shortName: "Magic Massage",          // shown in the top bar
+  phone: "(07) 4921 1516",
+  email: "magicmassagerockhampton@gmail.com",
+  address: "Shop 097, Stockland Rockhampton, 120-311 Yaamba Rd, Park Avenue QLD 4701",
+  locationNote: "Inside Stockland Rockhampton, next to Bright Eyes, near Woolworths.",
+  mapsUrl: "",                 // optional: paste your Google Maps share link
 
   currency: "$",               // shown before prices
-  currencyCode: "USD",         // for Facebook reporting: USD, GBP, AUD, NZD, EUR...
+  currencyCode: "AUD",         // for Facebook reporting
   clock24: false,              // true shows 14:30 instead of 2:30pm
 
   // Paste your Google Apps Script web app URL here (see SETUP.md).
@@ -47,59 +50,91 @@ window.CONFIG = {
 
   // Booking rules
   daysAhead: 28,               // how far ahead people can book
-  slotStep: 30,                // minutes between start times (15, 30 or 60)
-  bufferMinutes: 15,           // break after each massage (keep the same in apps-script.gs)
-  minNoticeHours: 2,           // earliest someone can book from now
+  slotStep: 15,                // minutes between start times (15, 30 or 60)
+  bufferMinutes: 15,           // break after each treatment (keep the same in apps-script.gs)
+  minNoticeHours: 1,           // earliest someone can book from now
 
   // Opening hours. Use null for closed days.
   hours: {
-    mon: ["09:00", "19:00"],
-    tue: ["09:00", "19:00"],
-    wed: ["09:00", "19:00"],
-    thu: ["09:00", "20:00"],
-    fri: ["09:00", "19:00"],
+    mon: ["09:00", "17:30"],
+    tue: ["09:00", "17:30"],
+    wed: ["09:00", "17:30"],
+    thu: ["09:00", "21:00"],
+    fri: ["09:00", "17:30"],
     sat: ["09:00", "17:00"],
-    sun: null
+    sun: ["09:30", "17:00"]
   },
-  closedDates: ["2026-12-25", "2026-12-26", "2027-01-01"],   // public holidays etc.
+  closedDates: ["2026-12-25"],   // public holidays etc.
 
-  // Your massages. "id" is used in ad links (?service=deep-tissue), so keep it simple.
+  // Text at the top of the page
+  intro: "Remedial, deep tissue, sports, pregnancy and hot stone massage, plus acupuncture and cupping, inside Stockland Rockhampton. Pick a time and you're booked.",
+  badges: ["HICAPS health fund claiming", "Qualified therapists", "Instant confirmation"],
+
+  // Your treatments, in the order shown. "group" puts them under a heading.
+  // "id" is used in ad links (?service=whole-body-60), so keep it simple.
   services: [
-    { id: "relaxation", name: "Relaxation massage", tag: "Most popular",
-      desc: "Long, flowing strokes with medium pressure to calm you down and melt away stress.",
-      options: [ { minutes: 60, price: 90 }, { minutes: 90, price: 125 } ] },
-    { id: "deep-tissue", name: "Deep tissue massage",
-      desc: "Firm, focused pressure on knots and tight spots in the neck, shoulders and back.",
-      options: [ { minutes: 60, price: 100 }, { minutes: 90, price: 140 } ] },
-    { id: "sports", name: "Sports & remedial massage",
-      desc: "Targeted work for training recovery, tight muscles and niggling aches.",
-      options: [ { minutes: 45, price: 80 }, { minutes: 60, price: 100 } ] },
-    { id: "hot-stone", name: "Hot stone massage",
-      desc: "Warm stones and slow strokes to ease deep muscle tension.",
-      options: [ { minutes: 75, price: 125 } ] },
-    { id: "pregnancy", name: "Pregnancy massage",
-      desc: "Side-lying and fully supported, for mums-to-be.",
-      options: [ { minutes: 60, price: 95 } ] },
-    { id: "express", name: "Express neck & shoulders",
-      desc: "Short on time? A quick, focused session where most tension lives.",
-      options: [ { minutes: 30, price: 55 } ] }
+    { group: "Full body", id: "whole-body", name: "Whole body massage",
+      desc: "Relaxing or firm, tailored to you. Ask for remedial or deep tissue work on the spots that need it.",
+      options: [ { minutes: 60, price: 105 }, { minutes: 90, price: 155 } ] },
+    { group: "Full body", id: "hot-stone", name: "Hot stone massage",
+      desc: "Warm stones and slow strokes to melt deep muscle tension.",
+      options: [ { minutes: 60, price: 125 }, { minutes: 90, price: 175 } ] },     // CHECK: price list says "$175 / 60mins"
+    { group: "Full body", id: "sports", name: "Sports massage",
+      desc: "Optimise performance, recover faster and help prevent injuries.",
+      options: [ { minutes: 60, price: 105 } ] },
+    { group: "Full body", id: "pregnancy", name: "Pregnancy massage",
+      desc: "Gentle care to ease back pain, swelling and muscle discomfort, from the second trimester.",
+      options: [ { minutes: 60, price: 105 } ] },
+    { group: "Full body", id: "lymphatic", name: "Lymphatic drainage massage",
+      desc: "Gentle therapy to support circulation and reduce swelling and puffiness.",
+      options: [ { minutes: 60, price: 105 } ] },
+    { group: "Full body", id: "massage-cupping", name: "Massage with cupping",
+      desc: "Massage combined with cupping to release tight, knotted muscles.",
+      options: [ { minutes: 60, price: 105 } ] },
+
+    { group: "Focus areas", id: "neck-shoulder", name: "Neck & shoulder",
+      desc: "A quick fix for the spot where most tension lives.",
+      options: [ { minutes: 30, price: 65 } ] },
+    { group: "Focus areas", id: "head-neck-shoulder", name: "Head, neck & shoulder",
+      desc: "Ease headaches, a stiff neck and tight shoulders.",
+      options: [ { minutes: 45, price: 85 } ] },
+    { group: "Focus areas", id: "neck-shoulder-back", name: "Neck, shoulder & back",
+      desc: "Upper body focus for desk workers and sore backs.",
+      options: [ { minutes: 45, price: 85 } ] },
+    { group: "Focus areas", id: "back-legs", name: "Back & legs",
+      desc: "Loosen a tight back and tired, heavy legs.",
+      options: [ { minutes: 45, price: 85 } ] },
+    { group: "Focus areas", id: "reflexology", name: "Foot reflexology",
+      desc: "Pressure-point foot massage to relax the whole body.",
+      options: [ { minutes: 45, price: 85 }, { minutes: 60, price: 105 } ] },
+    { group: "Focus areas", id: "feet-neck-shoulder", name: "Feet, neck & shoulders",
+      desc: "Reflexology plus neck and shoulder massage in one visit.",
+      options: [ { minutes: 60, price: 105 }, { minutes: 90, price: 155 } ] },     // CHECK: price list says "$155 / 60mins"
+
+    { group: "Acupuncture & cupping", id: "acupuncture", name: "Acupuncture or dry needling",
+      desc: "Needling to release muscle tension, improve movement and manage pain.",
+      options: [ { minutes: 45, price: 105 }, { minutes: 60, price: 130 } ] },
+    { group: "Acupuncture & cupping", id: "cupping", name: "Cupping (fire or vacuum)",
+      desc: "Suction cups to lift and loosen tight muscle and fascia.",
+      options: [ { minutes: 30, price: 60 } ] }
   ],
 
-  policy: "Free to cancel or move up to 24 hours before. Pay at the shop after your massage.",
+  policy: "Pay at the shop after your treatment. HICAPS health fund claiming available. Need to change your booking? Call us as early as you can.",
 
   highlights: [
-    { title: "Pressure that suits you", text: "Gentle or firm, tell us what you like. We check in during the session so it stays right." },
-    { title: "Warm, quiet rooms", text: "Soft lighting, heated tables and fresh linen for every client." },
-    { title: "Booked in a minute", text: "See real availability and pick your time. No calls, no waiting for a reply." }
+    { title: "Qualified therapists", text: "Fully qualified, certified therapists with years of hands-on experience." },
+    { title: "Spotlessly clean", text: "Beds, towels and tools are fully sanitised after every session." },
+    { title: "Claim on the spot", text: "HICAPS health fund claiming at the counter, so you only pay the gap." }
   ],
 
   // {phone} is replaced with your phone number.
   faqs: [
+    { q: "Can I claim on my health fund?", a: "Yes. We have HICAPS, so bring your health fund card and claim on the spot. How much you get back depends on your fund and level of cover." },
+    { q: "Where are you?", a: "Shop 097 inside Stockland Rockhampton, next to Bright Eyes, near Woolworths." },
     { q: "What should I wear?", a: "Whatever's comfortable. You undress to your comfort level and stay covered with towels, apart from the area being worked on." },
     { q: "How early should I arrive?", a: "About 5 to 10 minutes early on your first visit so we can go over any injuries or health conditions." },
-    { q: "Can I change or cancel?", a: "Yes, free of charge up to 24 hours before. Just call or text us on {phone}." },
-    { q: "How do I pay?", a: "At the shop after your massage, by card or cash." },
-    { q: "I'm pregnant. Can I book?", a: "Yes. Choose Pregnancy massage and tell us how far along you are in the notes." }
+    { q: "Can I change or cancel?", a: "Yes, just call us on {phone} as early as you can." },
+    { q: "I'm pregnant. Can I book?", a: "Yes, from the second trimester. Choose Pregnancy massage and tell us how far along you are in the notes." }
   ]
 };
 </script>
@@ -110,19 +145,19 @@ window.CONFIG = {
 
 <style>
 :root {
-  --bg: #f6f1ea;
-  --surface: #fffdf9;
-  --ink: #26241f;
-  --muted: #6b665c;
-  --line: #e3dacb;
-  --sage: #4b6853;
-  --sage-dark: #3b5442;
-  --sage-soft: #e2e9dd;
-  --clay: #a8704a;
-  --clay-soft: #f3e4d6;
+  --bg: #f8f3ec;
+  --surface: #fffcf7;
+  --ink: #2b1d15;
+  --muted: #6f6258;
+  --line: #e9ddcc;
+  --brand: #5b3a25;
+  --brand-dark: #432a1a;
+  --brand-soft: #f2e7d7;
+  --accent: #a96a1f;
+  --accent-soft: #fbecd2;
   --danger: #a33a2a;
   --radius: 18px;
-  --shadow: 0 1px 2px rgba(38,36,31,.05), 0 8px 28px rgba(38,36,31,.07);
+  --shadow: 0 1px 2px rgba(43,29,21,.05), 0 8px 28px rgba(43,29,21,.07);
   --serif: "Fraunces", Georgia, "Times New Roman", serif;
   --sans: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
@@ -131,28 +166,28 @@ html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
 body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--sans); }
 img, svg { display: block; max-width: 100%; }
-a { color: var(--sage-dark); }
+a { color: var(--brand-dark); }
 h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.15; margin: 0; letter-spacing: -.01em; }
 p { margin: 0; }
 .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 16px; }
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 [hidden] { display: none !important; }
-:focus-visible { outline: 3px solid color-mix(in srgb, var(--sage) 55%, transparent); outline-offset: 2px; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--brand) 55%, transparent); outline-offset: 2px; }
 
 /* buttons */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px;
-  border: 0; border-radius: 999px; background: var(--sage); color: #fff; font: 600 16px/1 var(--sans);
+  border: 0; border-radius: 999px; background: var(--brand); color: #fff; font: 600 16px/1 var(--sans);
   text-decoration: none; cursor: pointer; transition: background .15s, transform .1s; }
-.btn:hover { background: var(--sage-dark); }
+.btn:hover { background: var(--brand-dark); }
 .btn:active { transform: translateY(1px); }
 .btn[disabled] { opacity: .55; cursor: default; }
-.btn-ghost { background: transparent; color: var(--sage-dark); box-shadow: inset 0 0 0 1.5px var(--sage); }
-.btn-ghost:hover { background: var(--sage-soft); }
+.btn-ghost { background: transparent; color: var(--brand-dark); box-shadow: inset 0 0 0 1.5px var(--brand); }
+.btn-ghost:hover { background: var(--brand-soft); }
 .btn-block { width: 100%; }
-.link { background: none; border: 0; padding: 4px 0; color: var(--sage-dark); font: 600 15px var(--sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.link { background: none; border: 0; padding: 4px 0; color: var(--brand-dark); font: 600 15px var(--sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 
 /* preview banner */
-.preview { background: var(--clay-soft); color: #5a3a22; font-size: 14px; text-align: center; padding: 8px 16px; }
+.preview { background: var(--accent-soft); color: #5a3a12; font-size: 14px; text-align: center; padding: 8px 16px; }
 .preview b { font-weight: 600; }
 
 /* header */
@@ -162,22 +197,22 @@ header.top.scrolled { border-bottom-color: var(--line); }
 .top-in { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 64px; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font: 600 19px var(--serif); min-width: 0; }
 .brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.brand svg { flex: none; width: 32px; height: 32px; }
+.brand img { flex: none; width: 44px; height: 44px; }
 .top .btn { min-height: 40px; padding: 0 18px; font-size: 15px; flex: none; }
 
 /* hero */
 .hero { padding: 28px 0 32px; }
 .hero-in { display: grid; gap: 28px; align-items: center; }
-.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--sage-dark);
-  background: var(--sage-soft); padding: 6px 12px; border-radius: 999px; margin-bottom: 16px; }
-.eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--brand-dark);
+  background: var(--brand-soft); padding: 6px 12px; border-radius: 999px; margin-bottom: 16px; }
+.eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); }
 .hero h1 { font-size: clamp(36px, 9vw, 60px); margin-bottom: 14px; }
-.hero h1 em { font-style: italic; color: var(--sage); }
+.hero h1 em { font-style: italic; color: var(--accent); }
 .hero .lead { font-size: 18px; color: var(--muted); max-width: 34em; margin-bottom: 22px; }
 .cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
 .trust { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); }
 .trust li { display: flex; align-items: center; gap: 6px; }
-.trust svg { width: 16px; height: 16px; color: var(--sage); }
+.trust svg { width: 16px; height: 16px; color: var(--brand); }
 .art { display: none; }
 @media (min-width: 820px) {
   .hero { padding: 56px 0 56px; }
@@ -198,29 +233,31 @@ section.block { padding: 40px 0; }
 .steps { list-style: none; margin: 0 0 20px; padding: 0; display: flex; gap: 6px; counter-reset: s; }
 .steps li { flex: 1; counter-increment: s; font-size: 13px; font-weight: 600; color: var(--muted); padding-top: 10px; border-top: 3px solid var(--line); }
 .steps li::before { content: counter(s) ". "; }
-.steps li.on { color: var(--sage-dark); border-top-color: var(--sage); }
-.steps li.past { color: var(--sage-dark); border-top-color: color-mix(in srgb, var(--sage) 45%, var(--line)); }
+.steps li.on { color: var(--brand-dark); border-top-color: var(--brand); }
+.steps li.past { color: var(--brand-dark); border-top-color: color-mix(in srgb, var(--brand) 45%, var(--line)); }
 .panel-title { font: 600 20px var(--serif); margin: 0 0 12px; }
 .panel-title.mt { margin-top: 22px; }
 
 /* services */
-.svc-list { display: grid; gap: 12px; }
+.svc-list { display: grid; gap: 10px; }
 @media (min-width: 640px) { .svc-list { grid-template-columns: 1fr 1fr; } }
+.svc-group { grid-column: 1 / -1; margin: 10px 0 -2px; font: 600 13px var(--sans); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.svc-group:first-child { margin-top: 0; }
 .svc { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; background: #fff; display: flex; flex-direction: column; gap: 8px; transition: border-color .15s, box-shadow .15s; }
-.svc.hl { border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-soft); }
+.svc.hl { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 .svc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
 .svc h3 { font-size: 18px; }
-.tag { flex: none; font-size: 12px; font-weight: 600; color: var(--clay); background: var(--clay-soft); padding: 3px 9px; border-radius: 999px; }
+.tag { flex: none; font-size: 12px; font-weight: 600; color: var(--accent); background: var(--accent-soft); padding: 3px 9px; border-radius: 999px; }
 .svc p { font-size: 14.5px; color: var(--muted); flex: 1; }
 .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .opt { flex: 1 1 0; min-width: 110px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 14px;
   border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: 500 15px var(--sans); cursor: pointer; transition: border-color .15s, background .15s; }
 .opt b { font-weight: 600; }
-.opt:hover { border-color: var(--sage); }
-.opt.on { background: var(--sage); border-color: var(--sage); color: #fff; }
+.opt:hover { border-color: var(--brand); }
+.opt.on { background: var(--brand); border-color: var(--brand); color: #fff; }
 
 /* picked summary */
-.picked { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--sage-soft); border-radius: 14px; padding: 12px 14px; margin-bottom: 20px; }
+.picked { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--brand-soft); border-radius: 14px; padding: 12px 14px; margin-bottom: 20px; }
 .picked b { display: block; font-weight: 600; }
 .picked span { font-size: 14px; color: var(--muted); }
 
@@ -234,8 +271,8 @@ section.block { padding: 40px 0; }
 .day .wd { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
 .day .dn { font: 600 22px/1.1 var(--serif); }
 .day .mo { font-size: 12px; color: var(--muted); }
-.day:hover:not([disabled]) { border-color: var(--sage); }
-.day.on { background: var(--sage); border-color: var(--sage); color: #fff; }
+.day:hover:not([disabled]) { border-color: var(--brand); }
+.day.on { background: var(--brand); border-color: var(--brand); color: #fff; }
 .day.on .wd, .day.on .mo { color: rgba(255,255,255,.85); }
 .day[disabled] { background: transparent; border-style: dashed; cursor: default; opacity: .6; }
 .day[disabled] .dn { color: var(--muted); font-weight: 400; }
@@ -252,11 +289,11 @@ section.block { padding: 40px 0; }
 .times-group h4 { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
 .times-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
 .time { min-height: 46px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font: 600 15px var(--sans); cursor: pointer; }
-.time:hover { border-color: var(--sage); }
-.time.on { background: var(--sage); border-color: var(--sage); color: #fff; }
+.time:hover { border-color: var(--brand); }
+.time.on { background: var(--brand); border-color: var(--brand); color: #fff; }
 .note { font-size: 15px; color: var(--muted); padding: 14px; border: 1.5px dashed var(--line); border-radius: 14px; text-align: center; }
 .note .link { margin-left: 4px; }
-.notice { background: var(--clay-soft); color: #5a3a22; border-radius: 12px; padding: 10px 14px; font-size: 15px; margin-bottom: 16px; }
+.notice { background: var(--accent-soft); color: #5a3a12; border-radius: 12px; padding: 10px 14px; font-size: 15px; margin-bottom: 16px; }
 .skeleton { height: 46px; border-radius: 12px; background: linear-gradient(90deg, var(--line) 0%, #efe8dc 50%, var(--line) 100%); background-size: 200% 100%; animation: sh 1.2s infinite linear; opacity: .6; }
 @keyframes sh { to { background-position: -200% 0; } }
 
@@ -272,13 +309,13 @@ section.block { padding: 40px 0; }
 .field input, .field textarea { width: 100%; min-height: 50px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff;
   font: 16px var(--sans); color: var(--ink); transition: border-color .15s, box-shadow .15s; }
 .field textarea { min-height: 88px; resize: vertical; }
-.field input:focus, .field textarea:focus { outline: none; border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-soft); }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
 .field.bad input { border-color: var(--danger); }
 .field .msg { font-size: 14px; color: var(--danger); margin-top: 4px; }
 .row2 { display: grid; gap: 0 12px; }
 @media (min-width: 640px) { .row2 { grid-template-columns: 1fr 1fr; } }
 .check { display: flex; align-items: center; gap: 10px; font-size: 15px; margin: 4px 0 16px; cursor: pointer; }
-.check input { width: 20px; height: 20px; accent-color: var(--sage); margin: 0; }
+.check input { width: 20px; height: 20px; accent-color: var(--brand); margin: 0; }
 .fine { font-size: 14px; color: var(--muted); }
 .form-err { color: var(--danger); font-size: 15px; margin-top: 12px; }
 .form-err:empty { display: none; }
@@ -286,7 +323,7 @@ section.block { padding: 40px 0; }
 
 /* done */
 .done { text-align: center; padding: 8px 0; }
-.done-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--sage-soft); color: var(--sage); display: grid; place-items: center; margin: 0 auto 14px; }
+.done-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; margin: 0 auto 14px; }
 .done-icon svg { width: 30px; height: 30px; }
 .done h3 { font-size: 28px; margin-bottom: 8px; }
 .done .when { font-size: 18px; margin-bottom: 4px; }
@@ -298,7 +335,7 @@ section.block { padding: 40px 0; }
 .hl-grid { display: grid; gap: 12px; }
 @media (min-width: 760px) { .hl-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
 .hl-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
-.hl-item .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--sage-soft); color: var(--sage); display: grid; place-items: center; margin-bottom: 12px; }
+.hl-item .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; margin-bottom: 12px; }
 .hl-item .ic svg { width: 22px; height: 22px; }
 .hl-item h3 { font-size: 19px; margin-bottom: 6px; }
 .hl-item p { color: var(--muted); font-size: 15px; }
@@ -312,10 +349,10 @@ section.block { padding: 40px 0; }
 .hours td { padding: 7px 0; border-bottom: 1px solid var(--line); }
 .hours tr:last-child td { border-bottom: 0; }
 .hours td:last-child { text-align: right; color: var(--muted); }
-.hours tr.today td { font-weight: 600; color: var(--sage-dark); }
+.hours tr.today td { font-weight: 600; color: var(--brand-dark); }
 .contact-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 12px; }
 .contact-list li { display: flex; gap: 12px; align-items: flex-start; }
-.contact-list svg { flex: none; width: 20px; height: 20px; color: var(--sage); margin-top: 2px; }
+.contact-list svg { flex: none; width: 20px; height: 20px; color: var(--brand); margin-top: 2px; }
 .contact-list a { color: var(--ink); text-decoration-color: var(--line); text-underline-offset: 3px; word-break: break-word; }
 
 /* faq */
@@ -349,8 +386,8 @@ footer .wrap { display: grid; gap: 6px; }
 <header class="top" id="top">
   <div class="wrap top-in">
     <a class="brand" href="#">
-      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#e2e9dd"/><ellipse cx="16" cy="22" rx="9" ry="3.6" fill="#8f7f70"/><ellipse cx="16" cy="16.4" rx="6.6" ry="3" fill="#a99a8b"/><ellipse cx="16" cy="11.6" rx="4.3" ry="2.3" fill="#c4b6a8"/></svg>
-      <span data-c="businessName"></span>
+      <img src="logo.png" width="44" height="44" alt="">
+      <span data-c="shortName"></span>
     </a>
     <a class="btn" href="#book" data-cta="header">Book now</a>
   </div>
@@ -360,30 +397,27 @@ footer .wrap { display: grid; gap: 6px; }
   <section class="hero" id="hero">
     <div class="wrap hero-in">
       <div>
-        <div class="eyebrow"><i></i><span id="open-status">Massage studio</span></div>
+        <div class="eyebrow"><i></i><span id="open-status">Stockland Rockhampton</span></div>
         <h1>Tension out.<br><em>Calm in.</em></h1>
-        <p class="lead">Relaxation, deep tissue, sports and hot stone massage. Pick a time that suits you and you're booked, no phone calls needed.</p>
+        <p class="lead" id="intro"></p>
         <div class="cta-row">
           <a class="btn" href="#book" data-cta="hero">Book a time</a>
           <a class="btn btn-ghost" href="#book" data-cta="prices" id="from-price">See prices</a>
         </div>
-        <ul class="trust">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Instant confirmation</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Free changes 24h ahead</li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Pay on the day</li>
-        </ul>
+        <ul class="trust" id="badges"></ul>
       </div>
       <svg class="art" viewBox="0 0 400 400" aria-hidden="true">
-        <circle cx="200" cy="200" r="186" fill="#e2e9dd"/>
-        <circle cx="200" cy="200" r="140" fill="none" stroke="#4b6853" stroke-opacity=".14" stroke-width="2"/>
-        <g fill="none" stroke="#4b6853" stroke-width="3" stroke-linecap="round"><path d="M296 300c-4-52 4-104 34-150"/></g>
-        <g fill="#6f8f76">
+        <circle cx="200" cy="200" r="186" fill="#f0e4d3"/>
+        <circle cx="200" cy="200" r="186" fill="none" stroke="#e6ab58" stroke-width="5"/>
+        <circle cx="200" cy="200" r="140" fill="none" stroke="#5b3a25" stroke-opacity=".14" stroke-width="2"/>
+        <g fill="none" stroke="#6f7f5a" stroke-width="3" stroke-linecap="round"><path d="M296 300c-4-52 4-104 34-150"/></g>
+        <g fill="#7d8c64">
           <path d="M318 176c-24-6-38-26-34-50 24 4 38 24 34 50z"/>
-          <path d="M322 168c6-24 28-36 52-30-6 24-28 36-52 30z" fill="#87a58c"/>
-          <path d="M304 232c-24-4-40-22-38-46 24 2 40 22 38 46z" fill="#87a58c"/>
+          <path d="M322 168c6-24 28-36 52-30-6 24-28 36-52 30z" fill="#97a57c"/>
+          <path d="M304 232c-24-4-40-22-38-46 24 2 40 22 38 46z" fill="#97a57c"/>
           <path d="M306 222c8-22 30-32 52-24-8 22-30 32-52 24z"/>
         </g>
-        <ellipse cx="196" cy="318" rx="128" ry="16" fill="#26241f" opacity=".08"/>
+        <ellipse cx="196" cy="318" rx="128" ry="16" fill="#2b1d15" opacity=".08"/>
         <ellipse cx="196" cy="282" rx="114" ry="36" fill="#8f7f70"/>
         <ellipse cx="186" cy="270" rx="80" ry="16" fill="#fff" opacity=".07"/>
         <ellipse cx="200" cy="222" rx="84" ry="29" fill="#a99a8b"/>
@@ -399,20 +433,20 @@ footer .wrap { display: grid; gap: 6px; }
   <section class="block" id="book" aria-labelledby="book-h">
     <div class="wrap">
       <div class="sec-head" style="text-align:center">
-        <h2 id="book-h">Book your massage</h2>
+        <h2 id="book-h">Book online</h2>
         <p>Takes under a minute. You'll see the times that are free right now.</p>
       </div>
 
       <div class="card" id="card">
         <ol class="steps" id="steps">
-          <li data-s="1">Massage</li>
+          <li data-s="1">Treatment</li>
           <li data-s="2">Time</li>
           <li data-s="3">Your details</li>
         </ol>
 
         <!-- step 1 -->
         <div class="panel" data-panel="1">
-          <h3 class="panel-title" tabindex="-1">Choose your massage</h3>
+          <h3 class="panel-title" tabindex="-1">Choose your treatment</h3>
           <div class="svc-list" id="svc-list"></div>
         </div>
 
@@ -437,7 +471,7 @@ footer .wrap { display: grid; gap: 6px; }
         <div class="panel" data-panel="3" hidden>
           <div class="summary">
             <div class="summary-row">
-              <div><small>Massage</small><strong id="s-svc"></strong></div>
+              <div><small>Treatment</small><strong id="s-svc"></strong></div>
               <button type="button" class="link" data-go="1">Change</button>
             </div>
             <div class="summary-row">
@@ -511,7 +545,7 @@ footer .wrap { display: grid; gap: 6px; }
         <div class="box">
           <h3>Find us</h3>
           <ul class="contact-list">
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><a id="c-addr" target="_blank" rel="noopener"></a></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><div><a id="c-addr" target="_blank" rel="noopener"></a><div class="fine" id="c-note" style="margin-top:2px"></div></div></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><a id="c-phone"></a></li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><a id="c-email"></a></li>
           </ul>
@@ -572,13 +606,17 @@ footer .wrap { display: grid; gap: 6px; }
   function telHref(p) { return 'tel:' + String(p).replace(/[^\d+]/g, ''); }
 
   // ---------- fill in shop details ----------
-  $$('[data-c]').forEach(function (el) { el.textContent = C[el.dataset.c] || ''; });
+  $$('[data-c]').forEach(function (el) { el.textContent = C[el.dataset.c] || C.businessName || ''; });
   $('#year').textContent = new Date().getFullYear();
   $('#c-phone').textContent = C.phone; $('#c-phone').href = telHref(C.phone);
   $('#c-email').textContent = C.email; $('#c-email').href = 'mailto:' + C.email;
   $('#c-addr').textContent = C.address;
   $('#c-addr').href = C.mapsUrl || ('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(C.businessName + ', ' + C.address));
   $('#policy-line').textContent = C.policy;
+  $('#intro').textContent = C.intro || '';
+  $('#c-note').textContent = C.locationNote || '';
+  var TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  $('#badges').innerHTML = (C.badges || []).map(function (b) { return '<li>' + TICK + esc(b) + '</li>'; }).join('');
   if (DEMO) $('#preview').hidden = false;
 
   var minPrice = Infinity;
@@ -608,7 +646,7 @@ footer .wrap { display: grid; gap: 6px; }
     var h = hoursFor(ymd(today)), now = today.getHours() * 60 + today.getMinutes();
     var el = $('#open-status');
     if (h && now >= toMin(h[0]) && now < toMin(h[1])) el.textContent = 'Open today until ' + fmtTime(h[1]);
-    else el.textContent = 'Book online any time';
+    else el.textContent = 'Stockland Rockhampton';
   })();
 
   // ---------- Meta Pixel ----------
@@ -682,8 +720,11 @@ footer .wrap { display: grid; gap: 6px; }
   var card = $('#card');
 
   function renderServices() {
+    var lastGroup = null;
     $('#svc-list').innerHTML = C.services.map(function (s) {
-      return '<article class="svc" data-sid="' + esc(s.id) + '"><div class="svc-head"><h3>' + esc(s.name) + '</h3>' + (s.tag ? '<span class="tag">' + esc(s.tag) + '</span>' : '') + '</div>' +
+      var head = '';
+      if (s.group && s.group !== lastGroup) { head = '<h4 class="svc-group">' + esc(s.group) + '</h4>'; lastGroup = s.group; }
+      return head + '<article class="svc" data-sid="' + esc(s.id) + '"><div class="svc-head"><h3>' + esc(s.name) + '</h3>' + (s.tag ? '<span class="tag">' + esc(s.tag) + '</span>' : '') + '</div>' +
         '<p>' + esc(s.desc) + '</p><div class="opts" role="group" aria-label="' + esc(s.name) + ' length">' +
         s.options.map(function (o) {
           var on = state.svc === s && state.opt === o;
@@ -885,7 +926,7 @@ footer .wrap { display: grid; gap: 6px; }
     $('#done-when').innerHTML = '<b>' + esc(p.service) + '</b> (' + p.minutes + ' min)<br>' + esc(fmtDate(p.date)) + ' at ' + fmtTime(p.start);
     $('#done-ref').textContent = 'Booking ref ' + ref;
     $('#done-email').textContent = DEMO ? 'Preview mode: this booking was only saved in this browser.' : (d.email ? 'A confirmation email is on its way to ' + d.email + '.' : '');
-    $('#done-policy').innerHTML = esc(C.policy) + ' Need to change it? Call or text <a href="' + telHref(C.phone) + '">' + esc(C.phone) + '</a>.';
+    $('#done-policy').innerHTML = esc(C.policy) + ' <a href="' + telHref(C.phone) + '">' + esc(C.phone) + '</a>';
     $('#gcal').href = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
       '&text=' + encodeURIComponent(p.service + ' at ' + C.businessName) +
       '&dates=' + calStamp(p.date, p.start) + '/' + calStamp(p.date, p.end) +
@@ -923,7 +964,7 @@ footer .wrap { display: grid; gap: 6px; }
   renderServices();
   loadBusy(false);   // warm up availability in the background
 
-  // Ad links can open straight on a massage: ?service=deep-tissue or ?service=deep-tissue-90
+  // Ad links can open straight on a treatment: ?service=sports or ?service=whole-body-90
   (function deepLink() {
     var want = params.get('service'); if (!want) return;
     for (var i = 0; i < C.services.length; i++) {

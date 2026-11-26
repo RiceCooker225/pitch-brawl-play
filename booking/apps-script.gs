@@ -12,10 +12,10 @@
 
 // ---- EDIT THESE ----------------------------------------------------------
 var SETTINGS = {
-  businessName: 'Stillwater Massage',
-  phone: '0400 000 000',
-  address: '12 Example Street, Your Suburb',
-  policy: 'Free to cancel or move up to 24 hours before. Pay at the shop after your massage.',
+  businessName: 'Magic Massage Rockhampton',
+  phone: '(07) 4921 1516',
+  address: 'Shop 097, Stockland Rockhampton, 120-311 Yaamba Rd, Park Avenue QLD 4701 (next to Bright Eyes, near Woolworths)',
+  policy: 'Pay at the shop after your treatment. HICAPS health fund claiming available.',
   notifyEmail: '',        // where new-booking emails go. Empty = the Google account you deploy with.
   emailCustomers: true,   // email customers a confirmation when they give an email address
   bufferMinutes: 15,      // break after each massage. Keep the same as bufferMinutes in index.html.
@@ -185,7 +185,7 @@ function sendEmails_(b, ref, start, end) {
         'Booking ref: ' + ref,
         '',
         SETTINGS.policy,
-        'Need to change anything? Call or text ' + SETTINGS.phone + '.',
+        'Need to change anything? Call us on ' + SETTINGS.phone + '.',
         '',
         SETTINGS.businessName
       ].join('\n')
