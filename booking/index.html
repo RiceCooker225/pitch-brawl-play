@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<!-- ===================================================================
+     EDIT 1 of 2: what Facebook, Google and the browser tab show.
+     Change the shop name, the description and the two web addresses.
+     =================================================================== -->
+<title>Stillwater Massage · Book online</title>
+<meta name="description" content="Relaxation, deep tissue, sports and hot stone massage. See live availability and book your time online in under a minute.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Stillwater Massage">
+<meta property="og:title" content="Stillwater Massage · Book your massage online">
+<meta property="og:description" content="See live availability and pick a time that suits you. Booked in under a minute, pay on the day.">
+<meta property="og:url" content="https://ricecooker225.github.io/pitch-brawl-play/booking/">
+<meta property="og:image" content="https://ricecooker225.github.io/pitch-brawl-play/booking/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f6f1ea">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+<script>
+/* =====================================================================
+   EDIT 2 of 2: your shop. Everything on the page comes from here.
+   Keep the quotes and commas. Times are 24-hour ("09:00", "19:30").
+   ===================================================================== */
+window.CONFIG = {
+  businessName: "Stillwater Massage",
+  phone: "0400 000 000",
+  email: "bookings@example.com",
+  address: "12 Example Street, Your Suburb",
+  mapsUrl: "",                 // optional: paste a Google Maps link to your shop
+
+  currency: "$",               // shown before prices
+  currencyCode: "USD",         // for Facebook reporting: USD, GBP, AUD, NZD, EUR...
+  clock24: false,              // true shows 14:30 instead of 2:30pm
+
+  // Paste your Google Apps Script web app URL here (see SETUP.md).
+  // While it's empty the page runs in preview mode and nothing is saved.
+  bookingApiUrl: "",
+
+  // Paste your Meta (Facebook) Pixel ID here to track bookings from your ads.
+  metaPixelId: "",
+
+  // Booking rules
+  daysAhead: 28,               // how far ahead people can book
+  slotStep: 30,                // minutes between start times (15, 30 or 60)
+  bufferMinutes: 15,           // break after each massage (keep the same in apps-script.gs)
+  minNoticeHours: 2,           // earliest someone can book from now
+
+  // Opening hours. Use null for closed days.
+  hours: {
+    mon: ["09:00", "19:00"],
+    tue: ["09:00", "19:00"],
+    wed: ["09:00", "19:00"],
+    thu: ["09:00", "20:00"],
+    fri: ["09:00", "19:00"],
+    sat: ["09:00", "17:00"],
+    sun: null
+  },
+  closedDates: ["2026-12-25", "2026-12-26", "2027-01-01"],   // public holidays etc.
+
+  // Your massages. "id" is used in ad links (?service=deep-tissue), so keep it simple.
+  services: [
+    { id: "relaxation", name: "Relaxation massage", tag: "Most popular",
+      desc: "Long, flowing strokes with medium pressure to calm you down and melt away stress.",
+      options: [ { minutes: 60, price: 90 }, { minutes: 90, price: 125 } ] },
+    { id: "deep-tissue", name: "Deep tissue massage",
+      desc: "Firm, focused pressure on knots and tight spots in the neck, shoulders and back.",
+      options: [ { minutes: 60, price: 100 }, { minutes: 90, price: 140 } ] },
+    { id: "sports", name: "Sports & remedial massage",
+      desc: "Targeted work for training recovery, tight muscles and niggling aches.",
+      options: [ { minutes: 45, price: 80 }, { minutes: 60, price: 100 } ] },
+    { id: "hot-stone", name: "Hot stone massage",
+      desc: "Warm stones and slow strokes to ease deep muscle tension.",
+      options: [ { minutes: 75, price: 125 } ] },
+    { id: "pregnancy", name: "Pregnancy massage",
+      desc: "Side-lying and fully supported, for mums-to-be.",
+      options: [ { minutes: 60, price: 95 } ] },
+    { id: "express", name: "Express neck & shoulders",
+      desc: "Short on time? A quick, focused session where most tension lives.",
+      options: [ { minutes: 30, price: 55 } ] }
+  ],
+
+  policy: "Free to cancel or move up to 24 hours before. Pay at the shop after your massage.",
+
+  highlights: [
+    { title: "Pressure that suits you", text: "Gentle or firm, tell us what you like. We check in during the session so it stays right." },
+    { title: "Warm, quiet rooms", text: "Soft lighting, heated tables and fresh linen for every client." },
+    { title: "Booked in a minute", text: "See real availability and pick your time. No calls, no waiting for a reply." }
+  ],
+
+  // {phone} is replaced with your phone number.
+  faqs: [
+    { q: "What should I wear?", a: "Whatever's comfortable. You undress to your comfort level and stay covered with towels, apart from the area being worked on." },
+    { q: "How early should I arrive?", a: "About 5 to 10 minutes early on your first visit so we can go over any injuries or health conditions." },
+    { q: "Can I change or cancel?", a: "Yes, free of charge up to 24 hours before. Just call or text us on {phone}." },
+    { q: "How do I pay?", a: "At the shop after your massage, by card or cash." },
+    { q: "I'm pregnant. Can I book?", a: "Yes. Choose Pregnancy massage and tell us how far along you are in the notes." }
+  ]
+};
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #f6f1ea;
+  --surface: #fffdf9;
+  --ink: #26241f;
+  --muted: #6b665c;
+  --line: #e3dacb;
+  --sage: #4b6853;
+  --sage-dark: #3b5442;
+  --sage-soft: #e2e9dd;
+  --clay: #a8704a;
+  --clay-soft: #f3e4d6;
+  --danger: #a33a2a;
+  --radius: 18px;
+  --shadow: 0 1px 2px rgba(38,36,31,.05), 0 8px 28px rgba(38,36,31,.07);
+  --serif: "Fraunces", Georgia, "Times New Roman", serif;
+  --sans: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; animation: none !important; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--sans); }
+img, svg { display: block; max-width: 100%; }
+a { color: var(--sage-dark); }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.15; margin: 0; letter-spacing: -.01em; }
+p { margin: 0; }
+.wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid color-mix(in srgb, var(--sage) 55%, transparent); outline-offset: 2px; }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px;
+  border: 0; border-radius: 999px; background: var(--sage); color: #fff; font: 600 16px/1 var(--sans);
+  text-decoration: none; cursor: pointer; transition: background .15s, transform .1s; }
+.btn:hover { background: var(--sage-dark); }
+.btn:active { transform: translateY(1px); }
+.btn[disabled] { opacity: .55; cursor: default; }
+.btn-ghost { background: transparent; color: var(--sage-dark); box-shadow: inset 0 0 0 1.5px var(--sage); }
+.btn-ghost:hover { background: var(--sage-soft); }
+.btn-block { width: 100%; }
+.link { background: none; border: 0; padding: 4px 0; color: var(--sage-dark); font: 600 15px var(--sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+/* preview banner */
+.preview { background: var(--clay-soft); color: #5a3a22; font-size: 14px; text-align: center; padding: 8px 16px; }
+.preview b { font-weight: 600; }
+
+/* header */
+header.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid transparent; }
+header.top.scrolled { border-bottom-color: var(--line); }
+.top-in { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); font: 600 19px var(--serif); min-width: 0; }
+.brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand svg { flex: none; width: 32px; height: 32px; }
+.top .btn { min-height: 40px; padding: 0 18px; font-size: 15px; flex: none; }
+
+/* hero */
+.hero { padding: 28px 0 32px; }
+.hero-in { display: grid; gap: 28px; align-items: center; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--sage-dark);
+  background: var(--sage-soft); padding: 6px 12px; border-radius: 999px; margin-bottom: 16px; }
+.eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--sage); }
+.hero h1 { font-size: clamp(36px, 9vw, 60px); margin-bottom: 14px; }
+.hero h1 em { font-style: italic; color: var(--sage); }
+.hero .lead { font-size: 18px; color: var(--muted); max-width: 34em; margin-bottom: 22px; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+.trust { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); }
+.trust li { display: flex; align-items: center; gap: 6px; }
+.trust svg { width: 16px; height: 16px; color: var(--sage); }
+.art { display: none; }
+@media (min-width: 820px) {
+  .hero { padding: 56px 0 56px; }
+  .hero-in { grid-template-columns: 1.1fr .9fr; gap: 48px; }
+  .art { display: block; width: 100%; max-width: 420px; justify-self: center; }
+}
+
+/* sections */
+section.block { padding: 40px 0; }
+.sec-head { margin-bottom: 20px; }
+.sec-head h2 { font-size: clamp(28px, 6vw, 38px); margin-bottom: 6px; }
+.sec-head p { color: var(--muted); }
+
+/* booking card */
+#book { scroll-margin-top: 72px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow); padding: 18px; max-width: 760px; margin: 0 auto; }
+@media (min-width: 640px) { .card { padding: 28px; } }
+.steps { list-style: none; margin: 0 0 20px; padding: 0; display: flex; gap: 6px; counter-reset: s; }
+.steps li { flex: 1; counter-increment: s; font-size: 13px; font-weight: 600; color: var(--muted); padding-top: 10px; border-top: 3px solid var(--line); }
+.steps li::before { content: counter(s) ". "; }
+.steps li.on { color: var(--sage-dark); border-top-color: var(--sage); }
+.steps li.past { color: var(--sage-dark); border-top-color: color-mix(in srgb, var(--sage) 45%, var(--line)); }
+.panel-title { font: 600 20px var(--serif); margin: 0 0 12px; }
+.panel-title.mt { margin-top: 22px; }
+
+/* services */
+.svc-list { display: grid; gap: 12px; }
+@media (min-width: 640px) { .svc-list { grid-template-columns: 1fr 1fr; } }
+.svc { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; background: #fff; display: flex; flex-direction: column; gap: 8px; transition: border-color .15s, box-shadow .15s; }
+.svc.hl { border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-soft); }
+.svc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.svc h3 { font-size: 18px; }
+.tag { flex: none; font-size: 12px; font-weight: 600; color: var(--clay); background: var(--clay-soft); padding: 3px 9px; border-radius: 999px; }
+.svc p { font-size: 14.5px; color: var(--muted); flex: 1; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.opt { flex: 1 1 0; min-width: 110px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 14px;
+  border: 1.5px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: 500 15px var(--sans); cursor: pointer; transition: border-color .15s, background .15s; }
+.opt b { font-weight: 600; }
+.opt:hover { border-color: var(--sage); }
+.opt.on { background: var(--sage); border-color: var(--sage); color: #fff; }
+
+/* picked summary */
+.picked { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--sage-soft); border-radius: 14px; padding: 12px 14px; margin-bottom: 20px; }
+.picked b { display: block; font-weight: 600; }
+.picked span { font-size: 14px; color: var(--muted); }
+
+/* days */
+.days-wrap { position: relative; margin: 0 -18px; }
+@media (min-width: 640px) { .days-wrap { margin: 0; } }
+.days { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; padding: 2px 18px 10px; scrollbar-width: thin; }
+@media (min-width: 640px) { .days { padding: 2px 0 10px; } }
+.day { flex: none; scroll-snap-align: start; width: 66px; min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  border: 1.5px solid var(--line); border-radius: 14px; background: #fff; color: var(--ink); cursor: pointer; font-family: var(--sans); padding: 6px 0; }
+.day .wd { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+.day .dn { font: 600 22px/1.1 var(--serif); }
+.day .mo { font-size: 12px; color: var(--muted); }
+.day:hover:not([disabled]) { border-color: var(--sage); }
+.day.on { background: var(--sage); border-color: var(--sage); color: #fff; }
+.day.on .wd, .day.on .mo { color: rgba(255,255,255,.85); }
+.day[disabled] { background: transparent; border-style: dashed; cursor: default; opacity: .6; }
+.day[disabled] .dn { color: var(--muted); font-weight: 400; }
+.day-nav { display: none; }
+@media (hover: hover) and (min-width: 640px) {
+  .day-nav { display: flex; position: absolute; top: 22px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface);
+    box-shadow: var(--shadow); align-items: center; justify-content: center; cursor: pointer; color: var(--ink); z-index: 2; }
+  .day-nav.prev { left: -14px; } .day-nav.next { right: -14px; }
+  .day-nav svg { width: 16px; height: 16px; }
+}
+
+/* times */
+.times-group + .times-group { margin-top: 14px; }
+.times-group h4 { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.times-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.time { min-height: 46px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); font: 600 15px var(--sans); cursor: pointer; }
+.time:hover { border-color: var(--sage); }
+.time.on { background: var(--sage); border-color: var(--sage); color: #fff; }
+.note { font-size: 15px; color: var(--muted); padding: 14px; border: 1.5px dashed var(--line); border-radius: 14px; text-align: center; }
+.note .link { margin-left: 4px; }
+.notice { background: var(--clay-soft); color: #5a3a22; border-radius: 12px; padding: 10px 14px; font-size: 15px; margin-bottom: 16px; }
+.skeleton { height: 46px; border-radius: 12px; background: linear-gradient(90deg, var(--line) 0%, #efe8dc 50%, var(--line) 100%); background-size: 200% 100%; animation: sh 1.2s infinite linear; opacity: .6; }
+@keyframes sh { to { background-position: -200% 0; } }
+
+/* summary + form */
+.summary { border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 16px; margin-bottom: 20px; background: #fff; }
+.summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; }
+.summary-row + .summary-row { border-top: 1px solid var(--line); }
+.summary-row small { display: block; font-size: 13px; color: var(--muted); }
+.summary-row strong { font-weight: 600; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+.field label span { font-weight: 400; color: var(--muted); }
+.field input, .field textarea { width: 100%; min-height: 50px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff;
+  font: 16px var(--sans); color: var(--ink); transition: border-color .15s, box-shadow .15s; }
+.field textarea { min-height: 88px; resize: vertical; }
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--sage); box-shadow: 0 0 0 3px var(--sage-soft); }
+.field.bad input { border-color: var(--danger); }
+.field .msg { font-size: 14px; color: var(--danger); margin-top: 4px; }
+.row2 { display: grid; gap: 0 12px; }
+@media (min-width: 640px) { .row2 { grid-template-columns: 1fr 1fr; } }
+.check { display: flex; align-items: center; gap: 10px; font-size: 15px; margin: 4px 0 16px; cursor: pointer; }
+.check input { width: 20px; height: 20px; accent-color: var(--sage); margin: 0; }
+.fine { font-size: 14px; color: var(--muted); }
+.form-err { color: var(--danger); font-size: 15px; margin-top: 12px; }
+.form-err:empty { display: none; }
+.back-row { margin-top: 14px; text-align: center; }
+
+/* done */
+.done { text-align: center; padding: 8px 0; }
+.done-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--sage-soft); color: var(--sage); display: grid; place-items: center; margin: 0 auto 14px; }
+.done-icon svg { width: 30px; height: 30px; }
+.done h3 { font-size: 28px; margin-bottom: 8px; }
+.done .when { font-size: 18px; margin-bottom: 4px; }
+.done .ref { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+.cal { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px; }
+.done .fine { max-width: 30em; margin: 0 auto 10px; }
+
+/* highlights */
+.hl-grid { display: grid; gap: 12px; }
+@media (min-width: 760px) { .hl-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
+.hl-item { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+.hl-item .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--sage-soft); color: var(--sage); display: grid; place-items: center; margin-bottom: 12px; }
+.hl-item .ic svg { width: 22px; height: 22px; }
+.hl-item h3 { font-size: 19px; margin-bottom: 6px; }
+.hl-item p { color: var(--muted); font-size: 15px; }
+
+/* visit */
+.visit { display: grid; gap: 16px; }
+@media (min-width: 760px) { .visit { grid-template-columns: 1fr 1fr; } }
+.visit .box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+.visit h3 { font-size: 19px; margin-bottom: 12px; }
+.hours { width: 100%; border-collapse: collapse; font-size: 15px; }
+.hours td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+.hours tr:last-child td { border-bottom: 0; }
+.hours td:last-child { text-align: right; color: var(--muted); }
+.hours tr.today td { font-weight: 600; color: var(--sage-dark); }
+.contact-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 12px; }
+.contact-list li { display: flex; gap: 12px; align-items: flex-start; }
+.contact-list svg { flex: none; width: 20px; height: 20px; color: var(--sage); margin-top: 2px; }
+.contact-list a { color: var(--ink); text-decoration-color: var(--line); text-underline-offset: 3px; word-break: break-word; }
+
+/* faq */
+.faq { max-width: 760px; }
+.faq details { border-bottom: 1px solid var(--line); }
+.faq summary { list-style: none; cursor: pointer; padding: 16px 32px 16px 0; font-weight: 600; font-size: 17px; position: relative; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: ""; position: absolute; right: 6px; top: 50%; width: 10px; height: 10px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: translateY(-70%) rotate(45deg); transition: transform .2s; }
+.faq details[open] summary::after { transform: translateY(-30%) rotate(-135deg); }
+.faq details p { padding: 0 0 16px; color: var(--muted); }
+
+footer { padding: 32px 0 calc(96px + env(safe-area-inset-bottom)); color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); margin-top: 24px; }
+footer .wrap { display: grid; gap: 6px; }
+@media (min-width: 820px) { footer { padding-bottom: 32px; } }
+
+/* sticky mobile CTA */
+.sticky { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line); transform: translateY(110%); transition: transform .25s ease; }
+.sticky.show { transform: none; }
+.sticky .btn { width: 100%; }
+@media (min-width: 820px) { .sticky { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="preview" id="preview" hidden>
+  <b>Preview mode:</b> bookings are only saved in this browser. Connect your Google Sheet (see SETUP.md) to go live.
+</div>
+
+<header class="top" id="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#e2e9dd"/><ellipse cx="16" cy="22" rx="9" ry="3.6" fill="#8f7f70"/><ellipse cx="16" cy="16.4" rx="6.6" ry="3" fill="#a99a8b"/><ellipse cx="16" cy="11.6" rx="4.3" ry="2.3" fill="#c4b6a8"/></svg>
+      <span data-c="businessName"></span>
+    </a>
+    <a class="btn" href="#book" data-cta="header">Book now</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="wrap hero-in">
+      <div>
+        <div class="eyebrow"><i></i><span id="open-status">Massage studio</span></div>
+        <h1>Tension out.<br><em>Calm in.</em></h1>
+        <p class="lead">Relaxation, deep tissue, sports and hot stone massage. Pick a time that suits you and you're booked, no phone calls needed.</p>
+        <div class="cta-row">
+          <a class="btn" href="#book" data-cta="hero">Book a time</a>
+          <a class="btn btn-ghost" href="#book" data-cta="prices" id="from-price">See prices</a>
+        </div>
+        <ul class="trust">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Instant confirmation</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Free changes 24h ahead</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Pay on the day</li>
+        </ul>
+      </div>
+      <svg class="art" viewBox="0 0 400 400" aria-hidden="true">
+        <circle cx="200" cy="200" r="186" fill="#e2e9dd"/>
+        <circle cx="200" cy="200" r="140" fill="none" stroke="#4b6853" stroke-opacity=".14" stroke-width="2"/>
+        <g fill="none" stroke="#4b6853" stroke-width="3" stroke-linecap="round"><path d="M296 300c-4-52 4-104 34-150"/></g>
+        <g fill="#6f8f76">
+          <path d="M318 176c-24-6-38-26-34-50 24 4 38 24 34 50z"/>
+          <path d="M322 168c6-24 28-36 52-30-6 24-28 36-52 30z" fill="#87a58c"/>
+          <path d="M304 232c-24-4-40-22-38-46 24 2 40 22 38 46z" fill="#87a58c"/>
+          <path d="M306 222c8-22 30-32 52-24-8 22-30 32-52 24z"/>
+        </g>
+        <ellipse cx="196" cy="318" rx="128" ry="16" fill="#26241f" opacity=".08"/>
+        <ellipse cx="196" cy="282" rx="114" ry="36" fill="#8f7f70"/>
+        <ellipse cx="186" cy="270" rx="80" ry="16" fill="#fff" opacity=".07"/>
+        <ellipse cx="200" cy="222" rx="84" ry="29" fill="#a99a8b"/>
+        <ellipse cx="192" cy="212" rx="56" ry="12" fill="#fff" opacity=".09"/>
+        <ellipse cx="194" cy="172" rx="58" ry="23" fill="#c4b6a8"/>
+        <ellipse cx="188" cy="164" rx="38" ry="9" fill="#fff" opacity=".12"/>
+        <ellipse cx="200" cy="134" rx="34" ry="16" fill="#d9cdbf"/>
+        <ellipse cx="195" cy="128" rx="20" ry="6" fill="#fff" opacity=".18"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="block" id="book" aria-labelledby="book-h">
+    <div class="wrap">
+      <div class="sec-head" style="text-align:center">
+        <h2 id="book-h">Book your massage</h2>
+        <p>Takes under a minute. You'll see the times that are free right now.</p>
+      </div>
+
+      <div class="card" id="card">
+        <ol class="steps" id="steps">
+          <li data-s="1">Massage</li>
+          <li data-s="2">Time</li>
+          <li data-s="3">Your details</li>
+        </ol>
+
+        <!-- step 1 -->
+        <div class="panel" data-panel="1">
+          <h3 class="panel-title" tabindex="-1">Choose your massage</h3>
+          <div class="svc-list" id="svc-list"></div>
+        </div>
+
+        <!-- step 2 -->
+        <div class="panel" data-panel="2" hidden>
+          <div class="picked">
+            <div><b id="p2-name"></b><span id="p2-meta"></span></div>
+            <button type="button" class="link" data-go="1">Change</button>
+          </div>
+          <div class="notice" id="taken-notice" hidden>Sorry, someone just took that time. Please pick another.</div>
+          <h3 class="panel-title" tabindex="-1">Pick a day</h3>
+          <div class="days-wrap">
+            <button type="button" class="day-nav prev" data-scroll="-1" aria-label="Earlier days"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+            <div class="days" id="days"></div>
+            <button type="button" class="day-nav next" data-scroll="1" aria-label="Later days"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+          <h3 class="panel-title mt" id="times-title">Pick a time</h3>
+          <div id="times" aria-live="polite"></div>
+        </div>
+
+        <!-- step 3 -->
+        <div class="panel" data-panel="3" hidden>
+          <div class="summary">
+            <div class="summary-row">
+              <div><small>Massage</small><strong id="s-svc"></strong></div>
+              <button type="button" class="link" data-go="1">Change</button>
+            </div>
+            <div class="summary-row">
+              <div><small>When</small><strong id="s-when"></strong></div>
+              <button type="button" class="link" data-go="2">Change</button>
+            </div>
+          </div>
+          <h3 class="panel-title" tabindex="-1">Your details</h3>
+          <form id="form" novalidate>
+            <div class="field" data-f="name">
+              <label for="f-name">Name</label>
+              <input id="f-name" name="name" autocomplete="name" maxlength="80" required>
+              <div class="msg"></div>
+            </div>
+            <div class="row2">
+              <div class="field" data-f="phone">
+                <label for="f-phone">Mobile</label>
+                <input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" required>
+                <div class="msg"></div>
+              </div>
+              <div class="field" data-f="email">
+                <label for="f-email">Email <span>(for your confirmation)</span></label>
+                <input id="f-email" name="email" type="email" inputmode="email" autocomplete="email" maxlength="120">
+                <div class="msg"></div>
+              </div>
+            </div>
+            <div class="field">
+              <label for="f-notes">Anything we should know? <span>(optional)</span></label>
+              <textarea id="f-notes" name="notes" maxlength="600" placeholder="Injuries, areas to focus on, pressure you like…"></textarea>
+            </div>
+            <label class="check"><input type="checkbox" name="firstVisit" id="f-first"> This is my first visit</label>
+            <button class="btn btn-block" type="submit" id="submit">Confirm booking</button>
+            <p class="form-err" id="form-err" role="alert"></p>
+            <p class="fine" style="margin-top:12px" id="policy-line"></p>
+          </form>
+        </div>
+
+        <!-- done -->
+        <div class="panel done" data-panel="4" hidden>
+          <div class="done-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <h3 tabindex="-1" id="done-title">You're booked!</h3>
+          <p class="when" id="done-when"></p>
+          <p class="ref" id="done-ref"></p>
+          <div class="cal">
+            <a class="btn btn-ghost" id="gcal" target="_blank" rel="noopener">Add to Google Calendar</a>
+            <a class="btn btn-ghost" id="ics" download="massage-booking.ics">Add to Apple / Outlook</a>
+          </div>
+          <p class="fine" id="done-email"></p>
+          <p class="fine" id="done-policy"></p>
+          <button type="button" class="link" id="again">Book another massage</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="why-h">
+    <div class="wrap">
+      <div class="sec-head"><h2 id="why-h">Why people come back</h2></div>
+      <div class="hl-grid" id="highlights"></div>
+    </div>
+  </section>
+
+  <section class="block" id="visit" aria-labelledby="visit-h">
+    <div class="wrap">
+      <div class="sec-head"><h2 id="visit-h">Visit us</h2></div>
+      <div class="visit">
+        <div class="box">
+          <h3>Opening hours</h3>
+          <table class="hours"><tbody id="hours"></tbody></table>
+        </div>
+        <div class="box">
+          <h3>Find us</h3>
+          <ul class="contact-list">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg><a id="c-addr" target="_blank" rel="noopener"></a></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg><a id="c-phone"></a></li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg><a id="c-email"></a></li>
+          </ul>
+          <a class="btn btn-block" href="#book" data-cta="visit">Book a time</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="faq-h">
+    <div class="wrap">
+      <div class="sec-head"><h2 id="faq-h">Good to know</h2></div>
+      <div class="faq" id="faq"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>© <span id="year"></span> <span data-c="businessName"></span> · <span data-c="address"></span></div>
+    <div id="privacy">We only use your details to manage your booking.</div>
+  </div>
+</footer>
+
+<div class="sticky" id="sticky"><a class="btn" href="#book" data-cta="sticky">Book a massage</a></div>
+
+<script>
+(function () {
+  'use strict';
+  var C = window.CONFIG;
+  var DEMO = !C.bookingApiUrl;
+  var DAY_KEYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  var DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  var LOCALE = /^en\b/i.test(navigator.language || '') ? navigator.language : 'en';   // dates in the visitor's English style
+
+  function $(s, el) { return (el || document).querySelector(s); }
+  function $$(s, el) { return Array.prototype.slice.call((el || document).querySelectorAll(s)); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  // ---------- storage (never trusted to be there) ----------
+  function sget(k, session) { try { var v = (session ? sessionStorage : localStorage).getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function sset(k, v, session) { try { (session ? sessionStorage : localStorage).setItem(k, JSON.stringify(v)); } catch (e) {} }
+
+  // ---------- time helpers (all times are the shop's local wall-clock time) ----------
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymd(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function parseYmd(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function toMin(t) { var p = String(t).split(':'); return (+p[0]) * 60 + (+p[1] || 0); }
+  function toHHMM(m) { return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
+  function fmtTime(t) {
+    if (C.clock24) return t;
+    var m = toMin(t), h = Math.floor(m / 60), mm = m % 60, ap = h >= 12 ? 'pm' : 'am';
+    h = h % 12 || 12;
+    return h + (mm ? ':' + pad(mm) : '') + ap;
+  }
+  function fmtDate(s, opts) { return parseYmd(s).toLocaleDateString(LOCALE, opts || { weekday: 'long', day: 'numeric', month: 'long' }); }
+  function money(n) { return C.currency + (n % 1 ? n.toFixed(2) : n); }
+  function telHref(p) { return 'tel:' + String(p).replace(/[^\d+]/g, ''); }
+
+  // ---------- fill in shop details ----------
+  $$('[data-c]').forEach(function (el) { el.textContent = C[el.dataset.c] || ''; });
+  $('#year').textContent = new Date().getFullYear();
+  $('#c-phone').textContent = C.phone; $('#c-phone').href = telHref(C.phone);
+  $('#c-email').textContent = C.email; $('#c-email').href = 'mailto:' + C.email;
+  $('#c-addr').textContent = C.address;
+  $('#c-addr').href = C.mapsUrl || ('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(C.businessName + ', ' + C.address));
+  $('#policy-line').textContent = C.policy;
+  if (DEMO) $('#preview').hidden = false;
+
+  var minPrice = Infinity;
+  C.services.forEach(function (s) { s.options.forEach(function (o) { minPrice = Math.min(minPrice, o.price); }); });
+  if (isFinite(minPrice)) $('#from-price').textContent = 'Prices from ' + money(minPrice);
+
+  var ICONS = [
+    '<path d="M12 21s-7-4.4-9.3-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.3 6C19 16.6 12 21 12 21z"/>',
+    '<path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="4"/>',
+    '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+  ];
+  $('#highlights').innerHTML = (C.highlights || []).map(function (h, i) {
+    return '<div class="hl-item"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[i % ICONS.length] + '</svg></div><h3>' + esc(h.title) + '</h3><p>' + esc(h.text) + '</p></div>';
+  }).join('');
+
+  $('#faq').innerHTML = (C.faqs || []).map(function (f) {
+    return '<details><summary>' + esc(f.q) + '</summary><p>' + esc(f.a).replace(/\{phone\}/g, '<a href="' + telHref(C.phone) + '">' + esc(C.phone) + '</a>') + '</p></details>';
+  }).join('');
+
+  var today = new Date();
+  $('#hours').innerHTML = [1, 2, 3, 4, 5, 6, 0].map(function (d) {
+    var h = C.hours[DAY_KEYS[d]];
+    return '<tr' + (d === today.getDay() ? ' class="today"' : '') + '><td>' + DAY_NAMES[d] + '</td><td>' + (h ? fmtTime(h[0]) + ' – ' + fmtTime(h[1]) : 'Closed') + '</td></tr>';
+  }).join('');
+
+  (function openStatus() {
+    var h = hoursFor(ymd(today)), now = today.getHours() * 60 + today.getMinutes();
+    var el = $('#open-status');
+    if (h && now >= toMin(h[0]) && now < toMin(h[1])) el.textContent = 'Open today until ' + fmtTime(h[1]);
+    else el.textContent = 'Book online any time';
+  })();
+
+  // ---------- Meta Pixel ----------
+  if (C.metaPixelId) {
+    !function (f, b, e, v, n, t, s) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); }; if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s); }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    window.fbq('init', C.metaPixelId);
+    window.fbq('track', 'PageView');
+    $('#privacy').textContent = 'We only use your details to manage your booking. This site uses the Meta Pixel to measure our Facebook ads.';
+  }
+  function track(ev, data, opts) { try { if (window.fbq) window.fbq('track', ev, data || {}, opts || {}); } catch (e) {} }
+
+  // ---------- where did this visitor come from? (saved with the booking) ----------
+  var params = new URLSearchParams(location.search);
+  var attr = sget('attr', true) || {};
+  ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'fbclid'].forEach(function (k) { if (params.get(k)) attr[k] = params.get(k); });
+  if (!attr.referrer && document.referrer) { try { var rh = new URL(document.referrer).hostname; if (rh !== location.hostname) attr.referrer = rh; } catch (e) {} }
+  sset('attr', attr, true);
+  function sourceLabel() {
+    if (attr.utm_source) return attr.utm_source;
+    if (attr.fbclid || /facebook|instagram/.test(attr.referrer || '')) return 'facebook';
+    return attr.referrer || 'direct';
+  }
+
+  // ---------- opening hours + availability ----------
+  function hoursFor(d) {
+    if ((C.closedDates || []).indexOf(d) !== -1) return null;
+    var h = C.hours[DAY_KEYS[parseYmd(d).getDay()]];
+    return h && h.length === 2 ? h : null;
+  }
+  function daysList() {
+    var out = [], n = new Date();
+    for (var i = 0; i < C.daysAhead; i++) out.push(ymd(new Date(n.getFullYear(), n.getMonth(), n.getDate() + i)));
+    return out;
+  }
+  var busy = {}, busyState = 'idle', busyAt = 0, busyReq = null;   // idle | loading | ok | error
+  function slotsFor(d, minutes) {
+    var h = hoursFor(d); if (!h) return [];
+    var open = toMin(h[0]), close = toMin(h[1]), buf = C.bufferMinutes || 0;
+    var taken = busy[d] || [], cutoff = Date.now() + C.minNoticeHours * 3600e3, out = [];
+    for (var s = open; s + minutes <= close; s += C.slotStep) {
+      var dt = parseYmd(d); dt.setHours(Math.floor(s / 60), s % 60, 0, 0);
+      if (dt.getTime() < cutoff) continue;
+      var e = s + minutes;
+      if (taken.some(function (b) { return s < b.end + buf && e + buf > b.start; })) continue;
+      out.push(toHHMM(s));
+    }
+    return out;
+  }
+  function apiUrl(q) { return C.bookingApiUrl + (C.bookingApiUrl.indexOf('?') === -1 ? '?' : '&') + q; }
+  function withTimeout(p, ms) { return Promise.race([p, new Promise(function (_, rej) { setTimeout(function () { rej(new Error('timeout')); }, ms); })]); }
+
+  function loadBusy(force) {
+    if (!force && busyState === 'ok' && Date.now() - busyAt < 60000) return Promise.resolve();
+    if (!force && busyState === 'loading' && busyReq) return busyReq;
+    busyState = 'loading';
+    var days = daysList();
+    var p = DEMO
+      ? Promise.resolve(sget('demoBookings') || [])
+      : withTimeout(fetch(apiUrl('action=busy&from=' + days[0] + '&to=' + days[days.length - 1] + '&t=' + Date.now())), 15000)
+          .then(function (r) { return r.json(); })
+          .then(function (j) { if (!j.ok) throw new Error(j.error || 'bad response'); return j.busy; });
+    return (busyReq = p.then(function (list) {
+      busy = {};
+      list.forEach(function (b) { (busy[b.date] = busy[b.date] || []).push({ start: toMin(b.start), end: toMin(b.end) }); });
+      busyState = 'ok'; busyAt = Date.now();
+    }).catch(function () { busyState = 'error'; }));
+  }
+
+  // ---------- booking flow ----------
+  var state = { step: 1, svc: null, opt: null, date: null, time: null };
+  var card = $('#card');
+
+  function renderServices() {
+    $('#svc-list').innerHTML = C.services.map(function (s) {
+      return '<article class="svc" data-sid="' + esc(s.id) + '"><div class="svc-head"><h3>' + esc(s.name) + '</h3>' + (s.tag ? '<span class="tag">' + esc(s.tag) + '</span>' : '') + '</div>' +
+        '<p>' + esc(s.desc) + '</p><div class="opts" role="group" aria-label="' + esc(s.name) + ' length">' +
+        s.options.map(function (o) {
+          var on = state.svc === s && state.opt === o;
+          return '<button type="button" class="opt' + (on ? ' on' : '') + '" data-sid="' + esc(s.id) + '" data-min="' + o.minutes + '" aria-pressed="' + on + '"><span>' + o.minutes + ' min</span><b>' + money(o.price) + '</b></button>';
+        }).join('') + '</div></article>';
+    }).join('');
+  }
+  function findSvc(id) { for (var i = 0; i < C.services.length; i++) if (C.services[i].id === id) return C.services[i]; return null; }
+
+  $('#svc-list').addEventListener('click', function (e) {
+    var b = e.target.closest('.opt'); if (!b) return;
+    var s = findSvc(b.dataset.sid), o = null;
+    s.options.forEach(function (x) { if (x.minutes === +b.dataset.min) o = x; });
+    pickService(s, o);
+  });
+  function pickService(s, o) {
+    if (state.opt !== o) state.time = null;
+    state.svc = s; state.opt = o;
+    track('ViewContent', { content_name: s.name + ' ' + o.minutes + ' min', value: o.price, currency: C.currencyCode });
+    renderServices();
+    go(2);
+  }
+
+  function svcLabel() { return state.svc.name; }
+  function svcMeta() { return state.opt.minutes + ' min · ' + money(state.opt.price); }
+
+  function firstOpenDay() {
+    var days = daysList();
+    for (var i = 0; i < days.length; i++) if (slotsFor(days[i], state.opt.minutes).length) return days[i];
+    return null;
+  }
+  function renderDays() {
+    var mins = state.opt.minutes, days = daysList(), loaded = busyState === 'ok';
+    $('#days').innerHTML = days.map(function (d, i) {
+      var open = !!hoursFor(d);
+      var n = loaded ? slotsFor(d, mins).length : (open ? 1 : 0);
+      var wd = i === 0 ? 'Today' : i === 1 ? 'Tmrw' : fmtDate(d, { weekday: 'short' });
+      var sub = !open ? 'Closed' : (loaded && !n ? 'Full' : fmtDate(d, { month: 'short' }));
+      var on = d === state.date;
+      return '<button type="button" class="day' + (on ? ' on' : '') + '" data-date="' + d + '"' + (n ? '' : ' disabled') + ' aria-pressed="' + on + '" aria-label="' + fmtDate(d) + (n ? '' : ', ' + sub.toLowerCase()) + '">' +
+        '<span class="wd">' + wd + '</span><span class="dn">' + parseYmd(d).getDate() + '</span><span class="mo">' + sub + '</span></button>';
+    }).join('');
+    var sel = $('.day.on'), strip = $('#days');
+    if (sel) strip.scrollLeft = Math.max(0, sel.offsetLeft - strip.offsetLeft - strip.clientWidth / 2 + sel.clientWidth / 2);
+  }
+  function renderTimes() {
+    var box = $('#times');
+    if (busyState === 'loading' || busyState === 'idle') {
+      $('#times-title').textContent = 'Pick a time';
+      box.innerHTML = '<div class="times-grid">' + new Array(9).join('<div class="skeleton"></div>') + '</div>';
+      return;
+    }
+    if (busyState === 'error') {
+      box.innerHTML = '<div class="note">We couldn\'t load the free times.<button type="button" class="link" id="retry">Try again</button></div>';
+      return;
+    }
+    if (!state.date) {
+      box.innerHTML = '<div class="note">No free times in the next ' + C.daysAhead + ' days. Call us on <a href="' + telHref(C.phone) + '">' + esc(C.phone) + '</a> and we\'ll fit you in.</div>';
+      return;
+    }
+    $('#times-title').textContent = 'Pick a time on ' + fmtDate(state.date, { weekday: 'long', day: 'numeric', month: 'short' });
+    var slots = slotsFor(state.date, state.opt.minutes);
+    var groups = [['Morning', []], ['Afternoon', []], ['Evening', []]];
+    slots.forEach(function (t) { var m = toMin(t); groups[m < 720 ? 0 : m < 1020 ? 1 : 2][1].push(t); });
+    box.innerHTML = groups.filter(function (g) { return g[1].length; }).map(function (g) {
+      return '<div class="times-group"><h4>' + g[0] + '</h4><div class="times-grid">' + g[1].map(function (t) {
+        var on = t === state.time;
+        return '<button type="button" class="time' + (on ? ' on' : '') + '" data-time="' + t + '" aria-pressed="' + on + '">' + fmtTime(t) + '</button>';
+      }).join('') + '</div></div>';
+    }).join('') || '<div class="note">That day is now full. Please pick another.</div>';
+  }
+  function refreshStep2() {
+    if (busyState === 'ok' && (!state.date || !slotsFor(state.date, state.opt.minutes).length)) state.date = firstOpenDay();
+    if (state.time && (!state.date || slotsFor(state.date, state.opt.minutes).indexOf(state.time) === -1)) state.time = null;
+    renderDays(); renderTimes();
+  }
+
+  $('#days').addEventListener('click', function (e) {
+    var b = e.target.closest('.day'); if (!b || b.disabled) return;
+    state.date = b.dataset.date; state.time = null;
+    renderDays(); renderTimes();
+  });
+  $$('.day-nav').forEach(function (b) { b.addEventListener('click', function () { $('#days').scrollBy({ left: +b.dataset.scroll * 300, behavior: 'smooth' }); }); });
+  $('#times').addEventListener('click', function (e) {
+    if (e.target.id === 'retry') { loadBusy(true).then(refreshStep2); renderTimes(); return; }
+    var b = e.target.closest('.time'); if (!b) return;
+    state.time = b.dataset.time;
+    renderTimes();
+    go(3);
+  });
+  card.addEventListener('click', function (e) {
+    var g = e.target.closest('[data-go]'); if (g) go(+g.dataset.go);
+  });
+
+  function endTime() { return toHHMM(toMin(state.time) + state.opt.minutes); }
+  function whenLabel() { return fmtDate(state.date) + ', ' + fmtTime(state.time) + ' – ' + fmtTime(endTime()); }
+
+  function go(n, noScroll) {
+    state.step = n;
+    $$('.panel', card).forEach(function (p) { p.hidden = +p.dataset.panel !== n; });
+    $('#steps').hidden = n === 4;
+    $$('#steps li').forEach(function (li) { var s = +li.dataset.s; li.className = s === n ? 'on' : s < n ? 'past' : ''; });
+    if (n !== 2) $('#taken-notice').hidden = true;
+    if (n === 2) {
+      $('#p2-name').textContent = svcLabel(); $('#p2-meta').textContent = svcMeta();
+      refreshStep2();
+      loadBusy(false).then(function () { if (state.step === 2) refreshStep2(); });
+    }
+    if (n === 3) {
+      $('#s-svc').textContent = svcLabel() + ' · ' + svcMeta();
+      $('#s-when').textContent = whenLabel();
+      $('#form-err').textContent = '';
+    }
+    if (!noScroll) {
+      var r = card.getBoundingClientRect();
+      if (r.top < 64 || r.top > window.innerHeight * 0.5) window.scrollTo({ top: window.pageYOffset + r.top - 76, behavior: 'smooth' });
+      var h = $('[data-panel="' + n + '"] [tabindex="-1"]');
+      if (h) setTimeout(function () { try { h.focus({ preventScroll: true }); } catch (e) {} }, 50);
+    }
+  }
+
+  // ---------- details form ----------
+  var saved = sget('customer') || {};
+  ['name', 'phone', 'email'].forEach(function (k) { if (saved[k]) $('#f-' + k).value = saved[k]; });
+
+  function setErr(f, msg) { var el = $('[data-f="' + f + '"]'); el.classList.toggle('bad', !!msg); $('.msg', el).textContent = msg || ''; }
+  function validate(d) {
+    var ok = true;
+    setErr('name', d.name.length < 2 ? (ok = false, 'Please add your name.') : '');
+    setErr('phone', d.phone.replace(/\D/g, '').length < 8 ? (ok = false, 'Please add a mobile number we can reach you on.') : '');
+    setErr('email', d.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email) ? (ok = false, 'That email doesn\'t look right.') : '');
+    return ok;
+  }
+  ['name', 'phone', 'email'].forEach(function (k) { $('#f-' + k).addEventListener('input', function () { setErr(k, ''); }); });
+
+  function makeRef() { var a = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789', s = ''; for (var i = 0; i < 6; i++) s += a[Math.floor(Math.random() * a.length)]; return s; }
+  function demoBook(p) {
+    var list = sget('demoBookings') || [];
+    var s = toMin(p.start), e = toMin(p.end), buf = C.bufferMinutes || 0;
+    if (list.some(function (b) { return b.date === p.date && s < toMin(b.end) + buf && e + buf > toMin(b.start); })) return Promise.resolve({ ok: false, error: 'taken' });
+    var ref = makeRef();
+    list.push({ date: p.date, start: p.start, end: p.end, ref: ref });
+    sset('demoBookings', list);
+    return new Promise(function (res) { setTimeout(function () { res({ ok: true, ref: ref }); }, 500); });
+  }
+  function apiBook(p) {
+    // Sent as plain text so Google Apps Script accepts it without a CORS preflight.
+    return withTimeout(fetch(C.bookingApiUrl, { method: 'POST', body: JSON.stringify(p) }), 25000).then(function (r) { return r.json(); });
+  }
+
+  var submitting = false;
+  $('#form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (submitting) return;
+    var f = e.target;
+    var d = { name: f.name.value.trim(), phone: f.phone.value.trim(), email: f.email.value.trim(), notes: f.notes.value.trim(), firstVisit: f.firstVisit.checked };
+    if (!validate(d)) { var bad = $('.field.bad input'); if (bad) bad.focus(); return; }
+    var payload = {
+      action: 'book',
+      serviceId: state.svc.id, service: state.svc.name, minutes: state.opt.minutes, price: state.opt.price,
+      date: state.date, start: state.time, end: endTime(),
+      name: d.name, phone: d.phone, email: d.email, notes: d.notes, firstVisit: d.firstVisit,
+      source: sourceLabel(), campaign: attr.utm_campaign || '', ad: attr.utm_content || '', fbclid: attr.fbclid || ''
+    };
+    var btn = $('#submit');
+    submitting = true; btn.disabled = true; btn.textContent = 'Booking…'; $('#form-err').textContent = '';
+    (DEMO ? demoBook(payload) : apiBook(payload)).then(function (res) {
+      if (res && res.ok) {
+        sset('customer', { name: d.name, phone: d.phone, email: d.email });
+        busyState = 'idle';
+        done(payload, res.ref, d);
+      } else if (res && res.error === 'taken') {
+        state.time = null;
+        loadBusy(true).then(function () { if (state.step === 2) refreshStep2(); });
+        go(2);
+        $('#taken-notice').hidden = false;
+      } else {
+        $('#form-err').innerHTML = 'Something went wrong and your booking wasn\'t made. Please try again, or call us on <a href="' + telHref(C.phone) + '">' + esc(C.phone) + '</a>.';
+      }
+    }).catch(function () {
+      $('#form-err').innerHTML = 'We couldn\'t reach the booking system. Check your connection and try again, or call us on <a href="' + telHref(C.phone) + '">' + esc(C.phone) + '</a>.';
+    }).then(function () { submitting = false; btn.disabled = false; btn.textContent = 'Confirm booking'; });
+  });
+
+  // ---------- confirmation ----------
+  function calStamp(date, time) { return date.replace(/-/g, '') + 'T' + time.replace(':', '') + '00'; }
+  function icsText(p, ref) {
+    function e(s) { return String(s).replace(/([,;\\])/g, '\\$1').replace(/\n/g, '\\n'); }
+    return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//booking//EN', 'BEGIN:VEVENT',
+      'UID:' + ref + '@booking', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z',
+      'DTSTART:' + calStamp(p.date, p.start), 'DTEND:' + calStamp(p.date, p.end),
+      'SUMMARY:' + e(p.service + ' at ' + C.businessName), 'LOCATION:' + e(C.address),
+      'DESCRIPTION:' + e('Booking ref ' + ref + '. To change it, call ' + C.phone + '.'),
+      'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  }
+  var icsUrl = null;
+  function done(p, ref, d) {
+    $('#done-title').textContent = 'You\'re booked, ' + d.name.split(' ')[0] + '!';
+    $('#done-when').innerHTML = '<b>' + esc(p.service) + '</b> (' + p.minutes + ' min)<br>' + esc(fmtDate(p.date)) + ' at ' + fmtTime(p.start);
+    $('#done-ref').textContent = 'Booking ref ' + ref;
+    $('#done-email').textContent = DEMO ? 'Preview mode: this booking was only saved in this browser.' : (d.email ? 'A confirmation email is on its way to ' + d.email + '.' : '');
+    $('#done-policy').innerHTML = esc(C.policy) + ' Need to change it? Call or text <a href="' + telHref(C.phone) + '">' + esc(C.phone) + '</a>.';
+    $('#gcal').href = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent(p.service + ' at ' + C.businessName) +
+      '&dates=' + calStamp(p.date, p.start) + '/' + calStamp(p.date, p.end) +
+      '&location=' + encodeURIComponent(C.address) +
+      '&details=' + encodeURIComponent('Booking ref ' + ref + '. To change it, call ' + C.phone + '.');
+    try {
+      if (icsUrl) URL.revokeObjectURL(icsUrl);
+      icsUrl = URL.createObjectURL(new Blob([icsText(p, ref)], { type: 'text/calendar' }));
+      $('#ics').href = icsUrl;
+    } catch (e) { $('#ics').hidden = true; }
+    track('Schedule', { content_name: p.service + ' ' + p.minutes + ' min', value: p.price, currency: C.currencyCode }, { eventID: ref });
+    go(4);
+  }
+  $('#again').addEventListener('click', function () {
+    state = { step: 1, svc: null, opt: null, date: null, time: null };
+    $('#form').reset();
+    ['name', 'phone', 'email'].forEach(function (k) { var c = sget('customer') || {}; if (c[k]) $('#f-' + k).value = c[k]; });
+    renderServices(); go(1);
+  });
+
+  // ---------- page behaviour ----------
+  var header = $('#top');
+  window.addEventListener('scroll', function () { header.classList.toggle('scrolled', window.pageYOffset > 4); }, { passive: true });
+
+  if ('IntersectionObserver' in window) {
+    var vis = { hero: true, book: false };
+    var sticky = $('#sticky');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { vis[en.target.id] = en.isIntersecting; });
+      sticky.classList.toggle('show', !vis.hero && !vis.book);
+    }, { threshold: 0 });
+    io.observe($('#hero')); io.observe($('#book'));
+  }
+
+  renderServices();
+  loadBusy(false);   // warm up availability in the background
+
+  // Ad links can open straight on a massage: ?service=deep-tissue or ?service=deep-tissue-90
+  (function deepLink() {
+    var want = params.get('service'); if (!want) return;
+    for (var i = 0; i < C.services.length; i++) {
+      var s = C.services[i];
+      for (var j = 0; j < s.options.length; j++) {
+        var o = s.options[j];
+        if (want === s.id + '-' + o.minutes || (want === s.id && s.options.length === 1)) {
+          state.svc = s; state.opt = o; renderServices(); go(2, true);
+          setTimeout(function () { $('#book').scrollIntoView(); }, 0);
+          return;
+        }
+      }
+      if (want === s.id) {
+        var el = $('.svc[data-sid="' + s.id + '"]'); if (el) el.classList.add('hl');
+        setTimeout(function () { $('#book').scrollIntoView(); }, 0);
+        return;
+      }
+    }
+  })();
+})();
+</script>
+</body>
+</html>
